@@ -23,7 +23,6 @@ def text_reader_string( sFilename_in,\
             ifs = open(sFilename_in, "r")
             nrow_out = len(ifs.readlines())
             ifs.close()
-       
         sLine=' '
         ifs = open(sFilename_in, "r")
 
@@ -33,7 +32,6 @@ def text_reader_string( sFilename_in,\
                 ifs.readline()
         else:
             pass
-           
         #get delimiter
         if delimiter_in is not None:
             iFlag_delimiter = 1
@@ -62,7 +60,6 @@ def text_reader_string( sFilename_in,\
                 aData_out[iRow] = sLine.split(delimiter_in)
         else :
             if iFlag_column == 1:
-              
                 pass
             else :
                 dummy = sLine.split(delimiter_in)
