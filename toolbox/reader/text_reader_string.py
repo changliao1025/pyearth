@@ -44,7 +44,7 @@ def text_reader_string( sFilename_in,\
             iFlag_delimiter = 1
         else:
             iFlag_delimiter = 0
-            delimiter_in = ' '
+            #delimiter_in = ' '
         sLine = (ifs.readline()).rstrip()
         
         if iFlag_delimiter == 0:
@@ -75,7 +75,7 @@ def text_reader_string( sFilename_in,\
             if iFlag_column == 1:
                 pass
             else :
-                dummy = sLine.split(delimiter_in)
+                dummy = sLine.split()
                 ncolumn_out = len(dummy)
             #check ncolumn_in count
             if ncolumn_out < 1 :                
@@ -87,7 +87,7 @@ def text_reader_string( sFilename_in,\
             else:
                 pass 
 
-            dummy = sLine.split(delimiter_in)
+            dummy = sLine.split()
            
             aData_out[0] =  dummy
 
@@ -99,7 +99,7 @@ def text_reader_string( sFilename_in,\
                     dummy2=dummy2.replace('"','')
                 else:
                     pass
-                dummy3 = dummy2.split(delimiter_in)
+                dummy3 = dummy2.split()
                 #print(dummy3)
                 aData_out[iRow] = dummy3
         #print(aData_out)
