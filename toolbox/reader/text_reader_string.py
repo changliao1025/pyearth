@@ -47,7 +47,7 @@ def text_reader_string( sFilename_in,\
             #delimiter_in = ' '
         sLine = (ifs.readline()).rstrip()
         
-        if iFlag_delimiter == 0:
+        if iFlag_delimiter == 1:
             if iFlag_column == 1:
                 pass
             else :
