@@ -6,6 +6,13 @@ def text_reader_string( sFilename_in,\
      delimiter_in = None, \
      remove_quota = None, \
      skipline_in =  None ):
+    """
+    sFilename_in,\
+    ncolumn_in = None, \
+    nrow_in = None, \
+    delimiter_in = None, \
+    skipline_in =  None
+    """
     #print(sFilename_in)
     #print(os.path.isfile(sFilename_in))
     aData_out = -1
