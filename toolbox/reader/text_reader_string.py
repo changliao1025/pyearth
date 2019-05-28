@@ -3,14 +3,14 @@ import numpy as np
 def text_reader_string( sFilename_in,\
      ncolumn_in = None, \
      nrow_in = None, \
-     delimiter_in = None, \
-     remove_quota = None, \
-     skipline_in =  None ):
+     cDelimiter_in = None, \
+     iFlag_remove_quota = None, \
+     iSkipline_in =  None ):
     """sFilename_in,
     ncolumn_in = None, 
     nrow_in = None, 
-    delimiter_in = None, 
-    skipline_in =  None
+    cDelimiter_in = None, 
+    iSkipline_in =  None
     """
     #print(sFilename_in)
     #print(os.path.isfile(sFilename_in))
@@ -35,29 +35,29 @@ def text_reader_string( sFilename_in,\
         sLine=' '
         ifs = open(sFilename_in, "r")
 
-        if skipline_in is not None:
-            nrow_out =  nrow_out - skipline_in
-            for i in range(skipline_in):
+        if iSkipline_in is not None:
+            nrow_out =  nrow_out - iSkipline_in
+            for i in range(iSkipline_in):
                 ifs.readline()
         else:
             pass
-        if remove_quota is not None:
-            iFlag_remove_quota = 1
+        if iFlag_remove_quota is not None:
+            iFlag_iFlag_remove_quota = 1
         else:
-            iFlag_remove_quota = 0
+            iFlag_iFlag_remove_quota = 0
         #get delimiter
-        if delimiter_in is not None:
+        if cDelimiter_in is not None:
             iFlag_delimiter = 1
         else:
             iFlag_delimiter = 0
-            #delimiter_in = ' '
+            #cDelimiter_in = ' '
         sLine = (ifs.readline()).rstrip()
         
         if iFlag_delimiter == 1:
             if iFlag_column == 1:
                 pass
             else :
-                dummy = sLine.split(delimiter_in)
+                dummy = sLine.split(cDelimiter_in)
                 
                 ncolumn_out = len(dummy)
             #check ncolumn_in count
@@ -66,17 +66,17 @@ def text_reader_string( sFilename_in,\
                         
             #aData_out = [[0 for x in range(ncolumn_out)] for y in range(nrow_out)]   
             aData_out = np.full( (nrow_out, ncolumn_out), '  ' , dtype=object )          
-            dummy = sLine.split(delimiter_in)
+            dummy = sLine.split(cDelimiter_in)
            
             aData_out[0] =  dummy
 
             for iRow in range(1, nrow_out):
                 sLine=(ifs.readline()).rstrip()
-                if iFlag_remove_quota ==1:
+                if iFlag_iFlag_remove_quota ==1:
                     sLine.replace('"','')
                 else:
                     pass    
-                aData_out[iRow] = sLine.split(delimiter_in)
+                aData_out[iRow] = sLine.split(cDelimiter_in)
         else :
             if iFlag_column == 1:
                 pass
@@ -88,7 +88,7 @@ def text_reader_string( sFilename_in,\
                 return aData_out                      
             #aData_out = [[0 for x in range(ncolumn_out)] for y in range(nrow_out)] 
             aData_out = np.full( (nrow_out, ncolumn_out), '  ', dtype=object )
-            if iFlag_remove_quota ==1:
+            if iFlag_iFlag_remove_quota ==1:
                 sLine=sLine.replace('"','')
             else:
                 pass 
@@ -101,7 +101,7 @@ def text_reader_string( sFilename_in,\
                 dummy1 = ifs.readline()
                 #print('New line is: ' + dummy1)
                 dummy2 = dummy1.rstrip()
-                if iFlag_remove_quota ==1:
+                if iFlag_iFlag_remove_quota ==1:
                     dummy2=dummy2.replace('"','')
                 else:
                     pass
