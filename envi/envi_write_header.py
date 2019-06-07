@@ -23,10 +23,11 @@ def envi_write_header(sFilename_in, aHeader):
     pFile.write(sLine)
     sLine = 'data ignore value = ' + aHeader['missing_value'] + '\n'
     pFile.write(sLine)
-    sLine = '{Geographic Lat/Lon, 1.000, 1.000, ' \
+    sLine = 'map info = {Geographic Lat/Lon, 1.000, 1.000, ' \
         + aHeader['ULlon'] + ', ' + aHeader['ULlat'] + ', ' \
         + aHeader['pixelSize'] + ', ' + aHeader['pixelSize'] + ', ' \
         + 'WGS-84, units = Degrees}' + '\n'
+    pFile.write(sLine)
     sLine = 'wavelength units = Unknown ' + '\n'
     pFile.write(sLine)
     pFile.close()
