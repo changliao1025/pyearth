@@ -8,7 +8,7 @@ def envi_raster_binary_to_2d_array(sFilename_in):
     driver = gdal.GetDriverByName('ENVI')
     driver.Register()
 
-    pFile = gdal.Open(sFilename_in, GA_ReadOnly)
+    pFile = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
     if pFile is None:
         print("Couldn't open this file: " + sFilename_in)
