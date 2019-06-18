@@ -1,5 +1,6 @@
 
-from osgeo import gdal, gdalconst
+import sys
+from osgeo import gdal
 def envi_raster_binary_to_2d_array(sFilename_in):
     '''
 	Converts a binary file of ENVI type to a numpy array.
