@@ -1,4 +1,4 @@
-
+import sys
 from osgeo import gdal, gdalconst
 def envi_raster_binary_to_2d_array(sFilename_in):
     '''
