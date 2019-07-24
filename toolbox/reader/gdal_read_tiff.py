@@ -22,16 +22,10 @@ def gdal_read_tiff(sFilename_in):
         # Projection
         pFile.GetProjection()
 
-        # Dimensions
-        
+        # Dimensions       
 
         # Metadata for the pFile dataset
         pFile.GetMetadata()
-
-        
-
-        
-
         print('~~~~~~~~~~~~~~')
         print('Get image size')
         print('~~~~~~~~~~~~~~')
