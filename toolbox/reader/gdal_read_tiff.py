@@ -20,7 +20,7 @@ def gdal_read_tiff(sFilename_in):
         print("%s opened successfully" % sFilename_in)
         type(pFile)
         # Projection
-        pFile.GetProjection()
+        proj = pFile.GetProjection()
 
         # Dimensions       
 
@@ -80,4 +80,6 @@ def gdal_read_tiff(sFilename_in):
         print(type(image_array))
         print(image_array.shape)
 
-        return image_array, pixelWidth, (geotransform, pFile)
+        
+
+        return image_array, pixelWidth,originX, originY, cols,rows,proj, geotransform
