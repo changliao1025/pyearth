@@ -7,8 +7,8 @@ def gdal_read_envi(sFilename_in):
 	Converts a binary file of ENVI type to a numpy array.
 	Lack of an ENVI .hdr file will cause this to crash.
 	'''
-    driver = gdal.GetDriverByName('ENVI')
-    driver.Register()
+    pDriverName = gdal.GetDriverByName('ENVI')
+    pDriverName.Register()
 
     pFile = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
@@ -19,7 +19,7 @@ def gdal_read_envi(sFilename_in):
         sys.exit("Try again!")
     else:
         print("%s opened successfully" % sFilename_in)
-        proj = pFile.GetProjection()
+        pSpatialRef = pFile.GetProjection()
         print('~~~~~~~~~~~~~~')
         print('Get image size')
         print('~~~~~~~~~~~~~~')
@@ -54,5 +54,5 @@ def gdal_read_envi(sFilename_in):
         image_array_name = sFilename_in
         print(type(image_array))
         print(image_array.shape)
-        proj = osr.SpatialReference(wkt=proj)
-        return image_array, pixelWidth,originX, originY, cols,rows,proj, geotransform
+        pSpatialRef = osr.SpatialReference(wkt=pSpatialRef)
+        return image_array, pixelWidth, originX, originY, cols, rows, pSpatialRef, geotransform
