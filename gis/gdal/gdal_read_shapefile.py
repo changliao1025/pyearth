@@ -27,7 +27,7 @@ def gdal_read_shapefile(sFilename_in):
         for pFeature in pLayer:         
 
             pGeometry = pFeature.GetGeometryRef()
-            print (pGeometry.Centroid().ExportToWkt())
+            #print (pGeometry.Centroid().ExportToWkt())
             aFeature.append(pGeometry)
 
-        return aFeature, pSpatailRef
+        return aFeature, pSpatailRef, lFeatureCount
