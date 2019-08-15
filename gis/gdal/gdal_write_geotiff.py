@@ -32,4 +32,4 @@ def gdal_write_geotiff(sFilename_in, ncolumn_in, nrow_in, dX_origin_in, dY_origi
     pDataset.FlushCache()  # Write to disk.
     pDriver = None
     pDataset = None
-    return pDataset, pDataset.GetRasterBand(1) 
+    #return pDataset, pDataset.GetRasterBand(1) 
