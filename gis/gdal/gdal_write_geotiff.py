@@ -28,7 +28,7 @@ def gdal_write_geotiff(sFilename_in, ncolumn_in, nrow_in, dX_origin_in, dY_origi
     pProjection= pSpatialRef_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)
     pDataset.GetRasterBand(1).WriteArray(aData_image_in)
-    #pDataset.GetRasterBand(1).
+    pDataset.GetRasterBand(1).SetNoDataValue(dMissing_value_in)
     pDataset.FlushCache()  # Write to disk.
     pDriver = None
     pDataset = None
