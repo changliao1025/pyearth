@@ -97,4 +97,4 @@ def gdal_read_geotiff(sFilename_in):
         #row 2
         #...
         #row n
-        return ncolumn, nrow, dX_origin, dY_origin, dPixelWidth, dMissing_value, aData_image, pSpatialRef
+        return aData_image, ncolumn, nrow, dX_origin, dY_origin, dPixelWidth, dMissing_value, pGeotransform, pSpatialRef
