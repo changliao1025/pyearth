@@ -7,10 +7,12 @@ from pathlib import Path #get the home directory
 sPlatform_os = platform.system()
 sCluster = os.environ['SYSTEM_NAME']
 sWorkspace_home = str(Path.home())
+
 sWorkspace_configuration = sWorkspace_home
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
     sMachine ='None'
+    
     sWorkspace_code = 'C:' + slash + 'workspace'
     sWorkspace_scratch = 'D:'    
 else:  #linux or unix
@@ -39,12 +41,26 @@ else:  #linux or unix
             sWorkspace_scratch = slash + 'Users' + slash + 'liao313' + slash + 'tmp'  
         else:
             pass
+
+sWorkspace_data = sWorkspace_home + slash + 'data'
+
 #now we will start define major global variables
+#data file type
 sExtension_txt = '.txt'
+sExtension_envi = '.dat'
+sExtension_tiff = '.tif'
+sExtension_header ='.hdr'
+sExtension_netcdf = '.nc'
+sExtension_shapefile = '.shp'
+
+#graphics
 sExtension_png = '.png'
 sExtension_jpg = '.jpg'
-sExtension_envi = '.dat'
-sExtension_tif = '.tif'
-sExtension_header ='.hdr'
-missing_value = -9999.0
+
 sFilename_config = sMachine + '_configuration' + sExtension_txt
+
+#constant values
+missing_value = -9999.0
+mms2mmd = 24 * 3600.0
+iMonth_start = 1
+iMonth_end = 12
