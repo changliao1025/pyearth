@@ -1,8 +1,9 @@
 
 import sys
 from osgeo import gdal, osr
-def gdal_write_geotiff(sFilename_in, ncolumn_in, nrow_in, dX_origin_in, dY_origin_in, dPixelWidth_in, dMissing_value_in,\
-     aData_image_in, pSpatialRef_in):
+def gdal_write_geotiff(sFilename_in, aData_image_in,\
+     ncolumn_in, nrow_in, dX_origin_in, dY_origin_in, dPixelWidth_in, dMissing_value_in,\
+      pSpatialRef_in):
 
     """Array > Raster
     Save a raster from a C order aData_image_in.
