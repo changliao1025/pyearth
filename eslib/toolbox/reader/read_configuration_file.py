@@ -1,5 +1,5 @@
 import os
-def read_configuration_file(self, sFilename_configuration_in):
+def read_configuration_file(sFilename_configuration_in):
 
     if os.path.isfile(sFilename_configuration_in):
         aConfig_out = {}

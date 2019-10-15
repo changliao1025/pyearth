@@ -20,7 +20,7 @@ def gdal_read_geotiff(sFilename_in):
         print("%s opened successfully" % sFilename_in)
         #type(pFile)
         # Projection
-        pSpatialRef = pFile.GetProjection()
+        pProjection = pFile.GetProjection()
 
         # Dimensions       
 
@@ -84,7 +84,7 @@ def gdal_read_geotiff(sFilename_in):
 
         #there are different types of spatial reference systems
         #we will use one of them to keep the consistency
-        pSpatialRef = osr.SpatialReference(wkt=pSpatialRef)
+        pSpatialRef = osr.SpatialReference(wkt=pProjection)
         #there are many information in a raster data, we will use some standard way to output them
         #beblow is an example for ArcGIS ASCII file
         #NCOLS xxx

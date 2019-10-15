@@ -1,4 +1,5 @@
 #write the header for ENVI raster file from the dictionary data type
+#https://www.harrisgeospatial.com/docs/ENVIGridDefinition.html
 def envi_write_header(sFilename_in, aHeader):
     pFile = open(sFilename_in, 'w')
     sLine = 'ENVI' + '\n'

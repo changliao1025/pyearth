@@ -62,5 +62,6 @@ sFilename_config = sMachine + '_configuration' + sExtension_txt
 #constant values
 missing_value = -9999.0
 mms2mmd = 24 * 3600.0
+nmonth = 12
 iMonth_start = 1
 iMonth_end = 12
