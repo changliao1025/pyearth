@@ -8,7 +8,7 @@ sPlatform_os = platform.system()
 sCluster = os.environ['SYSTEM_NAME']
 sWorkspace_home = str(Path.home())
 
-sWorkspace_configuration = sWorkspace_home
+
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
     sMachine ='None'
@@ -42,6 +42,7 @@ else:  #linux or unix
         else:
             pass
 
+sWorkspace_configuration = sWorkspace_home + slash + '03configuration'
 sWorkspace_data = sWorkspace_home + slash + 'data'
 
 #now we will start define major global variables
