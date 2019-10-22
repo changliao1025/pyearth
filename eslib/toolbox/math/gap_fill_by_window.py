@@ -6,15 +6,7 @@ import sys
 import numpy as np
 from pathlib import Path
 from numpy  import array
-sPlatform_os = platform.system()
-if sPlatform_os=='Windows': #windows
-    slash = '\\'
-    sWorkspace_code = 'C:' + slash + 'workspace'
-    
-else: #linux or unix
-    slash ='/'
-    home = str(Path.home())
-    sWorkspace_code = home + slash + 'workspace'
+
 
 #import the eslib library
 sPath_library_python = sWorkspace_code +  slash + 'python' + slash + 'library' + slash + 'eslib_python'

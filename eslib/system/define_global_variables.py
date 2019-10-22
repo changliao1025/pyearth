@@ -8,7 +8,7 @@ sPlatform_os = platform.system()
 sCluster = os.environ['SYSTEM_NAME']
 sWorkspace_home = str(Path.home())
 
-
+#do not deleta this part!!!
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
     sMachine ='None'
@@ -44,6 +44,8 @@ else:  #linux or unix
 
 sWorkspace_configuration = sWorkspace_home + slash + '03configuration'
 sWorkspace_data = sWorkspace_home + slash + 'data'
+sWorkspace_bin = sWorkspace_home + slash + 'bin'
+sWorkspace_models  = sWorkspace_scratch + slash + '04model'
 
 #now we will start define major global variables
 #data file type
@@ -60,9 +62,14 @@ sExtension_jpg = '.jpg'
 
 sFilename_config = sMachine + '_configuration' + sExtension_txt
 
+sFilename_interactive_bash = sWorkspace_bin + slash + 'interactive_bash'
+
 #constant values
 missing_value = -9999.0
-mms2mmd = 24 * 3600.0
+
 nmonth = 12
 iMonth_start = 1
 iMonth_end = 12
+mms2mmd = 24 * 3600.0
+feet2meter = 0.3048
+inch2mm = 25.4
