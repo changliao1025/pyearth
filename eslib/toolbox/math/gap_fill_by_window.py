@@ -1,17 +1,20 @@
 
 import statistics 
-import platform #platform independent
 import math
 import sys
 import numpy as np
-from pathlib import Path
 from numpy  import array
 
+#use global method
+sSystem_paths = os.environ['PATH'].split(os.pathsep)
+sys.path.extend(sSystem_paths)
+from eslib.system import define_global_variables
+from eslib.system.define_global_variables import *
 
 #import the eslib library
 sPath_library_python = sWorkspace_code +  slash + 'python' + slash + 'library' + slash + 'eslib_python'
 sys.path.append(sPath_library_python)
-from toolbox.math.search_neighbors import search_neighbors
+from eslib.toolbox.math.search_neighbors import search_neighbors
 
 def gap_fill_by_window (aArray_in, iWindow_size_in = None):
     """aArray_in,
