@@ -8,7 +8,7 @@ sys.path.extend(sSystem_paths)
 #import global variable
 from eslib.system import define_global_variables
 from eslib.system.define_global_variables import *
-def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, iDimension_in):
+def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, aDimension_in):
     if os.path.exists(sFilename_old):
         print("Yep, I can read that file!")
     else:
@@ -19,14 +19,14 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
     #output file
     pDatasets_out = Dataset(sFilename_new, "w", format=netcdf_format)
     for sKey, iValue in pDatasets_in.dimensions.items():
-         
+        dummy = len(iValue)
         if not iValue.isunlimited():
-            pDatasets_out.createDimension(sKey, len(iValue) )
-            if len(iValue) == iDimension_in:
-                sDimension = sKey
-                print('found')
+            
+            pDatasets_out.createDimension(sKey, dummy)
+
+            
         else:
-            pDatasets_out.createDimension(sKey, len(iValue) )
+            pDatasets_out.createDimension(sKey, dummy )
         
     # Copy variables
     for sKey, aValue in pDatasets_in.variables.items():        
@@ -44,7 +44,7 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
         outVar[:] = aValue[:]
         # close the output file
     #add new variable 
-    pVar3 = pDatasets_out.createVariable(sVariable_in, 'f4', sDimension) 
+    pVar3 = pDatasets_out.createVariable(sVariable_in, 'f4', ('lsmlat','lsmlon')  ) 
     pVar3[:] = aData_in
     pVar3.description = sVariable_in
     pVar3.unit = sUnit_in
