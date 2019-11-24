@@ -1,4 +1,3 @@
-
 import sys
 from osgeo import gdal, osr
 def gdal_write_geotiff(sFilename_in, aData_image_in,\
