@@ -59,7 +59,7 @@ sExtension_shapefile = '.shp'
 #graphics
 sExtension_png = '.png'
 sExtension_jpg = '.jpg'
-
+sExtension_ps = '.ps'
 sFilename_config = sMachine + '_configuration' + sExtension_txt
 
 sFilename_interactive_bash = sWorkspace_bin + slash + 'interactive_bash'
