@@ -1,12 +1,9 @@
-import os
-import numpy
-import sys
+import os, sys
 from netCDF4 import Dataset
 #import library
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 #import global variable
-from eslib.system import define_global_variables
 from eslib.system.define_global_variables import *
 def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, aDimension_in):
     if os.path.exists(sFilename_old):
@@ -20,11 +17,8 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
     pDatasets_out = Dataset(sFilename_new, "w", format=netcdf_format)
     for sKey, iValue in pDatasets_in.dimensions.items():
         dummy = len(iValue)
-        if not iValue.isunlimited():
-            
-            pDatasets_out.createDimension(sKey, dummy)
-
-            
+        if not iValue.isunlimited():            
+            pDatasets_out.createDimension(sKey, dummy)            
         else:
             pDatasets_out.createDimension(sKey, dummy )
         
@@ -34,12 +28,9 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
         print( aValue.dimensions)
         # we need to take care of rec dimension
         dummy = aValue.dimensions
-        outVar = pDatasets_out.createVariable(sKey, aValue.datatype,   dummy  )
-        
-        for sAttribute in aValue.ncattrs():
-            
+        outVar = pDatasets_out.createVariable(sKey, aValue.datatype, dummy )        
+        for sAttribute in aValue.ncattrs():            
             outVar.setncatts( { sAttribute: aValue.getncattr(sAttribute) } )
-
           
         outVar[:] = aValue[:]
         # close the output file
@@ -48,6 +39,5 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
     pVar3[:] = aData_in
     pVar3.description = sVariable_in
     pVar3.unit = sUnit_in
-
     pDatasets_out.close()
 

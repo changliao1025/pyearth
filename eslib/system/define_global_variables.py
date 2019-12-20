@@ -73,3 +73,4 @@ iMonth_end = 12
 mms2mmd = 24 * 3600.0
 feet2meter = 0.3048
 inch2mm = 25.4
+cms2cmd = 24 * 3600
