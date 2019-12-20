@@ -4,6 +4,8 @@ import matplotlib.dates as mdates
 from mpl_toolkits.axes_grid1 import AxesGrid
 import matplotlib.ticker as ticker
 import math as Math
+
+
 def compute_ticks_space (x, step = 5):
     """
     Computes domain with given step encompassing series x
@@ -11,7 +13,6 @@ def compute_ticks_space (x, step = 5):
     x    - Required - A list-like object of integers or floats
     step - Optional - Tick frequency
     """
-
     xMax, xMin = Math.ceil(max(x)), Math.floor(min(x))
     dMax, dMin = xMax + abs((xMax % step) - step) + (step if (xMax % step != 0) else 0), xMin - abs((xMin % step))
     dSpace = (dMax - dMin)/step
