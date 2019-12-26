@@ -1,10 +1,9 @@
+import math as Math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from mpl_toolkits.axes_grid1 import AxesGrid
 import matplotlib.ticker as ticker
-import math as Math
-
+from mpl_toolkits.axes_grid1 import AxesGrid
 
 def compute_ticks_space (x, step = 5):
     """
@@ -13,8 +12,11 @@ def compute_ticks_space (x, step = 5):
     x    - Required - A list-like object of integers or floats
     step - Optional - Tick frequency
     """
-    xMax, xMin = Math.ceil(max(x)), Math.floor(min(x))
-    dMax, dMin = xMax + abs((xMax % step) - step) + (step if (xMax % step != 0) else 0), xMin - abs((xMin % step))
+    #xMax, xMin = Math.ceil(max(x)), Math.floor(min(x))
+    xMax = Math.ceil( np.nanmax(x) )
+    xMin = Math.floor( np.nanmin(x) )
+    dMax, dMin = xMax + abs((xMax % step) - step) + (step if (xMax % step != 0) else 0), \
+        xMin - abs((xMin % step))
     dSpace = (dMax - dMin)/step
     return dSpace
 
@@ -23,7 +25,6 @@ def plot_time_series_data(aTime, aData, sFilename_out, \
     iDPI_in = None ,\
     sLabel_Y_in = None , sLabel_legend_in = None,\
     sTitle_in = None):
-
 
     if iSize_X_in is not None:        
         iSize_X = iSize_X_in
@@ -80,7 +81,7 @@ def plot_time_series_data(aTime, aData, sFilename_out, \
         ax.set_xmargin(0.05)
         ax.set_ymargin(0.15)
         
-        ax.set_ylim( y_min, y_max)
+        
         
         ax.set_xlabel('Year',fontsize=12)
         ax.set_ylabel(sLabel_Y,fontsize=12)
@@ -102,7 +103,8 @@ def plot_time_series_data(aTime, aData, sFilename_out, \
         dRatio = (float(iSize_Y)/iSize_X) / (   (y_max-y_min )/ nstress )
         ax.set_aspect(dRatio)  #this one set the y / x ratio
 
-        ax.plot( x1, y1, color = 'red', linestyle = '--' , marker="+", markeredgecolor='blue' , label= sLabel_legend)
+        ax.plot( x1, y1, \
+                 color = 'red', linestyle = '--' , marker="+", markeredgecolor='blue' , label= sLabel_legend)
         
         if y_max < 1000 and y_max > 0.001:
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
@@ -110,6 +112,9 @@ def plot_time_series_data(aTime, aData, sFilename_out, \
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
         dSpace = compute_ticks_space(y1)
         ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
+        y_max = dSpace *6
+        ax.set_ylim( y_min, y_max)
+        
         ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
 
     plt.savefig(sFilename_out, bbox_inches='tight')
