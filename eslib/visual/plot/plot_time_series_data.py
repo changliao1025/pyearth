@@ -1,24 +1,13 @@
-import math as Math
-import numpy as np
+import os, sys
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 from mpl_toolkits.axes_grid1 import AxesGrid
 
-def compute_ticks_space (x, step = 5):
-    """
-    Computes domain with given step encompassing series x
-    @ params
-    x    - Required - A list-like object of integers or floats
-    step - Optional - Tick frequency
-    """
-    #xMax, xMin = Math.ceil(max(x)), Math.floor(min(x))
-    xMax = Math.ceil( np.nanmax(x) )
-    xMin = Math.floor( np.nanmin(x) )
-    dMax, dMin = xMax + abs((xMax % step) - step) + (step if (xMax % step != 0) else 0), \
-        xMin - abs((xMin % step))
-    dSpace = (dMax - dMin)/step
-    return dSpace
+sSystem_paths = os.environ['PATH'].split(os.pathsep)
+sys.path.extend(sSystem_paths)
+from eslib.visual.plot.compute_ticks_space import compute_ticks_space
+
 
 def plot_time_series_data(aTime, aData, sFilename_out, \
     iSize_X_in = None, iSize_Y_in = None,  \
