@@ -1,8 +1,9 @@
 
+
 import math as Math
 import numpy as np
 
-def compute_ticks_space (aData, nstep_in = 5):
+def calculate_ticks_space (aData, nstep_in = 5):
     """
     Computes domain with given nstep_in encompassing series aData
     @ params
@@ -12,7 +13,7 @@ def compute_ticks_space (aData, nstep_in = 5):
     #xMax, xMin = Math.ceil(max(aData)), Math.floor(min(aData))
     xMax = Math.ceil( np.nanmax(aData) )
     xMin = Math.floor( np.nanmin(aData) )
-    dMax, dMin = xMax + abs((xMax % nstep_in) - nstep_in) + (nstep_in if (xMax % nstep_in != 0) else 0), \
-        xMin - abs((xMin % nstep_in))
+    dMax =  xMax + abs((xMax % nstep_in) - nstep_in) + (nstep_in if (xMax % nstep_in != 0) else 0)
+    dMin = xMin - abs((xMin % nstep_in))
     dSpace = (dMax - dMin)/nstep_in
     return dSpace
