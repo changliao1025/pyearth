@@ -5,7 +5,7 @@ import platform  #determine the platform this package is running at
 from pathlib import Path #get the home directory
 
 sPlatform_os = platform.system()
-sCluster = os.environ['SYSTEM_NAME']
+
 sWorkspace_home = str(Path.home())
 
 #do not deleta this part!!!
@@ -19,6 +19,7 @@ else:  #linux or unix
     slash = '/'    
     sWorkspace_code = sWorkspace_home + slash + 'workspace'
     if (sPlatform_os == 'Linux'):
+        sCluster = os.environ['SYSTEM_NAME']
         if( 'compy' in sCluster):
             sMachine='compy'           
             sPython2 = '/share/apps/anaconda2/2019.03/bin/python' #this is used for mixture of python2/3
@@ -38,6 +39,7 @@ else:  #linux or unix
             #more cluster can be added here            
     else:
         if (sPlatform_os == 'Darwin'):
+            sMachine ='mac'
             sWorkspace_scratch = slash + 'Users' + slash + 'liao313' + slash + 'tmp'  
         else:
             pass
