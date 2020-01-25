@@ -51,63 +51,93 @@ def text_reader_string( sFilename_in,\
         else:
             iFlag_delimiter = 0
             #cDelimiter_in = ' '
-        sLine = (ifs.readline()).rstrip()
+        
         
         if iFlag_delimiter == 1:
             if iFlag_column == 1:
-                pass
+                if ncolumn_out < 1 :
+                    print( 'The file has no data!' )
+                aData_out = np.full( (nrow_out, ncolumn_out), '  ' , dtype=object )    
+                for iRow in range(nrow_out):
+                    sLine=(ifs.readline()).rstrip()
+                    if iFlag_iFlag_remove_quota ==1:
+                        sLine.replace('"','')
+                    else:
+                        pass    
+                    aDummy = sLine.split(cDelimiter_in)
+                    iDummy = len(aDummy)
+                    if iDummy == ncolumn_out:
+                        aData_out[iRow] = aDummy
+                    else:
+                        #something is missing
+                        aDummy2  =np.full(ncolumn_out, '  ' , dtype=object)
+                        aDummy2[0: iDummy]= aDummy
+                        aData_out[iRow]= aDummy2
             else :
-                dummy = sLine.split(cDelimiter_in)
-                
-                ncolumn_out = len(dummy)
-            #check ncolumn_in count
-            if ncolumn_out < 1 :
-                print( 'The file has no data!' )
-                        
-            #aData_out = [[0 for x in range(ncolumn_out)] for y in range(nrow_out)]   
-            aData_out = np.full( (nrow_out, ncolumn_out), '  ' , dtype=object )          
-            dummy = sLine.split(cDelimiter_in)
-           
-            aData_out[0] =  dummy
-
-            for iRow in range(1, nrow_out):
                 sLine=(ifs.readline()).rstrip()
-                if iFlag_iFlag_remove_quota ==1:
-                    sLine.replace('"','')
-                else:
-                    pass    
-                aData_out[iRow] = sLine.split(cDelimiter_in)
+                dummy = sLine.split(cDelimiter_in)
+                ncolumn_out = len(dummy)
+                #check ncolumn_in count
+                if ncolumn_out < 1 :
+                    print( 'The file has no data!' )  
+                aData_out = np.full( (nrow_out, ncolumn_out), '  ' , dtype=object )         
+                aData_out[0] = dummy
+                for iRow in range(1, nrow_out):
+                    sLine=(ifs.readline()).rstrip()
+                    if iFlag_iFlag_remove_quota ==1:
+                        sLine.replace('"','')
+                    else:
+                        pass    
+                    aDummy = sLine.split(cDelimiter_in)
+                    iDummy = len(aDummy)
+                    if iDummy == ncolumn_out:
+                        aData_out[iRow] = aDummy
+                    else:
+                        #something is missing
+                        aDummy2  =np.full(ncolumn_out, '  ' , dtype=object)
+                        aDummy2[0: iDummy]= aDummy
+                        aData_out[iRow]= aDummy2
+                
         else :
             if iFlag_column == 1:
-                pass
+                #check ncolumn_in count
+                if ncolumn_out < 1 :                
+                    return aData_out                      
+                aData_out = np.full( (nrow_out, ncolumn_out), '  ', dtype=object )
+                for iRow in range(nrow_out):
+                    dummy1 = ifs.readline()
+                    #print('New line is: ' + dummy1)
+                    dummy2 = dummy1.rstrip()
+                    if iFlag_iFlag_remove_quota ==1:
+                        dummy2=dummy2.replace('"','')
+                    else:
+                        pass
+                    dummy3 = dummy2.split()
+                    #print(dummy3)
+                    aData_out[iRow] = dummy3
             else :
+                sLine=(ifs.readline()).rstrip()
                 dummy = sLine.split()
                 ncolumn_out = len(dummy)
-            #check ncolumn_in count
-            if ncolumn_out < 1 :                
-                return aData_out                      
-            #aData_out = [[0 for x in range(ncolumn_out)] for y in range(nrow_out)] 
-            aData_out = np.full( (nrow_out, ncolumn_out), '  ', dtype=object )
-            if iFlag_iFlag_remove_quota ==1:
-                sLine=sLine.replace('"','')
-            else:
-                pass 
-
-            dummy = sLine.split()
-           
-            aData_out[0] =  dummy
-
-            for iRow in range(1,nrow_out):
-                dummy1 = ifs.readline()
-                #print('New line is: ' + dummy1)
-                dummy2 = dummy1.rstrip()
+                if ncolumn_out < 1 :                
+                    return aData_out          
+                aData_out = np.full( (nrow_out, ncolumn_out), '  ', dtype=object )
                 if iFlag_iFlag_remove_quota ==1:
-                    dummy2=dummy2.replace('"','')
+                    sLine=sLine.replace('"','')
                 else:
                     pass
-                dummy3 = dummy2.split()
-                #print(dummy3)
-                aData_out[iRow] = dummy3
+                aData_out[0] =  dummy
+                for iRow in range(1,nrow_out):
+                    dummy1 = ifs.readline()
+                    #print('New line is: ' + dummy1)
+                    dummy2 = dummy1.rstrip()
+                    if iFlag_iFlag_remove_quota ==1:
+                        dummy2=dummy2.replace('"','')
+                    else:
+                        pass
+                    dummy3 = dummy2.split()
+                    #print(dummy3)
+                    aData_out[iRow] = dummy3
         #print(aData_out)
         ifs.close()
 
