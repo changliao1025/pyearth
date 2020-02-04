@@ -5,7 +5,7 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
         sDirectory_job, \
         sFilename_checkpoint, \
         sFilename_job, \
-        sFilename_python, \            
+        sFilename_python,\
         nNode_in = None, \
         nTask_in=None, \
         sPath_in = None):
@@ -94,11 +94,11 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     pFile.write( sLine ) 
 
     #now prepare the resubmit part
-    sLine = 'iIndex="$(sed -n '1p'' + sFilename_checkpoint + ' | xargs)"' + '\n'
+    sLine = 'iIndex="$(sed -n' + '1p' + sFilename_checkpoint + ' | xargs)"' + '\n'
     pFile.write( sLine ) 
-    sLine = 'iIndex="$(sed -n '2p'' + sFilename_checkpoint + ' | xargs)"' + '\n'
+    sLine = 'iIndex="$(sed -n' + '2p' + sFilename_checkpoint + ' | xargs)"' + '\n'
     pFile.write( sLine ) 
-    sLine = 'iIndex="$(sed -n '3p'' + sFilename_checkpoint + ' | xargs)"' + '\n'
+    sLine = 'iIndex="$(sed -n' + '3p' + sFilename_checkpoint + ' | xargs)"' + '\n'
     pFile.write( sLine ) 
 
     sLine = 'if (($iIndex == 0));then' + '\n'
