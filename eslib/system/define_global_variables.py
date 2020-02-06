@@ -68,8 +68,9 @@ sFilename_interactive_bash = sWorkspace_bin + slash + 'interactive_bash'
 
 #constant values
 missing_value = -9999.0
-
+ncore_per_node = 40
 nmonth = 12
+
 iMonth_start = 1
 iMonth_end = 12
 mms2mmd = 24 * 3600.0

@@ -84,8 +84,12 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     pFile.write( sLine ) 
     sLine = 'conda activate mpienv' + '\n'
     pFile.write( sLine ) 
-    
-    
+    sLine = 'module load gcc/8.1.0' + '\n'
+    pFile.write( sLine ) 
+    sLine = 'module load openmpi/3.1.3' + '\n'
+    pFile.write( sLine ) 
+    sLine = 'export MPICC="$(which mpicc)"' + '\n'
+    pFile.write( sLine ) 
     
     sLine = 'sDirectory_job=' + sDirectory_job + '\n'
     pFile.write( sLine ) 
@@ -97,6 +101,9 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     pFile.write( sLine ) 
 
     sLine = 'echo " Job " ' + '${SLURM_JOBID}' + ' is launched' + '\n'
+    pFile.write( sLine ) 
+
+    sLine = 'mpiexec --n ' + sTask + ' python  $sFilename_python ' + ' --sDirectory_job=$sDirectory_job' + '\n'
     pFile.write( sLine ) 
 
     sLine = 'conda deactivate' + '\n'
