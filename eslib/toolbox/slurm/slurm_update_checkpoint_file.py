@@ -4,17 +4,14 @@ def slurm_update_checkpoint_file(iIndex_restart, \
     iIndex_end,\
     sFilename_checkpoint):
     #write checkpoint file
-    
-    
-    pFile = open(sFilename_checkpoint, "w")  #write mode 
+    ofs = open(sFilename_checkpoint, "w")  #write mode 
     sLine = "{:0d}".format( iIndex_restart ) + '\n'
-    
-    pFile.write( sLine ) 
+    ofs.write( sLine ) 
     sLine = "{:0d}".format( iIndex_start )  + '\n'
-    pFile.write( sLine ) 
+    ofs.write( sLine ) 
     sLine = "{:0d}".format( iIndex_end )  + '\n'
-    pFile.write( sLine ) 
-    pFile.close() 
+    ofs.write( sLine ) 
+    ofs.close() 
     #if(iIndex_restart == 0):
     #    print('Checkpoint file is resetted to: ', iIndex_restart,  iIndex_start, iIndex_end)
     #else:

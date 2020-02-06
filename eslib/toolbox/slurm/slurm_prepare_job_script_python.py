@@ -1,16 +1,17 @@
 import os
-import subprocess
 
+#normal job, no checkpoint 
 def slurm_prepare_job_script_python(iStart, iEnd, \
-        sDirectory_job, \
-        sDirectory_python,\
         sBasename_checkpoint, \
         sBasename_job, \
         sBasename_python,\
+        sDirectory_job, \
+        sDirectory_python,\
+        
         sJob_name, \
         nNode_in = None, \
         nTask_in=None, \
-            sQueue_in=None):
+        sQueue_in=None):
     if nNode_in is not None:
         iNode = nNode_in            
     else:
@@ -102,30 +103,30 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     sLine = 'conda deactivate' + '\n'
     pFile.write( sLine ) 
     
+    if iFlag_resubmit ==1:
+        #now prepare the resubmit part
+        sLine = 'iIndex="$(sed -n ' + ' 1p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'iIndex="$(sed -n ' + ' 2p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'iIndex="$(sed -n ' + ' 3p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
+        pFile.write( sLine ) 
 
-    #now prepare the resubmit part
-    sLine = 'iIndex="$(sed -n ' + ' 1p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
-    pFile.write( sLine ) 
-    sLine = 'iIndex="$(sed -n ' + ' 2p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
-    pFile.write( sLine ) 
-    sLine = 'iIndex="$(sed -n ' + ' 3p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
-    pFile.write( sLine ) 
+        sLine = 'if (($iIndex == 0));then' + '\n'
+        pFile.write( sLine )
+        sLine = '    echo "All tasks are finished"'      + '\n'
+        pFile.write( sLine )
+        sLine = 'else'      + '\n'
+        pFile.write( sLine )
+        sLine = '    echo "Job $SLURM_JOBID at $(date) will be re-submitted with new indices:, $sStart, $sEnd"'        + '\n'
+        pFile.write( sLine )
+        sLine = '    sBasename_job="resubmit_${iIndex}.job"'      + '\n'
+        pFile.write( sLine )
 
-    sLine = 'if (($iIndex == 0));then' + '\n'
-    pFile.write( sLine )
-    sLine = '    echo "All tasks are finished"'      + '\n'
-    pFile.write( sLine )
-    sLine = 'else'      + '\n'
-    pFile.write( sLine )
-    sLine = '    echo "Job $SLURM_JOBID at $(date) will be re-submitted with new indices:, $sStart, $sEnd"'      + '\n'
-    pFile.write( sLine )
-    sLine = '    sBasename_job="resubmit_${iIndex}.job"'      + '\n'
-    pFile.write( sLine )
-
-    sLine = '    sbatch $sDirectory_job/$sBasename_job'      + '\n'
-    pFile.write( sLine ) 
-    sLine = 'fi'      + '\n'
-    pFile.write( sLine ) 
+        sLine = '    sbatch $sDirectory_job/$sBasename_job'      + '\n'
+        pFile.write( sLine ) 
+        sLine = 'fi'      + '\n'
+        pFile.write( sLine ) 
     
     sLine = 'echo "Finished"'      + '\n'
     pFile.write( sLine ) 

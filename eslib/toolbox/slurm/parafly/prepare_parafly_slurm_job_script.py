@@ -1,38 +1,45 @@
 import os
-import subprocess
 
-def slurm_prepare_job_script_parafly(sDirectory_job, \
-        sBasename_job, \
+def prepare_parafly_slurm_job_script(sBasename_job, \
         sBasename_parafly, \
-        sJob_name, \
+        sDirectory_job, \
         iWalltime_in = None, \
         nNode_in = None, \
-        nTask_in=None, \
+        nThread_in=None, \
+        sJob_name_in =None, \
+            sPython_env_in =None,\
         sQueue_in=None):
-    if nNode_in is not None:
-        iNode = nNode_in            
-    else:
-        iNode = 1
-    if nTask_in is not None:
-        nTask = nTask_in            
-    else:
-        nTask = 40
-    if nNode_in is not None:
-        iNode = nNode_in            
-    else:
-        iNode = 1
-    if sQueue_in is not None:
-        sQueue = sQueue_in            
-    else:
-        sQueue = 'short'
     if iWalltime_in is not None:
         iWalltime = iWalltime_in            
     else:
         iWalltime = 2
+    if nNode_in is not None:
+        iNode = nNode_in            
+    else:
+        iNode = 1
+    if nThread_in is not None:
+        nThread = nThread_in            
+    else:
+        nThread = 40
    
-    sNode =  "{:0d}".format(iNode  )
-    sTask =   "{:0d}".format(nTask  )
+    if sJob_name_in is not None:
+        sJob_name = sJob_name_in            
+    else:
+        sJob_name = 'parafly'
+    if sPython_env_in is not None:
+        sPython_env = sPython_env_in            
+    else:
+        sPython_env = 'parafly'
+        
+    if sQueue_in is not None:
+        sQueue = sQueue_in            
+    else:
+        sQueue = 'short'
+        
     sWalltime ="{:0d}".format(iWalltime  )
+    sNode =  "{:0d}".format(iNode  )
+    sThread =   "{:0d}".format(nThread  )
+    
     os.chdir(sDirectory_job)
     
     ofs =  open(sBasename_job,"w")  #write mode 
@@ -41,8 +48,8 @@ def slurm_prepare_job_script_parafly(sDirectory_job, \
     sLine = '#SBATCH --account=e3sm' + '\n'
     ofs.write( sLine ) 
 
-    sLine = '#SBATCH --begin=now+1minutes' + '\n'
-    ofs.write( sLine ) 
+    #sLine = '#SBATCH --begin=now+1minutes' + '\n'
+    #ofs.write( sLine ) 
 
     sLine = '#SBATCH --cpus-per-task=1 ' + '\n'
     ofs.write( sLine ) 
@@ -60,7 +67,7 @@ def slurm_prepare_job_script_parafly(sDirectory_job, \
 
     sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'
     ofs.write( sLine ) 
-    sLine = '#SBATCH --ntasks=' + sTask + ' # total number of tasks' + '\n'
+    sLine = '#SBATCH --ntasks=' + sThread + ' # total number of tasks' + '\n'
     ofs.write( sLine ) 
     sLine = '#SBATCH --output=stdout_%j.out' + '\n'
     ofs.write( sLine ) 
@@ -68,7 +75,7 @@ def slurm_prepare_job_script_parafly(sDirectory_job, \
     sLine = '#SBATCH --partition=' + sQueue + '\n'  #can be improved here
     ofs.write( sLine ) 
 
-    sLine = '#SBATCH --time=' + sWalltime +':00:00      # total run time limit (HH:MM:SS)' + '\n'
+    sLine = '#SBATCH --time=' + sWalltime +':00:00   # total run time limit (HH:MM:SS)' + '\n'
     ofs.write( sLine ) 
 
     sLine = 'module purge' + '\n'
@@ -81,22 +88,17 @@ def slurm_prepare_job_script_parafly(sDirectory_job, \
     ofs.write( sLine ) 
     sLine = 'unset PYTHONHOME' + '\n'
     ofs.write( sLine ) 
-    sLine = 'conda activate mpienv' + '\n'
+    sLine = 'conda activate ' + sPython_env + '\n'
     ofs.write( sLine )   
-    sFilename_parafly = sBasename_parafly
 
-    sLine = 'ParaFly -c ' + sFilename_parafly + ' -CPU -failed_cmds rerun.txt' + '\n'
+    sLine = 'ParaFly -c ' + sBasename_parafly + ' -CPU ' + sThread + ' -failed_cmds rerun.txt' + '\n'
     ofs.write( sLine ) 
     
-    
-    
-
     sLine = 'echo " Job " ' + '${SLURM_JOBID}' + ' is launched' + '\n'
     ofs.write( sLine ) 
 
     sLine = 'conda deactivate' + '\n'
     ofs.write( sLine ) 
-    
     
     sLine = 'echo "Finished"'      + '\n'
     ofs.write( sLine ) 

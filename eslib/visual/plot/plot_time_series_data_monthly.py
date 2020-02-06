@@ -15,22 +15,26 @@ from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
 def plot_time_series_data_monthly(aTime, aData, \
-    sFilename_out, \
+    sFilename_out,\
+    iDPI_in = None ,\
     iFlag_trend = None,\
-    dMax_Y_in =None, 
-    dMin_Y_in = None, \
     iSize_X_in = None, \
     iSize_Y_in = None,  \
-    iDPI_in = None ,\
+    dMax_Y_in =None, \
+    dMin_Y_in = None, \
     sLabel_Y_in = None , \
     sLabel_legend_in = None,\
     sTitle_in = None):
 
-    
+    if iDPI_in is not None:        
+        iDPI = iDPI_in
+    else:       
+        iDPI = 300
     if iFlag_trend is not None:
         iFlag_trend = 1
     else:
         iFlag_trend = 0
+
     if iSize_X_in is not None:        
         iSize_X = iSize_X_in
     else:       
@@ -39,10 +43,7 @@ def plot_time_series_data_monthly(aTime, aData, \
         iSize_Y = iSize_Y_in
     else:       
         iSize_Y = 9
-    if iDPI_in is not None:        
-        iDPI = iDPI_in
-    else:       
-        iDPI = 300
+    
     if sLabel_Y_in is not None:        
         sLabel_Y = sLabel_Y_in
     else:        
@@ -56,26 +57,17 @@ def plot_time_series_data_monthly(aTime, aData, \
     else:        
         sTitle = ''
 
-    fig = plt.figure( dpi=iDPI )
-    fig.set_figwidth( iSize_X)   
-    fig.set_figheight( iSize_Y)
-              
-    ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )  
-
-    pYear = mdates.YearLocator(5)   # every year
-    pMonth = mdates.MonthLocator()  # every month
-    sYear_format = mdates.DateFormatter('%Y')
+    
 
     nstress = len(aTime)
     nan_index = np.where(aData == missing_value)
-    good_index = np.where(  ~np.isnan(aData))
     aData[nan_index] = np.nan
-
+    good_index = np.where(  ~np.isnan(aData))
+    
     if dMax_Y_in is not None:        
         dMax_Y = dMax_Y_in
     else:         
         dMax_Y = np.nanmax(aData) * 1.2 
-
     if dMin_Y_in is not None:        
         dMin_Y = dMin_Y_in
     else:
@@ -83,24 +75,31 @@ def plot_time_series_data_monthly(aTime, aData, \
     if (dMax_Y <= dMin_Y ):
         return
 
+    
+
+    fig = plt.figure( dpi=iDPI )
+    fig.set_figwidth( iSize_X)   
+    fig.set_figheight( iSize_Y)         
+    ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )  
+    pYear = mdates.YearLocator(5)   # every year
+    pMonth = mdates.MonthLocator()  # every month
+    sYear_format = mdates.DateFormatter('%Y')
     x1 = aTime    
     y1 = aData
-
+    ax.plot( x1, y1, \
+             color = 'red', linestyle = '--' ,\
+                  marker="+", markeredgecolor='blue' ,\
+                       label= sLabel_legend)
     #calculate linear regression
-    if iFlag_trend ==1:
+    if iFlag_trend ==1: 
         x_dummy = np.array( [i.timestamp() for i in x1 ] )        
         x_dummy = x_dummy[good_index]
         y_dummy = y1[good_index]
         coef = np.polyfit(x_dummy,y_dummy,1)
         poly1d_fn = np.poly1d(coef) 
-
-    ax.plot( x1, y1, \
-             color = 'red', linestyle = '--' , marker="+", markeredgecolor='blue' , label= sLabel_legend)
-
-    if iFlag_trend ==1: 
         mn=np.min(x_dummy)
         mx=np.max(x_dummy)
-        x2=np.linspace(mn,mx,500)
+        x2=[mn,mx]
         y2=poly1d_fn(x2)
         x2 = [datetime.fromtimestamp(i) for i in x2 ]  
         ax.plot(x2,y2, color = 'orange', linestyle = '-.',  linewidth=0.5)
@@ -114,7 +113,6 @@ def plot_time_series_data_monthly(aTime, aData, \
     ax.xaxis.set_minor_locator(pMonth)
     ax.xaxis.set_major_formatter(sYear_format)
     ax.tick_params(axis="x", labelsize=10) 
-    #better way?ax.yaxis.set_labelsize(13)
     ax.tick_params(axis="y", labelsize=10)
     
     ax.set_xmargin(0.05)
@@ -137,9 +135,7 @@ def plot_time_series_data_monthly(aTime, aData, \
     dMin_Y = dummy[1]
     dMax_Y = dummy[2]
     ax.set_ylim( dMin_Y, dMax_Y)
-    
     ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
-
     plt.savefig(sFilename_out, bbox_inches='tight')
                        
     plt.close('all')
