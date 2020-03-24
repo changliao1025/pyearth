@@ -7,7 +7,7 @@ def prepare_parafly_slurm_job_script(sBasename_job, \
         nNode_in = None, \
         nThread_in=None, \
         sJob_name_in =None, \
-            sPython_env_in =None,\
+        sPython_env_in =None,\
         sQueue_in=None):
     if iWalltime_in is not None:
         iWalltime = iWalltime_in            

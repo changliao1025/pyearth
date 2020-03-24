@@ -17,7 +17,9 @@ from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 def plot_time_series_data_monthly(aTime, aData, \
     sFilename_out,\
     iDPI_in = None ,\
-    iFlag_trend = None,\
+    iFlag_trend_in = None,\
+
+    iReverse_Y_in = None, \
     iSize_X_in = None, \
     iSize_Y_in = None,  \
     dMax_Y_in =None, \
@@ -30,10 +32,16 @@ def plot_time_series_data_monthly(aTime, aData, \
         iDPI = iDPI_in
     else:       
         iDPI = 300
-    if iFlag_trend is not None:
+    
+    if iFlag_trend_in is not None:
         iFlag_trend = 1
     else:
         iFlag_trend = 0
+        
+    if iReverse_Y_in is not None:
+        iReverse_Y = 1
+    else:
+        iReverse_Y = 0
 
     if iSize_X_in is not None:        
         iSize_X = iSize_X_in
@@ -131,10 +139,17 @@ def plot_time_series_data_monthly(aTime, aData, \
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
     dummy = calculate_ticks_space(y1, nstep_in =5)
     dSpace = dummy[0]
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
-    dMin_Y = dummy[1]
-    dMax_Y = dummy[2]
-    ax.set_ylim( dMin_Y, dMax_Y)
+    if(dSpace<= 0):
+        ax.invert_yaxis()
+
+    else:
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
+        dMin_Y = dummy[1]
+        dMax_Y = dummy[2]
+        if (iReverse_Y ==1):
+            ax.set_ylim( dMax_Y, dMin_Y )
+        else:
+            ax.set_ylim( dMin_Y, dMax_Y )
     ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
     plt.savefig(sFilename_out, bbox_inches='tight')
                        
