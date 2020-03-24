@@ -17,10 +17,10 @@ from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 def plot_time_series_data_monthly(aTime, aData, \
     sFilename_out,\
     iDPI_in = None,\
-    iFlag_trend_in = None,\
+    iFlag_trend_in = None, \
     iReverse_Y_in = None, \
     iSize_X_in = None, \
-    iSize_Y_in = None,  \
+    iSize_Y_in = None, \
     dMax_Y_in =None, \
     dMin_Y_in = None, \
     sLabel_Y_in = None, \
