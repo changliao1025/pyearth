@@ -17,7 +17,7 @@ def gdal_read_geotiff(sFilename_in):
         sys.exit("Try again!")
     else:
         # Check type of the variable 'pFile'
-        print("%s opened successfully" % sFilename_in)
+        #print("%s opened successfully" % sFilename_in)
         #type(pFile)
         # Projection
         pProjection = pFile.GetProjection()
@@ -26,9 +26,9 @@ def gdal_read_geotiff(sFilename_in):
 
         # Metadata for the pFile dataset
         pFile.GetMetadata()
-        print('~~~~~~~~~~~~~~')
-        print('Get image size')
-        print('~~~~~~~~~~~~~~')
+        #print('~~~~~~~~~~~~~~')
+        #print('Get image size')
+        #print('~~~~~~~~~~~~~~')
         ncolumn = pFile.RasterXSize
         nrow = pFile.RasterYSize
         nband = pFile.RasterCount
@@ -37,24 +37,24 @@ def gdal_read_geotiff(sFilename_in):
         #print("nrow: %i" % nrow)
         #print("nband: %i" % nband)
 
-        print('~~~~~~~~~~~~~~')
-        print('Get georeference information')
-        print('~~~~~~~~~~~~~~')
+        #print('~~~~~~~~~~~~~~')
+        #print('Get georeference information')
+        #print('~~~~~~~~~~~~~~')
         pGeotransform = pFile.GetGeoTransform()
         dX_origin = pGeotransform[0]
         dY_origin = pGeotransform[3]
         dPixelWidth = pGeotransform[1]
         pPixelHeight = pGeotransform[5]
 
-        print("origin x: %i" % dX_origin)
-        print("origin y: %i" % dY_origin)
-        print("width: %2.2f" % dPixelWidth)
-        print("height: %2.2f" % pPixelHeight)
+        #print("origin x: %i" % dX_origin)
+        #print("origin y: %i" % dY_origin)
+        #print("width: %2.2f" % dPixelWidth)
+        #print("height: %2.2f" % pPixelHeight)
 
         # Set pixel offset.....
-        print('~~~~~~~~~~~~~~')
-        print('Convert image to 2D array')
-        print('~~~~~~~~~~~~~~')
+        #print('~~~~~~~~~~~~~~')
+        #print('Convert image to 2D array')
+        #print('~~~~~~~~~~~~~~')
         
         pBand = pFile.GetRasterBand(1)
 
@@ -66,7 +66,7 @@ def gdal_read_geotiff(sFilename_in):
         # Compute statistics if needed
         if pBand.GetMinimum() is None or pBand.GetMaximum()is None:
             pBand.ComputeStatistics(0)
-            print("Statistics computed.")
+            #print("Statistics computed.")
 
         # Fetch metadata for the pBand
         
@@ -74,9 +74,9 @@ def gdal_read_geotiff(sFilename_in):
         # Print only selected metadata:
         
         dMissing_value = pBand.GetNoDataValue()
-        print ("[ NO DATA VALUE ] = ", dMissing_value) # none
-        print ("[ MIN ] = ", pBand.GetMinimum())
-        print ("[ MAX ] = ", pBand.GetMaximum())
+        #print ("[ NO DATA VALUE ] = ", dMissing_value) # none
+        #print ("[ MIN ] = ", pBand.GetMinimum())
+        #print ("[ MAX ] = ", pBand.GetMaximum())
         aData_image = pBand.ReadAsArray(0, 0, ncolumn, nrow)
         sFilename_image = sFilename_in
         #print(type(aData_image))
