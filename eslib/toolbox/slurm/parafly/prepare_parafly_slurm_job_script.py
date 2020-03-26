@@ -29,7 +29,7 @@ def prepare_parafly_slurm_job_script(sBasename_job, \
     if sPython_env_in is not None:
         sPython_env = sPython_env_in            
     else:
-        sPython_env = 'parafly'
+        sPython_env = 'all'
         
     if sQueue_in is not None:
         sQueue = sQueue_in            
@@ -74,7 +74,6 @@ def prepare_parafly_slurm_job_script(sBasename_job, \
 
     sLine = '#SBATCH --partition=' + sQueue + '\n'  #can be improved here
     ofs.write( sLine ) 
-
     sLine = '#SBATCH --time=' + sWalltime +':00:00   # total run time limit (HH:MM:SS)' + '\n'
     ofs.write( sLine ) 
 

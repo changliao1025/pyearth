@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/qfs/people/liao313/.conda/envs/mpienv/bin/python"
+    "python.pythonPath": "/qfs/people/liao313/.conda/envs/mpienv/bin/python",
+    "editor.renderWhitespace": "all"
 }
