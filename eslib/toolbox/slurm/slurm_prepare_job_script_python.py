@@ -1,25 +1,24 @@
-import os
-
+import os, sys
+sSystem_paths = os.environ['PATH'].split(os.pathsep)
+sys.path.extend(sSystem_paths)
+from eslib.system.define_global_variables import *
 #normal job, no checkpoint 
-def slurm_prepare_job_script_python(iStart, iEnd, \
-        sBasename_checkpoint, \
+def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         sBasename_job, \
-        sBasename_python,\
         sDirectory_job, \
-        sDirectory_python,\
-        
-        sJob_name, \
+        sFilename_python,\
+            iWalltime_in = None, \
         nNode_in = None, \
-        nTask_in=None, \
-        sQueue_in=None):
+        nThread_in = None, \
+        sQueue_in = None):
     if nNode_in is not None:
         iNode = nNode_in            
     else:
         iNode = 1
-    if nTask_in is not None:
-        nTask = nTask_in            
+    if nThread_in is not None:
+        nThread = nThread_in            
     else:
-        nTask = 40
+        nThread = 24
     if nNode_in is not None:
         iNode = nNode_in            
     else:
@@ -32,104 +31,88 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
         iWalltime = iWalltime_in            
     else:
         iWalltime = 2
-    sStart = "{:0d}".format(iStart  )
-    sEnd =  "{:0d}".format(iEnd  )
+  
+    
+
+    nTask = iIndex_end - iIndex_start + 1
+    nChunkPerThread = nTask // nThread 
+
     sNode =  "{:0d}".format(iNode  )
     sTask =   "{:0d}".format(nTask  )
     sWalltime ="{:0d}".format(iWalltime  )
     os.chdir(sDirectory_job)
-    
-    pFile =  open(sBasename_job,"w")  #write mode 
-    sLine = '#!/bin/bash' + '\n'
-    pFile.write( sLine ) 
-    sLine = '#SBATCH --account=e3sm' + '\n'
-    pFile.write( sLine ) 
 
-    sLine = '#SBATCH --begin=now+1minutes' + '\n'
-    pFile.write( sLine ) 
+    for iRank in range(1, nThread+1):
+        if iRank == 1:
+            iStart = (nThread-1) * nChunkPerThread + iIndex_start
+            iEnd = iIndex_end      
+        else:
+            iStart = (iRank-2) * nChunkPerThread + iIndex_start
+            iEnd = (iRank-1) * nChunkPerThread + iIndex_start - 1
+        sStart = "{:0d}".format(iStart  )
+        sEnd =  "{:0d}".format(iEnd  )
 
-    sLine = '#SBATCH --cpus-per-task=1 ' + '\n'
-    pFile.write( sLine ) 
-
-    sLine = '#SBATCH --dependency=singleton ' + '\n'
-    pFile.write( sLine )
-    sLine = '#SBATCH --error=stderr_%j.err' + '\n'
-    pFile.write( sLine ) 
-    sLine = '#SBATCH --job-name=' + sJob_name + '  # create a name for your job' + '\n'
-    pFile.write( sLine ) 
-    sLine = '#SBATCH --mail-type=ALL' + '\n'
-    pFile.write( sLine ) 
-    sLine = '#SBATCH --mail-user=chang.liao@pnnl.gov' + '\n'
-    pFile.write( sLine ) 
-
-    sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'
-    pFile.write( sLine ) 
-    sLine = '#SBATCH --ntasks=' + sTask + ' # total number of tasks' + '\n'
-    pFile.write( sLine ) 
-    sLine = '#SBATCH --output=stdout_%j.out' + '\n'
-    pFile.write( sLine ) 
-
-    sLine = '#SBATCH --partition=' + sQueue + '\n'  #can be improved here
-    pFile.write( sLine ) 
-
-    sLine = '#SBATCH --time=' + sWalltime +':00:00      # total run time limit (HH:MM:SS)' + '\n'
-    pFile.write( sLine ) 
-
-    sLine = 'module purge' + '\n'
-    pFile.write( sLine ) 
-    sLine = 'module load anaconda3/2019.03' + '\n'
-    pFile.write( sLine ) 
-    sLine = 'source /share/apps/anaconda3/2019.03/etc/profile.d/conda.sh' + '\n'
-    pFile.write( sLine ) 
-    sLine = 'unset PYTHONHOME' + '\n'
-    pFile.write( sLine ) 
-    sLine = 'conda activate mpienv' + '\n'
-    pFile.write( sLine ) 
-    
-    
-    
-    sLine = 'sDirectory_job=' + sDirectory_job + '\n'
-    pFile.write( sLine ) 
-    sLine = 'sDirectory_python=' + sDirectory_python + '\n'
-    pFile.write( sLine ) 
-    sLine = 'sBasename_python=' + sBasename_python + '\n'
-    pFile.write( sLine ) 
-    sLine = 'sFilename_python=' + '$sDirectory_python' + "/" + '$sBasename_python' + '\n'
-    pFile.write( sLine ) 
-
-    sLine = 'echo " Job " ' + '${SLURM_JOBID}' + ' is launched' + '\n'
-    pFile.write( sLine ) 
-
-    sLine = 'conda deactivate' + '\n'
-    pFile.write( sLine ) 
-    
-    if iFlag_resubmit ==1:
-        #now prepare the resubmit part
-        sLine = 'iIndex="$(sed -n ' + ' 1p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
+         
+        sFilename_job = sDirectory_job + slash + sBasename_job + "{:03d}".format(iRank)
+        pFile =  open(sFilename_job,"w")  #write mode 
+        sLine = '#!/bin/bash' + '\n'
         pFile.write( sLine ) 
-        sLine = 'iIndex="$(sed -n ' + ' 2p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
-        pFile.write( sLine ) 
-        sLine = 'iIndex="$(sed -n ' + ' 3p ' + sBasename_checkpoint + ' | xargs)"' + '\n'
+        sLine = '#SBATCH --account=e3sm' + '\n'
         pFile.write( sLine ) 
 
-        sLine = 'if (($iIndex == 0));then' + '\n'
-        pFile.write( sLine )
-        sLine = '    echo "All tasks are finished"'      + '\n'
-        pFile.write( sLine )
-        sLine = 'else'      + '\n'
-        pFile.write( sLine )
-        sLine = '    echo "Job $SLURM_JOBID at $(date) will be re-submitted with new indices:, $sStart, $sEnd"'        + '\n'
-        pFile.write( sLine )
-        sLine = '    sBasename_job="resubmit_${iIndex}.job"'      + '\n'
-        pFile.write( sLine )
+        sLine = '#SBATCH --begin=now+1minutes' + '\n'
+        #pFile.write( sLine ) 
 
-        sLine = '    sbatch $sDirectory_job/$sBasename_job'      + '\n'
+        sLine = '#SBATCH --cpus-per-task=1 ' + '\n'
         pFile.write( sLine ) 
-        sLine = 'fi'      + '\n'
+
+        sLine = '#SBATCH --dependency=singleton ' + '\n'
+        pFile.write( sLine )
+        sLine = '#SBATCH --error=stderr_%j.err' + '\n'
         pFile.write( sLine ) 
-    
-    sLine = 'echo "Finished"'      + '\n'
-    pFile.write( sLine ) 
-    pFile.close() 
+        sLine = '#SBATCH --job-name=' + sBasename_job + '  # create a name for your job' + '\n'
+        pFile.write( sLine ) 
+        sLine = '#SBATCH --mail-type=ALL' + '\n'
+        pFile.write( sLine ) 
+        sLine = '#SBATCH --mail-user=chang.liao@pnnl.gov' + '\n'
+        pFile.write( sLine ) 
+
+        sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'
+        pFile.write( sLine ) 
+        sLine = '#SBATCH --ntasks=1'  + ' # total number of tasks' + '\n'
+        pFile.write( sLine ) 
+        sLine = '#SBATCH --output=stdout_%j.out' + '\n'
+        pFile.write( sLine ) 
+
+        sLine = '#SBATCH --partition=' + sQueue + '\n'  #can be improved here
+        pFile.write( sLine ) 
+
+        sLine = '#SBATCH --time=' + sWalltime +':00:00      # total run time limit (HH:MM:SS)' + '\n'
+        pFile.write( sLine ) 
+
+        sLine = 'module purge' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'module load anaconda3/2019.03' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'source /share/apps/anaconda3/2019.03/etc/profile.d/conda.sh' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'unset PYTHONHOME' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'conda activate gdalenv' + '\n'
+        pFile.write( sLine ) 
+       
+        sLine = 'python ' + sFilename_python \
+            + ' --iIndex_start ' + sStart \
+            + ' --iIndex_end '  + sEnd + '\n'
+        pFile.write( sLine ) 
+
+        sLine = 'echo " Job " ' + '${SLURM_JOBID}' + ' is launched' + '\n'
+        pFile.write( sLine ) 
+
+        sLine = 'conda deactivate' + '\n'
+        pFile.write( sLine ) 
+        sLine = 'echo "Finished"'      + '\n'
+        pFile.write( sLine ) 
+        pFile.close() 
     
     return
