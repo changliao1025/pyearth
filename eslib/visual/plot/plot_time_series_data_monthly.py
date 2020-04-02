@@ -23,6 +23,7 @@ def plot_time_series_data_monthly(aTime, aData, \
     iSize_Y_in = None, \
     dMax_Y_in =None, \
     dMin_Y_in = None, \
+        sMarker_in =None,\
     sLabel_Y_in = None, \
     sLabel_legend_in = None,\
     sTitle_in = None):
@@ -64,7 +65,10 @@ def plot_time_series_data_monthly(aTime, aData, \
     else:        
         sTitle = ''
 
-    
+    if sMarker_in is not None:        
+        sMarker = sMarker_in
+    else:        
+        sMarker = '+'
 
     nstress = len(aTime)
     nan_index = np.where(aData == missing_value)
@@ -95,7 +99,7 @@ def plot_time_series_data_monthly(aTime, aData, \
     y1 = aData
     ax.plot( x1, y1, \
              color = 'red', linestyle = '--' ,\
-                  marker="+", markeredgecolor='blue' ,\
+                  marker=sMarker, markeredgecolor='blue' ,\
                        label= sLabel_legend)
     #calculate linear regression
     if iFlag_trend ==1: 

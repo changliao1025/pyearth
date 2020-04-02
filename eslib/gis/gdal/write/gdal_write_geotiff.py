@@ -30,12 +30,12 @@ def gdal_write_geotiff(sFilename_in, aData_in,\
     pProjection= pSpatialRef_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)
 
-    pBand = pDateset.GetRasterBand(1)
+    pBand = pDataset.GetRasterBand(1)
     pBand.WriteArray(aData_in)
     pBand.SetNoDataValue(dMissing_value_in)
 
-    pGeotransform_out = pDateset.GetGeoTransform()
-    pProjection_out = pDateset.GetProjection()
+    pGeotransform_out = pDataset.GetGeoTransform()
+    pProjection_out = pDataset.GetProjection()
 
     pDataset.FlushCache()  # Write to disk.
     pDriver = None

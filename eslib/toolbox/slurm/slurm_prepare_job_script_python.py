@@ -52,8 +52,7 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         sStart = "{:0d}".format(iStart  )
         sEnd =  "{:0d}".format(iEnd  )
 
-         
-        sFilename_job = sDirectory_job + slash + sBasename_job + "{:03d}".format(iRank)
+        sFilename_job = sDirectory_job + slash + sBasename_job + "{:03d}".format(iRank) + '.job'
         pFile =  open(sFilename_job,"w")  #write mode 
         sLine = '#!/bin/bash' + '\n'
         pFile.write( sLine ) 
@@ -67,10 +66,11 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         pFile.write( sLine ) 
 
         sLine = '#SBATCH --dependency=singleton ' + '\n'
-        pFile.write( sLine )
+        #pFile.write( sLine )
         sLine = '#SBATCH --error=stderr_%j.err' + '\n'
         pFile.write( sLine ) 
-        sLine = '#SBATCH --job-name=' + sBasename_job + '  # create a name for your job' + '\n'
+        sLine = '#SBATCH --job-name=' \
+        + sBasename_job + "{:03d}".format(iRank) + '  # create a name for your job' + '\n'
         pFile.write( sLine ) 
         sLine = '#SBATCH --mail-type=ALL' + '\n'
         pFile.write( sLine ) 

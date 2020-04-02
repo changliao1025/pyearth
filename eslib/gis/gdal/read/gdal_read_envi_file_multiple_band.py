@@ -1,6 +1,7 @@
 import sys
+import numpy as np
 from osgeo import gdal, osr,  gdalconst
-def gdal_read_envi_file_multiple(sFilename_in):
+def gdal_read_envi_file_multiple_band(sFilename_in):
     pDriver = gdal.GetDriverByName('ENVI')
     pDriver.Register()
 
