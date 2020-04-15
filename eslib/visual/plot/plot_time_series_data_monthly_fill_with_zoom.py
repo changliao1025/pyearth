@@ -14,7 +14,7 @@ from eslib.system.define_global_variables import *
 from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
-def plot_time_series_data_monthly_fill(aTime, aData, \
+def plot_time_series_data_monthly_fill_with_zoom(aTime, aData, \
     sFilename_out,\
     iDPI_in = None,\
     iFlag_trend_in = None, \
@@ -91,7 +91,7 @@ def plot_time_series_data_monthly_fill(aTime, aData, \
     fig = plt.figure( dpi=iDPI )
     fig.set_figwidth( iSize_X)   
     fig.set_figheight( iSize_Y)         
-    ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )  
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8] )  
     pYear = mdates.YearLocator(5)   # every year
     pMonth = mdates.MonthLocator()  # every month
     sYear_format = mdates.DateFormatter('%Y')
@@ -99,7 +99,7 @@ def plot_time_series_data_monthly_fill(aTime, aData, \
     y1 = (aData[1])[0]
     y_top = (aData[0])[0]
     y_bot = (aData[2])[0]
-    ax.fill_between(x1, y_top, y_bot,  facecolor='cornflowerblue')
+    ax.fill_between(x1, y_top, y_bot,  facecolor='tomato')
     ax.plot( x1, y1, \
              color = 'red', linestyle = '--' ,\
                   marker=sMarker, markeredgecolor='blue' ,\
@@ -157,7 +157,32 @@ def plot_time_series_data_monthly_fill(aTime, aData, \
             ax.set_ylim( dMax_Y, dMin_Y )
         else:
             ax.set_ylim( dMin_Y, dMax_Y )
-    ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+    ax.legend(bbox_to_anchor=(0.0,1.0), loc="upper left",fontsize=12)
+
+    zoom_left = 0.55
+    zoom_right = 0.85
+    zoom_bot = 0.7
+    zoom_top = 0.85
+
+    #plot zoom part
+    ax_zoom = fig.add_axes([zoom_left, zoom_bot, zoom_right-zoom_left, zoom_top-zoom_bot] )  
+    ax_zoom.plot( x1, y1, \
+             color = 'red', linestyle = '--' ,\
+                  marker=sMarker, markeredgecolor='blue' ,\
+                       label= sLabel_legend)
+    x_min = np.datetime64(aTime[int(nstress*0.8)  ], 'Y')
+    x_max = x_min + np.timedelta64(2, 'Y')
+    ax_zoom.set_xlim(x_min, x_max)
+    y_mean = np.mean(y1)
+    ax_zoom.set_ylim(y_mean*0.99, y_mean* 1.01)
+    pYear2 = mdates.YearLocator(1)
+    pMonth2 = mdates.MonthLocator()
+    ax_zoom.xaxis.set_major_locator(pYear2)        
+    ax_zoom.xaxis.set_minor_locator(pMonth2)
+    #draw lines connecting zoom with parent
+
+
+
     plt.savefig(sFilename_out, bbox_inches='tight')
                        
     plt.close('all')
