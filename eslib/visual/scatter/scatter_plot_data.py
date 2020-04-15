@@ -1,9 +1,12 @@
 import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-from mpl_toolkits.axes_grid1 import AxesGrid
+import seaborn as sns
+import pandas as pd
+from scipy.stats import gaussian_kde
+plt.style.use('seaborn')
+
 
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
@@ -76,10 +79,28 @@ def scatter_plot_data(aData_x, aData_y,\
     y_max = np.nanmax(aData_y) * 1.2 
 
         
-    x1 = aData_x
-    y1 = aData_y
-    ax_scatter.scatter( x1, y1, \
-             color = 'red', marker="+", label= sLabel_legend)
+    x = aData_x
+    y = aData_y
+    #xy = np.vstack([x,y])
+    #z = gaussian_kde(xy)(xy)
+    #ax_scatter.scatter( x, y, \
+    #         color = 'red', marker="+", label= sLabel_legend)
+#
+    #ax_scatter.scatter(x, y, c=z, s=100, edgecolor='')
+    #nbins = 20
+
+    #ax_scatter.hexbin(x, y, gridsize=nbins, cmap=plt.cm.BuGn_r)
+    # Basic 2D density plot
+    df=pd.DataFrame({'x': x, 'y': y })
+   
+    #sns.jointplot(x=df.x, y=df.y, kind='kde' )
+
+    sns.kdeplot(df.x, df.y, cmap="Reds", shade=True, ax = ax_scatter)
+    #plt.title('Overplotting? Try 2D density graph', loc='left')
+
+   
+
+
     ax_scatter.axis('on')          
     ax_scatter.grid(which='major', color='grey', linestyle='--', axis='y') 
     #ax_scatter.grid(which='minor', color='#CCCCCC', linestyle=':') #only y axis grid is 
@@ -103,29 +124,31 @@ def scatter_plot_data(aData_x, aData_y,\
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else: 
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
-    dummy = calculate_ticks_space(y1)
+    dummy = calculate_ticks_space(y)
     dSpace = dummy[0]
-    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
+    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(10))
     y_max = dSpace * 6
-    ax_scatter.set_ylim( 0, 90)
-    ax_scatter.set_xlim( 0, max(x1) )
+    ax_scatter.set_ylim( 0, 75)
+    ax_scatter.set_xlim( 0, max(x) )
 
-    dRatio = 90/(max(x1)-0.0)
-    dRatio = (float(iSize_y)/iSize_x) / ( (y_max-0 )/ ( max(x1)-0.0 ) )
+    dRatio = 75/(max(x)-0.0)
+    dRatio = (float(iSize_y)/iSize_x) / ( (75-0 )/ ( max(x)-0.0 ) )
     ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
     
-    ax_scatter.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+    #ax_scatter.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
 
     # now determine nice limits by hand:
-    #binwidth = 0.25
-    #lim = np.ceil(np.abs([x, y]).max() / binwidth) * binwidth
+    
+    #binwidthx = 0.01
+    #binwidthy = 1
+    #limx = np.ceil(np.abs([x]).max() / binwidthx) * binwidthx
+    #limy = np.ceil(np.abs([y]).max() / binwidthy) * binwidthy
     #ax_scatter.set_xlim((-lim, lim))
     #ax_scatter.set_ylim((-lim, lim))
-#
-    #bins = np.arange(-lim, lim + binwidth, binwidth)
-    #ax_histx.hist(x, bins=bins)
-    #ax_histy.hist(y, bins=bins, orientation='horizontal')
-#
+    #binsx = np.arange(0, limx + binwidthx, binwidthx)
+    #binsy = np.arange(0, limy + binwidthy, binwidthy)
+    #ax_histx.hist(x, bins=binsx)
+    #ax_histy.hist(y, bins=binsy, orientation='horizontal')
     #ax_histx.set_xlim(ax_scatter.get_xlim())
     #ax_histy.set_ylim(ax_scatter.get_ylim())
 
