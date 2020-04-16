@@ -2,24 +2,31 @@ import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import seaborn as sns
-import pandas as pd
+from matplotlib.ticker import MaxNLocator
 from scipy.stats import gaussian_kde
+#import seaborn as sns
+#import pandas as pd
+
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 
-def scatter_plot_data_density(aData_x, aData_y,\
+from eslib.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
+def scatter_plot_data_density(aData_x, \
+    aData_y,\
     sFilename_out, \
     iSize_x_in = None, \
-    iSize_y_in = None,  \
-    iDPI_in = None ,\
-        dSpace_x_in = None,\
-            dSpace_y_in = None,\
-    sLabel_x_in =None,\
-    sLabel_y_in = None , \
-    sLabel_legend_in = None,\
+    iSize_y_in = None, \
+    iDPI_in = None, \
+    dMin_x_in = None, \
+    dMax_x_in = None, \
+    dMin_y_in = None, \
+    dMax_y_in = None, \
+    dSpace_x_in = None, \
+    dSpace_y_in = None, \
+    sLabel_x_in = None, \
+    sLabel_y_in = None, \
+    sLabel_legend_in = None, \
     sTitle_in = None):
 
     if iSize_x_in is not None:        
@@ -34,6 +41,16 @@ def scatter_plot_data_density(aData_x, aData_y,\
         iDPI = iDPI_in
     else:       
         iDPI = 300
+
+    if dSpace_x_in is not None:        
+        dSpace_x = dSpace_x_in
+    else:       
+        dSpace_x = 1
+    if dSpace_y_in is not None:        
+        dSpace_y = dSpace_y_in
+    else:       
+        dSpace_y = 1
+
     if sLabel_x_in is not None:        
         sLabel_X = sLabel_x_in
     else:        
@@ -56,12 +73,12 @@ def scatter_plot_data_density(aData_x, aData_y,\
     fig.set_figwidth( iSize_x )   
     fig.set_figheight( iSize_y )
 
-    left, width = 0.1, 0.65
-    bottom, height = 0.1, 0.65
+    left, width = 0.1, 0.75
+    bottom, height = 0.1, 0.75
     spacing = 0.005
     rect_scatter = [left, bottom, width, height]
-    rect_histx = [left, bottom + height + spacing, width, 0.2]
-    rect_histy = [left + width + spacing, bottom, 0.2, height]
+    rect_histx = [left, bottom + height + spacing, width, 0.15]
+    rect_histy = [left + width + spacing, bottom, 0.15, height]
               
     #ax_scatter = fig.add_axes([0.1, 0.5, 0.8, 0.4] )  
     ax_scatter = plt.axes(rect_scatter)
@@ -72,19 +89,30 @@ def scatter_plot_data_density(aData_x, aData_y,\
     ax_histy.tick_params(direction='in', labelleft=False)
 
     nPoint = len(aData_x)
-    y_min = np.nanmin(aData_y) * 0.8#if it has negative value, change here   
-    y_max = np.nanmax(aData_y) * 1.2 
+    x_min = np.nanmin(aData_x) 
+    x_max = np.nanmax(aData_x) 
+    y_min = np.nanmin(aData_y) 
+    y_max = np.nanmax(aData_y)  
         
     x = aData_x
     y = aData_y
     
-    df=pd.DataFrame({'x': x, 'y': y })
+    #df=pd.DataFrame({'x': x, 'y': y })
    
-    sns.kdeplot(df.x, df.y, cmap="Reds", shade=True, ax = ax_scatter)
+    #sns.kdeplot(df.x, df.y, cmap="Reds", shade=True, ax = ax_scatter)
+    #, shade=False, vertical=False, kernel="gau",
+    bw="scott"
+    gridsize=100
+    cut=3
+    clip=None
+    if clip is None:
+        clip = [(-np.inf, np.inf), (-np.inf, np.inf)]
+    elif np.ndim(clip) == 1:
+        clip = [clip, clip]
+    xx, yy, z = _scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
+    cmap = plt.get_cmap('BuPu')
+    cset = ax_scatter.contourf(xx, yy, z,cmap=cmap)
     
-    ax_scatter.axis('on')          
-    ax_scatter.grid(which='major', color='grey', linestyle='--', axis='y') 
-       
     dRatio = 1.0
     ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
     
@@ -99,37 +127,100 @@ def scatter_plot_data_density(aData_x, aData_y,\
     ax_scatter.set_ylabel(sLabel_Y,fontsize=12)
     ax_scatter.set_title( sTitle, loc='center', fontsize=15)
     # round to nearest years...
-    
+    if x_max < 1000 and x_max > 0.001:
+        ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
+    else: 
+        ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
     if y_max < 1000 and y_max > 0.001:
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else: 
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
-    
-    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
-    y_max = dSpace * 6
-    ax_scatter.set_ylim( 0, 75)
-    ax_scatter.set_xlim( 0, max(x) )
 
-    dRatio = 75/(max(x)-0.0)
-    dRatio = (float(iSize_y)/iSize_x) / ( (75-0 )/ ( max(x)-0.0 ) )
+    ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
+    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
+    
+    ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(prune='both', nbins=4))
+    
+    ax_scatter.tick_params(axis='y', pad=8) 
+    #ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(nbins = 5, prune='lower' ))
+    if dMin_x_in is not None:        
+        dMin_x = dMin_x_in
+    else:       
+        dMin_x = x_min
+    if dMax_x_in is not None:        
+        dMax_x = dMax_x_in
+    else:       
+        dMax_x = x_max
+
+    if dMin_y_in is not None:        
+        dMin_y = dMin_y_in
+    else:       
+        dMin_y = y_min
+    if dMax_y_in is not None:        
+        dMax_y = dMax_y_in
+    else:       
+        dMax_y = y_max
+    ax_scatter.set_xlim( dMin_x, dMax_x )
+    ax_scatter.set_ylim( dMin_y, dMax_y)
+    
+
+    dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
     ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
+    ax_scatter.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+    ax_scatter.tick_params(which='both', # Options for both major and minor ticks
+                top='off', # turn off top ticks
+                left='off', # turn off left ticks
+                right='off',  # turn off right ticks
+                bottom='off') # turn off bottom ticks
+    #ax_histx.set_facecolor('aliceblue')
+    density = gaussian_kde(x)
+    xx = np.linspace(dMin_x, dMax_x,1000)
+    yy = density(xx)
+    ax_histx.plot(xx,yy, color='navy')
+    ax_histx.fill_between(xx, yy, 0, linewidth=3,  color = 'lightblue')
     
-    #ax_scatter.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+    ax_histx.set_xlim( dMin_x, dMax_x )
+    ax_histx.set_ylim( 0, max(yy)*1.1 )
+    ax_histx.axis('on')  
+    #ax_histx.grid(which='major', color='grey', linestyle='-', axis='x')
+    ax_histx.spines['right'].set_visible(False)
+    ax_histx.spines['top'].set_visible(False)
+    ax_histx.spines['bottom'].set_visible(False)
+    ax_histx.spines['left'].set_visible(False)
+    ax_histx.tick_params(which='both', # Options for both major and minor ticks
+                top='off', # turn off top ticks
+                left='off', # turn off left ticks
+                right='off',  # turn off right ticks
+                bottom='off') # turn off bottom ticks
+    ax_histx.axes.get_xaxis().set_visible(False)
+    ax_histx.axes.get_yaxis().set_visible(False)
 
-    # now determine nice limits by hand:
+
+    #y margin
+    #ax_histy.set_facecolor('aliceblue')
+    density = gaussian_kde(y)
+    xx = np.linspace(dMin_y, dMax_y,1000)
+    yy = density(xx)
+    xx, yy = yy, xx
+    ax_histy.plot(xx,yy, color='navy')
+    ax_histy.fill_betweenx(yy, 0, xx, linewidth=3,  color = 'lightblue')
     
-    #binwidthx = 0.01
-    #binwidthy = 1
-    #limx = np.ceil(np.abs([x]).max() / binwidthx) * binwidthx
-    #limy = np.ceil(np.abs([y]).max() / binwidthy) * binwidthy
-    #ax_scatter.set_xlim((-lim, lim))
-    #ax_scatter.set_ylim((-lim, lim))
-    #binsx = np.arange(0, limx + binwidthx, binwidthx)
-    #binsy = np.arange(0, limy + binwidthy, binwidthy)
-    #ax_histx.hist(x, bins=binsx)
-    #ax_histy.hist(y, bins=binsy, orientation='horizontal')
-    #ax_histx.set_xlim(ax_scatter.get_xlim())
-    #ax_histy.set_ylim(ax_scatter.get_ylim())
+    ax_histy.set_xlim(0, auto=None)
+    ax_histy.set_ylim(0, dMax_y)
+    ax_histy.axis('on')   
+    #ax_histy.grid(which='major', color='grey', linestyle='-', axis='y')
+    ax_histy.spines['right'].set_visible(False)
+    ax_histy.spines['top'].set_visible(False)
+    ax_histy.spines['bottom'].set_visible(False)
+    ax_histy.spines['left'].set_visible(False)
+    ax_histy.axes.get_xaxis().set_visible(False)
+    ax_histy.axes.get_yaxis().set_visible(False)
+    ax_histy.tick_params(which='both', # Options for both major and minor ticks
+                top='off', # turn off top ticks
+                left='off', # turn off left ticks
+                right='off',  # turn off right ticks
+                bottom='off') # turn off bottom ticks
+    
 
     plt.savefig(sFilename_out, bbox_inches='tight')
                        
