@@ -6,6 +6,11 @@ def create_diverge_rgb_color_hex(ncolor):
         if ncolor == 3:
             pass
         else:
+            if ncolor == 4:
+                colors_hex = [  '#d7191c',\
+                                '#fdae61',\
+                                '#abdda4',\
+                                '#2b83ba']
             if ncolor == 10:
                 colors_hex = [  '#9e0142', \
                                 '#d53e4f', \

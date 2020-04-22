@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
+import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
 #import seaborn as sns
 #import pandas as pd
@@ -97,10 +98,7 @@ def scatter_plot_data_density(aData_x, \
     x = aData_x
     y = aData_y
     
-    #df=pd.DataFrame({'x': x, 'y': y })
-   
-    #sns.kdeplot(df.x, df.y, cmap="Reds", shade=True, ax = ax_scatter)
-    #, shade=False, vertical=False, kernel="gau",
+    
     bw="scott"
     gridsize=100
     cut=3
@@ -136,9 +134,9 @@ def scatter_plot_data_density(aData_x, \
     else: 
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
 
-    ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
-    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
-    
+    #ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
+    #ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
+    ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
     ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(prune='both', nbins=4))
     
     ax_scatter.tick_params(axis='y', pad=8) 
@@ -166,7 +164,21 @@ def scatter_plot_data_density(aData_x, \
 
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
     ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
-    ax_scatter.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+    #ax_scatter.legend(cset, bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+
+    handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
+
+    # create the corresponding number of labels (= the text you want to     display)
+    labels = []
+    labels.append(sLabel_legend)
+    # create the legend, supressing the blank space of the empty line symbol    and the
+    # padding between symbol and label by setting handlelenght and  handletextpad
+    ax_scatter.legend(handles, labels, loc="upper right", fontsize=12, 
+          fancybox=True, framealpha=0.7, 
+          handlelength=0, handletextpad=0)
+
+
+
     ax_scatter.tick_params(which='both', # Options for both major and minor ticks
                 top='off', # turn off top ticks
                 left='off', # turn off left ticks
@@ -180,9 +192,11 @@ def scatter_plot_data_density(aData_x, \
     ax_histx.fill_between(xx, yy, 0, linewidth=3,  color = 'lightblue')
     
     ax_histx.set_xlim( dMin_x, dMax_x )
-    ax_histx.set_ylim( 0, max(yy)*1.1 )
+    ax_histx.set_ylim( 0, auto=None )
+    
     ax_histx.axis('on')  
-    #ax_histx.grid(which='major', color='grey', linestyle='-', axis='x')
+    ax_histx.grid(which='major', color='white', linestyle='-', axis='x')
+    ax_histx.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x/2))
     ax_histx.spines['right'].set_visible(False)
     ax_histx.spines['top'].set_visible(False)
     ax_histx.spines['bottom'].set_visible(False)
@@ -192,9 +206,9 @@ def scatter_plot_data_density(aData_x, \
                 left='off', # turn off left ticks
                 right='off',  # turn off right ticks
                 bottom='off') # turn off bottom ticks
-    ax_histx.axes.get_xaxis().set_visible(False)
+    #ax_histx.axes.get_xaxis().set_visible(False)
     ax_histx.axes.get_yaxis().set_visible(False)
-
+    ax_histx.tick_params(axis='x', colors='white')
 
     #y margin
     #ax_histy.set_facecolor('aliceblue')
@@ -207,14 +221,19 @@ def scatter_plot_data_density(aData_x, \
     
     ax_histy.set_xlim(0, auto=None)
     ax_histy.set_ylim(0, dMax_y)
+    
     ax_histy.axis('on')   
-    #ax_histy.grid(which='major', color='grey', linestyle='-', axis='y')
+    ax_histy.grid(which='major', color='white', linestyle='-', axis='y')
+    ax_histy.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y/2))
     ax_histy.spines['right'].set_visible(False)
     ax_histy.spines['top'].set_visible(False)
     ax_histy.spines['bottom'].set_visible(False)
     ax_histy.spines['left'].set_visible(False)
     ax_histy.axes.get_xaxis().set_visible(False)
-    ax_histy.axes.get_yaxis().set_visible(False)
+    #ax_histy.axes.get_yaxis().set_visible(False)
+    
+    ax_histy.tick_params(axis='y', colors='white')
+    
     ax_histy.tick_params(which='both', # Options for both major and minor ticks
                 top='off', # turn off top ticks
                 left='off', # turn off left ticks
