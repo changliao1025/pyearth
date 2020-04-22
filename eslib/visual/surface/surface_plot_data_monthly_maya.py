@@ -10,9 +10,7 @@ sys.path.extend(sSystem_paths)
 from eslib.system.define_global_variables import *
 from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def f(x, y):
-    sin, cos = np.sin, np.cos
-    return sin(x + y) + sin(2 * x - y) + cos(3 * x + 4 * y)
+
 def surface_plot_data_monthly_maya(    aGrid_x, \
     aGrid_y, \
         aData, \
@@ -113,13 +111,9 @@ def surface_plot_data_monthly_maya(    aGrid_x, \
     if (dMax_z <= dMin_z ):
         return
 
-    
-    
-        
 
-    x, y = np.mgrid[-7.:7.05:0.1, -5.:5.05:0.05]
-    s = surf(x, y, f)
-    #s = surf(aGrid_x, aGrid_y, aData)
+
+    s = surf(aGrid_x, aGrid_y, aData)
     #cs = contour_surf(x, y, f, contour_z=0)
     return s
 
