@@ -2,8 +2,8 @@ import os, sys
 import numpy as np
 
 from datetime import datetime
+import pyvista as pv
 
-from mayavi.mlab import *
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
@@ -11,9 +11,9 @@ from eslib.system.define_global_variables import *
 from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 
-def surface_plot_data_monthly_maya(    aGrid_x, \
+def surface_plot_data_monthly_vista(    aGrid_x, \
     aGrid_y, \
-        aData, \
+    aData, \
     sFilename_out,\
     iDPI_in = None,\
     iFlag_trend_in = None, \
@@ -111,11 +111,10 @@ def surface_plot_data_monthly_maya(    aGrid_x, \
     if (dMax_z <= dMin_z ):
         return
 
-
-
-    s = surf(aGrid_x, aGrid_y, aData)
-    #cs = contour_surf(x, y, f, contour_z=0)
-    return s
+  
+    grid = pv.StructuredGrid(aGrid_x, aGrid_y, aData)
+    grid.plot()
+    
 
    
 

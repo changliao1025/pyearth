@@ -11,7 +11,7 @@ sys.path.extend(sSystem_paths)
 from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
-def plot_time_series_data(aTime, aData,\
+def plot_time_series_data_monthly_multiple(aTime, aData,\
      sFilename_out, \
     iSize_X_in = None, \
         iSize_Y_in = None,  \
@@ -19,7 +19,10 @@ def plot_time_series_data(aTime, aData,\
     sLabel_Y_in = None , \
         sLabel_legend_in = None,\
     sTitle_in = None):
-
+    if iDPI_in is not None:        
+        iDPI = iDPI_in
+    else:       
+        iDPI = 300
     if iSize_X_in is not None:        
         iSize_X = iSize_X_in
     else:       
@@ -28,10 +31,7 @@ def plot_time_series_data(aTime, aData,\
         iSize_Y = iSize_Y_in
     else:       
         iSize_Y = 9
-    if iDPI_in is not None:        
-        iDPI = iDPI_in
-    else:       
-        iDPI = 300
+    
     if sLabel_Y_in is not None:        
         sLabel_Y = sLabel_Y_in
     else:        

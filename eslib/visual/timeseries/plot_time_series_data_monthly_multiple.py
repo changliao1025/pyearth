@@ -1,20 +1,19 @@
 import os, sys
 import numpy as np
 import matplotlib as mpl
-mpl.use('Agg')
+#mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 from datetime import datetime
 
-
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 from eslib.system.define_global_variables import *
-from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
-def plot_time_series_data_monthly(aTime, aData, \
+
+def plot_time_series_data_monthly_multiple(aTime, aData_all, \
                                   sFilename_out,\
                                   iDPI_in = None,\
                                   iFlag_trend_in = None, \
@@ -23,9 +22,12 @@ def plot_time_series_data_monthly(aTime, aData, \
                                   iSize_Y_in = None, \
                                   dMax_Y_in =None, \
                                   dMin_Y_in = None, \
-                                  sMarker_in =None,\
+                                  dSpace_y_in=None,\
+                                  aMarker_in =None,\
+                                      aColor_in =None,\
+                                    aLinestyle_in =None,\
                                   sLabel_Y_in = None, \
-                                  sLabel_legend_in = None,\
+                                  aLabel_legend_in = None,\
                                   sTitle_in = None):
 
     if iDPI_in is not None:
@@ -56,24 +58,32 @@ def plot_time_series_data_monthly(aTime, aData, \
         sLabel_Y = sLabel_Y_in
     else:
         sLabel_Y = ''
-    if sLabel_legend_in is not None:
-        sLabel_legend = sLabel_legend_in
+    if aLabel_legend_in is not None:
+        aLabel_legend = aLabel_legend_in
     else:
-        sLabel_legend = ''
+        aLabel_legend = {}
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
         sTitle = ''
 
-    if sMarker_in is not None:
-        sMarker = sMarker_in
+    if aMarker_in is not None:
+        aMarker = aMarker_in
     else:
-        sMarker = '+'
+        pass
+    if aColor_in is not None:
+        aColor = aColor_in
+    else:
+        pass
+    if aLinestyle_in is not None:
+        aLinestyle = aLinestyle_in
+    else:
+        pass
 
+    nData = len(aData_all)
+    aData = [aData_all]
     nstress = len(aTime)
-    nan_index = np.where(aData == missing_value)
-    aData[nan_index] = np.nan
-    good_index = np.where(  ~np.isnan(aData))
+    
 
     if dMax_Y_in is not None:
         dMax_Y = dMax_Y_in
@@ -86,39 +96,48 @@ def plot_time_series_data_monthly(aTime, aData, \
     if (dMax_Y <= dMin_Y ):
         return
 
+    if dSpace_y_in is not None:        
+        dSpace_y = dSpace_y_in
+    else:       
+        pass
+
 
 
     fig = plt.figure( dpi=iDPI )
     fig.set_figwidth( iSize_X)
     fig.set_figheight( iSize_Y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
-    pYear = mdates.YearLocator(5)   # every year
+    pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
     sYear_format = mdates.DateFormatter('%Y')
     x1 = aTime
-    y1 = aData
-    ax.plot( x1, y1, \
-             color = 'red', linestyle = '--' ,\
-             marker=sMarker, markeredgecolor='blue' ,\
-             label= sLabel_legend)
-    #calculate linear regression
-    if iFlag_trend ==1:
-        x_dummy = np.array( [i.timestamp() for i in x1 ] )
-        x_dummy = x_dummy[good_index]
-        y_dummy = y1[good_index]
-        coef = np.polyfit(x_dummy,y_dummy,1)
-        poly1d_fn = np.poly1d(coef)
-        mn=np.min(x_dummy)
-        mx=np.max(x_dummy)
-        x2=[mn,mx]
-        y2=poly1d_fn(x2)
-        x2 = [datetime.fromtimestamp(i) for i in x2 ]
-        ax.plot(x2,y2, color = 'orange', linestyle = '-.',  linewidth=0.5)
+    for i in np.arange(1, nData+1):
+        y1 = aData_all[i-1]
+        ax.plot( x1, y1, \
+             color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
+             marker=aMarker[i-1] ,\
+             label= aLabel_legend[i-1])
+    
+        #calculate linear regression
+        nan_index = np.where(y1 == missing_value)
+        y1[nan_index] = np.nan
+        good_index = np.where(  ~np.isnan(y1))
+        if iFlag_trend ==1:
+            x_dummy = np.array( [i.timestamp() for i in x1 ] )
+            x_dummy = x_dummy[good_index]
+            y_dummy = y1[good_index]
+            coef = np.polyfit(x_dummy,y_dummy,1)
+            poly1d_fn = np.poly1d(coef)
+            mn=np.min(x_dummy)
+            mx=np.max(x_dummy)
+            x2=[mn,mx]
+            y2=poly1d_fn(x2)
+            x2 = [datetime.fromtimestamp(i) for i in x2 ]
+            ax.plot(x2,y2, color = 'orange', linestyle = '-.',  linewidth=0.5)
 
     ax.axis('on')
     ax.grid(which='major', color='grey', linestyle='--', axis='y')
-    #ax.grid(which='minor', color='#CCCCCC', linestyle=':') #only y axis grid is
-
+    
     #ax.set_aspect(dRatio)  #this one set the y / x ratio
     ax.xaxis.set_major_locator(pYear)
     ax.xaxis.set_minor_locator(pMonth)
@@ -140,21 +159,16 @@ def plot_time_series_data_monthly(aTime, aData, \
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else:
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
-        dummy = calculate_ticks_space(y1, nstep_in =5)
-        dSpace = dummy[0]
-    if(dSpace<= 0):
-        ax.invert_yaxis()
-
+        
+    
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+    
+    if (iReverse_Y ==1):
+        ax.set_ylim( dMax_Y, dMin_Y )
     else:
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
-        dMin_Y = dummy[1]
-        dMax_Y = dummy[2]
-        if (iReverse_Y ==1):
-            ax.set_ylim( dMax_Y, dMin_Y )
-        else:
-            ax.set_ylim( dMin_Y, dMax_Y )
-            ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
-            plt.savefig(sFilename_out, bbox_inches='tight')
+        ax.set_ylim( dMin_Y, dMax_Y )
+    ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')
     plt.clf()

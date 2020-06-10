@@ -9,18 +9,15 @@ def gdal_read_geotiff(sFilename_in):
     if pDataset is None:
         print("Couldn't open this file: " + sFilename_in)
         sys.exit("Try again!")
-    else:
-       
+    else:       
         pProjection = pDataset.GetProjection()
 
-       
         pDataset.GetMetadata()
        
         ncolumn = pDataset.RasterXSize
         nrow = pDataset.RasterYSize
         nband = pDataset.RasterCount
 
-       
         pGeotransform = pDataset.GetGeoTransform()
         dOriginX = pGeotransform[0]
         dOriginY = pGeotransform[3]

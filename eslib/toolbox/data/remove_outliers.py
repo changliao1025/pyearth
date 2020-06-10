@@ -4,7 +4,7 @@ def remove_outliers(x, outlierConstant):
     upper_quartile = np.percentile(a, 75)
     lower_quartile = np.percentile(a, 25)
     IQR = (upper_quartile - lower_quartile) * outlierConstant
-    quartileSet = (lower_quartile - IQR, upper_quartile + IQR)
+    quartileSet = (lower_quartile + IQR, upper_quartile - IQR)
     #resultList = []
     #for y in a.tolist():
     #    if y >= quartileSet[0] and y <= quartileSet[1]:
