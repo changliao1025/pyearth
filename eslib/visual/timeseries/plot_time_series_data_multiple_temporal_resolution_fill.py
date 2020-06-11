@@ -13,7 +13,7 @@ from eslib.system.define_global_variables import *
 
 
 
-def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
+def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all, aData_all, \
                                   sFilename_out,\
                                   iDPI_in = None,\
                                   iFlag_trend_in = None, \
@@ -29,6 +29,7 @@ def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
                                   sLabel_Y_in = None, \
                                   aLabel_legend_in = None,\
                                   sTitle_in = None):
+
     nData = len(aData_all)
     aData = [aData_all]
     if iDPI_in is not None:
@@ -67,22 +68,22 @@ def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
         sTitle = sTitle_in
     else:
         sTitle = ''
-    
+
     if aMarker_in is not None:
         aMarker = aMarker_in
     else:
         aMarker=np.full(nData, '+')
-
     if aColor_in is not None:
         aColor = aColor_in
     else:
         aColor= np.full(nData, 'black')
-       
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
     else:
+
         aLinestyle = np.full(nData, '-')
-     
+
+    
 
     if dMax_Y_in is not None:
         dMax_Y = dMax_Y_in
@@ -112,28 +113,26 @@ def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
         x1 = aTime_all[i-1]
 
         if i==1:
-
+            #we need to plot low and high fill 
+            y_top = aData_all[i-1][2]
+            y_bot = aData_all[i-1][1]
+            ax.fill_between(x1, y_top, y_bot,  facecolor='cornflowerblue')
+            #plot mean
             y1 = aData_all[i-1][0]
+
             ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] , markersize =0.5,\
-                label = aLabel_legend[i-1] + ' low')
-            y1 = aData_all[i-1][1]
-            ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] , markersize =1, \
-                label = aLabel_legend[i-1] + ' mean')
-            y1 = aData_all[i-1][2]
-            ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] , markersize = 0.75,\
-                label = aLabel_legend[i-1] + ' high')
+             color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
+             marker = aMarker[i-1] ,\
+             label = aLabel_legend[i-1])
+
         else:
             y1 = aData_all[i-1]
+        
             ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] ,\
-                label = aLabel_legend[i-1])
+                 color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
+                 marker = aMarker[i-1] ,\
+                 label = aLabel_legend[i-1])
+    
         #calculate linear regression
         nan_index = np.where(y1 == missing_value)
         y1[nan_index] = np.nan

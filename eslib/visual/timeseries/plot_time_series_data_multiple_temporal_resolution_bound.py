@@ -13,7 +13,7 @@ from eslib.system.define_global_variables import *
 
 
 
-def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
+def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_all, \
                                   sFilename_out,\
                                   iDPI_in = None,\
                                   iFlag_trend_in = None, \
@@ -115,19 +115,19 @@ def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
 
             y1 = aData_all[i-1][0]
             ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] , markersize =0.5,\
-                label = aLabel_legend[i-1] + ' low')
+                color = aColor[i-1][0], linestyle = aLinestyle[i-1][0] ,\
+                marker = aMarker[i-1][0] , markersize =1,\
+                label = aLabel_legend[i-1][0] )
             y1 = aData_all[i-1][1]
             ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] , markersize =1, \
-                label = aLabel_legend[i-1] + ' mean')
+                color = aColor[i-1][1], linestyle = aLinestyle[i-1][1] ,\
+                marker = aMarker[i-1][1] , markersize =1, \
+                label = aLabel_legend[i-1][1] )
             y1 = aData_all[i-1][2]
             ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] , markersize = 0.75,\
-                label = aLabel_legend[i-1] + ' high')
+                color = aColor[i-1][2], linestyle = aLinestyle[i-1][2] ,\
+                marker = aMarker[i-1][2] , markersize = 1,\
+                label = aLabel_legend[i-1][2] )
         else:
             y1 = aData_all[i-1]
             ax.plot( x1, y1, \
@@ -183,7 +183,7 @@ def plot_time_series_data_multiple_temporal_resolution(aTime_all, aData_all, \
         ax.set_ylim( dMax_Y, dMin_Y )
     else:
         ax.set_ylim( dMin_Y, dMax_Y )
-    ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
+    ax.legend(bbox_to_anchor=(1.0,1.0), loc="lower left", fontsize=12)
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')

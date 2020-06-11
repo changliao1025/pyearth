@@ -1,4 +1,4 @@
-def create_diverge_rgb_color_hex(ncolor):
+def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
 
     if ncolor < 3 or ncolor > 12:
         return -1
@@ -24,4 +24,9 @@ def create_diverge_rgb_color_hex(ncolor):
                                 '#5e4fa2']
             else:
                 pass
+        #add the reverse feature
+        if iFlag_reverse_in is not None:
+            colors_hex.reverse()
+        else:
+            pass
         return colors_hex
