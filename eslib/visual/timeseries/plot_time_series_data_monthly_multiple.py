@@ -11,8 +11,6 @@ sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 from eslib.system.define_global_variables import *
 
-
-
 def plot_time_series_data_monthly_multiple(aTime, aData_all, \
                                   sFilename_out,\
                                   iDPI_in = None,\
