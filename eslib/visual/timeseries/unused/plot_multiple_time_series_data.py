@@ -10,7 +10,8 @@ sys.path.extend(sSystem_paths)
 from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
 from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def plot_multiple_time_series_data(aTime, n, aData, sFilename_out, \
+def plot_multiple_time_series_data(aTime, n, \
+    aData, sFilename_out, \
     iSize_X_in = None, iSize_Y_in = None,  \
     iDPI_in = None ,\
     sLabel_Y_in = None , aLabel_legend_in = None,\
