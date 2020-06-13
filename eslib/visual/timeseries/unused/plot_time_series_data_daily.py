@@ -3,8 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-from mpl_toolkits.axes_grid1 import AxesGrid
-
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
@@ -93,7 +91,7 @@ def plot_time_series_data_daily(aTime, aData,\
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
     dSpace = calculate_ticks_space(y1)
     ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
-    y_max = dSpace *6
+    y_max = dSpace * 6
     ax.set_ylim( y_min, y_max)
     
     ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)

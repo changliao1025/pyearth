@@ -11,20 +11,24 @@ from datetime import datetime
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 from eslib.system.define_global_variables import *
-from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
+
+#we will not use internal function to calculate space
+#the user is supposed to define it and pass it directly
 
 
-def plot_time_series_data_monthly(aTime, aData, \
+def plot_time_series_data_single(aTime, aData, \
                                   sFilename_out,\
                                   iDPI_in = None,\
                                   iFlag_trend_in = None, \
-                                  iReverse_Y_in = None, \
-                                  iSize_X_in = None, \
-                                  iSize_Y_in = None, \
-                                  dMax_Y_in =None, \
-                                  dMin_Y_in = None, \
+                                      
+                                  iReverse_y_in = None, \
+                                  iSize_x_in = None, \
+                                  iSize_y_in = None, \
+                                  dMax_y_in =None, \
+                                  dMin_y_in = None, \
+                                      sType_x_in =None,\
                                   sMarker_in =None,\
-                                  sLabel_Y_in = None, \
+                                  sLabel_y_in = None, \
                                   sLabel_legend_in = None,\
                                   sTitle_in = None):
 
@@ -38,22 +42,22 @@ def plot_time_series_data_monthly(aTime, aData, \
     else:
         iFlag_trend = 0
 
-    if iReverse_Y_in is not None:
-        iReverse_Y = 1
+    if iReverse_y_in is not None:
+        iReverse_y = 1
     else:
-        iReverse_Y = 0
+        iReverse_y = 0
 
-    if iSize_X_in is not None:
-        iSize_X = iSize_X_in
+    if iSize_x_in is not None:
+        iSize_x = iSize_x_in
     else:
-        iSize_X = 12
-    if iSize_Y_in is not None:
-        iSize_Y = iSize_Y_in
+        iSize_x = 12
+    if iSize_y_in is not None:
+        iSize_y = iSize_y_in
     else:
-        iSize_Y = 9
+        iSize_y = 9
 
-    if sLabel_Y_in is not None:
-        sLabel_Y = sLabel_Y_in
+    if sLabel_y_in is not None:
+        sLabel_Y = sLabel_y_in
     else:
         sLabel_Y = ''
     if sLabel_legend_in is not None:
@@ -75,12 +79,12 @@ def plot_time_series_data_monthly(aTime, aData, \
     aData[nan_index] = np.nan
     good_index = np.where(  ~np.isnan(aData))
 
-    if dMax_Y_in is not None:
-        dMax_Y = dMax_Y_in
+    if dMax_y_in is not None:
+        dMax_Y = dMax_y_in
     else:
         dMax_Y = np.nanmax(aData) * 1.2
-    if dMin_Y_in is not None:
-        dMin_Y = dMin_Y_in
+    if dMin_y_in is not None:
+        dMin_Y = dMin_y_in
     else:
         dMin_Y = np.nanmin(aData) #if it has negative value, change here
     if (dMax_Y <= dMin_Y ):
@@ -89,8 +93,8 @@ def plot_time_series_data_monthly(aTime, aData, \
 
 
     fig = plt.figure( dpi=iDPI )
-    fig.set_figwidth( iSize_X)
-    fig.set_figheight( iSize_Y)
+    fig.set_figwidth( iSize_x)
+    fig.set_figheight( iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
     pYear = mdates.YearLocator(5)   # every year
     pMonth = mdates.MonthLocator()  # every month
@@ -149,7 +153,7 @@ def plot_time_series_data_monthly(aTime, aData, \
         ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
         dMin_Y = dummy[1]
         dMax_Y = dummy[2]
-        if (iReverse_Y ==1):
+        if (iReverse_y ==1):
             ax.set_ylim( dMax_Y, dMin_Y )
         else:
             ax.set_ylim( dMin_Y, dMax_Y )

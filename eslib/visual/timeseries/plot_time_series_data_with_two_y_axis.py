@@ -13,7 +13,7 @@ from eslib.system.define_global_variables import *
 
 
 
-def plot_time_series_data_multiple_temporal_resolution_two_y_axis(aTime_all, aData_all, \
+def plot_time_series_data_with_two_y_axis(aTime_all, aData_all, \
                                   sFilename_out,\
                                   iDPI_in = None,\
                                   iFlag_trend_in = None, \
