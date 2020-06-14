@@ -11,6 +11,8 @@ sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 from eslib.system.define_global_variables import *
 
+from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+
 def plot_time_series_data(aTime_all, aData_all, \
                           sFilename_out,\
                           iDPI_in = None,\
@@ -66,7 +68,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     if aLabel_legend_in is not None:
         aLabel_legend = aLabel_legend_in
     else:
-        aLabel_legend = {}
+        aLabel_legend = np.full(nData,'')
 
     if sTitle_in is not None:
         sTitle = sTitle_in
@@ -91,20 +93,20 @@ def plot_time_series_data(aTime_all, aData_all, \
     if dMax_x_in is not None:
          dMax_x = dMax_x_in
     else:
-        dMax_x = np.datetime64(np.nanmin(aTime_all), 'Y')
+        dMax_x = np.datetime64(np.nanmax(aTime_all), 'Y')
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
-        dMin_x = np.datetime64(np.nanmax(aTime_all), 'Y')
+        dMin_x = np.datetime64(np.nanmin(aTime_all), 'Y')
 
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData) * 1.2
+        dMax_y = np.nanmax(aData_all) * 1.2
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData) #if it has negative value, change here
+        dMin_y = np.nanmin(aData_all) #if it has negative value, change here
     if (dMax_y <= dMin_y ):
         return
 

@@ -4,7 +4,10 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
         return -1
     else:
         if ncolor == 3:
-            pass
+            colors_hex = [  '#fc8d59',\
+                                '#ffffbf',\
+                                '#91bfdb']
+
         else:
             if ncolor == 4:
                 colors_hex = [  '#d7191c',\
