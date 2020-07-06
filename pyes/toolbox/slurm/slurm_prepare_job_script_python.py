@@ -1,7 +1,7 @@
 import os, sys
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.system.define_global_variables import *
+from pyes.system.define_global_variables import *
 #normal job, no checkpoint 
 def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         sBasename_job, \

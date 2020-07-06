@@ -8,13 +8,13 @@ from numpy  import array
 #use global method
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.system import define_global_variables
-from eslib.system.define_global_variables import *
+from pyes.system import define_global_variables
+from pyes.system.define_global_variables import *
 
-#import the eslib library
-sPath_library_python = sWorkspace_code +  slash + 'python' + slash + 'library' + slash + 'eslib_python'
+#import the pyes library
+sPath_library_python = sWorkspace_code +  slash + 'python' + slash + 'library' + slash + 'pyes_python'
 sys.path.append(sPath_library_python)
-from eslib.toolbox.math.search_neighbors import search_neighbors
+from pyes.toolbox.math.search_neighbors import search_neighbors
 
 def gap_fill_by_window (aArray_in, iWindow_size_in = None):
     """aArray_in,

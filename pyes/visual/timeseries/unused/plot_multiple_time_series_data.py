@@ -7,8 +7,8 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
-from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyes.visual.plot.calculate_ticks_space import calculate_ticks_space
+from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_multiple_time_series_data(aTime, n, \
     aData, sFilename_out, \

@@ -9,7 +9,7 @@ from scipy.stats import gaussian_kde
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 
-from eslib.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
+from pyes.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
 def histogram_plot_kde2(aData_a, \
     aData_b,\
     sFilename_out, \

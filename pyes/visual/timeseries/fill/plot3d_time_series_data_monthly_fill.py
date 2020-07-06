@@ -13,8 +13,8 @@ from matplotlib.collections import PolyCollection
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.system.define_global_variables import *
-from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyes.system.define_global_variables import *
+from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def polygon_under_graph(xlist, ylist):
     """

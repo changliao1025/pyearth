@@ -9,9 +9,9 @@ import matplotlib.ticker as ticker
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.system.define_global_variables import *
+from pyes.system.define_global_variables import *
 
-from eslib.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_time_series_data(aTime_all, aData_all, \
                           sFilename_out,\
@@ -46,7 +46,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         aFlag_trend = np.full(nData, 0)
 
     if iReverse_y_in is not None:
-        iReverse_y = 1
+        iReverse_y = iReverse_y_in
     else:
         iReverse_y = 0
 
@@ -83,7 +83,13 @@ def plot_time_series_data(aTime_all, aData_all, \
     if aColor_in is not None:
         aColor = aColor_in
     else:
-        aColor= create_diverge_rgb_color_hex(nData)
+        if(nData>=3):
+            aColor= create_diverge_rgb_color_hex(nData)
+        else:
+            if nData==2:
+                aColor= ['red','blue']
+            else:
+                aColor=['red']
 
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
@@ -111,8 +117,10 @@ def plot_time_series_data(aTime_all, aData_all, \
         return
 
     if dSpace_y_in is not None:
+        iFlag_space_y =1
         dSpace_y = dSpace_y_in
     else:
+        iFlag_space_y=0
         pass
 
     fig = plt.figure( dpi=iDPI )
@@ -186,8 +194,11 @@ def plot_time_series_data(aTime_all, aData_all, \
     else:
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
 
-
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+    if (iFlag_space_y ==0):        
+        ax.yaxis.set_major_locator(ticker.AutoLocator())
+        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())             
+    else:
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
 
     if (iReverse_y ==1):
         ax.set_ylim( dMax_y, dMin_y )
@@ -197,6 +208,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
 
     #save the result
+    plt.show()
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')

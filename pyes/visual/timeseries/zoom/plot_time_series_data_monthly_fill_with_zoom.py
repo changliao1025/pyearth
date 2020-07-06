@@ -10,8 +10,8 @@ from datetime import datetime
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.system.define_global_variables import *
-from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
+from pyes.system.define_global_variables import *
+from pyes.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
 def plot_time_series_data_monthly_fill_with_zoom(aTime, aData, \

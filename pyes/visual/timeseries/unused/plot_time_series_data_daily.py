@@ -6,7 +6,7 @@ import matplotlib.ticker as ticker
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
-from eslib.visual.plot.calculate_ticks_space import calculate_ticks_space
+from pyes.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
 def plot_time_series_data_daily(aTime, aData,\
