@@ -44,6 +44,7 @@ else:  #linux or unix
         else:
             pass
 
+#system wide paths
 sWorkspace_configuration = sWorkspace_home + slash + '03configuration'
 sWorkspace_data = sWorkspace_home + slash + 'data'
 sWorkspace_bin = sWorkspace_home + slash + 'bin'
@@ -69,7 +70,9 @@ sFilename_interactive_bash = sWorkspace_bin + slash + 'interactive_bash'
 #constant values
 missing_value = -9999.0
 ncore_per_node = 40
-nmonth = 12
+nmonth = 12 #be careful with this one
+
+#physical constants
 
 iMonth_start = 1
 iMonth_end = 12
