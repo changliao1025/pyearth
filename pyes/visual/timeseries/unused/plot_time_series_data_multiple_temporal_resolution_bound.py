@@ -14,21 +14,21 @@ from pyes.system.define_global_variables import *
 
 
 def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_all, \
-                                  sFilename_out,\
-                                  iDPI_in = None,\
-                                  iFlag_trend_in = None, \
-                                  iReverse_Y_in = None, \
-                                  iSize_X_in = None, \
-                                  iSize_Y_in = None, \
-                                  dMax_Y_in =None, \
-                                  dMin_Y_in = None, \
-                                  dSpace_y_in=None,\
-                                  aMarker_in =None,\
-                                aColor_in =None,\
-                                aLinestyle_in =None,\
-                                  sLabel_Y_in = None, \
-                                  aLabel_legend_in = None,\
-                                  sTitle_in = None):
+                                                             sFilename_out,\
+                                                             iDPI_in = None,\
+                                                             iFlag_trend_in = None, \
+                                                             iReverse_Y_in = None, \
+                                                             iSize_X_in = None, \
+                                                             iSize_Y_in = None, \
+                                                             dMax_Y_in =None, \
+                                                             dMin_Y_in = None, \
+                                                             dSpace_y_in=None,\
+                                                             aMarker_in =None,\
+                                                             aColor_in =None,\
+                                                             aLinestyle_in =None,\
+                                                             sLabel_Y_in = None, \
+                                                             aLabel_legend_in = None,\
+                                                             sTitle_in = None):
     nData = len(aData_all)
     aData = [aData_all]
     if iDPI_in is not None:
@@ -67,7 +67,7 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
         sTitle = sTitle_in
     else:
         sTitle = ''
-    
+
     if aMarker_in is not None:
         aMarker = aMarker_in
     else:
@@ -77,12 +77,12 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
         aColor = aColor_in
     else:
         aColor= np.full(nData, 'black')
-       
+
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
     else:
         aLinestyle = np.full(nData, '-')
-     
+
 
     if dMax_Y_in is not None:
         dMax_Y = dMax_Y_in
@@ -95,9 +95,9 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
     if (dMax_Y <= dMin_Y ):
         return
 
-    if dSpace_y_in is not None:        
+    if dSpace_y_in is not None:
         dSpace_y = dSpace_y_in
-    else:       
+    else:
         pass
 
     fig = plt.figure( dpi=iDPI )
@@ -107,7 +107,7 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
     pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
     sYear_format = mdates.DateFormatter('%Y')
-    
+
     for i in np.arange(1, nData+1):
         x1 = aTime_all[i-1]
 
@@ -115,26 +115,26 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
 
             y1 = aData_all[i-1][0]
             ax.plot( x1, y1, \
-                color = aColor[i-1][0], linestyle = aLinestyle[i-1][0] ,\
-                marker = aMarker[i-1][0] , markersize =1,\
-                label = aLabel_legend[i-1][0] )
+                     color = aColor[i-1][0], linestyle = aLinestyle[i-1][0] ,\
+                     marker = aMarker[i-1][0] , markersize =1,\
+                     label = aLabel_legend[i-1][0] )
             y1 = aData_all[i-1][1]
             ax.plot( x1, y1, \
-                color = aColor[i-1][1], linestyle = aLinestyle[i-1][1] ,\
-                marker = aMarker[i-1][1] , markersize =1, \
-                label = aLabel_legend[i-1][1] )
+                     color = aColor[i-1][1], linestyle = aLinestyle[i-1][1] ,\
+                     marker = aMarker[i-1][1] , markersize =1, \
+                     label = aLabel_legend[i-1][1] )
             y1 = aData_all[i-1][2]
             ax.plot( x1, y1, \
-                color = aColor[i-1][2], linestyle = aLinestyle[i-1][2] ,\
-                marker = aMarker[i-1][2] , markersize = 1,\
-                label = aLabel_legend[i-1][2] )
+                     color = aColor[i-1][2], linestyle = aLinestyle[i-1][2] ,\
+                     marker = aMarker[i-1][2] , markersize = 1,\
+                     label = aLabel_legend[i-1][2] )
         else:
             y1 = aData_all[i-1]
             ax.plot( x1, y1, \
-                color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                marker = aMarker[i-1] ,\
-                label = aLabel_legend[i-1])
-        #calculate linear regression
+                     color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
+                     marker = aMarker[i-1] ,\
+                     label = aLabel_legend[i-1])
+            #calculate linear regression
         nan_index = np.where(y1 == missing_value)
         y1[nan_index] = np.nan
         good_index = np.where(  ~np.isnan(y1))
@@ -153,7 +153,7 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
 
     ax.axis('on')
     ax.grid(which='major', color='grey', linestyle='--', axis='y')
-    
+
     #ax.set_aspect(dRatio)  #this one set the y / x ratio
     ax.xaxis.set_major_locator(pYear)
     ax.xaxis.set_minor_locator(pMonth)
@@ -168,23 +168,23 @@ def plot_time_series_data_multiple_temporal_resolution_bound(aTime_all, aData_al
     ax.set_ylabel(sLabel_Y,fontsize=12)
     ax.set_title( sTitle, loc='center', fontsize=15)
     # round to nearest years...
-    x_min = np.datetime64(aTime_all[1][0], 'Y') 
+    x_min = np.datetime64(aTime_all[1][0], 'Y')
     x_max = np.datetime64(aTime_all[1][ -1 ], 'Y') + np.timedelta64(1, 'Y')
     ax.set_xlim(x_min, x_max)
     if dMax_Y < 1000 and dMax_Y > 0.001:
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else:
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
-        
-    
+
+
     ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
-    
+
     if (iReverse_Y ==1):
         ax.set_ylim( dMax_Y, dMin_Y )
     else:
         ax.set_ylim( dMin_Y, dMax_Y )
-    ax.legend(bbox_to_anchor=(1.0,1.0), loc="lower left", fontsize=12)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+        ax.legend(bbox_to_anchor=(1.0,1.0), loc="lower left", fontsize=12)
+        plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')
     plt.clf()

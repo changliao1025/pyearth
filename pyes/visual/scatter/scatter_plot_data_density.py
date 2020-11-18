@@ -126,7 +126,7 @@ def scatter_plot_data_density(aData_x, \
     ax_scatter.set_title( sTitle, loc='center', fontsize=15)
     # round to nearest years...
     if x_max < 1000 and x_max > 0.001:
-        ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
+        ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else: 
         ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
     if y_max < 1000 and y_max > 0.001:

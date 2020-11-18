@@ -2,7 +2,7 @@ import os, sys
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-#mpl.use('Agg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
@@ -30,7 +30,8 @@ def plot_time_series_data(aTime_all, aData_all, \
                           aLinestyle_in = None,\
                           sLabel_y_in = None, \
                           aLabel_legend_in = None,\
-                        sDate_type = None,\
+                          sDate_type_in = None,\
+                          sFormat_y_in =None,\
                           sTitle_in = None):
     #find how many data will be plotted
     nData = len(aData_all)
@@ -97,7 +98,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         aLinestyle = np.full(nData, '-')
 
     if dMax_x_in is not None:
-         dMax_x = dMax_x_in
+        dMax_x = dMax_x_in
     else:
         dMax_x = np.datetime64(np.nanmax(aTime_all), 'Y')
     if dMin_x_in is not None:
@@ -108,7 +109,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData_all) * 1.2
+        dMax_y = np.nanmax(aData_all) * 1.0
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
@@ -129,15 +130,20 @@ def plot_time_series_data(aTime_all, aData_all, \
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
     pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
-    if sDate_type is not None:
-        if sDate_type == 'month':
+    if sDate_type_in is not None:
+        if sDate_type_in == 'month':
             pMonth = mdates.MonthLocator(3)
         else:
-            print(sDate_type)
+            print(sDate_type_in)
     else:
-        print(sDate_type)
+        print(sDate_type_in)
         pass
-    
+    if sFormat_y_in is not None:
+        iFlag_format_y = 1
+        sFormat_y = sFormat_y_in
+    else:
+        iFlag_format_y = 0
+
     sYear_format = mdates.DateFormatter('%Y')
 
     #start loop for each data
@@ -189,14 +195,16 @@ def plot_time_series_data(aTime_all, aData_all, \
 
     ax.set_xlim(dMin_x, dMax_x)
 
-    if dMax_y < 1000 and dMax_y > 0.001:
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
-    else:
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+    #if dMax_y < 1000 and dMax_y > 0.001:
+    #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+    #else:
+    #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+    if (iFlag_format_y ==1):
+        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(  sFormat_y ))
 
-    if (iFlag_space_y ==0):        
+    if (iFlag_space_y ==0):
         ax.yaxis.set_major_locator(ticker.AutoLocator())
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())             
+        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
     else:
         ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
 
@@ -208,7 +216,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
 
     #save the result
-    plt.show()
+    #plt.show()
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')

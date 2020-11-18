@@ -9,15 +9,10 @@ from datetime import datetime
 from mpl_toolkits import mplot3d
 from matplotlib.collections import PolyCollection
 
-from mayavi.mlab import *
-
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 from pyes.system.define_global_variables import *
 from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
-
-
-
 
 def surface_plot_data_monthly(aData_all, \
     sFilename_out,\
@@ -46,10 +41,6 @@ def surface_plot_data_monthly(aData_all, \
     else:       
         iDPI = 300
     
-    if iFlag_trend_in is not None:
-        iFlag_trend = 1
-    else:
-        iFlag_trend = 0
         
     if iReverse_z_in is not None:
         iReverse_z = 1
@@ -140,6 +131,7 @@ def surface_plot_data_monthly(aData_all, \
         xs = x1
         zs = aData
         verts.append(polygon_under_graph(xs, zs))
+        pass
 
     poly = PolyCollection(verts, facecolors= aColor ,alpha=.6)
     ax.add_collection3d(poly, zs=ys, zdir='y')

@@ -54,7 +54,7 @@ sWorkspace_models  = sWorkspace_scratch + slash + '04model'
 #data file type
 sExtension_txt = '.txt'
 sExtension_envi = '.dat'
-sExtension_tif = '.tif'
+sExtension_tiff = '.tif'
 sExtension_header ='.hdr'
 sExtension_netcdf = '.nc'
 sExtension_shapefile = '.shp'
