@@ -15,109 +15,117 @@ from pyes.system.define_global_variables import *
 from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def surface_plot_data_monthly(aData_all, \
-    sFilename_out,\
-    iDPI_in = None,\
-    iFlag_trend_in = None, \
-    iReverse_z_in = None, \
-    iSize_x_in = None, \
-    iSize_y_in = None, \
-        dMin_x_in=None,\
-        dMax_x_in=None,\
-    dMax_z_in =None, \
-    dMin_z_in = None, \
-        dSpace_x_in =None,\
-            dSpace_z_in=None,\
-                aColor_in = None,\
-                aLabel_y_in = None,\
-    sMarker_in =None,\
-          sLabel_x_in = None, \
-              sLabel_y_in = None, \
-    sLabel_z_in = None, \
-    sLabel_legend_in = None,\
-    sTitle_in = None):
+                              sFilename_out,\
+                              iDPI_in = None,\
+                              iFlag_trend_in = None, \
+                              iReverse_z_in = None, \
+                              iSize_x_in = None, \
+                              iSize_y_in = None, \
+                              dMin_x_in=None,\
+                              dMax_x_in=None,\
+                              dMax_z_in =None, \
+                              dMin_z_in = None, \
+                              dSpace_x_in =None,\
+                              dSpace_z_in=None,\
+                              aColor_in = None,\
+                              aLabel_y_in = None,\
+                              sMarker_in =None,\
+                              sLabel_x_in = None, \
+                              sLabel_y_in = None, \
+                              sLabel_z_in = None, \
+                              sLabel_legend_in = None,\
+                              sTitle_in = None):
 
-    if iDPI_in is not None:        
+    if iDPI_in is not None:
         iDPI = iDPI_in
-    else:       
+    else:
         iDPI = 300
-    
-        
+
+
     if iReverse_z_in is not None:
         iReverse_z = 1
     else:
         iReverse_z = 0
 
-    if iSize_x_in is not None:        
+    if iSize_x_in is not None:
         iSize_x = iSize_x_in
-    else:       
+    else:
         iSize_x = 12
-    if iSize_y_in is not None:        
+
+    if iSize_y_in is not None:
         iSize_y = iSize_y_in
-    else:       
+    else:
         iSize_y = 9
-    if dSpace_x_in is not None:        
+
+    if dSpace_x_in is not None:
         dSpace_x = dSpace_x_in
-    else:       
+    else:
         dSpace_x = 1
-    if dSpace_z_in is not None:        
+
+    if dSpace_z_in is not None:
         dSpace_z = dSpace_z_in
-    else:       
+    else:
         dSpace_z = 1
 
-    
-    if sLabel_x_in is not None:        
+
+    if sLabel_x_in is not None:
         sLabel_x = sLabel_x_in
-    else:        
+    else:
         sLabel_x = ''
 
-    if sLabel_y_in is not None:        
+    if sLabel_y_in is not None:
         sLabel_y = sLabel_y_in
-    else:        
+    else:
         sLabel_y = ''
-    if sLabel_z_in is not None:        
+
+    if sLabel_z_in is not None:
         sLabel_z = sLabel_z_in
-    else:        
+    else:
         sLabel_z = ''
-    if sLabel_legend_in is not None:        
+
+    if sLabel_legend_in is not None:
         sLabel_legend = sLabel_legend_in
-    else:        
+    else:
         sLabel_legend = ''
-    if sTitle_in is not None:        
+
+    if sTitle_in is not None:
         sTitle = sTitle_in
-    else:        
+    else:
         sTitle = ''
 
-    if sMarker_in is not None:        
+    if sMarker_in is not None:
         sMarker = sMarker_in
-    else:        
+    else:
         sMarker = '+'
 
     nstress = len(aTime)
 
     nslice = len(aData_all)
-    if aColor_in is not None:        
+    if aColor_in is not None:
         aColor = aColor_in
-    else:       
+    else:
         aColor = create_diverge_rgb_color_hex(nslice)
 
-    if dMax_z_in is not None:        
+    if dMax_z_in is not None:
         dMax_z = dMax_z_in
-    else:         
-        dMax_z = np.nanmax(aData_all) 
-    if dMin_z_in is not None:        
+    else:
+        dMax_z = np.nanmax(aData_all)
+
+    if dMin_z_in is not None:
         dMin_z = dMin_z_in
     else:
-        dMin_z = np.nanmin(aData_all) #if it has negative value, change here  
+        dMin_z = np.nanmin(aData_all) #if it has negative value, change here
+
     if (dMax_z <= dMin_z ):
         return
 
     fig = plt.figure( dpi=iDPI )
-    fig.set_figwidth( iSize_x)   
-    fig.set_figheight( iSize_y)         
+    fig.set_figwidth( iSize_x)
+    fig.set_figheight( iSize_y)
 
     ax = fig.add_subplot(111, projection='3d')
     ax.pbaspect = np.array([2.0, 10.0, 0.5])
-    
+
     x1 = mdates.date2num( aTime )
     verts=[]
     ys = range(nslice)
@@ -125,9 +133,9 @@ def surface_plot_data_monthly(aData_all, \
         aData = aData_all[iSlice-1]
         nan_index = np.where(aData == missing_value)
         aData[nan_index] = np.nan
-        good_index = np.where(  ~np.isnan(aData))   
+        good_index = np.where(  ~np.isnan(aData))
         #y1 = (aData[1])[0]
-        y_top = aData        
+        y_top = aData
         xs = x1
         zs = aData
         verts.append(polygon_under_graph(xs, zs))
@@ -137,14 +145,14 @@ def surface_plot_data_monthly(aData_all, \
     ax.add_collection3d(poly, zs=ys, zdir='y')
     pYear = mdates.YearLocator(3)   # every year
     pMonth = mdates.MonthLocator()  # every month
-    ax.axis('on')              
+    ax.axis('on')
 
     ax.xaxis._axinfo["grid"]['linewidth'] = 0.
     ax.yaxis._axinfo["grid"]['linewidth'] = 0.
     ax.zaxis._axinfo["grid"]['color'] = "grey"
     ax.zaxis._axinfo["grid"]['linestyle'] = "--"
 
-    ax.xaxis.set_major_locator(pYear)        
+    ax.xaxis.set_major_locator(pYear)
     #ax.xaxis.set_minor_locator(pMonth)
     sYear_format = mdates.DateFormatter('%Y')
 
@@ -159,6 +167,7 @@ def surface_plot_data_monthly(aData_all, \
     aLabel_y =[]
     for i in aLabel_y_in:
         aLabel_y.append( i.title() )
+        pass
 
     ax.set_yticklabels(aLabel_y,fontsize=13 )
 
@@ -166,15 +175,18 @@ def surface_plot_data_monthly(aData_all, \
 
     if (iReverse_z==1):
         ax.set_zlim3d(dMax_z, dMin_z)
+        pass
     else:
         ax.set_zlim3d(dMin_z, dMax_z)
+        pass
+
     ax.set_zlabel(sLabel_z)
 
-    
-    
+
+
 
     plt.savefig(sFilename_out, bbox_inches='tight')
-                       
+
     plt.close('all')
     plt.clf()
     #print('finished plotting')
