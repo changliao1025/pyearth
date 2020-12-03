@@ -24,7 +24,7 @@ def polygon_under_graph(xlist, ylist):
     return [(xlist[0], 80.), *zip(xlist, ylist), (xlist[-1], 80.)]
 
 
-def plot3d_time_series_data_monthly_fill(aTime, aData_all, \
+def plot3d_time_series_data_fill(aTime, aData_all, \
     sFilename_out,\
     iDPI_in = None,\
     iFlag_trend_in = None, \
@@ -65,14 +65,17 @@ def plot3d_time_series_data_monthly_fill(aTime, aData_all, \
         iSize_x = iSize_x_in
     else:       
         iSize_x = 12
+
     if iSize_y_in is not None:        
         iSize_y = iSize_y_in
     else:       
         iSize_y = 9
+
     if dSpace_x_in is not None:        
         dSpace_x = dSpace_x_in
     else:       
         dSpace_x = 1
+
     if dSpace_z_in is not None:        
         dSpace_z = dSpace_z_in
     else:       
@@ -88,14 +91,17 @@ def plot3d_time_series_data_monthly_fill(aTime, aData_all, \
         sLabel_y = sLabel_y_in
     else:        
         sLabel_y = ''
+
     if sLabel_z_in is not None:        
         sLabel_z = sLabel_z_in
     else:        
         sLabel_z = ''
+
     if sLabel_legend_in is not None:        
         sLabel_legend = sLabel_legend_in
     else:        
         sLabel_legend = ''
+
     if sTitle_in is not None:        
         sTitle = sTitle_in
     else:        
@@ -118,10 +124,12 @@ def plot3d_time_series_data_monthly_fill(aTime, aData_all, \
         dMax_z = dMax_z_in
     else:         
         dMax_z = np.nanmax(aData_all) 
+
     if dMin_z_in is not None:        
         dMin_z = dMin_z_in
     else:
         dMin_z = np.nanmin(aData_all) #if it has negative value, change here  
+    
     if (dMax_z <= dMin_z ):
         return
 
@@ -145,6 +153,7 @@ def plot3d_time_series_data_monthly_fill(aTime, aData_all, \
         xs = x1
         zs = aData
         verts.append(polygon_under_graph(xs, zs))
+        pass
 
     poly = PolyCollection(verts, facecolors= aColor ,alpha=.6)
     ax.add_collection3d(poly, zs=ys, zdir='y')
@@ -181,6 +190,8 @@ def plot3d_time_series_data_monthly_fill(aTime, aData_all, \
         ax.set_zlim3d(dMax_z, dMin_z)
     else:
         ax.set_zlim3d(dMin_z, dMax_z)
+        pass
+    
     ax.set_zlabel(sLabel_z)
 
     

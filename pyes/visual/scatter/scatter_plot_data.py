@@ -15,7 +15,7 @@ from pyes.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
 def scatter_plot_data(aData_x, aData_y,\
-     sFilename_out, \
+    sFilename_out, \
     iSize_x_in = None, \
     iSize_y_in = None,  \
     iDPI_in = None ,\
