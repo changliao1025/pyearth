@@ -9,6 +9,7 @@ import matplotlib.ticker as ticker
 
 import pandas as pd
 from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.stattools import adfuller
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
@@ -19,7 +20,7 @@ from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_co
 def plot_time_series_analysis(aTime, \
                               aData, \
                               sFilename_out,\
-                                sVariable,\
+                              sVariable,\
                               iDPI_in = None,\
                               aFlag_trend_in = None, \
                               iReverse_y_in = None, \
@@ -128,6 +129,11 @@ def plot_time_series_analysis(aTime, \
         iFlag_space_y=0
         pass
 
+    adf_test = adfuller(aData)
+    #print(adf_test)
+    print("ADF = " + str(adf_test[0]))
+    print("p-value = " +str(adf_test[1])  )
+
     #fig = plt.figure( dpi=iDPI )
     #fig.set_figwidth( iSize_x )
     #fig.set_figheight( iSize_y )
@@ -159,6 +165,8 @@ def plot_time_series_analysis(aTime, \
 
     aData_tsa = pd.Series(aData, index=pd.date_range(aTime[0], \
         periods=len(aTime), freq='M'), name = sVariable)
+
+    #aData_tsa = aData
     stl = STL(aData_tsa, seasonal=13)
     aTSA = stl.fit()
     #part 1
@@ -166,11 +174,15 @@ def plot_time_series_analysis(aTime, \
     
     aData_all = [aData, aTSA.trend, aTSA.seasonal, aTSA.resid ]
     for i, ax in enumerate(pAxGrid):   
+
+        
         #ax.set_facecolor('#eafff5')
         ax.plot( aTime, aData_all[i], \
                  color = aColor[i], linestyle = aLinestyle[i] ,\
                  marker = aMarker[i] ,\
-                 label = aLabel_legend[i])
+                 label = aLabel_legend[i],\
+                     zorder=3)
+                
         if i == 0:            
             ax.set_ylim( dMax_y,dMin_y  )            
             ax.set_title(sTitle,fontsize=13)
@@ -179,14 +191,14 @@ def plot_time_series_analysis(aTime, \
             
             pass
 
+        
+        ax.set_ylabel(aLabel_legend[i],fontsize=12)
+        ax.grid(which='major', color='lightgrey', linestyle=':', axis='y', zorder=1) 
+        
         if i == 3:
-            ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', zorder=-3)
+            ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
             ax.set_xlabel('Year',fontsize=12)
             pass
-        ax.set_ylabel(aLabel_legend[i],fontsize=12)
-        ax.grid(which='major', color='lightblue', linestyle='-', axis='y')
-        
-        
         ax.set_xlim(dMin_x, dMax_x)
         #ax.xaxis.set_major_locator(pYear)
         #ax.xaxis.set_minor_locator(pMonth)

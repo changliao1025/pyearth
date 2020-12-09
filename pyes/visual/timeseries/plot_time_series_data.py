@@ -16,6 +16,7 @@ from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_co
 def plot_time_series_data(aTime_all, aData_all, \
                           sFilename_out,\
                           iDPI_in = None,\
+                          ncolumn_in = None,\
                           aFlag_trend_in = None, \
                           iReverse_y_in = None, \
                           iSize_x_in = None, \
@@ -30,8 +31,10 @@ def plot_time_series_data(aTime_all, aData_all, \
                           aLinestyle_in = None,\
                           sLabel_y_in = None, \
                           aLabel_legend_in = None,\
+                          aLocation_legend_in =None,\
                           sDate_type_in = None,\
                           sFormat_y_in =None,\
+                          sLocation_legend_in=None,\
                           sTitle_in = None):
     #find how many data will be plotted
     nData = len(aData_all)
@@ -144,6 +147,21 @@ def plot_time_series_data(aTime_all, aData_all, \
     else:
         iFlag_format_y = 0
 
+    if sLocation_legend_in is not None:
+        sLocation_legend = sLocation_legend_in
+    else:
+        sLocation_legend = "upper right"
+
+    if aLocation_legend_in is not None:
+        aLocation_legend = aLocation_legend_in
+    else:
+        aLocation_legend=(1.0,1.0)
+
+    if ncolumn_in is not None:
+        ncolumn = ncolumn_in
+    else:
+        ncolumn = 1
+
     sYear_format = mdates.DateFormatter('%Y')
 
     #start loop for each data
@@ -200,7 +218,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     #else:
     #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
     if (iFlag_format_y ==1):
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(  sFormat_y ))
+        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
 
     if (iFlag_space_y ==0):
         ax.yaxis.set_major_locator(ticker.AutoLocator())
@@ -213,7 +231,10 @@ def plot_time_series_data(aTime_all, aData_all, \
     else:
         ax.set_ylim( dMin_y, dMax_y )
 
-    ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
+    ax.legend(bbox_to_anchor=aLocation_legend, \
+              loc=sLocation_legend, \
+              fontsize=12, \
+              ncol= ncolumn)
 
     #save the result
     #plt.show()
