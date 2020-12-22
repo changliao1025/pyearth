@@ -19,6 +19,7 @@ def scatter_plot_data_density(aData_x, \
     iSize_x_in = None, \
     iSize_y_in = None, \
     iDPI_in = None, \
+      
     dMin_x_in = None, \
     dMax_x_in = None, \
     dMin_y_in = None, \
@@ -38,10 +39,21 @@ def scatter_plot_data_density(aData_x, \
         iSize_y = iSize_y_in
     else:       
         iSize_y = 9
+
     if iDPI_in is not None:        
         iDPI = iDPI_in
     else:       
         iDPI = 300
+
+    #if iFlag_log_x_in is not None:        
+    #    iFlag_log_x = iFlag_log_x_in
+    #else:       
+    #    iFlag_log_x = 0 
+#
+    #if iFlag_log_y_in is not None:        
+    #    iFlag_log_y = iFlag_log_y_in
+    #else:       
+    #    iFlag_log_y = 0 
 
     if dSpace_x_in is not None:        
         dSpace_x = dSpace_x_in
@@ -90,6 +102,10 @@ def scatter_plot_data_density(aData_x, \
     ax_histy.tick_params(direction='in', labelleft=False)
 
     nPoint = len(aData_x)
+
+
+
+
     x_min = np.nanmin(aData_x) 
     x_max = np.nanmax(aData_x) 
     y_min = np.nanmin(aData_y) 
@@ -132,12 +148,9 @@ def scatter_plot_data_density(aData_x, \
     if y_max < 1000 and y_max > 0.001:
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else: 
-        ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+        ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
-    #ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
-    #ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
-    ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
-    ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(prune='both', nbins=4))
+    
     
     ax_scatter.tick_params(axis='y', pad=8) 
     #ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(nbins = 5, prune='lower' ))
@@ -160,6 +173,12 @@ def scatter_plot_data_density(aData_x, \
         dMax_y = y_max
     ax_scatter.set_xlim( dMin_x, dMax_x )
     ax_scatter.set_ylim( dMin_y, dMax_y)
+    
+    
+    #ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
+    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
+    ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+    #ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(prune='both', nbins=3))
     
 
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
@@ -220,7 +239,7 @@ def scatter_plot_data_density(aData_x, \
     ax_histy.fill_betweenx(yy, 0, xx, linewidth=3,  color = 'lightblue')
     
     ax_histy.set_xlim(0, auto=None)
-    ax_histy.set_ylim(0, dMax_y)
+    ax_histy.set_ylim(dMin_y, dMax_y)
     
     ax_histy.axis('on')   
     ax_histy.grid(which='major', color='white', linestyle='-', axis='y')

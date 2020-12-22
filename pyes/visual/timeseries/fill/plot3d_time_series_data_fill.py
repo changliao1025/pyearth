@@ -16,12 +16,12 @@ sys.path.extend(sSystem_paths)
 from pyes.system.define_global_variables import *
 from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def polygon_under_graph(xlist, ylist):
+def polygon_under_graph(xlist, ylist, z_level):
     """
     Construct the vertex list which defines the polygon filling the space under
     the (xlist, ylist) line graph.  Assumes the xs are in ascending order.
     """
-    return [(xlist[0], 80.), *zip(xlist, ylist), (xlist[-1], 80.)]
+    return [(xlist[0], z_level), *zip(xlist, ylist), (xlist[-1], z_level)]
 
 
 def plot3d_time_series_data_fill(aTime_all, \
@@ -139,11 +139,12 @@ def plot3d_time_series_data_fill(aTime_all, \
     fig.set_figheight( iSize_y)
 
     ax = fig.add_subplot(111, projection='3d')
-    ax.pbaspect = np.array([2.0, 10.0, 0.5])
-
+    #ax.pbaspect = np.array([3.0, 1.0, 1.0])
+    #ax.set_box_aspect((np.ptp(xs), np.ptp(ys), np.ptp(zs)))
     
     verts=[]
     ys = range(nslice)
+    z_level = dMin_z
     for iSlice in np.arange(1, nslice+1, 1):
         xs = mdates.date2num( aTime_all[iSlice-1] )
         aData = aData_all[iSlice-1]
@@ -153,13 +154,13 @@ def plot3d_time_series_data_fill(aTime_all, \
         #y1 = (aData[1])[0]
         #y_top = aData        
         zs = aData
-        verts.append(polygon_under_graph(xs, zs))
+        verts.append(polygon_under_graph(xs, zs, z_level))
         pass
 
     poly = PolyCollection(verts, facecolors= aColor ,alpha=.6)
     ax.add_collection3d(poly, zs=ys, zdir='y')
     pYear = mdates.YearLocator(1)   # every year
-    pMonth = mdates.MonthLocator()  # every month
+    #pMonth = mdates.MonthLocator()  # every month
     ax.axis('on')
 
     ax.xaxis._axinfo["grid"]['linewidth'] = 0.
@@ -168,12 +169,13 @@ def plot3d_time_series_data_fill(aTime_all, \
     ax.zaxis._axinfo["grid"]['linestyle'] = "--"
 
     ax.xaxis.set_major_locator(pYear)
-    ax.xaxis.set_minor_locator(pMonth)
+    #ax.xaxis.set_minor_locator(pMonth)
     sYear_format = mdates.DateFormatter('%Y')
 
     ax.xaxis.set_major_formatter(sYear_format)
-
     ax.set_xlabel(sLabel_x)
+    ax.xaxis.set_tick_params(labelsize=6)
+    
     ax.set_xlim3d(np.min(aTime_all[0]), np.max(aTime_all[0]))
     #ax.xaxis.set_major_locator(ticker.MultipleLocator(dSpace_x))
 
@@ -184,9 +186,10 @@ def plot3d_time_series_data_fill(aTime_all, \
         aLabel_y.append( i.title() )
         pass
 
-    ax.set_yticklabels(aLabel_y,fontsize=13 )
+    ax.set_yticklabels(aLabel_y,fontsize=8 )
 
     ax.set_ylabel(sLabel_y)
+    
 
     #ax.zaxis.set_major_locator(ticker.MultipleLocator(dSpace_z))
     if (iReverse_z==1):
@@ -196,6 +199,7 @@ def plot3d_time_series_data_fill(aTime_all, \
         pass
 
     ax.set_zlabel(sLabel_z)
+    ax.set_box_aspect( (6, 6, 3))
 
     plt.savefig(sFilename_out, bbox_inches='tight')
 
