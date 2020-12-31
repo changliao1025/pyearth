@@ -16,6 +16,8 @@ from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_co
 def plot_time_series_data(aTime_all, aData_all, \
                           sFilename_out,\
                           iDPI_in = None,\
+                          iFlag_log_in = None,\
+                          iFlag_scientific_notation_in=None,\
                           ncolumn_in = None,\
                           aFlag_trend_in = None, \
                           iReverse_y_in = None, \
@@ -43,6 +45,17 @@ def plot_time_series_data(aTime_all, aData_all, \
         iDPI = iDPI_in
     else:
         iDPI = 300
+        
+    if iFlag_log_in is not None:
+        iFlag_log = 1
+    else:
+        iFlag_log = 0
+
+    if iFlag_scientific_notation_in is not None:
+        iFlag_scientific_notation = 1
+    else:
+        iFlag_scientific_notation = 0
+        
 
     if aFlag_trend_in is not None:
         aFlag_trend = aFlag_trend_in
@@ -112,11 +125,13 @@ def plot_time_series_data(aTime_all, aData_all, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData_all) * 1.0
+        dMax_y = np.nanmax(aData_all) * 1.2
+
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
         dMin_y = np.nanmin(aData_all) #if it has negative value, change here
+        
     if (dMax_y <= dMin_y ):
         return
 
@@ -208,28 +223,54 @@ def plot_time_series_data(aTime_all, aData_all, \
     ax.set_ymargin(0.15)
 
     ax.set_xlabel('Year',fontsize=12)
-    ax.set_ylabel(sLabel_y,fontsize=12)
+    
     ax.set_title( sTitle, loc='center', fontsize=15)
 
     ax.set_xlim(dMin_x, dMax_x)
 
-    #if dMax_y < 1000 and dMax_y > 0.001:
-    #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
-    #else:
-    #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
-    if (iFlag_format_y ==1):
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
+    #next Y axis   
+    ax.set_ylabel(sLabel_y,fontsize=12)
 
-    if (iFlag_space_y ==0):
-        ax.yaxis.set_major_locator(ticker.AutoLocator())
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-    else:
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
-
-    if (iReverse_y ==1):
+    if (iReverse_y ==1): #be careful here
         ax.set_ylim( dMax_y, dMin_y )
     else:
-        ax.set_ylim( dMin_y, dMax_y )
+        ax.set_ylim( dMin_y, dMax_y )   
+    
+    if iFlag_log ==1:
+        #we need to change the ticklabel
+        aLabel_y = []
+        for i in np.arange( dMin_y, dMax_y +1, 1 ):
+            sTicklabel = r'$10^{{{}}}$'.format(int(i))
+            aLabel_y.append(sTicklabel)
+            pass
+
+        ax.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
+        ax.set_yticklabels(aLabel_y)
+        pass
+    else:
+        #not log 
+
+        if iFlag_scientific_notation ==1:
+            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter.set_scientific(True) 
+            formatter.set_powerlimits((-1,1)) # you might need to change here
+            ax.yaxis.set_major_formatter(formatter) 
+            #most time, when you use scientific notation, you may not need set the space,
+            #but you may still set it using the method below
+
+            pass
+        else:
+            if (iFlag_format_y ==1):
+                ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
+
+            if (iFlag_space_y ==0):
+                ax.yaxis.set_major_locator(ticker.AutoLocator())
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+            else:
+                ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+
+            pass
+
 
     ax.legend(bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, \

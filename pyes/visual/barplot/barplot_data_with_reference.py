@@ -14,18 +14,9 @@ from pyes.system.define_global_variables import *
 
 from pyes.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def autolabel(rects,ax, sFormat_y):
-    """Attach a text label above each bar in *rects*, displaying its height."""
 
-    for rect in rects:
-        height = rect.get_height()
-        ax.annotate( "{}".format(height),
-                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                     xytext=(0, 3),  # 3 points vertical offset
-                     textcoords="offset points",
-                     ha='center', va='bottom', size=6)
 
-def barplot_data(aData_in,\
+def barplot_data_with_reference(aData_in,\
                  aLabel_x_in,\
                  aLabel_y_in,\
                  sFilename_out,\
@@ -130,6 +121,16 @@ def barplot_data(aData_in,\
     fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
     x = np.arange(  len(aLabel_x_in)  )
+    dMin_x = -0.5
+    dMax_x = nData-2.5
+
+    x0 = [-1, nData]
+    y0 = [aData_in[0][0], aData_in[0][0]]
+
+    ax.plot( x0, y0, \
+                 color = aColor[0], linestyle = 'dashed' ,\
+                 marker = '+' ,\
+                 label = aLabel_y_in[0])   
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel(sLabel_y)
     ax.set_title(sTitle)
@@ -137,23 +138,24 @@ def barplot_data(aData_in,\
     ax.set_xticklabels(aLabel_x_in)
 
     total_width = 0.7
-    width = total_width / nData
+    width = total_width / (nData-1)
 
-    for i in np.arange(1, nData + 1, 1):
+    for i in np.arange(1, nData, 1):
 
-        data1 = aData_in[i-1]
-        if i == 1 or i ==2:
-            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i-1],\
-                            color = aColor[i-1], hatch = aHatch[i-1], edgecolor = "k")
+        data1 = aData_in[i]
+        if i == nData-1:
+            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i],\
+                            color = aColor[i], hatch = aHatch[i], edgecolor = "k")
         else:
-            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i-1],\
-                            color = aColor[i-1])#, hatch = aHatch[i-1], edgecolor = "k")
+            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i],\
+                            color = aColor[i])#, hatch = aHatch[i-1], edgecolor = "k")
             #autolabel(rects)
         pass
 
     if (iFlag_format_y ==1):
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
 
+    ax.set_xlim( dMin_x, dMax_x )
     ax.set_ylim( dMin_y, dMax_y )
     ax.legend(bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, \
