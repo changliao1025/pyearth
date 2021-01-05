@@ -19,7 +19,7 @@ def scatter_plot_data_density(aData_x, \
     iSize_x_in = None, \
     iSize_y_in = None, \
     iDPI_in = None, \
-      
+    iFlag_log_y_in = None,\
     dMin_x_in = None, \
     dMax_x_in = None, \
     dMin_y_in = None, \
@@ -50,10 +50,11 @@ def scatter_plot_data_density(aData_x, \
     #else:       
     #    iFlag_log_x = 0 
 #
-    #if iFlag_log_y_in is not None:        
-    #    iFlag_log_y = iFlag_log_y_in
-    #else:       
-    #    iFlag_log_y = 0 
+    if iFlag_log_y_in is not None:        
+        iFlag_log_y = 1
+    else:       
+        iFlag_log_y = 0 
+    
 
     if dSpace_x_in is not None:        
         dSpace_x = dSpace_x_in
@@ -102,9 +103,6 @@ def scatter_plot_data_density(aData_x, \
     ax_histy.tick_params(direction='in', labelleft=False)
 
     nPoint = len(aData_x)
-
-
-
 
     x_min = np.nanmin(aData_x) 
     x_max = np.nanmax(aData_x) 
@@ -183,11 +181,21 @@ def scatter_plot_data_density(aData_x, \
 
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
     ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
-    #ax_scatter.legend(cset, bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
+
+    if iFlag_log_y ==1:
+        aLabel_y = []
+        for i in np.arange( dMin_y, dMax_y +1, 1 ):
+            sTicklabel = r'$10^{{{}}}$'.format(int(i))
+            aLabel_y.append(sTicklabel)
+            pass
+
+        ax_scatter.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
+        ax_scatter.set_yticklabels(aLabel_y)
+        pass
 
     handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
 
-    # create the corresponding number of labels (= the text you want to     display)
+    # create the corresponding number of labels (= the text you want to display)
     labels = []
     labels.append(sLabel_legend)
     # create the legend, supressing the blank space of the empty line symbol    and the

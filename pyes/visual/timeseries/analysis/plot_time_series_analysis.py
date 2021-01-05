@@ -22,7 +22,7 @@ def plot_time_series_analysis(aTime, \
                               sFilename_out,\
                               sVariable,\
                               iDPI_in = None,\
-                              aFlag_trend_in = None, \
+                              iFlag_log_in = None,\
                               iReverse_y_in = None, \
                               iSize_x_in = None, \
                               iSize_y_in = None, \
@@ -184,8 +184,22 @@ def plot_time_series_analysis(aTime, \
                      zorder=3)
                 
         if i == 0:            
-            ax.set_ylim( dMax_y,dMin_y  )            
+            if iReverse_y ==1:
+                ax.set_ylim( dMin_y,dMax_y  )            
+                
             ax.set_title(sTitle,fontsize=13)
+
+            if iFlag_log_in ==1:
+                #we need to change the ticklabel
+                aLabel_y = []
+                for j in np.arange( dMin_y, dMax_y + 1, 1 ):
+                    sTicklabel = r'$10^{{{}}}$'.format(int(j))
+                    aLabel_y.append(sTicklabel)
+                    pass
+                
+                ax.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
+                ax.set_yticklabels(aLabel_y)
+                pass
             pass
         else:            
             
