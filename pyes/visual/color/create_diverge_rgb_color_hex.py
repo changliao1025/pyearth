@@ -42,6 +42,14 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#e0f3f8', \
                                 '#91bfdb', \
                                 '#4575b4'  ]
+            if ncolor == 8:
+                colors_hex = [  '#d73027', \
+                                '#fc8d59', \
+                                '#fee090', \
+                                '#ffffbf', \
+                                '#e0f3f8', \
+                                '#91bfdb', \
+                                '#4575b4'  ]
             if ncolor == 10:
                 colors_hex = [  '#9e0142', \
                                 '#d53e4f', \

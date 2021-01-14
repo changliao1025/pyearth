@@ -13,6 +13,7 @@ sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
 
 from pyes.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
+
 def scatter_plot_data_density(aData_x, \
     aData_y,\
     sFilename_out, \
@@ -35,6 +36,7 @@ def scatter_plot_data_density(aData_x, \
         iSize_x = iSize_x_in
     else:       
         iSize_x = 12
+
     if iSize_y_in is not None:        
         iSize_y = iSize_y_in
     else:       
@@ -60,6 +62,7 @@ def scatter_plot_data_density(aData_x, \
         dSpace_x = dSpace_x_in
     else:       
         dSpace_x = 1
+
     if dSpace_y_in is not None:        
         dSpace_y = dSpace_y_in
     else:       
@@ -74,10 +77,12 @@ def scatter_plot_data_density(aData_x, \
         sLabel_Y = sLabel_y_in
     else:        
         sLabel_Y = ''
+
     if sLabel_legend_in is not None:        
         sLabel_legend = sLabel_legend_in
     else:        
         sLabel_legend = ''
+
     if sTitle_in is not None:        
         sTitle = sTitle_in
     else:        
@@ -94,7 +99,7 @@ def scatter_plot_data_density(aData_x, \
     rect_histx = [left, bottom + height + spacing, width, 0.15]
     rect_histy = [left + width + spacing, bottom, 0.15, height]
               
-    #ax_scatter = fig.add_axes([0.1, 0.5, 0.8, 0.4] )  
+    
     ax_scatter = plt.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
     ax_histx = plt.axes(rect_histx)
@@ -117,10 +122,12 @@ def scatter_plot_data_density(aData_x, \
     gridsize=100
     cut=3
     clip=None
+
     if clip is None:
         clip = [(-np.inf, np.inf), (-np.inf, np.inf)]
     elif np.ndim(clip) == 1:
         clip = [clip, clip]
+
     xx, yy, z = _scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
     cmap = plt.get_cmap('BuPu')
     cset = ax_scatter.contourf(xx, yy, z,cmap=cmap)
@@ -128,8 +135,7 @@ def scatter_plot_data_density(aData_x, \
     dRatio = 1.0
     ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
     
-    ax_scatter.tick_params(axis="x", labelsize=13) 
-    
+    ax_scatter.tick_params(axis="x", labelsize=13)     
     ax_scatter.tick_params(axis="y", labelsize=13)
     
     ax_scatter.set_xmargin(0.05)
@@ -138,11 +144,13 @@ def scatter_plot_data_density(aData_x, \
     ax_scatter.set_xlabel(sLabel_X,fontsize=12)
     ax_scatter.set_ylabel(sLabel_Y,fontsize=12)
     ax_scatter.set_title( sTitle, loc='center', fontsize=15)
+
     # round to nearest years...
     if x_max < 1000 and x_max > 0.001:
         ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else: 
         ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+
     if y_max < 1000 and y_max > 0.001:
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
     else: 
@@ -203,7 +211,6 @@ def scatter_plot_data_density(aData_x, \
     ax_scatter.legend(handles, labels, loc="upper right", fontsize=12, 
           fancybox=True, framealpha=0.7, 
           handlelength=0, handletextpad=0)
-
 
 
     ax_scatter.tick_params(which='both', # Options for both major and minor ticks

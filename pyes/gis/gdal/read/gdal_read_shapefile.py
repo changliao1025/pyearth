@@ -1,6 +1,8 @@
 import os
 import sys
 from osgeo import gdalconst, ogr, osr
+import numpy as np
+os.environ['PROJ_LIB'] = '/qfs/people/liao313/.conda/envs/gdalenv/share/proj'
 def gdal_read_shapefile(sFilename_in):
     sDriverName = "ESRI Shapefile"
     pDriver = ogr.GetDriverByName( sDriverName )
@@ -8,6 +10,7 @@ def gdal_read_shapefile(sFilename_in):
         print ("%s pDriver not available.\n" % sDriverName)
     else:
         print  ("%s pDriver IS available.\n" % sDriverName)
+
     pDataSource = pDriver.Open(sFilename_in, 0) # 0 means      read-only. 1 means writeable.
     
     # Check to see if shapefile is found.
@@ -27,7 +30,9 @@ def gdal_read_shapefile(sFilename_in):
         for pFeature in pLayer:         
 
             pGeometry = pFeature.GetGeometryRef()
-            #print (pGeometry.Centroid().ExportToWkt())
+            print (pGeometry.Centroid().ExportToWkt())
             aFeature.append(pGeometry)
+
+        #aFeature = np.array(aFeature)
 
         return aFeature, pSpatailRef, lFeatureCount

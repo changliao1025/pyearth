@@ -51,6 +51,15 @@ def create_qualitative_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#66a61e',\
                                 '#e6ab02',\
                                 '#a6761d']
+            if ncolor == 8:
+                colors_hex = [  '#e41a1c' ,\
+                                '#377eb8' ,\
+                                '#4daf4a' ,\
+                                '#984ea3' ,\
+                                '#ff7f00' ,\
+                                '#ffff33' ,\
+                                '#a65628' ,\
+                                '#f781bf' ]
             if ncolor == 10:
                 colors_hex = [  '#9e0142', \
                                 '#d53e4f', \

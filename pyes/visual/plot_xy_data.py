@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-
-import matplotlib.ticker as ticker
 from adjustText import adjust_text
+import matplotlib.ticker as ticker
+
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
@@ -22,6 +22,7 @@ def plot_xy_data(aX_all, \
                  iReverse_y_in = None, \
                  iSize_x_in = None, \
                  iSize_y_in = None, \
+                     ncolumn_in = None,\
                  dMax_x_in = None, \
                      dMin_x_in = None, \
                  dMax_y_in = None, \
@@ -32,9 +33,11 @@ def plot_xy_data(aX_all, \
                  aLinestyle_in = None,\
                 aLabel_point_in = None, \
                 aTick_label_x_in = None, \
+                          aLocation_legend_in =None,\
                  sLabel_x_in = None,\
                  sLabel_y_in = None, \
                  aLabel_legend_in = None,\
+                     sLocation_legend_in=None,\
                  sFormat_y_in =None,\
                  sTitle_in = None):
 
@@ -65,7 +68,21 @@ def plot_xy_data(aX_all, \
         iSize_y = iSize_y_in
     else:
         iSize_y = 9
+    
+    if sLocation_legend_in is not None:
+        sLocation_legend = sLocation_legend_in
+    else:
+        sLocation_legend = "upper right"
 
+    if aLocation_legend_in is not None:
+        aLocation_legend = aLocation_legend_in
+    else:
+        aLocation_legend=(1.0,1.0)
+
+    if ncolumn_in is not None:
+        ncolumn = ncolumn_in
+    else:
+        ncolumn = 1
 
     if sLabel_x_in is not None:
         sLabel_x = sLabel_x_in
@@ -260,7 +277,10 @@ def plot_xy_data(aX_all, \
         ax.set_xticklabels(xtick_labels,fontsize= 8 )
         pass
 
-    ax.legend(bbox_to_anchor=(0.0,1.0), loc="upper left", fontsize=12)
+    ax.legend(bbox_to_anchor=aLocation_legend, \
+              loc=sLocation_legend, \
+              fontsize=8, \
+              ncol= ncolumn)
 
     #save the result
     #plt.show()
