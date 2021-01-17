@@ -1,11 +1,12 @@
 import numpy as np
+
 def scatter_lowess(x, y, f=1./3.):
     """
-    Basic LOWESS smoother with uncertainty. 
+    Basic LOWESS smoother with uncertainty.
     Note:
         - Not robust (so no iteration) and
-             only normally distributed errors. 
-        - No higher order polynomials d=1 
+             only normally distributed errors.
+        - No higher order polynomials d=1
             so linear smoother.
     """
     # get some paras
@@ -32,10 +33,10 @@ def scatter_lowess(x, y, f=1./3.):
         # predict for the observation only
         yest = A[i].dot(sol)# equiv of A.dot(yest) just for k
         place = order[i]
-        y_sm[place]=yest 
+        y_sm[place]=yest
         sigma2 = (np.sum((A.dot(sol) -y [order])**2)/N )
         # Calculate the standard error
-        y_stderr[place] = np.sqrt(sigma2 * 
-                                A[i].dot(np.linalg.inv(ATA)
-                                                    ).dot(A[i]))
+        y_stderr[place] = np.sqrt(sigma2 *
+                                  A[i].dot(np.linalg.inv(ATA)
+                                  ).dot(A[i]))
     return y_sm, y_stderr, order

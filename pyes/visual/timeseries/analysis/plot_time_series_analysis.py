@@ -22,6 +22,7 @@ def plot_time_series_analysis(aTime, \
                               sFilename_out,\
                               sVariable,\
                               iDPI_in = None,\
+                              iFlag_without_raw_in= None,\
                               iFlag_log_in = None,\
                               iReverse_y_in = None, \
                               iSize_x_in = None, \
@@ -48,6 +49,11 @@ def plot_time_series_analysis(aTime, \
         iDPI = iDPI_in
     else:
         iDPI = 300
+
+    if iFlag_without_raw_in is not None:
+        iFlag_without_raw = iFlag_without_raw_in
+    else:
+        iFlag_without_raw = 0
 
     if iReverse_y_in is not None:
         iReverse_y = iReverse_y_in
@@ -115,6 +121,7 @@ def plot_time_series_analysis(aTime, \
         dMax_y = dMax_y_in
     else:
         dMax_y = np.nanmax(aData) * 1.2
+
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
@@ -143,7 +150,6 @@ def plot_time_series_analysis(aTime, \
     #                    axes_pad=0.6,
     #                    label_mode='')  # note the empty label_mode
 
-    fig, pAxGrid = plt.subplots(nrows=4, figsize=(iSize_x, iSize_y),sharex=True,  dpi=iDPI)
 
     pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
@@ -155,6 +161,7 @@ def plot_time_series_analysis(aTime, \
     else:
         print(sDate_type_in)
         pass
+
     if sFormat_y_in is not None:
         iFlag_format_y = 1
         sFormat_y = sFormat_y_in
@@ -164,62 +171,94 @@ def plot_time_series_analysis(aTime, \
     sYear_format = mdates.DateFormatter('%Y')
 
     aData_tsa = pd.Series(aData, index=pd.date_range(aTime[0], \
-        periods=len(aTime), freq='M'), name = sVariable)
+                                                     periods=len(aTime), freq='M'), name = sVariable)
 
     #aData_tsa = aData
     stl = STL(aData_tsa, seasonal=13)
     aTSA = stl.fit()
     #part 1
     #plot time series
-    
-    aData_all = [aData, aTSA.trend, aTSA.seasonal, aTSA.resid ]
-    for i, ax in enumerate(pAxGrid):   
 
-        
+
+
+    if iFlag_without_raw == 1:
+        aData_all = [aTSA.trend, aTSA.seasonal, aTSA.resid ]
+        iSize_y = iSize_y * 0.75
+        fig, pAxGrid = plt.subplots(nrows= len(aData_all), \
+                                    figsize=(iSize_x, iSize_y),\
+                                    sharex=True,  dpi=iDPI)
+    else:
+        aData_all = [aData, aTSA.trend, aTSA.seasonal, aTSA.resid ]
+        fig, pAxGrid = plt.subplots(nrows= len(aData_all), \
+                                    figsize=(iSize_x, iSize_y),\
+                                    sharex=True,  dpi=iDPI)
+
+    for i, ax in enumerate(pAxGrid):
+
+
         #ax.set_facecolor('#eafff5')
-        ax.plot( aTime, aData_all[i], \
-                 color = aColor[i], linestyle = aLinestyle[i] ,\
-                 marker = aMarker[i] ,\
-                 label = aLabel_legend[i],\
+        if iFlag_without_raw == 1:
+            ax.plot( aTime, aData_all[i], \
+                     color = aColor[i+1], linestyle = aLinestyle[i+1] ,\
+                     marker = aMarker[i+1] ,\
+                     label = aLabel_legend[i+1],\
                      zorder=3)
-                
-        if i == 0:            
-            if iReverse_y ==1:
-                ax.set_ylim( dMin_y,dMax_y  )            
-                
-            ax.set_title(sTitle,fontsize=13)
 
-            if iFlag_log_in ==1:
-                #we need to change the ticklabel
-                aLabel_y = []
-                for j in np.arange( dMin_y, dMax_y + 1, 1 ):
-                    sTicklabel = r'$10^{{{}}}$'.format(int(j))
-                    aLabel_y.append(sTicklabel)
+        else:
+            ax.plot( aTime, aData_all[i], \
+                     color = aColor[i], linestyle = aLinestyle[i] ,\
+                     marker = aMarker[i] ,\
+                     label = aLabel_legend[i],\
+                     zorder=3)
+
+        if  iFlag_without_raw == 0:
+            if i==0:
+                if iReverse_y ==1:
+                    ax.set_ylim( dMin_y,dMax_y  )
+
+                ax.set_title(sTitle,fontsize=13)
+
+                if iFlag_log_in ==1:
+                    #we need to change the ticklabel
+                    aLabel_y = []
+                    for j in np.arange( dMin_y, dMax_y + 1, 1 ):
+                        sTicklabel = r'$10^{{{}}}$'.format(int(j))
+                        aLabel_y.append(sTicklabel)
+                        pass
+
+                    ax.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
+                    ax.set_yticklabels(aLabel_y)
                     pass
-                
-                ax.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
-                ax.set_yticklabels(aLabel_y)
                 pass
-            pass
-        else:            
-            
-            pass
+        else:
+            if i==0:
+                ax.set_title(sTitle,fontsize=13)
 
-        
-        ax.set_ylabel(aLabel_legend[i],fontsize=12)
-        ax.grid(which='major', color='lightgrey', linestyle=':', axis='y', zorder=1) 
-        
-        if i == 3:
-            ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
-            ax.set_xlabel('Year',fontsize=12)
-            pass
+
+        if iFlag_without_raw == 1:
+            ax.set_ylabel(aLabel_legend[i+1],fontsize=12)
+            if i == 2:
+                ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
+
+                ax.set_xlabel('Year',fontsize=12)
+
+        else:
+            ax.set_ylabel(aLabel_legend[i],fontsize=12)
+            if i == 3:
+                ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
+                ax.set_xlabel('Year',fontsize=12)
+
+
+        ax.grid(which='major', color='lightgrey', linestyle=':', axis='y', zorder=1)
+
+
         ax.set_xlim(dMin_x, dMax_x)
         #ax.xaxis.set_major_locator(pYear)
         #ax.xaxis.set_minor_locator(pMonth)
-  
-    
+
+
     #we can now rewrite the plot function here
-    
+
 
 
 

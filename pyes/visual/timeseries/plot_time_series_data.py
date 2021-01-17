@@ -45,7 +45,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         iDPI = iDPI_in
     else:
         iDPI = 300
-        
+
     if iFlag_log_in is not None:
         iFlag_log = 1
     else:
@@ -55,7 +55,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         iFlag_scientific_notation = 1
     else:
         iFlag_scientific_notation = 0
-        
+
 
     if aFlag_trend_in is not None:
         aFlag_trend = aFlag_trend_in
@@ -131,7 +131,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         dMin_y = dMin_y_in
     else:
         dMin_y = np.nanmin(aData_all) #if it has negative value, change here
-        
+
     if (dMax_y <= dMin_y ):
         return
 
@@ -148,6 +148,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
     pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
+
     if sDate_type_in is not None:
         if sDate_type_in == 'month':
             pMonth = mdates.MonthLocator(3)
@@ -156,6 +157,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     else:
         print(sDate_type_in)
         pass
+
     if sFormat_y_in is not None:
         iFlag_format_y = 1
         sFormat_y = sFormat_y_in
@@ -223,19 +225,19 @@ def plot_time_series_data(aTime_all, aData_all, \
     ax.set_ymargin(0.15)
 
     ax.set_xlabel('Year',fontsize=12)
-    
+
     ax.set_title( sTitle, loc='center', fontsize=15)
 
     ax.set_xlim(dMin_x, dMax_x)
 
-    #next Y axis   
+    #next Y axis
     ax.set_ylabel(sLabel_y,fontsize=12)
 
     if (iReverse_y ==1): #be careful here
         ax.set_ylim( dMax_y, dMin_y )
     else:
-        ax.set_ylim( dMin_y, dMax_y )   
-    
+        ax.set_ylim( dMin_y, dMax_y )
+
     if iFlag_log ==1:
         #we need to change the ticklabel
         aLabel_y = []
@@ -248,13 +250,13 @@ def plot_time_series_data(aTime_all, aData_all, \
         ax.set_yticklabels(aLabel_y)
         pass
     else:
-        #not log 
+        #not log
 
         if iFlag_scientific_notation ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
-            formatter.set_scientific(True) 
+            formatter.set_scientific(True)
             formatter.set_powerlimits((-1,1)) # you might need to change here
-            ax.yaxis.set_major_formatter(formatter) 
+            ax.yaxis.set_major_formatter(formatter)
             #most time, when you use scientific notation, you may not need set the space,
             #but you may still set it using the method below
 

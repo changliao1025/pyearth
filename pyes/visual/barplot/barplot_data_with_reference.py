@@ -6,7 +6,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-from adjustText import adjust_text
+#from adjustText import adjust_text
 
 sSystem_paths = os.environ['PATH'].split(os.pathsep)
 sys.path.extend(sSystem_paths)
@@ -61,6 +61,7 @@ def barplot_data_with_reference(aData_in,\
         dMax_y = dMax_y_in
     else:
         dMax_y = np.nanmax(aData_in) * 1.0
+
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:

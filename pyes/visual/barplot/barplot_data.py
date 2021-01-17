@@ -70,6 +70,7 @@ def barplot_data(aData_in,\
         dMax_y = dMax_y_in
     else:
         dMax_y = np.nanmax(aData_in) * 1.0
+
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
