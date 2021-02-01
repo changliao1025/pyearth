@@ -139,7 +139,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         iFlag_space_y =1
         dSpace_y = dSpace_y_in
     else:
-        iFlag_space_y=0
+        dSpace_y = (dMax_y - dMin_y) /4.0
         pass
 
     fig = plt.figure( dpi=iDPI )
@@ -241,14 +241,25 @@ def plot_time_series_data(aTime_all, aData_all, \
     if iFlag_log ==1:
         #we need to change the ticklabel
         aLabel_y = []
-        for i in np.arange( dMin_y, dMax_y +1, 1 ):
-            sTicklabel = r'$10^{{{}}}$'.format(int(i))
+        nlabel = int( (dMax_y- dMin_y) / dSpace_y) +1
+        for i in np.arange( 0, nlabel, 1 ):
+            ii = dMin_y + i * dSpace_y
+            sTicklabel = r'$10^{{{}}}$'.format(ii)
             aLabel_y.append(sTicklabel)
             pass
-
-        ax.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
+        ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
+        ax.set_yticks( ticks)
         ax.set_yticklabels(aLabel_y)
-        pass
+        #if (iFlag_format_y ==1):
+        #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
+
+        
+           
+        #ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+
+        
+        
     else:
         #not log
 
@@ -266,10 +277,12 @@ def plot_time_series_data(aTime_all, aData_all, \
                 ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
 
             if (iFlag_space_y ==0):
-                ax.yaxis.set_major_locator(ticker.AutoLocator())
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                #ax.yaxis.set_major_locator(ticker.AutoLocator())
+                #ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
             else:
                 ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
 
             pass
 

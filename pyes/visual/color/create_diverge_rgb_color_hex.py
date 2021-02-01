@@ -17,6 +17,7 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
             if ncolor == 5:
                 colors_hex = [  '#d7191c',\
                                 '#fdae61',\
+                                '#ffffbf',\
                                 '#abdda4',\
                                 '#2b83ba']
             if ncolor == 6:
