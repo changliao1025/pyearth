@@ -39,7 +39,9 @@ def plot_time_series_data(aTime_all, aData_all, \
                           sLocation_legend_in=None,\
                           sTitle_in = None):
     #find how many data will be plotted
-    nData = len(aData_all)
+    pShape = aData_all.shape
+  
+    nData = pShape[0]
 
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -125,7 +127,7 @@ def plot_time_series_data(aTime_all, aData_all, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData_all) * 1.2
+        dMax_y = np.nanmax(aData_all) #* 1.2
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
@@ -139,6 +141,7 @@ def plot_time_series_data(aTime_all, aData_all, \
         iFlag_space_y =1
         dSpace_y = dSpace_y_in
     else:
+        iFlag_space_y =1
         dSpace_y = (dMax_y - dMin_y) /4.0
         pass
 

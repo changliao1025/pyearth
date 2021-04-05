@@ -23,6 +23,7 @@ def text_reader_string( sFilename_in,\
             ncolumn_out = ncolumn_in
         else:
             iFlag_column = 0
+            
         if nrow_in is not None :
             #there is nothing
             nrow_out = nrow_in
@@ -32,6 +33,7 @@ def text_reader_string( sFilename_in,\
             ifs = open(sFilename_in, "r")
             nrow_out = len(ifs.readlines())
             ifs.close()
+
         sLine=' '
         ifs = open(sFilename_in, "r")
 
@@ -41,22 +43,27 @@ def text_reader_string( sFilename_in,\
                 ifs.readline()
         else:
             pass
+
         if iFlag_remove_quota is not None:
             iFlag_iFlag_remove_quota = 1
         else:
             iFlag_iFlag_remove_quota = 0
+
         #get delimiter
         if cDelimiter_in is not None:
             iFlag_delimiter = 1
         else:
             iFlag_delimiter = 0
             #cDelimiter_in = ' '
+            pass
         
         
         if iFlag_delimiter == 1:
             if iFlag_column == 1:
                 if ncolumn_out < 1 :
                     print( 'The file has no data!' )
+                    pass
+
                 aData_out = np.full( (nrow_out, ncolumn_out), '  ' , dtype=object )    
                 for iRow in range(nrow_out):
                     sLine=(ifs.readline()).rstrip()
@@ -64,6 +71,7 @@ def text_reader_string( sFilename_in,\
                         sLine.replace('"','')
                     else:
                         pass    
+
                     aDummy = sLine.split(cDelimiter_in)
                     iDummy = len(aDummy)
                     if iDummy == ncolumn_out:
@@ -73,6 +81,8 @@ def text_reader_string( sFilename_in,\
                         aDummy2  =np.full(ncolumn_out, '  ' , dtype=object)
                         aDummy2[0: iDummy]= aDummy
                         aData_out[iRow]= aDummy2
+                        pass
+
             else :
                 sLine=(ifs.readline()).rstrip()
                 dummy = sLine.split(cDelimiter_in)
@@ -80,6 +90,8 @@ def text_reader_string( sFilename_in,\
                 #check ncolumn_in count
                 if ncolumn_out < 1 :
                     print( 'The file has no data!' )  
+                    pass
+
                 aData_out = np.full( (nrow_out, ncolumn_out), '  ' , dtype=object )         
                 aData_out[0] = dummy
                 for iRow in range(1, nrow_out):
@@ -88,6 +100,7 @@ def text_reader_string( sFilename_in,\
                         sLine.replace('"','')
                     else:
                         pass    
+
                     aDummy = sLine.split(cDelimiter_in)
                     iDummy = len(aDummy)
                     if iDummy == ncolumn_out:
@@ -97,12 +110,14 @@ def text_reader_string( sFilename_in,\
                         aDummy2  =np.full(ncolumn_out, '  ' , dtype=object)
                         aDummy2[0: iDummy]= aDummy
                         aData_out[iRow]= aDummy2
+                        pass
                 
         else :
             if iFlag_column == 1:
                 #check ncolumn_in count
                 if ncolumn_out < 1 :                
                     return aData_out                      
+
                 aData_out = np.full( (nrow_out, ncolumn_out), '  ', dtype=object )
                 for iRow in range(nrow_out):
                     dummy1 = ifs.readline()
@@ -112,6 +127,7 @@ def text_reader_string( sFilename_in,\
                         dummy2=dummy2.replace('"','')
                     else:
                         pass
+
                     dummy3 = dummy2.split()
                     #print(dummy3)
                     aData_out[iRow] = dummy3
@@ -121,11 +137,13 @@ def text_reader_string( sFilename_in,\
                 ncolumn_out = len(dummy)
                 if ncolumn_out < 1 :                
                     return aData_out          
+
                 aData_out = np.full( (nrow_out, ncolumn_out), '  ', dtype=object )
                 if iFlag_iFlag_remove_quota ==1:
                     sLine=sLine.replace('"','')
                 else:
                     pass
+
                 aData_out[0] =  dummy
                 for iRow in range(1,nrow_out):
                     dummy1 = ifs.readline()
@@ -135,12 +153,15 @@ def text_reader_string( sFilename_in,\
                         dummy2=dummy2.replace('"','')
                     else:
                         pass
+
                     dummy3 = dummy2.split()
                     #print(dummy3)
                     aData_out[iRow] = dummy3
+
         #print(aData_out)
         ifs.close()
 
     else :
         print('file does not exist')
+
     return aData_out
