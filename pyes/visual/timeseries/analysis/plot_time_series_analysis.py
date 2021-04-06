@@ -173,7 +173,8 @@ def plot_time_series_analysis(aTime, \
     aData_tsa = pd.Series(aData, index=pd.date_range(aTime[0], \
                                                      periods=len(aTime), freq='M'), name = sVariable)
 
-    #aData_tsa = aData
+    
+    #https://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.STL.html#statsmodels.tsa.seasonal.STL
     stl = STL(aData_tsa, seasonal=13)
     aTSA = stl.fit()
     #part 1

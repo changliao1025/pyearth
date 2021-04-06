@@ -18,9 +18,7 @@ KEYWORDS = "Earth Science"
 
 REQUIRED = [
     "numpy", 
-    "pathlib", 
     "osgeo", 
-    "shapely",
     "matplotlib",
     "scipy",
     "statsmodels",
@@ -29,13 +27,12 @@ REQUIRED = [
 ]
 
 CLASSIFY = [
-    "Development Status :: 1 - Beta",
+    "Development Status :: 4 - Beta",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",    
     "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Earth Science",
     "Topic :: Scientific/Engineering :: Visualization"
 ]
 

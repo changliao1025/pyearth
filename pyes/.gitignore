@@ -1,0 +1,11 @@
+# python things
+__pycache__/
+*.py[co]
+
+# data files, etc
+*.nc
+*.grd
+*.vtk
+*.off
+*.obj
+*.stl
