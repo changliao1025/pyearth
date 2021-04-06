@@ -6,13 +6,13 @@ import shutil
 
 from setuptools import setup, find_packages, Command
 
-NAME = "pyes"
+NAME = "pyearth"
 DESCRIPTION = \
     "Python for Earth Science."
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "chang.liao@pnnl.gov"
-URL = "https://github.com/changliao1025/pyes"
-VERSION = "1.0"
+URL = "https://github.com/changliao1025/pyearth"
+VERSION = "0.1"
 REQUIRES_PYTHON = ">=3.6.0"
 KEYWORDS = "Earth Science"
 
@@ -31,7 +31,7 @@ CLASSIFY = [
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3",    
+    "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Visualization"
 ]
