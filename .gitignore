@@ -1,7 +1,14 @@
 # python things
 __pycache__/
-*.py[cod]
+*.py[co]
+build/
+dist/
+unused/
+pyearth.egg-info/
+.vscode/
 .core*
+.pypi*
+*~
 
 # data files, etc
 *.nc
