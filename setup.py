@@ -12,17 +12,18 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "chang.liao@pnnl.gov"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1"
+VERSION = "0.0.1"
 REQUIRES_PYTHON = ">=3.6.0"
 KEYWORDS = "Earth Science"
 
 REQUIRED = [
-    "numpy", 
-    "osgeo", 
+    "numpy",
     "matplotlib",
     "scipy",
     "statsmodels",
     "pandas",
+    "osgeo",
+    "netCDF4",
     "adjustText"
 ]
 

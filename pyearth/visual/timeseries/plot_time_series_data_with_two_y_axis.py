@@ -7,9 +7,7 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 from datetime import datetime
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
+from ...system.define_global_variables import *
 
 
 

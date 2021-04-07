@@ -5,13 +5,10 @@ import matplotlib.ticker as ticker
 import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
 
-#import statsmodels.api as sm
-#lowess = sm.nonparametric.lowess
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
 
-from pyearth.visual.scatter.scatter_lowess import scatter_lowess
+
+from ...visual.scatter.scatter_lowess import scatter_lowess
 
 
 def scatter_plot_data(aData_x, \

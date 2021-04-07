@@ -1,8 +1,6 @@
 import os, sys
 from netCDF4 import Dataset
-#import library
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
+
 
 def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in):
 

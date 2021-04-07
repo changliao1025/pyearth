@@ -8,10 +8,7 @@ from scipy.stats import gaussian_kde
 
 
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-
-from pyearth.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
+from ...toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
 
 def scatter_plot_data_density(aData_x, \
                               aData_y,\

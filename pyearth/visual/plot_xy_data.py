@@ -7,12 +7,9 @@ import matplotlib.pyplot as plt
 from adjustText import adjust_text
 import matplotlib.ticker as ticker
 
+from ...system.define_global_variables import *
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
-
-from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_xy_data(aX_all, \
                  aY_all, \

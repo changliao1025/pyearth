@@ -1,11 +1,10 @@
 import os, sys
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
+from ...system.define_global_variables import *
 #normal job, no checkpoint 
 def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         sBasename_job, \
         sDirectory_job, \
+            sEmail, \
         sFilename_python,\
             iWalltime_in = None, \
         nNode_in = None, \
@@ -74,7 +73,7 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         pFile.write( sLine ) 
         sLine = '#SBATCH --mail-type=ALL' + '\n'
         pFile.write( sLine ) 
-        sLine = '#SBATCH --mail-user=chang.liao@pnnl.gov' + '\n'
+        sLine = '#SBATCH --mail-user=' + sEmail + '\n'
         pFile.write( sLine ) 
 
         sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'

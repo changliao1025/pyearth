@@ -1,7 +1,7 @@
 import numpy as np
-import math
+
 def search_neighbors(iIndex_in, aArray_in, iWindow_size_in = None):
-    missing_value = math.nan
+    missing_value = np.nan
     if iWindow_size_in is not None:
         iWindow_size = iWindow_size_in
            
@@ -14,7 +14,7 @@ def search_neighbors(iIndex_in, aArray_in, iWindow_size_in = None):
 
     iLength_out = iWindow_size * 2 + 1
 
-    aArray_out = np.full( iLength_out , math.nan , dtype = float )
+    aArray_out = np.full( iLength_out , np.nan , dtype = float )
 
     
     if iIndex_in >= iStart and iIndex_in < iEnd  :

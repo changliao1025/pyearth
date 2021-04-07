@@ -1,15 +1,12 @@
 import os, sys
 import numpy as np
+
+from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
-from scipy.stats import gaussian_kde
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-
-from pyearth.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
 def histogram_plot(aData, \
     sFilename_out, \
     iSize_x_in = None, \

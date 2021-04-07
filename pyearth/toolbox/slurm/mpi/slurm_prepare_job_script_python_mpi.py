@@ -1,6 +1,6 @@
 import os
 
-#with mpi, we assume slave are uniform distributed, and the checkpoint is optional
+#with mpi, we assume child nodes are uniform distributed, and the checkpoint is optional
 def slurm_prepare_job_script_python_mpi(iIndex_start, iIndex_end, \
         
         sBasename_job, \

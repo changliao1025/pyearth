@@ -1,6 +1,7 @@
 import sys
-from osgeo import gdal, osr,  gdalconst
 import numpy as np
+from osgeo import gdal, osr,  gdalconst
+
 
 def gdal_read_envi_file(sFilename_in):
     pDriver = gdal.GetDriverByName('ENVI')

@@ -28,7 +28,7 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#a6d854',\
                                 '#ffd92f' ]
 
-
+#another option
                 colors_hex = [  '#e41a1c',\
                                 '#377eb8',\
                                 '#4daf4a',\

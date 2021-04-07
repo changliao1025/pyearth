@@ -1,10 +1,9 @@
 import os,sys
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
+from ...system.define_global_variables import *
 
-def prepare_parafly_python_command_file(iIndex_start, iIndex_end,\
+def prepare_parafly_python_command_file(iIndex_start, \
+    iIndex_end,\
     nThread, \
     sFilename_parafly, \
     sFilename_python):
@@ -32,5 +31,3 @@ def prepare_parafly_python_command_file(iIndex_start, iIndex_end,\
     ofs.close()
     
     return
-if __name__ == '__main__':
-    slurm_prepare_parafly_python_command()

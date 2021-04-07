@@ -7,11 +7,10 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
 
-from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from ...system.define_global_variables import *
+
+from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_time_series_data(aTime_all, aData_all, \
                           sFilename_out,\

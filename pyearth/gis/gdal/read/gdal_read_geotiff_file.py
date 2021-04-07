@@ -1,7 +1,7 @@
-
 import sys
-from osgeo import gdal, osr
 import numpy as np
+from osgeo import gdal, osr
+
 def gdal_read_geotiff_file(sFilename_in):
     pDriver = gdal.GetDriverByName('GTiff')
     pDriver.Register()

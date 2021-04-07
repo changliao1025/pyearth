@@ -5,16 +5,9 @@ import sys
 import numpy as np
 from numpy  import array
 
-#use global method
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system import define_global_variables
-from pyearth.system.define_global_variables import *
+from ...system.define_global_variables import *
 
-#import the pyearth library
-sPath_library_python = sWorkspace_code +  slash + 'python' + slash + 'library' + slash + 'pyearth_python'
-sys.path.append(sPath_library_python)
-from pyearth.toolbox.math.search_neighbors import search_neighbors
+from ...toolbox.math.search_neighbors import search_neighbors
 
 def gap_fill_by_window (aArray_in, iWindow_size_in = None):
     """aArray_in,

@@ -7,6 +7,7 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
         sBasename_python,\
         sDirectory_job, \
         sDirectory_python,\
+            sEmail, \
         sJob_name, \
         nNode_in = None, \
         nTask_in=None, \
@@ -58,7 +59,7 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     pFile.write( sLine ) 
     sLine = '#SBATCH --mail-type=ALL' + '\n'
     pFile.write( sLine ) 
-    sLine = '#SBATCH --mail-user=chang.liao@pnnl.gov' + '\n'
+    sLine = '#SBATCH --mail-user=' + sEmail + '\n'
     pFile.write( sLine ) 
 
     sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'
@@ -78,8 +79,9 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     pFile.write( sLine ) 
     sLine = 'module load anaconda3/2019.03' + '\n'
     pFile.write( sLine ) 
-    sLine = 'source /share/apps/anaconda3/2019.03/etc/profile.d/conda.sh' + '\n'
-    pFile.write( sLine ) 
+    #only need to manuually source if the cluster requires
+    #sLine = 'source /share/apps/anaconda3/2019.03/etc/profile.d/conda.sh' + '\n'
+    #pFile.write( sLine ) 
     sLine = 'unset PYTHONHOME' + '\n'
     pFile.write( sLine ) 
     sLine = 'conda activate mpienv' + '\n'

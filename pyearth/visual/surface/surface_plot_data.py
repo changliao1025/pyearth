@@ -9,10 +9,9 @@ from datetime import datetime
 from mpl_toolkits import mplot3d
 from matplotlib.collections import PolyCollection
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
-from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+
+from ...system.define_global_variables import *
+from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def surface_plot_data_monthly(aData_all, \
                               sFilename_out,\

@@ -7,12 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 
+from ...system.define_global_variables import *
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
-
-from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def autolabel(rects,ax, sFormat_y):
     """Attach a text label above each bar in *rects*, displaying its height."""

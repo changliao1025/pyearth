@@ -8,11 +8,9 @@ import matplotlib.ticker as ticker
 from datetime import datetime
 
 
-sSystem_paths = os.environ['PATH'].split(os.pathsep)
-sys.path.extend(sSystem_paths)
-from pyearth.system.define_global_variables import *
-from pyearth.visual.plot.calculate_ticks_space import calculate_ticks_space
 
+from ...system.define_global_variables import *
+from ...visual.plot.calculate_ticks_space import calculate_ticks_space
 
 def plot_time_series_data_monthly_fill(aTime, aData, \
     sFilename_out,\

@@ -3,6 +3,7 @@ import os
 def prepare_parafly_slurm_job_script(sBasename_job, \
         sBasename_parafly, \
         sDirectory_job, \
+            sEmail,\
         iWalltime_in = None, \
         nNode_in = None, \
         nThread_in=None, \
@@ -62,7 +63,7 @@ def prepare_parafly_slurm_job_script(sBasename_job, \
     ofs.write( sLine ) 
     sLine = '#SBATCH --mail-type=ALL' + '\n'
     ofs.write( sLine ) 
-    sLine = '#SBATCH --mail-user=chang.liao@pnnl.gov' + '\n'
+    sLine = '#SBATCH --mail-user=' + sEmail + '\n'
     ofs.write( sLine ) 
 
     sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'

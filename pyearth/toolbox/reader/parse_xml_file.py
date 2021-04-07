@@ -1,5 +1,6 @@
-import xml.etree.ElementTree as ET
+
 import numpy as np
+import xml.etree.ElementTree as ET
 def parse_xml_file(sFilename_xml_in):
     """Read MACES settings from a xml file.
    
