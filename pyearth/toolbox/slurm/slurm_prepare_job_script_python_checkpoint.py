@@ -9,6 +9,7 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
         sDirectory_python,\
             sEmail, \
         sJob_name, \
+    sAccount = None,\
         nNode_in = None, \
         nTask_in=None, \
         sQueue_in=None):
@@ -42,8 +43,10 @@ def slurm_prepare_job_script_python(iStart, iEnd, \
     pFile =  open(sBasename_job,"w")  #write mode 
     sLine = '#!/bin/bash' + '\n'
     pFile.write( sLine ) 
-    sLine = '#SBATCH --account=e3sm' + '\n'
-    pFile.write( sLine ) 
+
+    if sAccount is not None:
+        sLine = '#SBATCH --account=' + sAccount  + '\n'
+        pFile.write( sLine ) 
 
     sLine = '#SBATCH --begin=now+1minutes' + '\n'
     pFile.write( sLine ) 

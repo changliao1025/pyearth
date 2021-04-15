@@ -1,7 +1,5 @@
 import os, sys
 from netCDF4 import Dataset
-
-
 def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in):
 
     if os.path.exists(sFilename_old):

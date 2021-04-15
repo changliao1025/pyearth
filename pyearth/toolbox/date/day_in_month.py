@@ -1,5 +1,3 @@
-
-
 from jdcal import gcal2jd, jd2gcal
 
 from pyearth.toolbox.date.leap_year import leap_year

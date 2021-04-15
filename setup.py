@@ -24,7 +24,8 @@ REQUIRED = [
     "pandas",
     "osgeo",
     "netCDF4",
-    "adjustText"
+    "adjustText",
+    "jdcal"
 ]
 
 CLASSIFY = [

@@ -1,14 +1,9 @@
 
 import numpy as np
 import xml.etree.ElementTree as ET
+
 def parse_xml_file(sFilename_xml_in):
-    """Read MACES settings from a xml file.
-   
-    https://docs.python.org/3/library/xml.etree.elementtree.html
-    Arguments:
-        sFilename_xml_in : the file name string
-    Returns : a model setting dictionary
-    """
+    
     tree = ET.parse(sFilename_xml_in)
     root = tree.getroot()
     namelist = {}

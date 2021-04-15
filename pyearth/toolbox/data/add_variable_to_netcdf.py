@@ -1,10 +1,14 @@
 import os, sys
 from netCDF4 import Dataset
-
 from pyearth.system.define_global_variables import *
 
-
-def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, aDimension_in):
+def add_variable_to_netcdf(sFilename_old, \
+    sFilename_new, \
+        aData_in, \
+            sVariable_in, \
+            sUnit_in, \
+                aDimension_in):
+                
     if os.path.exists(sFilename_old):
         print("Yep, I can read that file!")
     else:

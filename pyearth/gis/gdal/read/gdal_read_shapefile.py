@@ -6,11 +6,6 @@ from osgeo import gdalconst, ogr, osr
 #for some reason, the proj library cannot be loaded even gdal is loaded, a better way is needed
 #currently, you can just replace this with your own proj library
 
-sProj = os.environ['PROJ_LIB']
-if sProj is None:
-    print("The proj library is missing.")
-    os.environ['PROJ_LIB'] = '/qfs/people/liao313/.conda/envs/gdalenv/share/proj'
-    
 
 def gdal_read_shapefile(sFilename_in):
     sDriverName = "ESRI Shapefile"
