@@ -8,9 +8,9 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
-from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_time_series_data(aTime_all, aData_all, \
                           sFilename_out,\

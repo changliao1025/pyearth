@@ -6,7 +6,7 @@ import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
 
-from ...toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
+from pyearth.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
 def histogram_plot_multiple(aData_a, aData_b, \
     sFilename_out, \
     iSize_x_in = None, \

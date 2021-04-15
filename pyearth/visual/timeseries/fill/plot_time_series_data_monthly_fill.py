@@ -9,8 +9,8 @@ from datetime import datetime
 
 
 
-from ...system.define_global_variables import *
-from ...visual.plot.calculate_ticks_space import calculate_ticks_space
+from pyearth.system.define_global_variables import *
+from pyearth.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 def plot_time_series_data_monthly_fill(aTime, aData, \
     sFilename_out,\

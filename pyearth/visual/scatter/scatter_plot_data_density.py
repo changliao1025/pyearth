@@ -8,7 +8,7 @@ from scipy.stats import gaussian_kde
 
 
 
-from ...toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
+from pyearth.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
 
 def scatter_plot_data_density(aData_x, \
                               aData_y,\

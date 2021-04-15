@@ -9,8 +9,8 @@ from datetime import datetime
 from mpl_toolkits import mplot3d
 from matplotlib.collections import PolyCollection
 
-from ...system.define_global_variables import *
-from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.system.define_global_variables import *
+from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def polygon_under_graph(xlist, ylist, z_level):
     """

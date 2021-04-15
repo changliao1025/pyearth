@@ -1,5 +1,5 @@
 import os, sys
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 #normal job, no checkpoint 
 def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         sBasename_job, \

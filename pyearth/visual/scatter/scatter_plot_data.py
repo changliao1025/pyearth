@@ -8,7 +8,7 @@ from scipy.stats import gaussian_kde
 
 
 
-from ...visual.scatter.scatter_lowess import scatter_lowess
+from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
 
 def scatter_plot_data(aData_x, \

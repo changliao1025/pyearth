@@ -5,9 +5,9 @@ import sys
 import numpy as np
 from numpy  import array
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
-from ...toolbox.math.search_neighbors import search_neighbors
+from pyearth.toolbox.math.search_neighbors import search_neighbors
 
 def gap_fill_by_window (aArray_in, iWindow_size_in = None):
     """aArray_in,

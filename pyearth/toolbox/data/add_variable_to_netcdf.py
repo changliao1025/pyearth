@@ -1,7 +1,7 @@
 import os, sys
 from netCDF4 import Dataset
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
 
 def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, aDimension_in):

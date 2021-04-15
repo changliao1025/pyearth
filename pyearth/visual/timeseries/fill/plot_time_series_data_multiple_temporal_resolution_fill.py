@@ -8,7 +8,7 @@ import matplotlib.ticker as ticker
 from datetime import datetime
 
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
 
 

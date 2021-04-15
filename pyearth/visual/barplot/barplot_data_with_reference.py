@@ -7,9 +7,9 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
-from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def barplot_data_with_reference(aData_in,\
                  aLabel_x_in,\

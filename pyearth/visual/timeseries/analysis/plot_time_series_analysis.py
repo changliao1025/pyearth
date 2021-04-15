@@ -11,9 +11,9 @@ import pandas as pd
 from statsmodels.tsa.seasonal import STL
 from statsmodels.tsa.stattools import adfuller
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
-from ...visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_time_series_analysis(aTime, \
                               aData, \

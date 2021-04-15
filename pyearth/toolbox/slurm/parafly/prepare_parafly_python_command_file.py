@@ -1,6 +1,6 @@
 import os,sys
 
-from ...system.define_global_variables import *
+from pyearth.system.define_global_variables import *
 
 def prepare_parafly_python_command_file(iIndex_start, \
     iIndex_end,\
