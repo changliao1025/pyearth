@@ -6,7 +6,9 @@ def text_reader_string( sFilename_in,\
      cDelimiter_in = None, \
      iFlag_remove_quota = None, \
      iSkipline_in =  None ):
-    """sFilename_in,
+    """
+    Read a text based file
+    sFilename_in,
     ncolumn_in = None, 
     nrow_in = None, 
     cDelimiter_in = None, 

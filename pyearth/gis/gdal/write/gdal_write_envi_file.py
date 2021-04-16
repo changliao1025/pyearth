@@ -1,5 +1,5 @@
 import sys
-from osgeo import gdal, osr, gdalconst
+from osgeo import gdal, osr, ogr,gdalconst
 
 def gdal_write_envi_file(sFilename_in, aData_in, \
                          dPixelWidth_in,\
@@ -8,8 +8,17 @@ def gdal_write_envi_file(sFilename_in, aData_in, \
                          dMissing_value_in,\
                          pSpatialRef_in ):
 
-    pDriver = gdal.GetDriverByName('ENVI')
-    pDriver.Register()
+    """Write a ENVI standard format raster file."""
+
+    sDriverName='ENVI'
+    pDriver = ogr.GetDriverByName(sDriverName)  
+
+    if pDriver is None:
+        print ("%s pDriver not available.\n" % sDriverName)
+    else:
+        print  ("%s pDriver IS available.\n" % sDriverName) 
+    
+
     nrow, ncolumn = aData_in.shape
     nband = 1
 
@@ -56,8 +65,17 @@ def gdal_write_envi_file_multiple_band(sFilename_in, aData_in, \
                                        dMissing_value_in,\
                                        pSpatialRef_in ):
 
-    pDriver = gdal.GetDriverByName('ENVI')
-    pDriver.Register()
+    
+    """Write a ENVI standard format raster file with multiple bands."""
+
+    sDriverName='ENVI'
+    pDriver = ogr.GetDriverByName(sDriverName)  
+
+    if pDriver is None:
+        print ("%s pDriver not available.\n" % sDriverName)
+    else:
+        print  ("%s pDriver IS available.\n" % sDriverName) 
+
     nband, nrow, ncolumn = aData_in.shape
 
 

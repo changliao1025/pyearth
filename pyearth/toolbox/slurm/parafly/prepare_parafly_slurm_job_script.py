@@ -10,6 +10,9 @@ def prepare_parafly_slurm_job_script(sBasename_job, \
         sJob_name_in =None, \
         sPython_env_in =None,\
         sQueue_in=None):
+    """
+    prepare a job script for parafly
+    """
     if iWalltime_in is not None:
         iWalltime = iWalltime_in            
     else:

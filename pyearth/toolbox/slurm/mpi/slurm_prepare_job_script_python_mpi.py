@@ -1,7 +1,8 @@
 import os
 
 #with mpi, we assume child nodes are uniform distributed, and the checkpoint is optional
-def slurm_prepare_job_script_python_mpi(iIndex_start, iIndex_end, \
+def slurm_prepare_job_script_python_mpi(iIndex_start, \
+    iIndex_end, \
         
         sBasename_job, \
         sBasename_python,\
@@ -14,6 +15,9 @@ def slurm_prepare_job_script_python_mpi(iIndex_start, iIndex_end, \
         sBasename_checkpoint_in=None, \
         sJob_name_in= None, \    
         sQueue_in=None):
+    """
+    
+    """
     if iFlag_checkpoint_in is not None:
         iFlag_checkpoint = 1            
     else:

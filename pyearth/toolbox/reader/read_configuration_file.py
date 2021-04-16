@@ -1,5 +1,8 @@
 import os
 def read_configuration_file(sFilename_configuration_in):
+    """
+    Read a text based configuration file.
+    """
     if os.path.isfile(sFilename_configuration_in):
         aConfig_out = {}
         ifs = open(sFilename_configuration_in, 'r')

@@ -1,5 +1,5 @@
 import sys
-from osgeo import gdal, osr, gdalconst
+from osgeo import gdal, osr,ogr, gdalconst
 
 def gdal_write_geotiff_file(sFilename_in, aData_in,\
                        dPixelWidth_in, \
@@ -8,8 +8,16 @@ def gdal_write_geotiff_file(sFilename_in, aData_in,\
                        dMissing_value_in,\
                        pSpatialRef_in):
 
-    pDriver = gdal.GetDriverByName('GTiff')
-    pDriver.Register()
+    """Write a Geotiff standard format raster file."""
+
+    sDriverName='GTiff'
+    pDriver = ogr.GetDriverByName(sDriverName)  
+
+    if pDriver is None:
+        print ("%s pDriver not available.\n" % sDriverName)
+    else:
+        print  ("%s pDriver IS available.\n" % sDriverName) 
+
     nrow, ncolumn = aData_in.shape
     nband = 1
 
@@ -54,8 +62,16 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in, aData_in, \
                                      dMissing_value_in,\
                                      pSpatialRef_in ):
 
-    pDriver = gdal.GetDriverByName('GTiff')
-    pDriver.Register()
+    """Write a Geotiff standard format raster file."""
+
+    sDriverName='GTiff'
+    pDriver = ogr.GetDriverByName(sDriverName)  
+
+    if pDriver is None:
+        print ("%s pDriver not available.\n" % sDriverName)
+    else:
+        print  ("%s pDriver IS available.\n" % sDriverName) 
+
     nband, nrow, ncolumn = aData_in.shape
 
 

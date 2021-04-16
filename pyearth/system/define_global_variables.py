@@ -11,7 +11,7 @@ sWorkspace_home = str(Path.home())
 
 sUsername = getpass.getuser()
 
-#do not delete this part!!!
+
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
     sMachine ='None'

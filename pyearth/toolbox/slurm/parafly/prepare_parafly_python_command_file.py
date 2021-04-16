@@ -7,6 +7,9 @@ def prepare_parafly_python_command_file(iIndex_start, \
     nThread, \
     sFilename_parafly, \
     sFilename_python):
+    """
+    Prepare a parafly file which runs python script
+    """
     
     ofs =  open(sFilename_parafly,"w")  #write mode 
     nTask = iIndex_end - iIndex_start + 1

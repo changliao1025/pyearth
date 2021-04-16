@@ -1,7 +1,7 @@
-
 import numpy as np
 
 from scipy.stats import gaussian_kde
+
 def kde_support(data, bw, gridsize, cut, clip):
     """Establish support for a kernel density estimate."""
     support_min = max(data.min() - bw * cut, clip[0])

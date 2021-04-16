@@ -8,12 +8,15 @@ from numpy  import array
 from pyearth.system.define_global_variables import *
 
 def search_neighbors(iIndex_in, aArray_in, iWindow_size_in = None):
+    """
+    Gap filling a 2D array
+    """
     missing_value = np.nan
     if iWindow_size_in is not None:
-        iWindow_size = iWindow_size_in
-           
+        iWindow_size = iWindow_size_in           
     else:
         iWindow_size = 1
+
     iLength =  len(aArray_in)
 
     iStart = iWindow_size
@@ -31,20 +34,24 @@ def search_neighbors(iIndex_in, aArray_in, iWindow_size_in = None):
      
  
     return aArray_out
+
+
 def gap_fill_by_window (aArray_in, iWindow_size_in = None):
-    """aArray_in,
+    
+    """
+    Gap filling a 2D array
+    
+    aArray_in,
      
     iWindow_size_in =  None
     """
     iLength = len(aArray_in)
-
     iWindow_size = iWindow_size_in
-
     aArray_out = aArray_in
 
     iStart = iWindow_size
     iEnd = iLength - iWindow_size
-    #print(  np.nansum(aArray_in) )
+   
     for iIndex in range( iStart , iEnd  ):
         dummy = aArray_in[iIndex]
         if ( np.isnan(dummy) )  :
@@ -63,13 +70,16 @@ def gap_fill_by_window (aArray_in, iWindow_size_in = None):
 
                 aNeighbors_good = aNeighbors[ good_index ]
                 good_count = len(aNeighbors_good)
+                
                 if good_count <  10:
                     aArray_out[iIndex] = statistics.median(aNeighbors_good)
-                    #print(aArray_out[iIndex])
+                    pass
+                   
                 else:
                     aArray_out[iIndex] = statistics.median(aNeighbors_good)
-                    #print(aArray_out[iIndex])
-                #print(  np.nansum(aArray_out) )
+                    pass
+                
+                
 
             else:
                 #print(nan_count)
@@ -83,5 +93,4 @@ def gap_fill_by_window (aArray_in, iWindow_size_in = None):
      
         
 
-    #print(  np.nansum(aArray_out) )
     return aArray_out

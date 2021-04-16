@@ -3,11 +3,15 @@ import numpy as np
 import xml.etree.ElementTree as ET
 
 def parse_xml_file(sFilename_xml_in):
+    """
+    Parse an XML file
+    """
     
     tree = ET.parse(sFilename_xml_in)
     root = tree.getroot()
     namelist = {}
     keys_str = []
+
     for entry in root.findall('./group/entry'):
         key = entry.get('id')
         dtype = entry.find('type').text
@@ -45,6 +49,7 @@ def parse_xml_file(sFilename_xml_in):
                 else:
                     values.append(value.text)
             namelist[key] = np.array(values, dtype=np.float64, order='F')
+
     # fill environment variable values
     for key in keys_str:
         keys_str_iter = list(set(keys_str)-set([key]))
@@ -53,4 +58,5 @@ def parse_xml_file(sFilename_xml_in):
             if string.find('$'+key)>=0:
                 new_string = string.replace('$'+key, namelist[key])
                 namelist[okey] = new_string
+                
     return namelist
