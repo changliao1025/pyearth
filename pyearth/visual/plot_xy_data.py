@@ -2,13 +2,11 @@ import os, sys
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-mpl.use('Agg')
 import matplotlib.pyplot as plt
-from adjustText import adjust_text
 import matplotlib.ticker as ticker
+from adjustText import adjust_text
 
 from pyearth.system.define_global_variables import *
-
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_xy_data(aX_all, \

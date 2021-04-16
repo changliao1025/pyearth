@@ -1,7 +1,7 @@
 import os, sys
 import numpy as np
 import matplotlib as mpl
-mpl.use('Agg')
+
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
