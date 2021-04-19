@@ -1,6 +1,5 @@
 import os, sys
 import numpy as np
-
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -22,6 +21,10 @@ def histogram_plot(aData, \
     sLabel_y_in = None, \
     sTitle_in = None):
 
+    """
+    Draw a histogram for single dataset
+    """
+
     if iSize_x_in is not None:        
         iSize_x = iSize_x_in
     else:       
@@ -38,6 +41,7 @@ def histogram_plot(aData, \
         dMin = dMin_in
     else:       
         dMin = np.min(aData)
+
     if dMax_in is not None:        
         dMax = dMax_in
     else:       
@@ -47,6 +51,7 @@ def histogram_plot(aData, \
         dMin_x = dMin_x_in
     else:       
         dMin_x = dMin
+
     if dMax_x_in is not None:        
         dMax_x = dMax_x_in
     else:       
@@ -55,10 +60,13 @@ def histogram_plot(aData, \
     if dSpace_x_in is not None:        
         dSpace_x = dSpace_x_in
     else:       
+        #it may be calculated 
         pass
+
     if dSpace_y_in is not None:        
         dSpace_y = dSpace_y_in
     else:       
+        #it may be calculated 
         pass
 
     if sLabel_x_in is not None:        
@@ -92,23 +100,24 @@ def histogram_plot(aData, \
 
     aData = aData[good_index]
 
-    ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x))  # arguments are passed to np.histogram
+    ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x))  
 
     ax_histo.set_xlabel(sLabel_x,fontsize=13 )
-    ax_histo.set_ylabel(sLabel_y,fontsize=13 )
-    
-    #ax_histo.set_xscale('log')
-    #set up
+    ax_histo.set_ylabel(sLabel_y,fontsize=13 )   
+   
+  
     ax_histo.set_xlim( dMin_x, dMax_x )
-    #ax_histo.set_ylim( 0, 0.06 *100 )
+   
     ax_histo.axis('on')   
     ax_histo.grid(which='major', color='white', linestyle='-', axis='y')
-    #ax_histo.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
+    
    
     leg = ax_histo.legend(bbox_to_anchor=(1.0,1.0),loc='upper right', frameon=True)
     
     frame = leg.get_frame()
     frame.set_edgecolor('black')
+
+    ax_histo.set_title(sTitle)
     
     plt.savefig(sFilename_out, bbox_inches='tight')
                        

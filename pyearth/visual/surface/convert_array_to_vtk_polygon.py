@@ -7,7 +7,7 @@ from pyevtk.vtk import  VtkQuad
 def convert_array_to_vtk_polygon(pArray_in, pLabel_in, aX_in, aY_in, pZ_in, sFilename_vtk):
     
 
-    dMin_x =  np.min(aX_in)
+    dMin_x = np.min(aX_in)
     dMax_x = np.max(aX_in)
 
     dMin_y = np.min(aY_in)
@@ -120,16 +120,6 @@ def convert_array_to_vtk_polygon(pArray_in, pLabel_in, aX_in, aY_in, pZ_in, sFil
 
     unstructuredGridToVTK(sFilename_vtk, x, y, z, connectivity = conn, \
                               offsets = offset, cell_types = ctype, cellData = celldata, pointData = None)
-
-
-
-
-
-
-
-    
-
-
 
 
 

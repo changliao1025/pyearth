@@ -1,4 +1,7 @@
 def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
+    """
+    choose diverge color from: https://colorbrewer2.org/
+    """
 
     if ncolor < 3 or ncolor > 12:
         return -1
@@ -28,7 +31,7 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#a6d854',\
                                 '#ffd92f' ]
 
-#another option
+                #another option
                 colors_hex = [  '#e41a1c',\
                                 '#377eb8',\
                                 '#4daf4a',\
@@ -51,6 +54,16 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#e0f3f8', \
                                 '#91bfdb', \
                                 '#4575b4'  ]
+            if ncolor == 9:
+                colors_hex = [  '#d53e4f',\
+                                '#f46d43',\
+                                '#fdae61',\
+                                '#fee08b',\
+                                '#ffffbf',\
+                                '#e6f598',\
+                                '#abdda4',\
+                                '#66c2a5',\
+                                '#3288bd']
             if ncolor == 10:
                 colors_hex = [  '#9e0142', \
                                 '#d53e4f', \
@@ -63,7 +76,9 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#3288bd', \
                                 '#5e4fa2']
             else:
-                pass
+                print('Too many colors are requested!')
+                return -1
+                
         #add the reverse feature
         if iFlag_reverse_in is not None:
             colors_hex.reverse()

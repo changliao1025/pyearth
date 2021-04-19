@@ -11,16 +11,7 @@ from pyearth.system.define_global_variables import *
 
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def autolabel(rects,ax, sFormat_y):
-    """Attach a text label above each bar in *rects*, displaying its height."""
 
-    for rect in rects:
-        height = rect.get_height()
-        ax.annotate( "{}".format(height),
-                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                     xytext=(0, 3),  # 3 points vertical offset
-                     textcoords="offset points",
-                     ha='center', va='bottom', size=6)
 
 def barplot_data(aData_in,\
                  aLabel_x_in,\
@@ -42,11 +33,14 @@ def barplot_data(aData_in,\
                  sFormat_y_in =None,\
                  sLocation_legend_in=None,\
                  sTitle_in = None):
+    """
+    Draw a barplot
+    """
 
     aData_in = np.array(aData_in)
     pShape = aData_in.shape
 
-    nData = pShape[0] #len(aLabel_x_in)
+    nData = pShape[0] #len(aLabel_x_in) this maybe checked 
 
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -71,7 +65,7 @@ def barplot_data(aData_in,\
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData_in) #if it has negative value, change here
+        dMin_y = np.nanmin(aData_in) 
 
     if (dMax_y <= dMin_y ):
         return
@@ -140,13 +134,14 @@ def barplot_data(aData_in,\
     for i in np.arange(1, nData + 1, 1):
 
         data1 = aData_in[i-1]
+        #need bettern control here, hatch (texture) can be used to betten represet some data
         if i == 1 or i ==2:
             rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i-1],\
                             color = aColor[i-1], hatch = aHatch[i-1], edgecolor = "k")
         else:
             rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i-1],\
                             color = aColor[i-1])#, hatch = aHatch[i-1], edgecolor = "k")
-            #autolabel(rects)
+      
         pass
 
     if (iFlag_format_y ==1):

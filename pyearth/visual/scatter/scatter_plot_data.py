@@ -6,8 +6,6 @@ import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
 
 
-
-
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
 
@@ -125,10 +123,6 @@ def scatter_plot_data(aData_x, \
     ax_scatter.axis('on')
     ax_scatter.grid(which='major', color='grey', linestyle='--', axis='y')
 
-
-    dRatio = 1.0
-    #ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
-
     ax_scatter.tick_params(axis="x", labelsize=13)
     ax_scatter.tick_params(axis="y", labelsize=13)
 
@@ -241,14 +235,7 @@ def scatter_plot_data(aData_x, \
     labels.append(sLabel_legend)
 
     iFlag_lowess = 1
-    if(iFlag_lowess==1):
-        #z = lowess(aData_y, aData_x, frac= 1./3, it=0)
-        #ax_scatter.plot(x1, y1, 'red', linewidth=1)
-        # unpack the lowess smoothed points to their values
-        #lowess_x = list(zip(*z))[0]
-        #lowess_y = list(zip(*z))[1]
-        #ax_scatter.plot(lowess_x, lowess_y)
-        #ax_scatter.fill_between(x,ll,ul,alpha=.33)
+    if(iFlag_lowess==1):      
 
         y_sm, y_std, order = scatter_lowess(aData_x, aData_y, f=1./3.)
         ax_scatter.plot(x[order], y_sm[order], color='tomato')
@@ -256,9 +243,9 @@ def scatter_plot_data(aData_x, \
                                 y_sm[order] - 1.96*y_std[order], \
                                 y_sm[order] + 1.96*y_std[order], \
                                 alpha=0.3)
-        #sLabel_legend_lowess1 = , label='LOWESS'
+
         sLabel_legend_lowess2 = 'LOWESS uncertainty'
-        #labels.append(sLabel_legend_lowess1)
+      
         labels.append(sLabel_legend_lowess2)
 
     ax_scatter.legend(handles, labels,\
@@ -295,12 +282,12 @@ def scatter_plot_data(aData_x, \
                          left='off', # turn off left ticks
                          right='off',  # turn off right ticks
                          bottom='off') # turn off bottom ticks
-    #ax_histx.axes.get_xaxis().set_visible(False)
+
     ax_histx.axes.get_yaxis().set_visible(False)
     ax_histx.tick_params(axis='x', colors='white')
 
     #y margin
-    #ax_histy.set_facecolor('aliceblue')
+ 
     density = gaussian_kde(y)
     xx = np.linspace(dMin_y, dMax_y,1000)
     yy = density(xx)
@@ -319,7 +306,7 @@ def scatter_plot_data(aData_x, \
     ax_histy.spines['bottom'].set_visible(False)
     ax_histy.spines['left'].set_visible(False)
     ax_histy.axes.get_xaxis().set_visible(False)
-    #ax_histy.axes.get_yaxis().set_visible(False)
+
 
     ax_histy.tick_params(axis='y', colors='white')
 

@@ -254,16 +254,12 @@ def plot_xy_data(aX_all, \
             
             sLabel_point= aLabel_point[i-1]
             aText.append(ax.text(aX_all[1][i-1], aY_all[1][i-1], sLabel_point, color = 'red'))
-            #ax.annotate(sLabel_point, \
-            #    (aX_all[1][i-1], aY_all[1][i-1]),\
-            #        color = 'red',\
-            #    textcoords="offset points", \
-            #     xytext=(10,-5),\
-            #     ha='right') # horizontal alignment can be left, right or center)
+            
             pass
 
-        adjust_text(aText, only_move={'points':'y', 'texts':'xy'}, \
-            arrowprops=dict(arrowstyle="->", color='r', lw=0.5))
+        adjust_text(aText, \
+            only_move={'points':'y', 'texts':'xy'}, \
+            arrowprops=dict(arrowstyle="->", color='r', lw=0.5) )
 
         pass
 
@@ -277,10 +273,9 @@ def plot_xy_data(aX_all, \
               fontsize=8, \
               ncol= ncolumn)
 
-    #save the result
-    #plt.show()
+   
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')
     plt.clf()
-    #print('finished plotting')
+ 

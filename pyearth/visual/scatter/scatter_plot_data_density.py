@@ -150,16 +150,13 @@ def scatter_plot_data_density(aData_x, \
         sFormat_x=sFormat_x_in
         ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_x))
 
-        #ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))'%.1f'
+  
 
     if sFormat_y_in is not None:
         sFormat_y = sFormat_y_in
         ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
 
-        #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))'%.1f'
-
-
-
+    
     ax_scatter.tick_params(axis='y', pad=8)
     #ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(nbins = 5, prune='lower' ))
     if dMin_x_in is not None:
@@ -196,7 +193,6 @@ def scatter_plot_data_density(aData_x, \
         dSpace_y = (dMax_y - dMin_y) /4.0
 
 
-    #ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
 
     ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
 

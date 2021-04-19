@@ -1,5 +1,7 @@
 def create_qualitative_rgb_color_hex(ncolor, iFlag_reverse_in = None):
-
+    """
+    choose diverge color from: https://colorbrewer2.org/
+    """
     if ncolor < 3 or ncolor > 12:
         return -1
     else:
@@ -60,6 +62,17 @@ def create_qualitative_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#ffff33' ,\
                                 '#a65628' ,\
                                 '#f781bf' ]
+
+            if ncolor == 9:
+                colors_hex = [  '#a6cee3',\
+                                '#1f78b4',\
+                                '#b2df8a',\
+                                '#33a02c',\
+                                '#fb9a99',\
+                                '#e31a1c',\
+                                '#fdbf6f',\
+                                '#ff7f00',\
+                                '#cab2d6']
             if ncolor == 10:
                 colors_hex = [  '#9e0142', \
                                 '#d53e4f', \
@@ -72,7 +85,9 @@ def create_qualitative_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#3288bd', \
                                 '#5e4fa2']
             else:
-                pass
+                print('Too many colors are requested!')
+                return -1
+                
         #add the reverse feature
         if iFlag_reverse_in is not None:
             colors_hex.reverse()

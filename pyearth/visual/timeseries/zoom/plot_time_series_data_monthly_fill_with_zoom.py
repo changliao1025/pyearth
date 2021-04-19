@@ -11,7 +11,8 @@ from pyearth.system.define_global_variables import *
 from pyearth.visual.plot.calculate_ticks_space import calculate_ticks_space
 
 
-def plot_time_series_data_monthly_fill_with_zoom(aTime, aData, \
+def plot_time_series_data_monthly_fill_with_zoom(aTime, \
+    aData, \
     sFilename_out,\
     iDPI_in = None,\
     iFlag_trend_in = None, \

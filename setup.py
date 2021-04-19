@@ -25,7 +25,8 @@ REQUIRED = [
     "osgeo",
     "netCDF4",
     "adjustText",
-    "jdcal"
+    "jdcal",
+    "pyevtk"
 ]
 
 CLASSIFY = [

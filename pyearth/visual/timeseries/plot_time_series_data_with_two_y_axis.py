@@ -187,6 +187,7 @@ def plot_time_series_data_with_two_y_axis(aTime_all, aData_all, \
         ax1.set_ylim( dMax_y1, dMin_y1 )
     else:
         ax1.set_ylim( dMin_y1, dMax_y1 )
+        
     ax1.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
     ax2.legend(bbox_to_anchor=(1.0,1.0), loc="upper right", fontsize=12)
     print(sFilename_out)

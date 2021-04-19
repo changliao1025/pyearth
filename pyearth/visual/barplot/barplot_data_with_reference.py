@@ -126,7 +126,7 @@ def barplot_data_with_reference(aData_in,\
                  color = aColor[0], linestyle = 'dashed' ,\
                  marker = '+' ,\
                  label = aLabel_y_in[0])   
-    # Add some text for labels, title and custom x-axis tick labels, etc.
+   
     ax.set_ylabel(sLabel_y)
     ax.set_title(sTitle)
     ax.set_xticks(x)
@@ -143,8 +143,7 @@ def barplot_data_with_reference(aData_in,\
                             color = aColor[i], hatch = aHatch[i], edgecolor = "k")
         else:
             rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i],\
-                            color = aColor[i])#, hatch = aHatch[i-1], edgecolor = "k")
-            #autolabel(rects)
+                            color = aColor[i])
         pass
 
     if (iFlag_format_y ==1):
