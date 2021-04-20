@@ -11,7 +11,7 @@ def gdal_write_geotiff_file(sFilename_in, aData_in,\
     """Write a Geotiff standard format raster file."""
 
     sDriverName='GTiff'
-    pDriver = ogr.GetDriverByName(sDriverName)  
+    pDriver = gdal.GetDriverByName(sDriverName)  
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)
@@ -65,7 +65,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in, aData_in, \
     """Write a Geotiff standard format raster file."""
 
     sDriverName='GTiff'
-    pDriver = ogr.GetDriverByName(sDriverName)  
+    pDriver = gdal.GetDriverByName(sDriverName)  
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)

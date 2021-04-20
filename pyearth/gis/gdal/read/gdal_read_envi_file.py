@@ -7,7 +7,7 @@ def gdal_read_envi_file(sFilename_in):
     """Read a ENVI standard format raster file."""
 
     sDriverName='ENVI'
-    pDriver = ogr.GetDriverByName(sDriverName)  
+    pDriver = gdal.GetDriverByName(sDriverName)  
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)
@@ -51,7 +51,7 @@ def gdal_read_envi_file_multiple_band(sFilename_in):
     """Read a ENVI standard format raster file with multiple bands."""
 
     sDriverName='ENVI'
-    pDriver = ogr.GetDriverByName(sDriverName)  
+    pDriver = gdal.GetDriverByName(sDriverName)  
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)

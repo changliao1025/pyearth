@@ -5,7 +5,7 @@ from osgeo import gdal, osr,ogr, gdalconst
 def gdal_read_geotiff_file(sFilename_in):
     """Read a Geotiff raster file."""
     sDriverName='GTiff'
-    pDriver = ogr.GetDriverByName(sDriverName)  
+    pDriver = gdal.GetDriverByName(sDriverName)  
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)
@@ -59,7 +59,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in):
 
    
     sDriverName='GTiff'
-    pDriver = ogr.GetDriverByName(sDriverName)  
+    pDriver = gdal.GetDriverByName(sDriverName)  
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)
