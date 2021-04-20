@@ -11,7 +11,7 @@ def gdal_read_geotiff_file(sFilename_in):
         print ("%s pDriver not available.\n" % sDriverName)
     else:
         print  ("%s pDriver IS available.\n" % sDriverName)  
-    pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
     if pDataset is None:
         print("Couldn't open this file: " + sFilename_in)
@@ -65,7 +65,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in):
         print ("%s pDriver not available.\n" % sDriverName)
     else:
         print  ("%s pDriver IS available.\n" % sDriverName) 
-    pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
     if pDataset is None:
         print("Couldn't open this file: " + sFilename_in)

@@ -14,7 +14,7 @@ def gdal_read_envi_file(sFilename_in):
     else:
         print  ("%s pDriver IS available.\n" % sDriverName)
          
-    pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
     if pDataset is None:
         print("Couldn't open this file: " + sFilename_in)
@@ -58,7 +58,7 @@ def gdal_read_envi_file_multiple_band(sFilename_in):
     else:
         print  ("%s pDriver IS available.\n" % sDriverName) 
 
-    pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
     if pDataset is None:
         print("Couldn't open this file: " + sFilename_in)
