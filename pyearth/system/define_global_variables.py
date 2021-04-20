@@ -1,16 +1,20 @@
-#this module will be used to define all the global variable with consideration of cross platform
-import os #retrieve existing system variables
-import sys #used to add system path
-import platform  #determine the platform this package is running at
-from pathlib import Path #get the home directory
+"""
+this module will be used to define all the global variable 
+"""
+import os 
+import sys
+import platform  
+from pathlib import Path
 import getpass
 sPlatform_os = platform.system()
 
-sWorkspace_home = str(Path.home())
-
-
 sUsername = getpass.getuser()
 
+#system wide paths
+#sWorkspace_scratch: data storage
+#sWorkspace_home: home directory
+
+sWorkspace_home = str(Path.home())
 
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
@@ -32,9 +36,6 @@ else:  #linux or unix
         else:
             pass
 
-#system wide paths
-
-#now we will start define major global variables
 #data file type
 sExtension_txt = '.txt'
 sExtension_envi = '.dat'
@@ -42,11 +43,14 @@ sExtension_tiff = '.tif'
 sExtension_header ='.hdr'
 sExtension_netcdf = '.nc'
 sExtension_shapefile = '.shp'
+sExtension_json = '.json'
 
-#graphics
+#graphics format
+
 sExtension_png = '.png'
 sExtension_jpg = '.jpg'
 sExtension_ps = '.ps'
+sExtension_vtk = '.vtk'
 
 
 #constant values
@@ -54,7 +58,7 @@ missing_value = -9999.0
 
 nmonth = 12 #be careful with this one
 
-#physical constants
+#unit conversion
 
 iMonth_start = 1
 iMonth_end = 12
