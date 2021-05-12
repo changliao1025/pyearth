@@ -20,8 +20,6 @@ def day_of_year(iYear_in, iMonth_in, iDay_in):
           print('Parameter iDay_in is not within correct range')
           return -1
 
-    
-
     lJulian_start = gcal2jd(iYear_in, 1, 1)
     lJulian_end =  gcal2jd(iYear_in, iMonth_in, iDay_in)
 
