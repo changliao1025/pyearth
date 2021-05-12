@@ -1,4 +1,4 @@
-
+import os
 import numpy as np
 import xml.etree.ElementTree as ET
 
@@ -6,7 +6,11 @@ def parse_xml_file(sFilename_xml_in):
     """
     Parse an XML file
     """
-    
+    if os.path.exists(sFilename_xml_in):
+        pass
+    else:
+        print('The xml file does not exist!')
+        return
     tree = ET.parse(sFilename_xml_in)
     root = tree.getroot()
     namelist = {}

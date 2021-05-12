@@ -25,7 +25,7 @@ else:  #linux or unix
     slash = '/'    
    
     if (sPlatform_os == 'Linux'):
-        sCluster = os.environ['SYSTEM_NAME']
+        #sCluster = os.environ['SYSTEM_NAME']
         
         sWorkspace_scratch =  sWorkspace_home + slash + 'scratch'            
         
