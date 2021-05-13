@@ -1,8 +1,6 @@
 
 import io
 import os
-import subprocess
-import shutil
 
 from setuptools import setup, find_packages, Command
 
@@ -12,7 +10,7 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "chang.liao@pnnl.gov"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 REQUIRES_PYTHON = ">=3.6.0"
 KEYWORDS = "Earth Science"
 
