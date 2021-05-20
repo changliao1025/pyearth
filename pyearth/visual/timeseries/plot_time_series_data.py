@@ -149,7 +149,9 @@ def plot_time_series_data(aTime_all, \
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
-    pYear = mdates.YearLocator(1)   # every year
+
+    nYear = int( (dMax_x-dMin_x)/ 5 )
+    pYear = mdates.YearLocator(nYear)   # every year
     pMonth = mdates.MonthLocator()  # every month
 
     if sDate_type_in is not None:
