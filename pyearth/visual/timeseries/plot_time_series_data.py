@@ -11,6 +11,7 @@ import matplotlib.ticker as ticker
 from pyearth.system.define_global_variables import *
 
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 
 def plot_time_series_data(aTime_all, \
                         aData_all, \
@@ -103,7 +104,13 @@ def plot_time_series_data(aTime_all, \
         aColor = aColor_in
     else:
         if(nData>=3):
-            aColor= create_diverge_rgb_color_hex(nData)
+            if (nData<=12):
+                aColor= create_diverge_rgb_color_hex(nData)
+            else:            
+                a = rand_hex_color(num=2)
+                b = polylinear_gradient(a, nData)
+                aColor = b['hex']
+                pass
         else:
             if nData==2:
                 aColor= ['red','blue']
