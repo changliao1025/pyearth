@@ -13,7 +13,7 @@ from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_time_series_data(aTime_all, \
-    aData_all, \
+                        aData_all, \
                           sFilename_out,\
                           iDPI_in = None,\
                           iFlag_log_in = None,\
@@ -291,8 +291,8 @@ def plot_time_series_data(aTime_all, \
 
             pass
 
-
-    ax.legend(bbox_to_anchor=aLocation_legend, \
+    if len(aLabel_legend[0]) > 0:
+        ax.legend(bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, \
               fontsize=12, \
               ncol= ncolumn)
