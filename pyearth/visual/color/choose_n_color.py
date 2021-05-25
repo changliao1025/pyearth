@@ -45,13 +45,11 @@ def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
     # Calcuate a color at each evenly spaced value of t from 1 to n
     for t in range(1, n):
         # Interpolate RGB vector for color at the current value of t
-      curr_vector = [  int(s[j] + (float(t)/(n-1))*(f[j]-s[j]))     for j in range(3)   ]
-      # Add it to our list of output colors
-      RGB_list.append(curr_vector)
+        curr_vector = [  int(s[j] + (float(t)/(n-1))*(f[j]-s[j]))     for j in range(3)   ]
+        # Add it to our list of output colors
+        RGB_list.append(curr_vector)
 
     return color_dict(RGB_list)
-
-
 
 def rand_hex_color(num=1):
     ''' Generate random hex colors, default is one,

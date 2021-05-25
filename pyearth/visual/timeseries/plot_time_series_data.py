@@ -18,7 +18,7 @@ def plot_time_series_data(aTime_all, \
                           sFilename_out,\
                           iDPI_in = None,\
                           iFlag_log_in = None,\
-                          iFlag_scientific_notation_in=None,\
+                          iFlag_scientific_notation_in = None,\
                           ncolumn_in = None,\
                           aFlag_trend_in = None, \
                           iReverse_y_in = None, \
