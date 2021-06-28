@@ -15,7 +15,8 @@ def plot_time_series_vertical_data(aTime, \
                           dMax_y_in = None, \
                           dMin_y_in = None,\
                               sLabel_y_in=None,\
-                                  sLabel_legend_in = None,\
+                                  sLabel_colorbar_in = None,\
+                                       sLabel_legend_in = None,\
                                              sLocation_legend_in=None,\
                                                  aLocation_legend_in =None):
     # Generate data for the plot
@@ -77,6 +78,14 @@ def plot_time_series_vertical_data(aTime, \
     else:
         iFlag_legend=0
         sLabel_legend = ''
+    
+    if sLabel_colorbar_in is not None:
+        
+        sLabel_colorbar = sLabel_colorbar_in
+    else:
+ 
+        sLabel_colorbar = ''
+
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
     else:
@@ -98,7 +107,9 @@ def plot_time_series_vertical_data(aTime, \
         ax.set_ylim( dMin_y, dMax_y )
     cmap = ax.pcolormesh(aTime, aVertical, aData)
 
-    fig.colorbar(cmap)
+    cbar = fig.colorbar(cmap)
+    cbar.set_label(sLabel_colorbar,labelpad=8)
+    
 
     #next Y axis
     ax.set_ylabel(sLabel_y,fontsize=12)
