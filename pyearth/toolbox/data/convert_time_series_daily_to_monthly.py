@@ -12,7 +12,7 @@ def convert_time_series_daily_to_monthly(aData_daily_in,\
 
     #check the length of data
 
-    aData_daily = np.arra(aData_daily_in)
+    aData_daily = np.array(aData_daily_in)
     aData_monthly_out = list()
 
     lJulian_start = gcal2jd(iYear_start_in, iMonth_start_in, iDay_start_in)
@@ -70,7 +70,7 @@ def convert_time_series_daily_to_monthly(aData_daily_in,\
                     
                     for iDay in range(iDay_start, iDay_end+1):
                         lJulian=gcal2jd(iYear, iMonth, iDay)
-                        dummy_index = int(lJulian-lJulian_start)
+                        dummy_index = int(lJulian[1]-lJulian_start[1])
                         dummy = dummy + aData_daily[dummy_index]
                         pass
 
