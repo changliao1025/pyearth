@@ -38,6 +38,7 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#984ea3',\
                                 '#ff7f00',\
                                 '#ffff33']
+                
             if ncolor == 7:
                 colors_hex = [  '#d73027', \
                                 '#fc8d59', \
@@ -76,8 +77,7 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#3288bd', \
                                 '#5e4fa2']
             else:
-                print('Too many colors are requested!')
-                return -1
+                pass
                 
         #add the reverse feature
         if iFlag_reverse_in is not None:

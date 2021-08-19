@@ -127,10 +127,12 @@ def barplot_data_with_reference(aData_in,\
                  marker = '+' ,\
                  label = aLabel_y_in[0])   
    
-    ax.set_ylabel(sLabel_y)
-    ax.set_title(sTitle)
+    ax.set_ylabel(sLabel_y,fontsize=14)
+    ax.set_title(sTitle,fontsize=14)
     ax.set_xticks(x)
     ax.set_xticklabels(aLabel_x_in)
+    ax.tick_params(axis="x", labelsize=15)
+    ax.tick_params(axis="y", labelsize=15)
 
     total_width = 0.7
     width = total_width / (nData-1)
@@ -153,7 +155,7 @@ def barplot_data_with_reference(aData_in,\
     ax.set_ylim( dMin_y, dMax_y )
     ax.legend(bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, \
-              fontsize=12, \
+              fontsize=15, \
               ncol= ncolumn)
     plt.savefig(sFilename_out, bbox_inches='tight')
 
