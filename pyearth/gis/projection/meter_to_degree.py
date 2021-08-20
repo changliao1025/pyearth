@@ -7,6 +7,6 @@ def meter_to_degree(dResolution_meter, dLatitude_mean):
 
     ##dResolution_meter = dResolution_degree / 360.0 * 2*np.pi * dRadius2
 
-    dResolution_degree= dResolution_meter/2*np.pi * dRadius2 * 360.0
+    dResolution_degree= dResolution_meter/(2*np.pi * dRadius2) * 360.0
 
     return dResolution_degree
