@@ -30,7 +30,6 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
         iWalltime = 2
 
 
-
     nTask = iIndex_end - iIndex_start + 1
     nChunkPerThread = nTask // nThread
 
