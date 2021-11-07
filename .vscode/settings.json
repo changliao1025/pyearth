@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "/global/homes/l/liao313/.conda/envs/pypestenv/bin/python",
+    "python.pythonPath": "/bin/python3",
     "editor.renderWhitespace": "all"
 }
