@@ -84,7 +84,7 @@ def gdal_read_envi_file_multiple_band(sFilename_in):
         dMissing_value = pBand.GetNoDataValue()
         #there is a chance that GDAL datetype is not compatiable with numpy datatype.
 
-        aData_out = np.full( (nband, nrow, ncolumn) , -9999.0, dtype= dt )
+        aData_out = np.full( (nband, nrow, ncolumn) , -9999.0, dtype= np.float32 )
         for iBand in range(nband):
             pBand = pDataset.GetRasterBand( iBand + 1)
             
