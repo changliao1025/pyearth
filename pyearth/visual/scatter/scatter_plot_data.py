@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
+from scipy import stats
 
 
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
@@ -102,10 +103,12 @@ def scatter_plot_data(aData_x, \
     #ax_scatter = sns.regplot(x=aData_x, y=aData_y, marker="+", lowess=True)
     ax_scatter = plt.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
-    ax_histx = plt.axes(rect_histx)
-    ax_histx.tick_params(direction='in', labelbottom=False)
-    ax_histy = plt.axes(rect_histy)
-    ax_histy.tick_params(direction='in', labelleft=False)
+    iFlag_histgram=1
+    if iFlag_histgram ==1:
+        ax_histx = plt.axes(rect_histx)
+        ax_histx.tick_params(direction='in', labelbottom=False)
+        ax_histy = plt.axes(rect_histy)
+        ax_histy.tick_params(direction='in', labelleft=False)
 
 
     nPoint = len(aData_x)
@@ -175,13 +178,14 @@ def scatter_plot_data(aData_x, \
     if dSpace_y_in is not None:
         dSpace_y = dSpace_y_in
     else:
-        dSpace_y = (dMax_y - dMin_y) /4.0
+        dSpace_y = (dMax_y - dMin_y) / 4.0
 
     ax_scatter.set_xlim( dMin_x, dMax_x )
     ax_scatter.set_ylim( dMin_y, dMax_y)
 
 
-    ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+    #ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=4))
+    ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
 
 
     if iFlag_log_x ==1:
@@ -197,7 +201,7 @@ def scatter_plot_data(aData_x, \
         if iFlag_scientific_notation_x ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
-            formatter.set_powerlimits((-1,1)) # you might need to change here
+            formatter.set_powerlimits((-1,6)) # you might need to change here
             ax_scatter.xaxis.set_major_formatter(formatter)
         else:
             pass
@@ -220,7 +224,7 @@ def scatter_plot_data(aData_x, \
         if iFlag_scientific_notation_y ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
-            formatter.set_powerlimits((-1,1)) # you might need to change here
+            formatter.set_powerlimits((-1,6)) # you might need to change here
             ax_scatter.yaxis.set_major_formatter(formatter)
 
         pass
@@ -234,7 +238,7 @@ def scatter_plot_data(aData_x, \
     labels = []
     labels.append(sLabel_legend)
 
-    iFlag_lowess = 1
+    iFlag_lowess = 0
     if(iFlag_lowess==1):      
 
         y_sm, y_std, order = scatter_lowess(aData_x, aData_y, f=1./3.)
@@ -260,61 +264,67 @@ def scatter_plot_data(aData_x, \
                            left='off', # turn off left ticks
                            right='off',  # turn off right ticks
                            bottom='off') # turn off bottom ticks
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
 
-    density = gaussian_kde(x)
-    xx = np.linspace(dMin_x, dMax_x,1000)
-    yy = density(xx)
-    ax_histx.plot(xx,yy, color='navy')
-    ax_histx.fill_between(xx, yy, 0, linewidth=3,  color = 'lightblue')
+    sR = "r-squared:" +  "{:.3f}".format(  r_value**2 )
+    print(sR)
+    print(slope, intercept, r_value, p_value, std_err)
+    
+    if iFlag_histgram ==1:
+        density = gaussian_kde(x)
+        xx = np.linspace(dMin_x, dMax_x,1000)
+        yy = density(xx)
+        ax_histx.plot(xx,yy, color='navy')
+        ax_histx.fill_between(xx, yy, 0, linewidth=3,  color = 'lightblue')
 
-    ax_histx.set_xlim( dMin_x, dMax_x )
-    ax_histx.set_ylim( 0, auto=None )
+        ax_histx.set_xlim( dMin_x, dMax_x )
+        ax_histx.set_ylim( 0, auto=None )
 
-    ax_histx.axis('on')
-    ax_histx.grid(which='major', color='white', linestyle='-', axis='x')
-    ax_histx.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x/2.0))
-    ax_histx.spines['right'].set_visible(False)
-    ax_histx.spines['top'].set_visible(False)
-    ax_histx.spines['bottom'].set_visible(False)
-    ax_histx.spines['left'].set_visible(False)
-    ax_histx.tick_params(which='both', # Options for both major and minor ticks
-                         top='off', # turn off top ticks
-                         left='off', # turn off left ticks
-                         right='off',  # turn off right ticks
-                         bottom='off') # turn off bottom ticks
+        ax_histx.axis('on')
+        ax_histx.grid(which='major', color='white', linestyle='-', axis='x')
+        ax_histx.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x/2.0))
+        ax_histx.spines['right'].set_visible(False)
+        ax_histx.spines['top'].set_visible(False)
+        ax_histx.spines['bottom'].set_visible(False)
+        ax_histx.spines['left'].set_visible(False)
+        ax_histx.tick_params(which='both', # Options for both major and minor ticks
+                             top='off', # turn off top ticks
+                             left='off', # turn off left ticks
+                             right='off',  # turn off right ticks
+                             bottom='off') # turn off bottom ticks
 
-    ax_histx.axes.get_yaxis().set_visible(False)
-    ax_histx.tick_params(axis='x', colors='white')
+        ax_histx.axes.get_yaxis().set_visible(False)
+        ax_histx.tick_params(axis='x', colors='white')
 
-    #y margin
- 
-    density = gaussian_kde(y)
-    xx = np.linspace(dMin_y, dMax_y,1000)
-    yy = density(xx)
-    xx, yy = yy, xx
-    ax_histy.plot(xx,yy, color='navy')
-    ax_histy.fill_betweenx(yy, 0, xx, linewidth=3,  color = 'lightblue')
+        #y margin
+    
+        density = gaussian_kde(y)
+        xx = np.linspace(dMin_y, dMax_y,1000)
+        yy = density(xx)
+        xx, yy = yy, xx
+        ax_histy.plot(xx,yy, color='navy')
+        ax_histy.fill_betweenx(yy, 0, xx, linewidth=3,  color = 'lightblue')
 
-    ax_histy.set_xlim(0, auto=None)
-    ax_histy.set_ylim(dMin_y, dMax_y)
+        ax_histy.set_xlim(0, auto=None)
+        ax_histy.set_ylim(dMin_y, dMax_y)
 
-    ax_histy.axis('on')
-    ax_histy.grid(which='major', color='white', linestyle='-', axis='y')
-    ax_histy.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y/2.0))
-    ax_histy.spines['right'].set_visible(False)
-    ax_histy.spines['top'].set_visible(False)
-    ax_histy.spines['bottom'].set_visible(False)
-    ax_histy.spines['left'].set_visible(False)
-    ax_histy.axes.get_xaxis().set_visible(False)
+        ax_histy.axis('on')
+        ax_histy.grid(which='major', color='white', linestyle='-', axis='y')
+        ax_histy.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y/2.0))
+        ax_histy.spines['right'].set_visible(False)
+        ax_histy.spines['top'].set_visible(False)
+        ax_histy.spines['bottom'].set_visible(False)
+        ax_histy.spines['left'].set_visible(False)
+        ax_histy.axes.get_xaxis().set_visible(False)
 
 
-    ax_histy.tick_params(axis='y', colors='white')
+        ax_histy.tick_params(axis='y', colors='white')
 
-    ax_histy.tick_params(which='both', # Options for both major and minor ticks
-                         top='off', # turn off top ticks
-                         left='off', # turn off left ticks
-                         right='off',  # turn off right ticks
-                         bottom='off') # turn off bottom ticks
+        ax_histy.tick_params(which='both', # Options for both major and minor ticks
+                             top='off', # turn off top ticks
+                             left='off', # turn off left ticks
+                             right='off',  # turn off right ticks
+                             bottom='off') # turn off bottom ticks
 
 
     plt.savefig(sFilename_out, bbox_inches='tight')
