@@ -54,8 +54,7 @@ def map_raster_data(aImage_in, \
         sColormap =  'rainbow'
 
     cmap = cm.get_cmap(sColormap)
-
-    
+   
 
     dummy_index = np.where(aImage_in > dData_max)
     aImage_in[dummy_index] = dData_max

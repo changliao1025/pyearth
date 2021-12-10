@@ -86,7 +86,9 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in):
         pPixelHeight = pGeotransform[5]
 
         pBand = pDataset.GetRasterBand(1)
-        dt = gdal.GetDataTypeName(pBand.DataType)
+        
+        dummy_data = pBand.ReadAsArray(0, 0, ncolumn, nrow)
+        dt = type(dummy_data)
         #there is a chance that GDAL datetype is not compatiable with numpy datatype.
         dMissing_value = pBand.GetNoDataValue()
         aData_out = np.full( (nband, nrow, ncolumn) , -9999.0, dtype= dt )
