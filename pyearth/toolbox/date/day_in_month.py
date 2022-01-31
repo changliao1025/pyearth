@@ -1,5 +1,4 @@
-from jdcal import gcal2jd, jd2gcal
-
+import julian
 def day_in_month(iYear_in, iMonth_in):
     lJulian_start = gcal2jd(iYear_in, iMonth_in, 1)
 

@@ -1,6 +1,7 @@
 import numpy as np
-from jdcal import gcal2jd, jd2gcal
+import julian
 from pyearth.toolbox.date.day_in_month import day_in_month
+
 def convert_time_series_daily_to_monthly(aData_daily_in,\
     iYear_start_in, iMonth_start_in, iDay_start_in, \
       iYear_end_in, iMonth_end_in, iDay_end_in , sType_in = None  ):

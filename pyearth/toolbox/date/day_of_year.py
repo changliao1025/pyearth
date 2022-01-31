@@ -1,4 +1,4 @@
-from jdcal import gcal2jd, jd2gcal
+import julian
 
 def day_of_year(iYear_in, iMonth_in, iDay_in):
 
