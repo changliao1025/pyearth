@@ -3,13 +3,57 @@ import numpy as np
 import osgeo
 from osgeo import ogr, osr, gdal, gdalconst
 
-
-
-
 gdal.UseExceptions()    # Enable exceptions
 
+
+def reproject_coordinates(x, y, spatial_reference_source, spatial_reference_target=None):
+    """ Reproject a pair of x,y coordinates. 
+
+    Args:
+        x ([type]): [description]
+        y ([type]): [description]
+        spatial_reference_source ([type]): [description]
+        spatial_reference_target ([type], optional): [description]. Defaults to None.
+
+    Returns:
+        [type]: [description]
+    """
+
+    if spatial_reference_target is not None:
+
+        pass
+    else:
+        spatial_reference_target = osr.SpatialReference()
+        spatial_reference_target.ImportFromEPSG(4326)
+        
+        pass
+
+    
+    if int(osgeo.__version__[0]) >= 3:
+    # GDAL 3 changes axis order: https://github.com/OSGeo/gdal/issues/1546
+                    
+        spatial_reference_source.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        spatial_reference_target.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+    
+    pTransform = osr.CoordinateTransformation( spatial_reference_source, spatial_reference_target)
+   
+    x_new,y_new, z = pTransform.TransformPoint( x,y)
+    
+    return x_new,y_new
+
 def reproject_coordinates_batch(x, y, spatial_reference_source, spatial_reference_target=None):
-    """ Reproject a list of x,y coordinates. """
+    """ Reproject a list of x, y coordinates.
+
+    Args:
+        x (list): list of x coordinates
+        y (list): list of y coordinates
+        spatial_reference_source ([type]): [description]
+        spatial_reference_target ([type], optional): [description]. Defaults to None.
+
+    Returns:
+        [type]: [description]
+    """
 
     if spatial_reference_target is not None:
 
@@ -44,34 +88,17 @@ def reproject_coordinates_batch(x, y, spatial_reference_source, spatial_referenc
     
     return x_new,y_new
 
-def reproject_coordinates(x, y, spatial_reference_source, spatial_reference_target=None):
-    """ Reproject a list of x,y coordinates. """
-
-    if spatial_reference_target is not None:
-
-        pass
-    else:
-        spatial_reference_target = osr.SpatialReference()
-        spatial_reference_target.ImportFromEPSG(4326)
-        
-        pass
-
-    
-    if int(osgeo.__version__[0]) >= 3:
-    # GDAL 3 changes axis order: https://github.com/OSGeo/gdal/issues/1546
-                    
-        spatial_reference_source.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
-        spatial_reference_target.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    
-    pTransform = osr.CoordinateTransformation( spatial_reference_source, spatial_reference_target)
-   
-    x_new,y_new, z = pTransform.TransformPoint( x,y)
-    
-    return x_new,y_new
-
 def obtain_raster_metadata(sFilename_geotiff):
-    pDriver = gdal.GetDriverByName('GTiff')
+    """retrieve the metadata of a geotiff file
+
+    Args:
+        sFilename_geotiff ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    
+    #pDriver = gdal.GetDriverByName('GTiff')
    
     pDataset = gdal.Open(sFilename_geotiff, gdal.GA_ReadOnly)
 
@@ -97,7 +124,19 @@ def obtain_raster_metadata(sFilename_geotiff):
         return dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, pSpatialRef, pProjection, pGeotransform
 
 def obtain_shapefile_metadata(sFilename_shapefile):
+    """[summary]
 
+    Args:
+        sFilename_shapefile ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    if os.path.exists(sFilename_shapefile):
+        pass
+    else:
+        print('The  shapefile does not exist!')
+        return
 
     pDriver_shapefile = ogr.GetDriverByName('ESRI Shapefile')
    
@@ -133,6 +172,6 @@ def obtain_shapefile_metadata(sFilename_shapefile):
         
 
             print( pEnvelope )
-        print(left_min, right_max, bot_min, top_max)
+      
         return left_min, right_max, bot_min, top_max
 

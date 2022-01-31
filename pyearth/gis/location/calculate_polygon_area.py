@@ -5,7 +5,18 @@ def calculate_polygon_area(lats, lons, algorithm = 0, radius = 6378137.0):
     Computes area of spherical polygon, assuming spherical Earth. 
     Returns result in ratio of the sphere's area if the radius is specified. Otherwise, in the units of provided radius.
     lats and lons are in degrees.
+
+    Args:
+        lats ([type]): [description]
+        lons ([type]): [description]
+        algorithm (int, optional): [description]. Defaults to 0.
+        radius (float, optional): [description]. Defaults to 6378137.0.
+
+    Returns:
+        [type]: [description]
     """
+    
+   
     #TODO: take into account geodesy (i.e. convert latitude to authalic sphere, use radius of authalic sphere instead of mean radius of spherical earth)
     lats = np.deg2rad(lats)
     lons = np.deg2rad(lons)

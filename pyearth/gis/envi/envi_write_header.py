@@ -1,10 +1,30 @@
-import os,sys
+import os
 def envi_write_header(sFilename_in, aHeader):
     """
     write the header for ENVI raster file from the dictionary data type, 
     currently it only supports WGS84 and a dict is required to store all the information. 
     https://www.harrisgeospatial.com/docs/ENVIGridDefinition.html
+
+    Parameters
+    ----------
+        sFilename_in ([type]): the file name
+        aHeader ([type]): a dict that contains all information
+    Returns
+    -------
+
+    See Also
+    --------
+    ifftshift : The inverse of `fftshift`.
+    Examples
+    --------
     """
+    
+    
+    if os.path.exists(sFilename_in):
+        pass
+    else:
+        print('The envi file does not exist!')
+        return
 
     pFile = open(sFilename_in, 'w')
     sLine = 'ENVI' + '\n'
