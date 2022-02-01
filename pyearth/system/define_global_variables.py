@@ -1,18 +1,13 @@
 """
-this module will be used to define all the global variable 
+this module will be used to define all the global variables 
 """
-import os 
-import sys
+
 import platform  
 from pathlib import Path
 import getpass
 sPlatform_os = platform.system()
 
 sUsername = getpass.getuser()
-
-#system wide paths
-#sWorkspace_scratch: data storage
-#sWorkspace_home: home directory
 
 sWorkspace_home = str(Path.home())
 
@@ -25,8 +20,6 @@ else:  #linux or unix
     slash = '/'    
    
     if (sPlatform_os == 'Linux'):
-        #sCluster = os.environ['SYSTEM_NAME']
-        
         sWorkspace_scratch =  sWorkspace_home + slash + 'scratch'            
         
     else:

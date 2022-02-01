@@ -1,24 +1,24 @@
 
-def world2Pixel(geoMatrix, x, y):
+def world2Pixel(pGeoMatrix_in, dx_in, dy_in):
     """
     Uses a gdal geomatrix (gdal.GetGeoTransform()) to calculate
     the pixel location of a geospatial coordinate
    
     Args:
-        geoMatrix ([type]): [description]
-        x ([type]): [description]
-        y ([type]): [description]
+        geoMatrix (gdal): The geotransform matrix
+        dx_in ([type]): The X coodinate of a point
+        dy_in ([type]): The Y coodinate of a point
 
     Returns:
-        [type]: [description]
+        Tuple: pixel, line
     """
     
-    ulX = geoMatrix[0]
-    ulY = geoMatrix[3]
-    xDist = geoMatrix[1]
-    yDist = geoMatrix[5]
-    rtnX = geoMatrix[2]
-    rtnY = geoMatrix[4]
-    pixel = int((x - ulX) / xDist)
-    line = int((ulY - y) / xDist)
+    ulX = pGeoMatrix_in[0]
+    ulY = pGeoMatrix_in[3]
+    xDist = pGeoMatrix_in[1]
+    yDist = pGeoMatrix_in[5]
+    rtnX = pGeoMatrix_in[2]
+    rtnY = pGeoMatrix_in[4]
+    pixel = int((dx_in - ulX) / xDist)
+    line = int((ulY - dy_in) / xDist)
     return (pixel, line)

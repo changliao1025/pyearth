@@ -1,13 +1,27 @@
+import datetime
 import julian
 def day_in_month(iYear_in, iMonth_in):
-    lJulian_start = gcal2jd(iYear_in, iMonth_in, 1)
+    """
+    Calculate how many days in a month
 
-    """Calculate how many days in a month"""
+    Args:
+        iYear_in (int): The year
+        iMonth_in (int): The month
+
+    Returns:
+        int: The total day in the month
+    """
+    
+    dummy1 = datetime.datetime(iYear_in, iMonth_in, 1)
+    lJulian_start = julian.to_jd(dummy1, fmt='jd')    
 
     if iMonth_in < 12:
-        lJulian_end =  gcal2jd(iYear_in, iMonth_in+1, 1)
+        dummy1 = datetime.datetime(iYear_in, iMonth_in+1, 1)
+        lJulian_end = julian.to_jd(dummy1, fmt='jd')
+        
     else:
-        lJulian_end =  gcal2jd(iYear_in+1, 1, 1)
+        dummy1 = datetime.datetime(iYear_in+1, iMonth_in, 1)
+        lJulian_end = julian.to_jd(dummy1, fmt='jd')
    
     dayinmon = int (lJulian_end[1] - lJulian_start[1] ) 
   

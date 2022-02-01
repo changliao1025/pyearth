@@ -6,25 +6,25 @@ from osgeo import ogr, osr, gdal, gdalconst
 gdal.UseExceptions()    # Enable exceptions
 
 
-def reproject_coordinates(x, y, spatial_reference_source, spatial_reference_target=None):
+def reproject_coordinates(dx_in, dy_in, pSpatial_reference_source_in, pSpatial_reference_target_in=None):
     """ Reproject a pair of x,y coordinates. 
 
     Args:
-        x ([type]): [description]
-        y ([type]): [description]
-        spatial_reference_source ([type]): [description]
-        spatial_reference_target ([type], optional): [description]. Defaults to None.
+        dx_in (float): X Coordinate of point
+        dy_in (float): Y Coordinate of
+        pSpatial_reference_source_in (osr): The source spatial reference of point
+        pSpatial_reference_target_in (osr, optional): The target spatial reference of point. Defaults to None.
 
     Returns:
-        [type]: [description]
+        Tuple: dx_new, dy_new
     """
 
-    if spatial_reference_target is not None:
+    if pSpatial_reference_target_in is not None:
 
         pass
     else:
-        spatial_reference_target = osr.SpatialReference()
-        spatial_reference_target.ImportFromEPSG(4326)
+        pSpatial_reference_target_in = osr.SpatialReference()
+        pSpatial_reference_target_in.ImportFromEPSG(4326)
         
         pass
 
@@ -32,35 +32,35 @@ def reproject_coordinates(x, y, spatial_reference_source, spatial_reference_targ
     if int(osgeo.__version__[0]) >= 3:
     # GDAL 3 changes axis order: https://github.com/OSGeo/gdal/issues/1546
                     
-        spatial_reference_source.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
-        spatial_reference_target.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        pSpatial_reference_source_in.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        pSpatial_reference_target_in.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     
-    pTransform = osr.CoordinateTransformation( spatial_reference_source, spatial_reference_target)
+    pTransform = osr.CoordinateTransformation( pSpatial_reference_source_in, pSpatial_reference_target_in)
    
-    x_new,y_new, z = pTransform.TransformPoint( x,y)
+    dx_out,dy_out, z = pTransform.TransformPoint( dx_in,dy_in)
     
-    return x_new,y_new
+    return dx_out, dy_out
 
-def reproject_coordinates_batch(x, y, spatial_reference_source, spatial_reference_target=None):
+def reproject_coordinates_batch(aX_in, aY_in, pSpatial_reference_source_in, pSpatial_reference_target_in=None):
     """ Reproject a list of x, y coordinates.
 
     Args:
-        x (list): list of x coordinates
-        y (list): list of y coordinates
-        spatial_reference_source ([type]): [description]
-        spatial_reference_target ([type], optional): [description]. Defaults to None.
+        aX_in (list): A list of X Coordinate of points
+        aY_in (list): A list of Y Coordinate of points
+        pSpatial_reference_source_in (osr): The source spatial reference of point
+        pSpatial_reference_target_in (osr, optional): The target spatial reference of point. Defaults to None.
 
     Returns:
-        [type]: [description]
+        Tuple: aX_out, aY_out
     """
 
-    if spatial_reference_target is not None:
+    if pSpatial_reference_target_in is not None:
 
         pass
     else:
-        spatial_reference_target = osr.SpatialReference()
-        spatial_reference_target.ImportFromEPSG(4326)
+        pSpatial_reference_target_in = osr.SpatialReference()
+        pSpatial_reference_target_in.ImportFromEPSG(4326)
         
         pass
 
@@ -68,46 +68,57 @@ def reproject_coordinates_batch(x, y, spatial_reference_source, spatial_referenc
     if int(osgeo.__version__[0]) >= 3:
     # GDAL 3 changes axis order: https://github.com/OSGeo/gdal/issues/1546
                     
-        spatial_reference_source.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
-        spatial_reference_target.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        pSpatial_reference_source_in.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        pSpatial_reference_target_in.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     
-    pTransform = osr.CoordinateTransformation( spatial_reference_source, spatial_reference_target)
+    pTransform = osr.CoordinateTransformation( pSpatial_reference_source_in, pSpatial_reference_target_in)
 
-    npoint = len(x)
-    x_new=list()
-    y_new=list()
+    npoint = len(aX_in)
+    aX_out=list()
+    aY_out=list()
     for i in range(npoint):
-        x0 = x[i]
-        y0 = y[i]
+        x0 = aX_in[i]
+        y0 = aY_in[i]
    
         x1,y1, z = pTransform.TransformPoint( x0,y0)
 
-        x_new.append(x1)
-        y_new.append(y1)
+        aX_out.append(x1)
+        aY_out.append(y1)
     
-    return x_new,y_new
+    return aX_out,aY_out
 
-def obtain_raster_metadata(sFilename_geotiff):
+def obtain_raster_metadata_geotiff(sFilename_geotiff_in):
     """retrieve the metadata of a geotiff file
 
     Args:
-        sFilename_geotiff ([type]): [description]
+        sFilename_geotiff (string): The filename of geotiff
 
     Returns:
-        [type]: [description]
+       Tuple: dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, pSpatial_reference, pProjection, pGeotransform
     """
+
+    if os.path.exists(sFilename_geotiff_in):
+        pass
+    else:
+        print('The file does not exist!')
+        return
     
-    #pDriver = gdal.GetDriverByName('GTiff')
+    sDriverName='GTiff'    
+    pDriver = gdal.GetDriverByName(sDriverName)
+    if pDriver is None:
+        print ("%s pDriver not available.\n" % sDriverName)
+    else:
+        print  ("%s pDriver IS available.\n" % sDriverName) 
    
-    pDataset = gdal.Open(sFilename_geotiff, gdal.GA_ReadOnly)
+    pDataset = gdal.Open(sFilename_geotiff_in, gdal.GA_ReadOnly)
 
     if pDataset is None:
-        print("Couldn't open this file: " + sFilename_geotiff)
+        print("Couldn't open this file: " + sFilename_geotiff_in)
         sys.exit("Try again!")
     else: 
         pProjection = pDataset.GetProjection()
-        pSpatialRef = osr.SpatialReference(wkt=pProjection)
+        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
     
     
         ncolumn = pDataset.RasterXSize
@@ -120,32 +131,39 @@ def obtain_raster_metadata(sFilename_geotiff):
         dPixelWidth = pGeotransform[1]
         pPixelHeight = pGeotransform[5]       
         
-        print( dPixelWidth, dOriginX, dOriginY, nrow, ncolumn)
-        return dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, pSpatialRef, pProjection, pGeotransform
+        
+        return dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, pSpatial_reference, pProjection, pGeotransform
 
-def obtain_shapefile_metadata(sFilename_shapefile):
-    """[summary]
+def obtain_shapefile_metadata(sFilename_shapefile_in):
+    """
+    Obtain the metadata of a shapefile
 
     Args:
-        sFilename_shapefile ([type]): [description]
+        sFilename_shapefile (string): The filename of the shapefile
 
     Returns:
-        [type]: [description]
+        Tuple: left_min, right_max, bot_min, top_max
     """
-    if os.path.exists(sFilename_shapefile):
+    if os.path.exists(sFilename_shapefile_in):
         pass
     else:
         print('The  shapefile does not exist!')
         return
 
-    pDriver_shapefile = ogr.GetDriverByName('ESRI Shapefile')
+
+    sDriverName='ESRI Shapefile'    
+    pDriver_shapefile = ogr.GetDriverByName(sDriverName)
+    if pDriver_shapefile is None:
+        print ("%s pDriver not available.\n" % sDriverName)
+    else:
+        print  ("%s pDriver IS available.\n" % sDriverName) 
    
-    pDataset = pDriver_shapefile.Open(sFilename_shapefile, gdal.GA_ReadOnly)
+    pDataset = pDriver_shapefile.Open(sFilename_shapefile_in, gdal.GA_ReadOnly)
     pLayer = pDataset.GetLayer(0)
-    #pSrs = pLayer.GetSpatialRef()
+  
 
     if pDataset is None:
-        print("Couldn't open this file: " + sFilename_shapefile)
+        print("Couldn't open this file: " + sFilename_shapefile_in)
         sys.exit("Try again!")
     else:    
         
@@ -154,8 +172,6 @@ def obtain_shapefile_metadata(sFilename_shapefile):
         for feature in pLayer:
             pGeometry = feature.GetGeometryRef()
             pEnvelope = pGeometry.GetEnvelope()
-
-            #"minX: %d, minY: %d, maxX: %d, maxY: %d" %(env[0],env[2],env[1],env[3])
 
             if iFlag_first ==1:
                 left_min = pEnvelope[0]
@@ -169,9 +185,5 @@ def obtain_shapefile_metadata(sFilename_shapefile):
                 bot_min = np.min([bot_min,  pEnvelope[2]])
                 top_max = np.max([top_max,  pEnvelope[3]])
 
-        
-
-            print( pEnvelope )
-      
         return left_min, right_max, bot_min, top_max
 

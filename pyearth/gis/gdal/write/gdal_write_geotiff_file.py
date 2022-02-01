@@ -1,14 +1,25 @@
-import sys
+import os, sys
 from osgeo import gdal, osr,ogr, gdalconst
 
-def gdal_write_geotiff_file(sFilename_in, aData_in,\
-                       dPixelWidth_in, \
-                       dOriginX_in, \
-                       dOriginY_in, \
-                       dMissing_value_in,\
-                       pSpatialRef_in):
+def gdal_write_geotiff_file(sFilename_in, aData_in, dPixelWidth_in,    dOriginX_in,        dOriginY_in,    dMissing_value_in,     pSpatial_reference_in):
+    """
+    Write a Geotiff standard format raster file
 
-    """Write a Geotiff standard format raster file."""
+    Args:
+        sFilename_in (string): The filename
+        aData_in (numpy.array): The data
+        dPixelWidth_in (float): The resolution
+        dOriginX_in (float): The location of origin x
+        dOriginY_in (float): The location of origin y
+        dMissing_value_in (float): The missinge value
+        pSpatial_reference_in (osr): The spatial reference
+
+    Returns:
+        Tuple: pGeotransform_out, pProjection_out
+    """
+    if os.path.exists(sFilename_in):
+        os.remove(sFilename_in)
+        pass
 
     sDriverName='GTiff'
     pDriver = gdal.GetDriverByName(sDriverName)  
@@ -36,7 +47,7 @@ def gdal_write_geotiff_file(sFilename_in, aData_in,\
         0,                      # 4
         -dPixelWidth_in])
 
-    pProjection= pSpatialRef_in.ExportToPrettyWkt()
+    pProjection= pSpatial_reference_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)
 
     pBand = pDataset.GetRasterBand(1)
@@ -55,14 +66,25 @@ def gdal_write_geotiff_file(sFilename_in, aData_in,\
 
 
 
-def gdal_write_geotiff_file_multiple_band(sFilename_in, aData_in, \
-                                     dPixelWidth_in,\
-                                     dOriginX_in, \
-                                     dOriginY_in,  \
-                                     dMissing_value_in,\
-                                     pSpatialRef_in ):
+def gdal_write_geotiff_file_multiple_band(sFilename_in, aData_in,  dPixelWidth_in,   dOriginX_in,   dOriginY_in, dMissing_value_in,   pSpatial_reference_in ):
+    """
+    Write a multi-band geotiff raster file
 
-    """Write a Geotiff standard format raster file."""
+    Args:
+        sFilename_in (string): The filename
+        aData_in (numpy.array): The data
+        dPixelWidth_in (float): The resolution
+        dOriginX_in (float): The location of origin x
+        dOriginY_in (float): The location of origin y
+        dMissing_value_in (float): The missinge value
+        pSpatial_reference_in (osr): The spatial reference
+
+    Returns:
+        Tuple: pGeotransform_out, pProjection_out
+    """
+    if os.path.exists(sFilename_in):
+        os.remove(sFilename_in)
+        pass
 
     sDriverName='GTiff'
     pDriver = gdal.GetDriverByName(sDriverName)  
@@ -91,7 +113,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in, aData_in, \
                               0.0, \
                               -dPixelWidth_in])
 
-    pProjection= pSpatialRef_in.ExportToPrettyWkt()
+    pProjection= pSpatial_reference_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)
 
     #Write raster datasets

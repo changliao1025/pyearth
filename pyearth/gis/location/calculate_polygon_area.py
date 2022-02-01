@@ -1,41 +1,46 @@
 import numpy as np
 from numpy import arctan2, cos, sin, sqrt, pi, power, append, diff
-def calculate_polygon_area(lats, lons, algorithm = 0, radius = 6378137.0):
+
+def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, radius = 6378137.0):
     """
     Computes area of spherical polygon, assuming spherical Earth. 
     Returns result in ratio of the sphere's area if the radius is specified. Otherwise, in the units of provided radius.
     lats and lons are in degrees.
 
     Args:
-        lats ([type]): [description]
-        lons ([type]): [description]
-        algorithm (int, optional): [description]. Defaults to 0.
-        radius (float, optional): [description]. Defaults to 6378137.0.
+        aLongitude_in (list): The longitude of list of points
+        aLatitude_in (list): The latitude of list of points
+        iFlag_algorithm (int, optional): Which algorithm to use. Defaults to 0.
+        radius (float, optional): The radius of Earth in meter. Defaults to 6378137.0.
 
     Returns:
-        [type]: [description]
+        float: The area of the polygon
     """
     
+    npoint = len(aLongitude_in)
+    if npoint<3:
+        print('More than 2 points are required!')
+        return
    
     #TODO: take into account geodesy (i.e. convert latitude to authalic sphere, use radius of authalic sphere instead of mean radius of spherical earth)
-    lats = np.deg2rad(lats)
-    lons = np.deg2rad(lons)
+    aLatitude_in = np.deg2rad(aLatitude_in)
+    aLongitude_in = np.deg2rad(aLongitude_in)
 
-    if algorithm==0:
+    if iFlag_algorithm==0:
         # Line integral based on Green's Theorem, assumes spherical Earth
         
 
         #close polygon
-        if lats[0]!=lats[-1]:
-            lats = append(lats, lats[0])
-            lons = append(lons, lons[0])
+        if aLatitude_in[0]!=aLatitude_in[-1]:
+            aLatitude_in = append(aLatitude_in, aLatitude_in[0])
+            aLongitude_in = append(aLongitude_in, aLongitude_in[0])
 
         # Get colatitude (a measure of surface distance as an angle)
-        a = sin(lats/2)**2 + cos(lats)* sin(lons/2)**2
+        a = sin(aLatitude_in/2)**2 + cos(aLatitude_in)* sin(aLongitude_in/2)**2
         colat = 2*arctan2( sqrt(a), sqrt(1-a) )
 
         #azimuth of each point in segment from the arbitrary origin
-        az = arctan2(cos(lats) * sin(lons), sin(lats)) % (2*pi)
+        az = arctan2(cos(aLatitude_in) * sin(aLongitude_in), sin(aLatitude_in)) % (2*pi)
 
         # Calculate step sizes
         # daz = diff(az) % (2*pi)
@@ -58,7 +63,7 @@ def calculate_polygon_area(lats, lons, algorithm = 0, radius = 6378137.0):
             return area * 4*pi*radius**2
         else: #return in ratio of sphere total area
             return area
-    elif algorithm==2:
+    elif iFlag_algorithm==2:
         #L'Huilier Theorem, assumes spherical earth
         #see:
         # https://mathworld.wolfram.com/SphericalPolygon.html
@@ -67,7 +72,7 @@ def calculate_polygon_area(lats, lons, algorithm = 0, radius = 6378137.0):
         # https://github.com/tylerjereddy/spherical-SA-docker-demo/blob/master/docker_build/demonstration.py
         #TODO
         pass
-    elif algorithm==3:
+    elif iFlag_algorithm==3:
         #https://trs.jpl.nasa.gov/handle/2014/41271
         #TODO
         pass

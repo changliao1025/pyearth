@@ -1,28 +1,28 @@
 from math import radians, cos, sin, asin, sqrt
 
-def calculate_distance_based_on_lon_lat(lon1, lat1, lon2, lat2):
+def calculate_distance_based_on_lon_lat(dLongitude_from, dLatitude_from, dLongitude_to, dLatitude_to):
     """
     Calculate the great circle distance between two points 
     on the earth (specified in decimal degrees)
     https://en.wikipedia.org/wiki/Great-circle_distance
+    The current algorothm is the  haversine formula 
 
     Args:
-        lon1 ([type]): [description]
-        lat1 ([type]): [description]
-        lon2 ([type]): [description]
-        lat2 ([type]): [description]
+        dLongitude_from (float): The longitude of the start point
+        dLatitude_from (float):  The latitude of the start point
+        dLongitude_to (float):  The longitude of the end point
+        dLatitude_to (float):  The latitude of the end point
 
     Returns:
-        [type]: [description]
+        float: The great circle distance
     """
     # convert decimal degrees to radians 
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    dLongitude_from, dLatitude_from, dLongitude_to, dLatitude_to = map(radians, [dLongitude_from, dLatitude_from, dLongitude_to, dLatitude_to])
 
     # haversine formula 
-    dlon = lon2 - lon1 
-    dlat = lat2 - lat1 
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    dlon = dLongitude_to - dLongitude_from 
+    dlat = dLatitude_to - dLatitude_from 
+    a = sin(dlat/2)**2 + cos(dLatitude_from) * cos(dLatitude_to) * sin(dlon/2)**2
     c = 2 * asin(sqrt(a)) 
-
     r = 6378137.0# Radius of earth in kilometers. Use 3956 for miles
     return c * r

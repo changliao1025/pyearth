@@ -7,7 +7,19 @@ def gdal_read_shapefile(sFilename_in):
     """
     Read a ESRI Shapefile. 
     Be careful that GDAL Python blinding has issue with some objects
+
+    Args:
+        sFilename_in (string): The filename
+
+    Returns:
+        tuple: aFeature, pSpatial_reference, lFeatureCount
     """
+
+    if os.path.exists(sFilename_in):
+        pass
+    else:
+        print('The file does not exist!')
+        return
 
     sDriverName = "ESRI Shapefile"
     pDriver = ogr.GetDriverByName( sDriverName )
@@ -29,7 +41,7 @@ def gdal_read_shapefile(sFilename_in):
         lFeatureCount = pLayer.GetFeatureCount()
         print ("Number of features in %s: %d" %  (os.path.basename(sFilename_in),lFeatureCount))
         
-        pSpatailRef = pLayer.GetSpatialRef() 
+        pSpatial_reference = pLayer.GetSpatialRef() 
         
         aFeature=[]
         for pFeature in pLayer:         
@@ -38,4 +50,4 @@ def gdal_read_shapefile(sFilename_in):
             #print (pGeometry.Centroid().ExportToWkt())
             aFeature.append(pGeometry)       
 
-        return aFeature, pSpatailRef, lFeatureCount
+        return aFeature, pSpatial_reference, lFeatureCount

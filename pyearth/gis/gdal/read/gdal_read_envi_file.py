@@ -1,10 +1,23 @@
 import os, sys
 import numpy as np
-from osgeo import gdal, osr,ogr,  gdalconst
+from osgeo import gdal, osr
 
 
 def gdal_read_envi_file(sFilename_in):
-    """Read a ENVI standard format raster file."""
+    """Read a ENVI standard format raster file.
+
+    Args:
+        sFilename_in (string): The filename
+
+    Returns:
+        tuple: aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+    """
+    
+    if os.path.exists(sFilename_in):
+        pass
+    else:
+        print('The file does not exist!')
+        return
 
     sDriverName='ENVI'
     pDriver = gdal.GetDriverByName(sDriverName)  
@@ -38,17 +51,29 @@ def gdal_read_envi_file(sFilename_in):
         pBand = pDataset.GetRasterBand(1)
         dMissing_value = pBand.GetNoDataValue()
         aData_out = pBand.ReadAsArray(0, 0, ncolumn, nrow)
-        pSpatialRef = osr.SpatialReference(wkt=pProjection)
+        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
 
         pDriver = None
         pDataset = None
         pBand = None
 
-        return aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatialRef
+        return aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
 
 
 def gdal_read_envi_file_multiple_band(sFilename_in):
-    """Read a ENVI standard format raster file with multiple bands."""
+    """Read a ENVI standard format raster file with multiple bands.
+
+    Args:
+        sFilename_in (string): The file name
+
+    Returns:
+        tuple: aData_out, pPixelWidth, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value , pGeotransform, pProjection, pSpatial_reference
+    """
+    if os.path.exists(sFilename_in):
+        pass
+    else:
+        print('The file does not exist!')
+        return
 
     sDriverName='ENVI'
     pDriver = gdal.GetDriverByName(sDriverName)  
@@ -90,10 +115,10 @@ def gdal_read_envi_file_multiple_band(sFilename_in):
             
             aData_out[iBand, :, :] = pBand.ReadAsArray(0, 0, ncolumn, nrow)
 
-        pSpatialRef = osr.SpatialReference(wkt=pProjection)
+        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
 
         pDriver = None
         pDataset = None
         pBand = None
 
-        return aData_out, pPixelWidth, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value , pGeotransform, pProjection, pSpatialRef
+        return aData_out, pPixelWidth, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value , pGeotransform, pProjection, pSpatial_reference

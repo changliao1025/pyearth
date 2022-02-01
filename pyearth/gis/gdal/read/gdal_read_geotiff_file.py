@@ -1,9 +1,23 @@
 import os, sys
 import numpy as np
-from osgeo import gdal, osr,ogr, gdalconst
+from osgeo import gdal, osr
 
 def gdal_read_geotiff_file(sFilename_in):
-    """Read a Geotiff raster file."""
+    """Read a Geotiff format raster file.
+
+    Args:
+        sFilename_in (string): The file name
+
+    Returns:
+        tuple: aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+    """
+    
+    if os.path.exists(sFilename_in):
+        pass
+    else:
+        print('The file does not exist!')
+        return
+
     sDriverName='GTiff'
     pDriver = gdal.GetDriverByName(sDriverName)  
 
@@ -11,6 +25,7 @@ def gdal_read_geotiff_file(sFilename_in):
         print ("%s pDriver not available.\n" % sDriverName)
     else:
         print  ("%s pDriver IS available.\n" % sDriverName)  
+
     pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
     if pDataset is None:
@@ -44,19 +59,32 @@ def gdal_read_geotiff_file(sFilename_in):
         aData_out = pBand.ReadAsArray(0, 0, ncolumn, nrow)
     
         #we will use one of them to keep the consistency
-        pSpatialRef = osr.SpatialReference(wkt=pProjection)
+        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
        
 
         pDataset = None
         pBand = None      
         pBand = None
 
-        return aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatialRef
+        return aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
 
 
 def gdal_read_geotiff_file_multiple_band(sFilename_in):
-    """Read a Geotiff file with multiple bands."""
+    
+    """Read a Geotiff format raster file with multiple bands.
 
+    Args:
+        sFilename_in (string): The filename
+
+    Returns:
+        tuple: aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+    """
+    
+    if os.path.exists(sFilename_in):
+        pass
+    else:
+        print('The file does not exist!')
+        return
    
     sDriverName='GTiff'
     pDriver = gdal.GetDriverByName(sDriverName)  
@@ -99,10 +127,10 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in):
        
 
       
-        pSpatialRef = osr.SpatialReference(wkt=pProjection)
+        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
         
 
         pDriver = None
         pDataset = None
         pBand = None
-        return aData_out, pPixelWidth, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatialRef
+        return aData_out, pPixelWidth, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference

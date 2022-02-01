@@ -6,10 +6,10 @@ def convert_360_to_180(dLongitude_in):
     
 
     Args:
-        dLongitude_in ([type]): [description]
+        dLongitude_in (float): The input longitude range from 0 to 360
 
     Returns:
-        [type]: [description]
+        float: Longitude from -180 to 180
     """
     a = int(dLongitude_in /180)
     dLongitude_out = dLongitude_in - a*360.0
@@ -26,10 +26,10 @@ def convert_180_to_360(dLongitude_in):
     
 
     Args:
-        dLongitude_in ([type]): [description]
+        dLongitude_in (float): The input longitude range from -180 to 180
 
     Returns:
-        [type]: [description]
+        float: Longitude from 0 to 360
     """
     dLongitude_out = (dLongitude_in + 360.0) % 360.0
 
