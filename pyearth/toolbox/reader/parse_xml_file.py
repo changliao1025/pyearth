@@ -5,7 +5,14 @@ import xml.etree.ElementTree as ET
 def parse_xml_file(sFilename_xml_in):
     """
     Parse an XML file
+
+    Args:
+        sFilename_xml_in (string): The XML filename
+
+    Returns:
+        dict: The content in the XML file
     """
+
     if os.path.exists(sFilename_xml_in):
         pass
     else:

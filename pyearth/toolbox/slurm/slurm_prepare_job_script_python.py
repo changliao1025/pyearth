@@ -1,16 +1,23 @@
 import os, sys
 from pyearth.system.define_global_variables import *
-#normal job, no checkpoint
-def slurm_prepare_job_script_python(iIndex_start, iIndex_end, \
-                                    sBasename_job, \
-                                    sDirectory_job, \
-                                    sFilename_python,\
-                                    iWalltime_in = None, \
-                                    nNode_in = None, \
-                                    nThread_in = None, \
-                                    sAccount =None,\
-                                    sEmail=None, \
-                                    sQueue_in = None):
+
+def slurm_prepare_job_script_python(iIndex_start, iIndex_end,      sBasename_job,     sDirectory_job,     sFilename_python,       iWalltime_in = None,     nNode_in = None,     nThread_in = None,   sAccount =None,    sEmail=None,      sQueue_in = None):
+    """
+    Prepare a slurm job script for python without checkpoint
+
+    Args:
+        iIndex_start ([type]): [description]
+        iIndex_end ([type]): [description]
+        sBasename_job ([type]): [description]
+        sDirectory_job ([type]): [description]
+        sFilename_python ([type]): [description]
+        iWalltime_in ([type], optional): [description]. Defaults to None.
+        nNode_in ([type], optional): [description]. Defaults to None.
+        nThread_in ([type], optional): [description]. Defaults to None.
+        sAccount ([type], optional): [description]. Defaults to None.
+        sEmail ([type], optional): [description]. Defaults to None.
+        sQueue_in ([type], optional): [description]. Defaults to None.
+    """
     if nNode_in is not None:
         iNode = nNode_in
     else:

@@ -2,13 +2,16 @@ import os,sys
 
 from pyearth.system.define_global_variables import *
 
-def prepare_parafly_python_command_file(iIndex_start, \
-    iIndex_end,\
-    nThread, \
-    sFilename_parafly, \
-    sFilename_python):
+def prepare_parafly_python_command_file(iIndex_start,     iIndex_end,    nThread,     sFilename_parafly,     sFilename_python):
     """
     Prepare a parafly file which runs python script
+
+    Args:
+        iIndex_start ([type]): [description]
+        iIndex_end ([type]): [description]
+        nThread ([type]): [description]
+        sFilename_parafly ([type]): [description]
+        sFilename_python ([type]): [description]
     """
     
     ofs =  open(sFilename_parafly,"w")  #write mode 

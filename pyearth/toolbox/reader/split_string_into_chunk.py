@@ -1,7 +1,13 @@
 def split_string_into_chunk(sString_in,iChunk_size_in=None): 
     """
     Split a string into pieces
-    # we assume here that iChunk_size_in is an int and > 0
+
+    Args:
+        sString_in (string): The input strin
+        iChunk_size_in (int, optional): the number of chuck. Defaults to None.
+
+    Yields:
+        list: Subset of the string
     """
     iTotel_size = len(sString_in)
     if iChunk_size_in is not None:

@@ -1,24 +1,26 @@
 import os
 
 #normal job, no checkpoint
-def slurm_prepare_job_script_python(iStart, \
-                                    iEnd, \
-                                    sBasename_checkpoint, \
-                                    sBasename_job, \
-                                    sBasename_python,\
-                                    sDirectory_job, \
-                                    sDirectory_python,\
-                                    sJob_name, \
-                                    iFlag_resubmit =None,\
-                                    iWalltime_in = None,\
-                                    nNode_in = None, \
-                                    nTask_in=None, \
-                                    sAccount = None,\
-                                    sEmail=None, \
-                                    sQueue_in=None):
-
+def slurm_prepare_job_script_python(iStart,  iEnd,    sBasename_checkpoint,  sBasename_job,   sBasename_python,  sDirectory_job,    sDirectory_python,    sJob_name,    iFlag_resubmit =None,  iWalltime_in = None,   nNode_in = None,    nTask_in=None,   sAccount = None,  sEmail=None,   sQueue_in=None):
     """
-        prepare a slurm job script for python with checkpoint
+    Prepare a slurm job script for python with checkpoint
+
+    Args:
+        iStart (int): [description]
+        iEnd (int): [description]
+        sBasename_checkpoint (string): [description]
+        sBasename_job (string): [description]
+        sBasename_python (string): [description]
+        sDirectory_job (string): [description]
+        sDirectory_python (string): [description]
+        sJob_name (string): [description]
+        iFlag_resubmit (int, optional): [description]. Defaults to None.
+        iWalltime_in (int, optional): [description]. Defaults to None.
+        nNode_in (int, optional): [description]. Defaults to None.
+        nTask_in (int, optional): [description]. Defaults to None.
+        sAccount (string, optional): [description]. Defaults to None.
+        sEmail (string, optional): [description]. Defaults to None.
+        sQueue_in (string, optional): [description]. Defaults to None.
     """
 
     if nNode_in is not None:

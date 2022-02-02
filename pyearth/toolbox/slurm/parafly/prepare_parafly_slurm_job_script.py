@@ -1,17 +1,20 @@
 import os
 
-def prepare_parafly_slurm_job_script(sBasename_job, \
-        sBasename_parafly, \
-        sDirectory_job, \
-            sEmail,\
-        iWalltime_in = None, \
-        nNode_in = None, \
-        nThread_in=None, \
-        sJob_name_in =None, \
-        sPython_env_in =None,\
-        sQueue_in=None):
+def prepare_parafly_slurm_job_script(sBasename_job,         sBasename_parafly,         sDirectory_job,             sEmail,        iWalltime_in = None,         nNode_in = None,         nThread_in=None,         sJob_name_in =None,         sPython_env_in =None,        sQueue_in=None):
     """
     prepare a job script for parafly
+
+    Args:
+        sBasename_job ([type]): [description]
+        sBasename_parafly ([type]): [description]
+        sDirectory_job ([type]): [description]
+        sEmail ([type]): [description]
+        iWalltime_in ([type], optional): [description]. Defaults to None.
+        nNode_in ([type], optional): [description]. Defaults to None.
+        nThread_in ([type], optional): [description]. Defaults to None.
+        sJob_name_in ([type], optional): [description]. Defaults to None.
+        sPython_env_in ([type], optional): [description]. Defaults to None.
+        sQueue_in ([type], optional): [description]. Defaults to None.
     """
     if iWalltime_in is not None:
         iWalltime = iWalltime_in            
