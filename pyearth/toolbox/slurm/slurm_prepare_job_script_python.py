@@ -6,9 +6,9 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end,      sBasename_job
     Prepare a slurm job script for python without checkpoint
 
     Args:
-        iIndex_start ([type]): [description]
-        iIndex_end ([type]): [description]
-        sBasename_job ([type]): [description]
+        iIndex_start ([type]): The start index
+        iIndex_end ([type]): The end index
+        sBasename_job ([type]): The basename of job
         sDirectory_job ([type]): [description]
         sFilename_python ([type]): [description]
         iWalltime_in ([type], optional): [description]. Defaults to None.

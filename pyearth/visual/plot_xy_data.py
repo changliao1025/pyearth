@@ -9,32 +9,38 @@ import matplotlib.ticker as ticker
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def plot_xy_data(aX_all, \
-                 aY_all, \
-                 sFilename_out,\
-                 iDPI_in = None,\
-                 aFlag_trend_in = None, \
-                 iReverse_y_in = None, \
-                 iSize_x_in = None, \
-                 iSize_y_in = None, \
-                     ncolumn_in = None,\
-                 dMax_x_in = None, \
-                     dMin_x_in = None, \
-                 dMax_y_in = None, \
-                 dMin_y_in = None, \
-                 dSpace_y_in = None,\
-                 aMarker_in = None,\
-                 aColor_in = None,\
-                 aLinestyle_in = None,\
-                aLabel_point_in = None, \
-                aTick_label_x_in = None, \
-                          aLocation_legend_in =None,\
-                 sLabel_x_in = None,\
-                 sLabel_y_in = None, \
-                 aLabel_legend_in = None,\
-                     sLocation_legend_in=None,\
-                 sFormat_y_in =None,\
-                 sTitle_in = None):
+def plot_xy_data(aX_all,  aY_all,  sFilename_out,iDPI_in = None, aFlag_trend_in = None,  iReverse_y_in = None,  iSize_x_in = None,  iSize_y_in = None,  ncolumn_in = None,  dMax_x_in = None,  dMin_x_in = None,  dMax_y_in = None, dMin_y_in = None,  dSpace_y_in = None, aMarker_in = None, aColor_in = None, aLinestyle_in = None,  aLabel_point_in = None,  aTick_label_x_in = None,  aLocation_legend_in =None, sLabel_x_in = None, sLabel_y_in = None,  aLabel_legend_in = None, sLocation_legend_in=None, sFormat_y_in =None, sTitle_in = None):
+    """
+    Plot a X-Y data
+
+    Args:
+        aX_all ([type]): [description]
+        aY_all ([type]): [description]
+        sFilename_out ([type]): [description]
+        iDPI_in ([type], optional): [description]. Defaults to None.
+        aFlag_trend_in ([type], optional): [description]. Defaults to None.
+        iReverse_y_in ([type], optional): [description]. Defaults to None.
+        iSize_x_in ([type], optional): [description]. Defaults to None.
+        iSize_y_in ([type], optional): [description]. Defaults to None.
+        ncolumn_in ([type], optional): [description]. Defaults to None.
+        dMax_x_in ([type], optional): [description]. Defaults to None.
+        dMin_x_in ([type], optional): [description]. Defaults to None.
+        dMax_y_in ([type], optional): [description]. Defaults to None.
+        dMin_y_in ([type], optional): [description]. Defaults to None.
+        dSpace_y_in ([type], optional): [description]. Defaults to None.
+        aMarker_in ([type], optional): [description]. Defaults to None.
+        aColor_in ([type], optional): [description]. Defaults to None.
+        aLinestyle_in ([type], optional): [description]. Defaults to None.
+        aLabel_point_in ([type], optional): [description]. Defaults to None.
+        aTick_label_x_in ([type], optional): [description]. Defaults to None.
+        aLocation_legend_in ([type], optional): [description]. Defaults to None.
+        sLabel_x_in ([type], optional): [description]. Defaults to None.
+        sLabel_y_in ([type], optional): [description]. Defaults to None.
+        aLabel_legend_in ([type], optional): [description]. Defaults to None.
+        sLocation_legend_in ([type], optional): [description]. Defaults to None.
+        sFormat_y_in ([type], optional): [description]. Defaults to None.
+        sTitle_in ([type], optional): [description]. Defaults to None.
+    """
 
     #find how many data will be plotted
     nData = len(aY_all)

@@ -7,11 +7,11 @@ def prepare_parafly_python_command_file(iIndex_start,     iIndex_end,    nThread
     Prepare a parafly file which runs python script
 
     Args:
-        iIndex_start ([type]): [description]
-        iIndex_end ([type]): [description]
-        nThread ([type]): [description]
-        sFilename_parafly ([type]): [description]
-        sFilename_python ([type]): [description]
+        iIndex_start (int): The start index
+        iIndex_end (int): The end index
+        nThread (int): Number of thread
+        sFilename_parafly (string): The python binary
+        sFilename_python (string): The parafly filename
     """
     
     ofs =  open(sFilename_parafly,"w")  #write mode 
