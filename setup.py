@@ -14,16 +14,16 @@ VERSION = "0.1.2"
 REQUIRES_PYTHON = ">=3.6.0"
 KEYWORDS = "Earth Science"
 
-REQUIRED = [
-    "numpy",
+REQUIRED = [    
+    "julian",
     "matplotlib",
+    "netCDF4",
+    "numpy",    
+    "osgeo",
+    "pandas",
+    "pyevtk"
     "scipy",
     "statsmodels",
-    "pandas",
-    "osgeo",
-    "netCDF4",
-    "julian",
-    "pyevtk"
 ]
 
 CLASSIFY = [
