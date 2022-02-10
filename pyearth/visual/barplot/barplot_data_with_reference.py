@@ -14,6 +14,7 @@ def barplot_data_with_reference(aData_in,\
                  aLabel_x_in,\
                  aLabel_y_in,\
                  sFilename_out,\
+                     aReference_in,\
                  iDPI_in = None,\
                  ncolumn_in = None,\
                  iSize_x_in = None, \
@@ -26,6 +27,7 @@ def barplot_data_with_reference(aData_in,\
                  aHatch_in = None,\
                  sLabel_y_in = None, \
                  aLabel_legend_in = None,\
+                     aLinestyle_in = None,\
                  aLocation_legend_in =None,\
                  sFormat_y_in =None,\
                  sLocation_legend_in=None,\
@@ -117,15 +119,9 @@ def barplot_data_with_reference(aData_in,\
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
     x = np.arange(  len(aLabel_x_in)  )
     dMin_x = -0.5
-    dMax_x = nData-2.5
+    dMax_x = len(aLabel_x_in)-0.25
 
-    x0 = [-1, nData]
-    y0 = [aData_in[0][0], aData_in[0][0]]
-
-    ax.plot( x0, y0, \
-                 color = aColor[0], linestyle = 'dashed' ,\
-                 marker = '+' ,\
-                 label = aLabel_y_in[0])   
+     
    
     ax.set_ylabel(sLabel_y,fontsize=14)
     ax.set_title(sTitle,fontsize=14)
@@ -134,19 +130,28 @@ def barplot_data_with_reference(aData_in,\
     ax.tick_params(axis="x", labelsize=15)
     ax.tick_params(axis="y", labelsize=15)
 
-    total_width = 0.7
-    width = total_width / (nData-1)
+    total_width = 0.6
+    width = total_width / (nData)
 
-    for i in np.arange(1, nData, 1):
-
-        data1 = aData_in[i]
-        if i == nData-1:
-            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i],\
-                            color = aColor[i], hatch = aHatch[i], edgecolor = "k")
+    for i in np.arange(0, nData, 1):
+        if i in aReference_in:
+            pass 
         else:
-            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i],\
-                            color = aColor[i])
-        pass
+            data1 = aData_in[i]
+            
+            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i], linestyle = aLinestyle_in[i],\
+                                color = aColor[i], hatch = aHatch[i], edgecolor = "k")
+            
+            pass
+
+    for i in aReference_in:
+
+        x0 = [-1, nData-len(aReference_in)]
+        y0 = [aData_in[i][0], aData_in[i][0]]
+        ax.plot( x0, y0, \
+                 color = aColor[i], linestyle = 'dashed' ,\
+                 marker = aMarker_in[i] ,\
+                 label = aLabel_y_in[i])  
 
     if (iFlag_format_y ==1):
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )

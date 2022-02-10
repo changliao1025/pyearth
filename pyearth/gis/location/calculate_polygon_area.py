@@ -1,6 +1,6 @@
-import numpy as np
-from numpy import arctan2, cos, sin, sqrt, pi, power, append, diff
 
+from math import cos, sin,  sqrt, pi
+import numpy as np
 def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, radius = 6378137.0):
     """
     Computes area of spherical polygon, assuming spherical Earth. 
@@ -32,23 +32,23 @@ def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, ra
 
         #close polygon
         if aLatitude_in[0]!=aLatitude_in[-1]:
-            aLatitude_in = append(aLatitude_in, aLatitude_in[0])
-            aLongitude_in = append(aLongitude_in, aLongitude_in[0])
+            aLatitude_in = np.append(aLatitude_in, aLatitude_in[0])
+            aLongitude_in = np.append(aLongitude_in, aLongitude_in[0])
 
         # Get colatitude (a measure of surface distance as an angle)
         a = sin(aLatitude_in/2)**2 + cos(aLatitude_in)* sin(aLongitude_in/2)**2
-        colat = 2*arctan2( sqrt(a), sqrt(1-a) )
+        colat = 2*np.arctan2( sqrt(a), sqrt(1-a) )
 
         #azimuth of each point in segment from the arbitrary origin
-        az = arctan2(cos(aLatitude_in) * sin(aLongitude_in), sin(aLatitude_in)) % (2*pi)
+        az = np.arctan2(cos(aLatitude_in) * sin(aLongitude_in), sin(aLatitude_in)) % (2*pi)
 
         # Calculate step sizes
-        # daz = diff(az) % (2*pi)
-        daz = diff(az)
+        # daz = np.diff(az) % (2*pi)
+        daz = np.diff(az)
         daz = (daz + pi) % (2 * pi) - pi
 
         # Determine average surface distance for each step
-        deltas=diff(colat)/2
+        deltas=np.diff(colat)/2
         colat=colat[0:-1]+deltas
 
         # Integral over azimuth is 1-cos(colatitudes)
