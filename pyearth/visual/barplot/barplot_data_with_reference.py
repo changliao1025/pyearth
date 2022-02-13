@@ -25,6 +25,7 @@ def barplot_data_with_reference(aData_in,\
                  aMarker_in = None,\
                  aColor_in = None,\
                  aHatch_in = None,\
+                     sLabel_info_in = None,\
                  sLabel_y_in = None, \
                  aLabel_legend_in = None,\
                      aLinestyle_in = None,\
@@ -119,7 +120,7 @@ def barplot_data_with_reference(aData_in,\
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
     x = np.arange(  len(aLabel_x_in)  )
     dMin_x = -0.5
-    dMax_x = len(aLabel_x_in)-0.25
+    dMax_x = len(aLabel_x_in)-0.5
 
      
    
@@ -131,17 +132,17 @@ def barplot_data_with_reference(aData_in,\
     ax.tick_params(axis="y", labelsize=15)
 
     total_width = 0.6
-    width = total_width / (nData)
-
+    width = total_width / (nData-len(aReference_in))
+    j = 0
     for i in np.arange(0, nData, 1):
         if i in aReference_in:
             pass 
         else:
             data1 = aData_in[i]
             
-            rects = ax.bar( x - total_width * 0.5 + i * width, data1, width, label= aLabel_y_in[i], linestyle = aLinestyle_in[i],\
+            rects = ax.bar( x - total_width * 0.5 + (j+0.5) * width, data1, width, label= aLabel_y_in[i], linestyle = aLinestyle_in[i],\
                                 color = aColor[i], hatch = aHatch[i], edgecolor = "k")
-            
+            j=j+1
             pass
 
     for i in aReference_in:
@@ -153,11 +154,18 @@ def barplot_data_with_reference(aData_in,\
                  marker = aMarker_in[i] ,\
                  label = aLabel_y_in[i])  
 
+    if sLabel_info_in is not None:
+        ax.text(0.1,0.9, sLabel_info_in, \
+                        verticalalignment='center', horizontalalignment='left',\
+                        transform=ax.transAxes, \
+                        color='black', fontsize=13)
+
     if (iFlag_format_y ==1):
         ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
 
     ax.set_xlim( dMin_x, dMax_x )
     ax.set_ylim( dMin_y, dMax_y )
+    ax.grid(linewidth=1, color='gray', alpha=0.3, linestyle='--')
     ax.legend(bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, \
               fontsize=15, \
