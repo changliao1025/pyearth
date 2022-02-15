@@ -263,9 +263,9 @@ def plot_xy_data(aX_all,  aY_all,  sFilename_out,iDPI_in = None, aFlag_trend_in 
             
             pass
 
-        adjust_text(aText, \
-            only_move={'points':'y', 'texts':'xy'}, \
-            arrowprops=dict(arrowstyle="->", color='r', lw=0.5) )
+        #adjust_text(aText, \
+        #    only_move={'points':'y', 'texts':'xy'}, \
+        #    arrowprops=dict(arrowstyle="->", color='r', lw=0.5) )
 
         pass
 

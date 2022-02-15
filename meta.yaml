@@ -21,7 +21,7 @@ requirements:
     - matplotlib
     - netCDF4
     - numpy    
-    - osgeo
+    - gdal
     - pandas
     - pyevtk
     - python

@@ -10,8 +10,8 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.2"
-REQUIRES_PYTHON = ">=3.6.0"
+VERSION = "0.1.4"
+REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
 REQUIRED = [    
@@ -19,9 +19,9 @@ REQUIRED = [
     "matplotlib",
     "netCDF4",
     "numpy",    
-    "osgeo",
+    "gdal",
     "pandas",
-    "pyevtk"
+    "pyevtk",
     "scipy",
     "statsmodels",
 ]
