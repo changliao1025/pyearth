@@ -14,8 +14,6 @@ Contents:
    getting-started
    api
 
-
-
 Indices and tables
 ==================
 
