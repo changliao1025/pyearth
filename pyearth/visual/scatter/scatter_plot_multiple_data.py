@@ -307,7 +307,10 @@ def scatter_plot_multiple_data(aData_x, \
     for i in range(nData):
         x = aData_x[i].flatten()
         try:
-            density = gaussian_kde(x)
+            if np.max(x) > np.min(x):
+                density = gaussian_kde(x)
+            else:
+                return
         except ValueError:
             print(sGrid,x )
   

@@ -23,7 +23,7 @@ def day_in_month(iYear_in, iMonth_in):
         dummy1 = datetime.datetime(iYear_in+1, iMonth_in, 1)
         lJulian_end = julian.to_jd(dummy1, fmt='jd')
    
-    dayinmon = int (lJulian_end[1] - lJulian_start[1] ) 
+    dayinmon = int (lJulian_end - lJulian_start ) 
   
 
     return dayinmon

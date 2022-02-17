@@ -94,7 +94,7 @@ def convert_time_series_daily_to_monthly(aData_daily_in, iYear_start_in, iMonth_
                         #lJulian=gcal2jd(iYear, iMonth, iDay)
                         dummy2 = datetime.datetime(iYear, iMonth, iDay)
                         lJulian = julian.to_jd(dummy2, fmt='jd')
-                        dummy_index = int(lJulian[1]-lJulian_start[1])
+                        dummy_index = int(lJulian-lJulian_start)
                         dummy = dummy + aData_daily[dummy_index]
                         pass
 
