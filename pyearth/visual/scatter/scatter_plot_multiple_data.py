@@ -16,7 +16,7 @@ from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_co
 def scatter_plot_multiple_data(aData_x, \
                       aData_y,\
                       sFilename_out, \
-                          sGrid,\
+                      sGrid,\
                       iFlag_scientific_notation_x_in=None,\
                       iFlag_scientific_notation_y_in=None,\
                       iSize_x_in = None, \
