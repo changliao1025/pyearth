@@ -72,7 +72,7 @@ def add_multiple_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, aVar
         dummy = len(iValue)
         if not iValue.isunlimited():            
             aDimension_key.append(sKey)
-            aDimension_value.append(sKey)
+            aDimension_value.append(dummy)
             pDatasets_out.createDimension(sKey, dummy)            
         else:
             pDatasets_out.createDimension(sKey, dummy )
