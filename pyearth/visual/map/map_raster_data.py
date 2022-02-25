@@ -113,6 +113,7 @@ def map_raster_data(aImage_in, \
         formatter = ticker.ScalarFormatter(useMathText=True)
         formatter.set_scientific(True)
         cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max', format=formatter)
+        
     cb.ax.get_yaxis().set_ticks_position('left')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel(sUnit, rotation=270)

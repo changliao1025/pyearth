@@ -2,6 +2,7 @@
 unused/
 .vscode/
 .core*
+doxygen/
 *~
 
 # data files, etc
