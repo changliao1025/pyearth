@@ -20,7 +20,6 @@ REQUIRED = [
     "netCDF4",
     "numpy",    
     "pandas",
-    "pyevtk",
     "scipy",
     "statsmodels",
 ]

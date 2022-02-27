@@ -18,7 +18,6 @@ requirements:
     - numpy    
     - gdal
     - pandas
-    - pyevtk
     - python >=3.6
     - scipy    
     - statsmodels
