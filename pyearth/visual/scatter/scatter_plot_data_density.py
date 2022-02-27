@@ -6,17 +6,13 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
 
-
-
-from pyearth.toolbox.math.stat._scipy_bivariate_kde import _scipy_bivariate_kde
-
 def scatter_plot_data_density(aData_x, \
                               aData_y,\
                               sFilename_out, \
                               iSize_x_in = None, \
                               iSize_y_in = None, \
-                              iDPI_in = None, \iFlag_sci
-                              entific_notation_x_in=None,\
+                              iDPI_in = None,\
+                              iFlag_scientific_notation_x_in=None,\
                               iFlag_scientific_notation_y_in=None,\
                               iFlag_log_x_in=None,\
                               iFlag_log_y_in=None,\

@@ -12,6 +12,7 @@ requirements:
     - setuptools
   
   run:
+    - cartopy
     - matplotlib
     - netCDF4
     - numpy    
