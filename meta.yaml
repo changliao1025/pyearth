@@ -28,9 +28,7 @@ build:
   noarch: python
   script: "{{ PYTHON }} -m pip install . -vv"    
     
-test:
-  imports:
-    -
+
 
 about:
   home: https://github.com/changliao1025/pyearth
