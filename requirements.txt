@@ -1,0 +1,10 @@
+twine
+cartopy
+gdal
+matplotlib 
+netCDF4 
+numpy
+pandas 
+pyevtk 
+scipy 
+statsmodels 

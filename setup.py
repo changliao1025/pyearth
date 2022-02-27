@@ -15,11 +15,10 @@ REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
 REQUIRED = [    
-    "julian",
+    "cartopy",
     "matplotlib",
     "netCDF4",
     "numpy",    
-    "gdal",
     "pandas",
     "pyevtk",
     "scipy",

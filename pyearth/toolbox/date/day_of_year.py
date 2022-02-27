@@ -1,6 +1,5 @@
 import datetime
-import julian
-
+import pyearth.toolbox.date.julian as julian
 def day_of_year(iYear_in, iMonth_in, iDay_in):
     """
     Calculate the day in a year

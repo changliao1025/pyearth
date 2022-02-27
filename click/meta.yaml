@@ -1,0 +1,43 @@
+package:
+  name: "pyearth"
+  version: "0.1.12"
+
+source:
+  git_rev:
+  git_url:
+
+requirements:
+  build:
+    - python
+    - setuptools
+  
+  run:
+    - matplotlib
+    - netCDF4
+    - numpy    
+    - gdal
+    - pandas
+    - pyevtk
+    - python >=3.6
+    - scipy    
+    - statsmodels
+    
+build:
+  number: 0
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . -vv"    
+    
+test:
+  imports:
+    -
+
+about:
+  home: https://github.com/changliao1025/pyearth
+  license: MIT
+  license_familY: MIT
+  license_file: LICENSE
+  summary: "Python for Earth Science"
+
+extra:
+  recipe-maintainers:
+    - changliao1025
