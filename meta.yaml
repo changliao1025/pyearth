@@ -15,7 +15,7 @@ requirements:
     - cartopy
     - matplotlib
     - netCDF4
-    - numpy    
+    - numpy >=1.16
     - gdal
     - pandas
     - python >=3.6
