@@ -1,4 +1,4 @@
-name: Upload Python Package
+name: Upload Pyearth Package to PyPI
 
 on:
   release:
@@ -9,8 +9,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@master
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
