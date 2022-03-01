@@ -21,6 +21,8 @@ You can either call these functions through this package, or you can modify them
 This research was supported as part of the Next Generation Ecosystem Experiments-Tropics, funded by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research at Pacific Northwest National Laboratory. The study was also partly supported by U.S. Department of Energy Office of Science Biological and Environmental Research through the Earth and Environmental System Modeling program as part of the Energy Exascale Earth System Model (E3SM) project. 
 
 # Install
+pyearth depends on several other packages including gdal, which cannot be installed through pip easily. You are commended to use conda to install dependency if necessary.
+
 1. pip install pyearth
 
 # Contact
