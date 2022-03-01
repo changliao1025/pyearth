@@ -25,7 +25,7 @@ def __to_format(jd: float, fmt: str) -> float:
         raise ValueError('Invalid Format')
 
 
-def __from_format(jd: float, fmt: str) -> (int, float):
+def __from_format(jd: float, fmt: str):
     """
     Converts a Julian Day format into the "standard" Julian
     day format.
