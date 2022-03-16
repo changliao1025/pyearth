@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import cartopy.crs as ccrs
 import cartopy.mpl.ticker as ticker
-from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+import matplotlib as mpl
+
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree()
@@ -13,6 +14,7 @@ def map_raster_data(aImage_in, \
     sFilename_output_in,\
        iFlag_scientific_notation_colorbar_in=None,\
     sColormap_in = None,\
+        sTitle_in = None, \
     iDPI_in = None,\
     dMissing_value_in=None,\
     dData_max_in = None, \
@@ -59,6 +61,13 @@ def map_raster_data(aImage_in, \
         sColormap = sColormap_in
     else:
         sColormap =  'rainbow'
+    
+    if sTitle_in is not None:
+        sTitle = sTitle_in
+        iFlag_title =1
+    else:
+        iFlag_title=0
+        sTitle =  ''
 
     if sUnit_in is not None:
         sUnit = sUnit_in
@@ -78,7 +87,7 @@ def map_raster_data(aImage_in, \
     fig = plt.figure( dpi = iDPI  )
     #fig.set_figwidth( iSize_x )
     #fig.set_figheight( iSize_y )
-    ax = fig.add_axes([0.1, 0.1, 0.65, 0.7], projection=pProjection )
+    ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection )
 
     # set a margin around the data
     ax.set_xmargin(0.05)
@@ -90,8 +99,9 @@ def map_raster_data(aImage_in, \
         transform=pProjection)   
 
     ax.coastlines(color='black', linewidth=1)
-    
+    ax.set_title(sTitle)
     ax.set_extent(aImage_extent)
+    
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
                   linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
@@ -107,14 +117,15 @@ def map_raster_data(aImage_in, \
         b = int(b)
         return r'${} \times 10^{{{}}}$'.format(a, b)
     
-    if iFlag_scientific_notation_colorbar!=1:
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max')
-    else:
-        formatter = ticker.ScalarFormatter(useMathText=True)
+    if iFlag_scientific_notation_colorbar==1:
+        formatter = mpl.ticker.ScalarFormatter(useMathText=True)
         formatter.set_scientific(True)
+        formatter.set_powerlimits((0,2))
         cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max', format=formatter)
-        
-    cb.ax.get_yaxis().set_ticks_position('left')
+    else:
+        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max')
+    
+    cb.ax.get_yaxis().set_ticks_position('right')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6) 
