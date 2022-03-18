@@ -9,6 +9,19 @@ import matplotlib as mpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree()
+
+class OOMFormatter(mpl.ticker.ScalarFormatter):
+    def __init__(self, order=0, fformat="%1.1f", offset=True, mathText=True):
+        self.oom = order
+        self.fformat = fformat
+        mpl.ticker.ScalarFormatter.__init__(self,useOffset=offset,useMathText=mathText)
+    def _set_order_of_magnitude(self):
+        self.orderOfMagnitude = self.oom
+    def _set_format(self, vmin=None, vmax=None):
+        self.format = self.fformat
+        if self._useMathText:
+            self.format = r'$\mathdefault{%s}$' % self.format
+
 def map_raster_data(aImage_in, \
     aImage_extent, \
     sFilename_output_in,\
@@ -118,9 +131,10 @@ def map_raster_data(aImage_in, \
         return r'${} \times 10^{{{}}}$'.format(a, b)
     
     if iFlag_scientific_notation_colorbar==1:
-        formatter = mpl.ticker.ScalarFormatter(useMathText=True)
-        formatter.set_scientific(True)
-        formatter.set_powerlimits((0,2))
+        #formatter = mpl.ticker.ScalarFormatter(useMathText=True)
+        #formatter.set_scientific(True)
+        formatter = OOMFormatter(fformat= "%1.1f")
+        #formatter.set_powerlimits((0,2))
         cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max', format=formatter)
     else:
         cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max')
