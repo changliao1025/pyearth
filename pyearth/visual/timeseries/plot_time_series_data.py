@@ -167,7 +167,7 @@ def plot_time_series_data(aTime_all, \
         else:
             print(sDate_type_in)
     else:
-        print(sDate_type_in)
+        #print(sDate_type_in)
         pass
 
     if sFormat_y_in is not None:

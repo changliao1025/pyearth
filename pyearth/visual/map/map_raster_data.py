@@ -11,7 +11,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 pProjection = ccrs.PlateCarree()
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
-    def __init__(self, order=0, fformat="%1.1f", offset=True, mathText=True):
+    def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
         self.oom = order
         self.fformat = fformat
         mpl.ticker.ScalarFormatter.__init__(self,useOffset=offset,useMathText=mathText)
@@ -133,7 +133,7 @@ def map_raster_data(aImage_in, \
     if iFlag_scientific_notation_colorbar==1:
         #formatter = mpl.ticker.ScalarFormatter(useMathText=True)
         #formatter.set_scientific(True)
-        formatter = OOMFormatter(fformat= "%1.1f")
+        formatter = OOMFormatter(fformat= "%1.1e")
         #formatter.set_powerlimits((0,2))
         cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max', format=formatter)
     else:
