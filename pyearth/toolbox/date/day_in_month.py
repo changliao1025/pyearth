@@ -20,7 +20,7 @@ def day_in_month(iYear_in, iMonth_in,iFlag_leap_year_in=None):
         lJulian_end = julian.to_jd(dummy1, fmt='jd')
         
     else:
-        dummy1 = datetime.datetime(iYear_in+1, iMonth_in, 1)
+        dummy1 = datetime.datetime(iYear_in+1, 1, 1)
         lJulian_end = julian.to_jd(dummy1, fmt='jd')
 
     dayinmon = int (lJulian_end - lJulian_start ) 
