@@ -71,3 +71,46 @@ def parse_xml_file(sFilename_xml_in):
                 namelist[okey] = new_string
                 
     return namelist
+
+def parse_xml_file_atm(sFilename_xml_in, sVariable_in):
+    """
+    Parse an XML file
+
+    Args:
+        sFilename_xml_in (string): The XML filename
+
+    Returns:
+        dict: The content in the XML file
+    """
+
+    if os.path.exists(sFilename_xml_in):
+        pass
+    else:
+        print('The xml file does not exist!')
+        return
+    tree = ET.parse(sFilename_xml_in)
+    root = tree.getroot()
+    namelist = {}
+    keys_str = []
+
+    entry = root.findall('./fieldInfo/filePath')
+    sFolder = (entry[0].text).strip()
+
+    entry = root.findall('./fieldInfo/variableNames')
+    dummy = (entry[0].text).strip()
+    sField = (dummy.split(" "))[0]
+
+    entry = root.findall('./fieldInfo/fileNames')
+    dummy = (entry[0].text).strip()
+    aFilename = dummy.split('\n')
+
+    nf = len(aFilename)
+    aFile=list()
+    for i in range(nf):
+        aFile.append( os.path.join( sFolder ,aFilename[i] ) )
+
+   
+        
+        
+                
+    return sFolder, sField, aFile

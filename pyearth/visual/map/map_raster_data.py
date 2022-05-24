@@ -32,6 +32,7 @@ def map_raster_data(aImage_in, \
     dMissing_value_in=None,\
     dData_max_in = None, \
     dData_min_in = None,\
+        sExtend_in =None,\
         sUnit_in=None):
 
     aImage_in = np.array(aImage_in)
@@ -82,6 +83,11 @@ def map_raster_data(aImage_in, \
         iFlag_title=0
         sTitle =  ''
 
+    if sExtend_in is not None:
+        sExtend = sExtend_in
+    else:
+        sExtend =  'max'       
+
     if sUnit_in is not None:
         sUnit = sUnit_in
     else:
@@ -129,15 +135,17 @@ def map_raster_data(aImage_in, \
         a, b = '{:.2e}'.format(x).split('e')
         b = int(b)
         return r'${} \times 10^{{{}}}$'.format(a, b)
-    
+    rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
     if iFlag_scientific_notation_colorbar==1:
         #formatter = mpl.ticker.ScalarFormatter(useMathText=True)
         #formatter.set_scientific(True)
         formatter = OOMFormatter(fformat= "%1.1e")
         #formatter.set_powerlimits((0,2))
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max', format=formatter)
+        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend, format=formatter)
+        
     else:
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = 'max')
+        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend)
+        
     
     cb.ax.get_yaxis().set_ticks_position('right')
     cb.ax.get_yaxis().labelpad = 10

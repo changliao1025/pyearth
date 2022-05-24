@@ -50,7 +50,7 @@ def plot_time_series_data(aTime_all, \
         iDPI = 300
 
     if iFlag_log_in is not None:
-        iFlag_log = 1
+        iFlag_log = iFlag_log_in
     else:
         iFlag_log = 0
 
@@ -278,7 +278,7 @@ def plot_time_series_data(aTime_all, \
         if iFlag_scientific_notation ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
-            formatter.set_powerlimits((-1,1)) # you might need to change here
+            #formatter.set_powerlimits((-1,1)) # you might need to change here
             ax.yaxis.set_major_formatter(formatter)
             #most time, when you use scientific notation, you may not need set the space,
             #but you may still set it using the method below
