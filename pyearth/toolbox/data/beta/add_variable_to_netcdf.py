@@ -61,7 +61,7 @@ def add_multiple_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, aVar
     else:
         print("Nope, the path doesn't reach your file. Go research filepath in python")
         exit
-
+    missing_value=-9999
     pDatasets_in = Dataset(sFilename_old)
     netcdf_format = pDatasets_in.file_format
     #output file
@@ -104,7 +104,7 @@ def add_multiple_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, aVar
 
         aDimension_tuple = tuple(aDimension_list)
 
-        pVar3 = pDatasets_out.createVariable(sVariable, 'f4', aDimension_tuple  ) 
+        pVar3 = pDatasets_out.createVariable(sVariable, 'f4', aDimension_tuple,fill_value=missing_value  ) 
         pVar3[:] = aData
         pVar3.description = sVariable
         pVar3.unit = sUnit

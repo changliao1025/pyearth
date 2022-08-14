@@ -3,7 +3,7 @@ from netCDF4 import Dataset
 def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in):
 
     if os.path.exists(sFilename_old):
-        print("Yep, I can read that file!")
+        print("Yep, I can read that file: "+ sFilename_old)
     else:
         print("Nope, the path doesn't reach your file. Go research filepath in python")
         exit
@@ -18,10 +18,17 @@ def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, sVariable
         else:
             pDatasets_out.createDimension(sKey, dummy )
 
+    #copy global attribute
+    
+    for attr in pDatasets_in.ncattrs():
+        #print(':::GlobalAtt:', attr,' Val:', getattr(pDatasets_in,attr))
+        pDatasets_out.setncattr( attr, pDatasets_in.getncattr( attr ) )
+
     # Copy variables
+    aAttribute = list()
     for sKey, aValue in pDatasets_in.variables.items():        
-        print(aValue.datatype)
-        print( aValue.dimensions)
+        #print(aValue.datatype)
+        #print( aValue.dimensions)
         # we need to take care of rec dimension
         dummy = aValue.dimensions
         if(sKey != sVariable_in): #only copy other dataset first
@@ -33,14 +40,30 @@ def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, sVariable
         else:
             pDataType = aValue.datatype
             pDimension = aValue.dimensions
-            pUnit = aValue.units
+            #pUnit = aValue.units
 
+            for sAttribute in aValue.ncattrs():
+                
+                if sAttribute == '_FillValue' or sAttribute =='missing_value':
+                    pass
+                else:
+                    aAttribute.append(sAttribute)
             pass
         # close the output file
     #replace variable 
-    pVar3 = pDatasets_out.createVariable(sVariable_in, pDataType, pDimension  ) 
+    pVar3 = pDatasets_out.createVariable(sVariable_in, pDataType, pDimension, fill_value=-9999  ) 
     pVar3[:] = aData_in
-    pVar3.description = sVariable_in
-    pVar3.units = pUnit
+    pValue = pDatasets_in.variables[sVariable_in]
+    for sAttribute in pValue.ncattrs():            
+        if sAttribute == '_FillValue' or sAttribute =='missing_value':
+            pass
+        else:
+            pVar3.setncatts( { sAttribute: pValue.getncattr(sAttribute) } )
+    pVar3.missing_value = -9999
+  
+    
+    
+    #pVar3.description = sVariable_in
+    #pVar3.units = pUnit
     pDatasets_out.close()
     return
