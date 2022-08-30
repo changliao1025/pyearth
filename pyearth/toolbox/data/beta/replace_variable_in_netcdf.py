@@ -49,7 +49,7 @@ def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, sVariable
                 else:
                     aAttribute.append(sAttribute)
             pass
-        # close the output file
+    # close the output file
     #replace variable 
     pVar3 = pDatasets_out.createVariable(sVariable_in, pDataType, pDimension, fill_value=-9999  ) 
     pVar3[:] = aData_in
