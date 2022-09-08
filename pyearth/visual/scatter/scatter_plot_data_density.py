@@ -6,6 +6,8 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
 
+from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
+
 def scatter_plot_data_density(aData_x, \
                               aData_y,\
                               sFilename_out, \
@@ -90,7 +92,7 @@ def scatter_plot_data_density(aData_x, \
 
     left, width = 0.1, 0.75
     bottom, height = 0.1, 0.75
-    spacing = 0.005
+    spacing = 0.02
     rect_scatter = [left, bottom, width, height]
     rect_histx = [left, bottom + height + spacing, width, 0.15]
     rect_histy = [left + width + spacing, bottom, 0.15, height]
@@ -108,7 +110,7 @@ def scatter_plot_data_density(aData_x, \
     x_min = np.nanmin(aData_x)
     x_max = np.nanmax(aData_x)
     y_min = np.nanmin(aData_y)
-    y_max = np.nanmax(aData_y)
+    y_max = np.ceil(np.nanmax(aData_y))
 
     x = aData_x
     y = aData_y
@@ -124,18 +126,17 @@ def scatter_plot_data_density(aData_x, \
     elif np.ndim(clip) == 1:
         clip = [clip, clip]
 
-    xx, yy, z = _scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
+    xx, yy, z = scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
     cmap = plt.get_cmap('BuPu')
     cset = ax_scatter.contourf(xx, yy, z,cmap=cmap)
 
-    dRatio = 1.0
-    ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
+    
 
     ax_scatter.tick_params(axis="x", labelsize=13)
     ax_scatter.tick_params(axis="y", labelsize=13)
 
     ax_scatter.set_xmargin(0.05)
-    ax_scatter.set_ymargin(0.15)
+    ax_scatter.set_ymargin(0.05)
 
     ax_scatter.set_xlabel(sLabel_X,fontsize=12)
     ax_scatter.set_ylabel(sLabel_Y,fontsize=12)
@@ -177,6 +178,10 @@ def scatter_plot_data_density(aData_x, \
 
     ax_scatter.set_xlim( dMin_x, dMax_x )
     ax_scatter.set_ylim( dMin_y, dMax_y)
+
+    #dRatio = 1.0
+    #ax_scatter.set_aspect('auto')  #this one set the y / x ratio
+    
 
     if dSpace_x_in is not None:
         dSpace_x = dSpace_x_in
@@ -233,7 +238,9 @@ def scatter_plot_data_density(aData_x, \
         pass
 
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
-    ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
+    ax_scatter.set_aspect(dRatio, 'box')  #this one set the y / x ratio
+
+    
 
     handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
 
