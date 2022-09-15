@@ -33,7 +33,8 @@ def map_raster_data(aImage_in, \
     dData_max_in = None, \
     dData_min_in = None,\
         sExtend_in =None,\
-        sUnit_in=None):
+        sUnit_in=None,\
+            aLegend_in = None):
 
     aImage_in = np.array(aImage_in)
 
@@ -119,6 +120,20 @@ def map_raster_data(aImage_in, \
 
     ax.coastlines(color='black', linewidth=1)
     ax.set_title(sTitle)
+
+
+    if aLegend_in is not None:
+        nlegend = len(aLegend_in)
+        for i in range(nlegend):
+            sText = aLegend_in[i]
+            dLocation = 0.95 - i * 0.05
+            ax.text(0.05, dLocation, sText, \
+                verticalalignment='top', horizontalalignment='left',\
+                transform=ax.transAxes, \
+                color='black', fontsize=8)
+
+            pass
+
     ax.set_extent(aImage_extent)
     
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,

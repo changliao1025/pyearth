@@ -6,17 +6,14 @@ import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
 
-def histogram_plot(aData, \
+def cdf_plot(aData, \
     sFilename_out, \
     iSize_x_in = None, \
     iSize_y_in = None, \
     iDPI_in = None, \
-    #dMin_y_in = None, \
-    #dMax_y_in = None, \
     dMin_x_in = None, \
     dMax_x_in = None, \
     dSpace_x_in = None, \
-    #dSpace_y_in = None, \
     sLabel_x_in = None, \
     sLabel_y_in = None, \
     sTitle_in = None,\
@@ -38,14 +35,7 @@ def histogram_plot(aData, \
         iDPI = iDPI_in
     else:       
         iDPI = 300
-    #if dMin_y_in is not None:        
-    #    dMin_y = dMin_y_in
-    #else:       
-    #    dMin_y = np.min(aData)
-    #if dMax_y_in is not None:        
-    #    dMax_y = dMax_y_in
-    #else:       
-    #    dMax_y = np.max(aData)
+  
 
     if dMin_x_in is not None:        
         dMin_x = dMin_x_in
@@ -63,11 +53,7 @@ def histogram_plot(aData, \
         #it may be calculated 
         pass
 
-    #if dSpace_y_in is not None:        
-    #    dSpace_y = dSpace_y_in
-    #else:       
-    #    #it may be calculated 
-    #    pass
+ 
 
     if sLabel_x_in is not None:        
         sLabel_x = sLabel_x_in
@@ -105,7 +91,19 @@ def histogram_plot(aData, \
 
     aData = aData[good_index]
 
-    ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x))  
+    #ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x), density=True, cumulative=True)  
+    count, bins_count = np.histogram(aData, bins=100)
+  
+    # finding the PDF of the histogram using count values
+    pdf = count / sum(count)    
+    # using numpy np.cumsum to calculate the CDF
+    # We can also find using the PDF values by looping and adding
+    cdf = np.cumsum(pdf)
+    #density = gaussian_kde(x)
+    #xx = np.linspace(dMin_x, dMax_x,1000)
+    #yy = density(xx)
+    #ax_histx.plot(xx,yy, color='navy')
+    ax_histo.plot(bins_count[1:], cdf)
 
     ax_histo.set_xlabel(sLabel_x,fontsize=13 )
     ax_histo.set_ylabel(sLabel_y,fontsize=13 )   
@@ -117,9 +115,7 @@ def histogram_plot(aData, \
     ax_histo.grid(which='major', color='white', linestyle='-', axis='y')
     
    
-    #leg = ax_histo.legend(bbox_to_anchor=(1.0,1.0),loc='upper right', frameon=True)   
-    #frame = leg.get_frame()
-    #frame.set_edgecolor('black')
+   
     handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
 
     # create the corresponding number of labels (= the text you want to display)
