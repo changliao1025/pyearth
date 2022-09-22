@@ -6,7 +6,7 @@ import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
 
-def cdf_plot(aData, \
+def histogram_w_cdf_plot(aData, \
     sFilename_out, \
     iSize_x_in = None, \
     iSize_y_in = None, \
@@ -86,27 +86,16 @@ def cdf_plot(aData, \
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
    
-    ax_cdf = plt.axes(rect_histogram)
-    ax_cdf.tick_params(direction='in', top=True, right=True)
-
+    ax_histo = plt.axes(rect_histogram)
+    ax_histo.tick_params(direction='in', top=True, right=True)
     aData = aData[good_index]
-
-    count, bins_count = np.histogram(aData, bins=100)  
+    ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x), density=True)           
+    ax_histo.set_xlabel(sLabel_x,fontsize=13 )
+    ax_histo.set_ylabel(sLabel_y,fontsize=13 )       
+    ax_histo.set_xlim( dMin_x, dMax_x )
    
-    pdf = count / sum(count)    
-   
-    cdf = np.cumsum(pdf)
- 
-    ax_cdf.plot(bins_count[1:], cdf)
-
-    ax_cdf.set_xlabel(sLabel_x,fontsize=13 )
-    ax_cdf.set_ylabel(sLabel_y,fontsize=13 )   
-   
-  
-    ax_cdf.set_xlim( dMin_x, dMax_x )
-   
-    ax_cdf.axis('on')   
-    ax_cdf.grid(which='major', color='white', linestyle='-', axis='y')
+    ax_histo.axis('on')   
+    ax_histo.grid(which='major', color='white', linestyle='-', axis='y')
     
    
    
@@ -117,12 +106,23 @@ def cdf_plot(aData, \
     labels.append(sLabel_legend)
     # create the legend, supressing the blank space of the empty line symbol    and the
     # padding between symbol and label by setting handlelenght and  handletextpad
-    ax_cdf.legend(handles, labels, loc="upper right", fontsize=12,
+
+    
+
+    ax_histo.legend(handles, labels, loc="upper right", fontsize=12,
                       fancybox=True, framealpha=0.7,
                       handlelength=0, handletextpad=0)
 
-    ax_cdf.set_title(sTitle)
     
+
+    ax_cdf = ax_histo.twinx()
+    count, bins_count = np.histogram(aData, bins=100)  
+    # finding the PDF of the histogram using count values
+    pdf = count / sum(count)    
+    cdf = np.cumsum(pdf)  
+    ax_cdf.plot(bins_count[1:], cdf)
+    
+    ax_histo.set_title(sTitle)
     plt.savefig(sFilename_out, bbox_inches='tight')
                        
     plt.close('all')

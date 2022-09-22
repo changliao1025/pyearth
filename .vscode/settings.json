@@ -1,4 +1,5 @@
 {
     "python.pythonPath": "/bin/python3",
-    "editor.renderWhitespace": "all"
+    "editor.renderWhitespace": "all",
+    "workbench.colorTheme": "Tomorrow Night Blue"
 }
