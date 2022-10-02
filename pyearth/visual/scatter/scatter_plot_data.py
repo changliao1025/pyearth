@@ -41,7 +41,7 @@ def scatter_plot_data(aData_x, \
     if iSize_y_in is not None:
         iSize_y = iSize_y_in
     else:
-        iSize_y = 9
+        iSize_y = 12
 
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -134,7 +134,7 @@ def scatter_plot_data(aData_x, \
 
     ax_scatter.set_xlabel(sLabel_X,fontsize=12)
     ax_scatter.set_ylabel(sLabel_Y,fontsize=12)
-    ax_scatter.set_title( sTitle, loc='center', fontsize=15)
+    
     # round to nearest years...
 
     if sFormat_x_in is not None:
@@ -201,7 +201,7 @@ def scatter_plot_data(aData_x, \
         if iFlag_scientific_notation_x ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
-            formatter.set_powerlimits((-1,6)) # you might need to change here
+            #formatter.set_powerlimits((-1,6)) # you might need to change here
             ax_scatter.xaxis.set_major_formatter(formatter)
         else:
             pass
@@ -224,7 +224,7 @@ def scatter_plot_data(aData_x, \
         if iFlag_scientific_notation_y ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
-            formatter.set_powerlimits((-1,6)) # you might need to change here
+            #formatter.set_powerlimits((-1,6)) # you might need to change here
             ax_scatter.yaxis.set_major_formatter(formatter)
 
         pass
@@ -253,7 +253,7 @@ def scatter_plot_data(aData_x, \
         labels.append(sLabel_legend_lowess2)
 
     ax_scatter.legend(handles, labels,\
-                      loc="upper right", fontsize=12,\
+                      loc="upper right", fontsize=14,\
                       fancybox=True, \
                       framealpha=0.7,\
                       handlelength=0, \
@@ -326,7 +326,7 @@ def scatter_plot_data(aData_x, \
                              right='off',  # turn off right ticks
                              bottom='off') # turn off bottom ticks
 
-
+    ax_scatter.set_title( sTitle, loc='center', fontsize=15)
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')

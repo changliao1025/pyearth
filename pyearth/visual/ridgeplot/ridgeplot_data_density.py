@@ -140,7 +140,7 @@ def ridgeplot_data_density(aDict, \
 
         ax.get_yaxis().set_visible(False)
         sText = aDict[i+1]
-        ax.text(0.85, 0.40, sText, \
+        ax.text(0.70, 0.40, sText, \
         verticalalignment='bottom', horizontalalignment='left',\
             transform=ax.transAxes, \
             color= pal[i], fontsize=10, fontweight='bold')
