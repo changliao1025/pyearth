@@ -14,7 +14,7 @@ from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 
-def scatter_plot_multiple_data(aData_x, \
+def scatter_plot_multiple_data_w_density(aData_x, \
                       aData_y,\
                       sFilename_out, \
                     iFlag_miniplot_in = None,\
@@ -131,7 +131,10 @@ def scatter_plot_multiple_data(aData_x, \
     else:
         ax_scatter_all= [ax_scatter_full]
 
-    
+    ax_histx = plt.axes(rect_histx)
+    ax_histx.tick_params(direction='in', labelbottom=False)
+    ax_histy = plt.axes(rect_histy)
+    ax_histy.tick_params(direction='in', labelleft=False)
 
     for i in range(nData):
         du= np.array(aData_x[i])
@@ -267,11 +270,11 @@ def scatter_plot_multiple_data(aData_x, \
                 #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))'%.1f'
 
             ax_scatter.tick_params(axis='y', pad=8)
-            ax_scatter.set_xlim( dMin_x, dMax_x * 1.05)
-            ax_scatter.set_ylim( dMin_x, dMax_x * 1.05)
+            ax_scatter.set_xlim( dMin_x, dMax_x )
+            ax_scatter.set_ylim( dMin_y, dMax_y)
         else:
             ax_scatter.set_xlim( dMin_x, dMax_x * 0.1 )
-            ax_scatter.set_ylim( dMin_x, dMax_x * 0.1)
+            ax_scatter.set_ylim( dMin_y, dMax_y * 0.1)
             pass
     
 
@@ -298,8 +301,7 @@ def scatter_plot_multiple_data(aData_x, \
                 pass
 
 
-        #ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
-        ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+        ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
 
 
         if iFlag_log_y ==1:
@@ -368,7 +370,27 @@ def scatter_plot_multiple_data(aData_x, \
                
                 xx = np.linspace(dMin_x, dMax_x,1000)
                 yy = density(xx)
-                
+                ax_histx.plot(xx,yy, color= 'navy' )
+                ax_histx.fill_between(xx, yy, 0, linewidth=3,  color = 'lightblue')
+
+                ax_histx.set_xlim( dMin_x, dMax_x )
+                ax_histx.set_ylim( 0, auto=None )
+
+                ax_histx.axis('on')
+                ax_histx.grid(which='major', color='white', linestyle='-', axis='x')
+                ax_histx.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x/2.0))
+                ax_histx.spines['right'].set_visible(False)
+                ax_histx.spines['top'].set_visible(False)
+                ax_histx.spines['bottom'].set_visible(False)
+                ax_histx.spines['left'].set_visible(False)
+                ax_histx.tick_params(which='both', # Options for both major and minor ticks
+                                     top='off', # turn off top ticks
+                                     left='off', # turn off left ticks
+                                     right='off',  # turn off right ticks
+                                     bottom='off') # turn off bottom ticks
+
+                ax_histx.axes.get_yaxis().set_visible(False)
+                ax_histx.tick_params(axis='x', colors='white')
 
                 #y margin
                 y = aData_y[i].flatten()
@@ -377,7 +399,29 @@ def scatter_plot_multiple_data(aData_x, \
                 xx = np.linspace(dMin_y, dMax_y,1000)
                 yy = density(xx)
                 xx, yy = yy, xx
-                
+                ax_histy.plot(xx,yy, color=aColor[i] )
+                ax_histy.fill_betweenx(yy, 0, xx, linewidth=3,  color = 'lightblue')
+
+                ax_histy.set_xlim(0, auto=None)
+                ax_histy.set_ylim(dMin_y, dMax_y)
+
+                ax_histy.axis('on')
+                ax_histy.grid(which='major', color='white', linestyle='-', axis='y')
+                ax_histy.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y/2.0))
+                ax_histy.spines['right'].set_visible(False)
+                ax_histy.spines['top'].set_visible(False)
+                ax_histy.spines['bottom'].set_visible(False)
+                ax_histy.spines['left'].set_visible(False)
+                ax_histy.axes.get_xaxis().set_visible(False)
+
+
+                ax_histy.tick_params(axis='y', colors='white')
+
+                ax_histy.tick_params(which='both', # Options for both major and minor ticks
+                                     top='off', # turn off top ticks
+                                     left='off', # turn off left ticks
+                                     right='off',  # turn off right ticks
+                                     bottom='off') # turn off bottom ticks
         
         if iax ==0:
 
