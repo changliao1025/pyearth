@@ -6,9 +6,20 @@ import cartopy.crs as ccrs
 import cartopy.mpl.ticker as ticker
 import matplotlib as mpl
 
+from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree()
+
+def fmt0(x):
+        a, b = '{:.1e}'.format(x).split('e')
+        b = int(b)
+        return r'${} \times 10^{{{}}}$'.format(a, b)
+
+def fmt1(x):
+        a = '{:.1f}'.format(x)
+        return a
+        
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
@@ -26,6 +37,7 @@ def map_raster_data(aImage_in, \
     aImage_extent, \
     sFilename_output_in,\
        iFlag_scientific_notation_colorbar_in=None,\
+        iFlag_contour_in = None,\
     sColormap_in = None,\
         sTitle_in = None, \
     iDPI_in = None,\
@@ -52,6 +64,11 @@ def map_raster_data(aImage_in, \
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
     else:
         iFlag_scientific_notation_colorbar = 0
+    
+    if iFlag_contour_in is not None:
+        iFlag_contour = iFlag_contour_in
+    else:
+        iFlag_contour = 0
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -117,6 +134,18 @@ def map_raster_data(aImage_in, \
         extent=aImage_extent, \
         cmap = cmap, \
         transform=pProjection)   
+    
+    if iFlag_contour ==1:
+        aPercentiles_in = np.arange(33, 67, 33)
+        levels = cgpercentiles(aImage_in, aPercentiles_in, missing_value_in = -9999)    
+        contourplot = ax.contour(aImage_in, levels, colors='k', origin='upper',\
+            extent=aImage_extent , transform=pProjection, linewidths=0.5)
+
+        if iFlag_scientific_notation_colorbar == 1:            
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt0, fontsize=4)
+        else:
+            
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt1, fontsize=4)
 
     ax.coastlines(color='black', linewidth=1)
     ax.set_title(sTitle)
@@ -126,11 +155,11 @@ def map_raster_data(aImage_in, \
         nlegend = len(aLegend_in)
         for i in range(nlegend):
             sText = aLegend_in[i]
-            dLocation = 0.95 - i * 0.05
-            ax.text(0.05, dLocation, sText, \
+            dLocation = 0.06 + i * 0.04
+            ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
                 transform=ax.transAxes, \
-                color='black', fontsize=8)
+                color='black', fontsize=6)
 
             pass
 
@@ -146,26 +175,22 @@ def map_raster_data(aImage_in, \
     gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
     ax_cb= fig.add_axes([0.75, 0.1, 0.02, 0.7])
 
-    def fmt(x, pos):
-        a, b = '{:.2e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
-    rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
-    if iFlag_scientific_notation_colorbar==1:
-        #formatter = mpl.ticker.ScalarFormatter(useMathText=True)
-        #formatter.set_scientific(True)
-        formatter = OOMFormatter(fformat= "%1.1e")
-        #formatter.set_powerlimits((0,2))
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend, format=formatter)
-        
-    else:
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend)
-        
     
+    rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
+
+    if iFlag_scientific_notation_colorbar==1:        
+        formatter = OOMFormatter(fformat= "%1.1e")        
+        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend, format=formatter)        
+    else:
+        formatter = OOMFormatter(fformat= "%1.1f") 
+        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend, format=formatter)
+
+
     cb.ax.get_yaxis().set_ticks_position('right')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6) 
+   
 
     plt.savefig(sFilename_out , bbox_inches='tight')
     #.show()

@@ -5,10 +5,20 @@ from matplotlib import cm
 import cartopy.crs as ccrs
 import cartopy.mpl.ticker as ticker
 import matplotlib as mpl
-
+from matplotlib import colors
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-
+from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 pProjection = ccrs.PlateCarree()
+
+def fmt0(x):
+        a, b = '{:.1e}'.format(x).split('e')
+        b = int(b)
+        return r'${} \times 10^{{{}}}$'.format(a, b)
+
+def fmt1(x):
+        a = '{:.1f}'.format(x)
+        return a
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
@@ -26,14 +36,18 @@ def map_raster_data_dc(aImage_in, \
     aImage_extent, \
     sFilename_output_in,\
        iFlag_scientific_notation_colorbar_in=None,\
+          iFlag_contour_in = None,\
     sColormap_in = None,\
         sTitle_in = None, \
+            aInterval_in = None,\
+                aColor_in = None,\
     iDPI_in = None,\
     dMissing_value_in=None,\
     dData_max_in = None, \
     dData_min_in = None,\
         sExtend_in =None,\
-        sUnit_in=None):
+        sUnit_in=None,\
+            aLegend_in = None):
 
     aImage_in = np.array(aImage_in)
 
@@ -51,6 +65,37 @@ def map_raster_data_dc(aImage_in, \
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
     else:
         iFlag_scientific_notation_colorbar = 0
+    
+    if iFlag_contour_in is not None:
+        iFlag_contour = iFlag_contour_in
+    else:
+        iFlag_contour = 0
+
+    if aInterval_in is not None:
+        iFlag_interval = 1
+        aInterval = aInterval_in
+        nInterval = len(aInterval)
+    else:
+        aPercentiles_in = np.arange(33, 67, 33)
+        aInterval = cgpercentiles(aImage_in, aPercentiles_in, missing_value_in = dMissing_value_in) 
+        iFlag_interval = 0
+
+    if aColor_in is not None:
+        iFlag_colar = 1
+        aColor = aColor_in
+        ncolor = len(aColor)
+        if iFlag_interval ==1:
+            ncolor = nInterval + 1
+        else:
+            pass
+    else:
+        iFlag_colar = 0
+        if iFlag_interval ==1:
+            ncolor = nInterval + 1
+            aColor = create_diverge_rgb_color_hex(ncolor)
+        else:
+
+            pass
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -93,9 +138,7 @@ def map_raster_data_dc(aImage_in, \
     else:
         sUnit =  ''    
 
-    cmap = cm.get_cmap(sColormap)
-   
-
+       
     dummy_index = np.where(aImage_in > dData_max)
     aImage_in[dummy_index] = dData_max
 
@@ -104,18 +147,73 @@ def map_raster_data_dc(aImage_in, \
 
 
     fig = plt.figure( dpi = iDPI  )
-    #fig.set_figwidth( iSize_x )
-    #fig.set_figheight( iSize_y )
+    
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection )
 
     # set a margin around the data
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.10)   
 
-    rasterplot = ax.imshow(aImage_in, origin='upper', \
+
+    if iFlag_contour ==1:
+        aPercentiles_in = np.arange(33, 67, 33)
+        levels = cgpercentiles(aImage_in, aPercentiles_in, missing_value_in = dMissing_value)    
+        contourplot = ax.contour(aImage_in, levels, colors='k', origin='upper',\
+            extent=aImage_extent , transform=pProjection, linewidths=0.5)
+
+        if iFlag_scientific_notation_colorbar == 1:            
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt0, fontsize=4)
+        else:
+            
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt1, fontsize=4)
+
+    aPseudo_image = np.full((nrow, ncolumn), fill_value = np.nan)
+
+    dummy_index = np.where( aImage_in <=aInterval[0]  )
+    if len(dummy_index) !=0:
+        aPseudo_image[dummy_index] = 0
+
+    for i in range( 0, nInterval-1,1):
+        dIntervel0 = aInterval[i]
+        dIntervel1 = aInterval[i+1]
+        dummy_index = np.where( (aImage_in > dIntervel0) & (aImage_in <=dIntervel1)  )
+        if len(dummy_index) !=0:
+            aPseudo_image[dummy_index] = i+1
+
+    dummy_index = np.where( aImage_in >aInterval[nInterval-1]  )
+    if len(dummy_index) !=0:
+        aPseudo_image[dummy_index] = nInterval
+
+    #cmap = colors.ListedColormap(aColor)
+
+    cmap = (mpl.colors.ListedColormap(aColor[1:ncolor-1])
+        .with_extremes(over=aColor[ncolor-1], under=aColor[0]))
+
+    uni = np.unique(aPseudo_image[np.where(np.isfinite(aPseudo_image))])
+    uni_index = np.array(uni).astype(int)
+    dummy_color=list()
+    for i in uni_index:
+        dummy_color.append( aColor[i] )
+    cmap0 = colors.ListedColormap(dummy_color)
+
+    
+    dcrasterplot = ax.imshow(aPseudo_image, origin='upper', \
         extent=aImage_extent, \
-        cmap = cmap, \
+        cmap = cmap0, \
         transform=pProjection)   
+    
+    if aLegend_in is not None:
+        nlegend = len(aLegend_in)
+        for i in range(nlegend):
+            sText = aLegend_in[i]
+            dLocation = 0.06 + i * 0.04
+            ax.text(0.03, dLocation, sText, \
+                verticalalignment='top', horizontalalignment='left',\
+                transform=ax.transAxes, \
+                color='black', fontsize=6)
+
+            pass
+
 
     ax.coastlines(color='black', linewidth=1)
     ax.set_title(sTitle)
@@ -129,28 +227,34 @@ def map_raster_data_dc(aImage_in, \
 
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
-    ax_cb= fig.add_axes([0.75, 0.1, 0.02, 0.7])
 
-    def fmt(x, pos):
-        a, b = '{:.2e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
-    rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
-    if iFlag_scientific_notation_colorbar==1:
-        #formatter = mpl.ticker.ScalarFormatter(useMathText=True)
-        #formatter.set_scientific(True)
-        formatter = OOMFormatter(fformat= "%1.1e")
-        #formatter.set_powerlimits((0,2))
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend, format=formatter)
-        
-    else:
-        cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend)
-        
+    ax_cb= fig.add_axes([0.75, 0.1, 0.02, 0.7])  
+    bounds = np.linspace(0,nInterval-1, nInterval, endpoint=True)
     
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+    cb = plt.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm), cax = ax_cb, \
+        extend = sExtend,extendfrac='auto', \
+        ticks=bounds)
+
+
     cb.ax.get_yaxis().set_ticks_position('right')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6) 
+    aLabel=list()
+
+    
+    for i in range(nInterval):
+        if iFlag_scientific_notation_colorbar ==1:
+            sLabel = '{:.1e}'.format(aInterval[i])
+        else:
+            sLabel = '{:.1f}'.format(aInterval[i])
+        aLabel.append(sLabel)
+
+    bounds0 = np.linspace(0,nInterval-1, nInterval)    
+    bounds = bounds0[0:nInterval]
+    cb.ax.set_yticks(bounds, labels=aLabel)
+
 
     plt.savefig(sFilename_out , bbox_inches='tight')
     #.show()

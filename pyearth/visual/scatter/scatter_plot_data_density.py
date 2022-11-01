@@ -5,6 +5,7 @@ import matplotlib.ticker as ticker
 from matplotlib.ticker import MaxNLocator
 import matplotlib.patches as mpl_patches
 from scipy.stats import gaussian_kde
+import scipy.stats
 
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
 
@@ -128,7 +129,7 @@ def scatter_plot_data_density(aData_x, \
 
     xx, yy, z = scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
     cmap = plt.get_cmap('BuPu')
-    cset = ax_scatter.contourf(xx, yy, z,cmap=cmap)
+    sc = ax_scatter.contourf(xx, yy, z,cmap=cmap)
 
     
 
@@ -240,18 +241,47 @@ def scatter_plot_data_density(aData_x, \
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
     ax_scatter.set_aspect(dRatio, 'box')  #this one set the y / x ratio
 
-    
+    aCorrelation = scipy.stats.kendalltau(x, y)
+    aLegend_artist = []
+    aLegend_artist.append(sc)
 
-    handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
+    #handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
 
     # create the corresponding number of labels (= the text you want to display)
-    labels = []
-    labels.append(sLabel_legend)
+    #labels = []
+    #labels.append(sLabel_legend)
     # create the legend, supressing the blank space of the empty line symbol    and the
     # padding between symbol and label by setting handlelenght and  handletextpad
-    ax_scatter.legend(handles, labels, loc="upper right", fontsize=12,
-                      fancybox=True, framealpha=0.7,
-                      handlelength=0, handletextpad=0)
+    #ax_scatter.legend(handles, labels, loc="upper right", fontsize=12,
+    #                  fancybox=True, framealpha=0.7,
+    #                  handlelength=0, handletextpad=0)
+    #aLabel=list()
+    #aLabel.append(sLabel_legend)
+    #aLabel.append( "{:.2f}".format( aCorrelation[0] ) )
+    #aLabel.append( "{:.2e}".format( aCorrelation[1] ) )
+
+
+    #ax_scatter.legend(aLegend_artist, aLabel,\
+    #                  loc="upper right", fontsize=12)
+
+    sText = sLabel_legend
+    ax_scatter.text(0.05, 0.95, sText, \
+    verticalalignment='top', horizontalalignment='left',\
+            transform=ax_scatter.transAxes, \
+            color='black', fontsize=12)
+
+    sText = r'$\tau$: ' + "{:.2f}".format( aCorrelation[0] )
+    ax_scatter.text(0.05, 0.9, sText, \
+    verticalalignment='top', horizontalalignment='left',\
+            transform=ax_scatter.transAxes, \
+            color='black', fontsize=12)
+    
+    sText = 'P-value: ' + "{:.2E}".format( aCorrelation[1] )
+    ax_scatter.text(0.05, 0.85, sText, \
+    verticalalignment='top', horizontalalignment='left',\
+            transform=ax_scatter.transAxes, \
+            color='black', fontsize=12)
+   
 
 
     ax_scatter.tick_params(which='both', # Options for both major and minor ticks
