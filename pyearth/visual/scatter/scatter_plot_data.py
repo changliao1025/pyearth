@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.patches as mpl_patches
-from scipy.stats import gaussian_kde
-from scipy import stats
+
+import scipy
 
 
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
@@ -20,6 +20,7 @@ def scatter_plot_data(aData_x, \
                       iDPI_in = None ,\
                       iFlag_log_x_in = None,\
                       iFlag_log_y_in = None,\
+                        iFlag_lowess_in = None,\
                       dMin_x_in = None, \
                       dMax_x_in = None, \
                       dMin_y_in = None, \
@@ -68,6 +69,12 @@ def scatter_plot_data(aData_x, \
     else:
         iFlag_log_y = 0
 
+    
+    if iFlag_log_y_in is not None:
+        iFlag_lowess = iFlag_lowess_in
+    else:
+        iFlag_lowess = 0 
+
     if sLabel_x_in is not None:
         sLabel_X = sLabel_x_in
     else:
@@ -94,13 +101,12 @@ def scatter_plot_data(aData_x, \
 
     left, width = 0.1, 0.75
     bottom, height = 0.1, 0.75
-    spacing = 0.005
+    spacing = 0.02
     rect_scatter = [left, bottom, width, height]
     rect_histx = [left, bottom + height + spacing, width, 0.15]
     rect_histy = [left + width + spacing, bottom, 0.15, height]
 
-    #sns.regplot(x, y, lowess=True)
-    #ax_scatter = sns.regplot(x=aData_x, y=aData_y, marker="+", lowess=True)
+    
     ax_scatter = plt.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
     iFlag_histgram=1
@@ -115,14 +121,23 @@ def scatter_plot_data(aData_x, \
     x_min = np.nanmin(aData_x)
     x_max = np.nanmax(aData_x)
     y_min = np.nanmin(aData_y)
-    y_max = np.nanmax(aData_y)
+    y_max =np.ceil(np.nanmax(aData_y))
 
     x = aData_x
     y = aData_y
 
+    aLegend_artist = []
+    aLegend_label=[]
+
+    
     cmap = plt.get_cmap('BuPu')
-    ax_scatter.scatter(x, y,  alpha=0.5,cmap=cmap)
+
+    sc= ax_scatter.scatter(x, y,  alpha=0.5,cmap=cmap)
     #ax_scatter.set_facecolor('silver')
+    aLegend_artist.append(sc)
+    sLabel = sLabel_legend
+    aLegend_label.append(sLabel)
+
     ax_scatter.axis('on')
     ax_scatter.grid(which='major', color='grey', linestyle='--', axis='y')
 
@@ -130,7 +145,7 @@ def scatter_plot_data(aData_x, \
     ax_scatter.tick_params(axis="y", labelsize=13)
 
     ax_scatter.set_xmargin(0.05)
-    ax_scatter.set_ymargin(0.15)
+    ax_scatter.set_ymargin(0.05)
 
     ax_scatter.set_xlabel(sLabel_X,fontsize=12)
     ax_scatter.set_ylabel(sLabel_Y,fontsize=12)
@@ -230,48 +245,52 @@ def scatter_plot_data(aData_x, \
         pass
 
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
-    ax_scatter.set_aspect(dRatio)  #this one set the y / x ratio
-
-    handles = [mpl_patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
-
-    # create the corresponding number of labels (= the text you want to display)
-    labels = []
-    labels.append(sLabel_legend)
-
-    iFlag_lowess = 0
+    
+    
     if(iFlag_lowess==1):      
 
         y_sm, y_std, order = scatter_lowess(aData_x, aData_y, f=1./3.)
         ax_scatter.plot(x[order], y_sm[order], color='tomato')
-        ax_scatter.fill_between(x[order], \
+        sc_lowess =ax_scatter.fill_between(x[order], \
                                 y_sm[order] - 1.96*y_std[order], \
                                 y_sm[order] + 1.96*y_std[order], \
                                 alpha=0.3)
 
-        sLabel_legend_lowess2 = 'LOWESS uncertainty'
-      
-        labels.append(sLabel_legend_lowess2)
+        aLegend_artist.append(sc_lowess)
 
-    ax_scatter.legend(handles, labels,\
-                      loc="upper right", fontsize=14,\
-                      fancybox=True, \
-                      framealpha=0.7,\
-                      handlelength=0, \
-                      handletextpad=0)
+        sLabel_legend_lowess = 'LOWESS uncertainty'
+      
+        aLegend_label.append(sLabel_legend_lowess)
+
+    ax_scatter.set_aspect(dRatio, 'box')  #this one set the y / x ratio
+    ax_scatter.legend(aLegend_artist, aLegend_label,\
+                      loc="upper right", fontsize=12)
+
+    
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
+    
+    
+    print(slope, intercept, r_value, p_value, std_err)
+    sText = r'R: ' + "{:.2f}".format( r_value )
+    ax_scatter.text(0.05, 0.95, sText, \
+    verticalalignment='top', horizontalalignment='left',\
+            transform=ax_scatter.transAxes, \
+            color='black', fontsize=12)
+    
+    sText = 'P-value: ' + "{:.2E}".format( p_value )
+    ax_scatter.text(0.05, 0.9, sText, \
+    verticalalignment='top', horizontalalignment='left',\
+            transform=ax_scatter.transAxes, \
+            color='black', fontsize=12)
 
     ax_scatter.tick_params(which='both', # Options for both major and minor ticks
                            top='off', # turn off top ticks
                            left='off', # turn off left ticks
                            right='off',  # turn off right ticks
                            bottom='off') # turn off bottom ticks
-    slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
-
-    sR = "r-squared:" +  "{:.3f}".format(  r_value**2 )
-    print(sR)
-    print(slope, intercept, r_value, p_value, std_err)
     
     if iFlag_histgram ==1:
-        density = gaussian_kde(x)
+        density = scipy.stats.gaussian_kde(x)
         xx = np.linspace(dMin_x, dMax_x,1000)
         yy = density(xx)
         ax_histx.plot(xx,yy, color='navy')
@@ -298,7 +317,7 @@ def scatter_plot_data(aData_x, \
 
         #y margin
     
-        density = gaussian_kde(y)
+        density = scipy.stats.gaussian_kde(y)
         xx = np.linspace(dMin_y, dMax_y,1000)
         yy = density(xx)
         xx, yy = yy, xx

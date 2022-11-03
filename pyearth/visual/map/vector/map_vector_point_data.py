@@ -33,7 +33,8 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
         if self._useMathText:
             self.format = r'$\mathdefault{%s}$' % self.format
 
-def map_raster_data(aImage_in, \
+def map_vector_data(iFiletype_in,\
+    sFilename_in, \
     aImage_extent, \
     sFilename_output_in,\
        iFlag_scientific_notation_colorbar_in=None,\
@@ -170,12 +171,10 @@ def map_raster_data(aImage_in, \
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
     
-
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
     ax_cb= fig.add_axes([0.75, 0.1, 0.02, 0.7])
 
-    
     rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
 
     if iFlag_scientific_notation_colorbar==1:        
@@ -185,12 +184,10 @@ def map_raster_data(aImage_in, \
         formatter = OOMFormatter(fformat= "%1.1f") 
         cb = plt.colorbar(rasterplot, cax = ax_cb, extend = sExtend, format=formatter)
 
-
     cb.ax.get_yaxis().set_ticks_position('right')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6) 
-   
 
     plt.savefig(sFilename_out , bbox_inches='tight')
     #.show()
