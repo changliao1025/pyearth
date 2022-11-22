@@ -1,33 +1,23 @@
 import os, sys
 from datetime import datetime
 import numpy as np
-
-
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-
-
 from pyearth.system.define_global_variables import *
-
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 
-def fmt0(x):
+def log_formatter(x):
         a, b = '{:.1e}'.format(x).split('e')
         b = int(b)
         return r'${} \times 10^{{{}}}$'.format(a, b)
 
-def fmt1(x):
-        a = '{:.2f}'.format(x)
-        return a
 
-def fmt2(x):
-        a = '{:.2e}'.format(x)
-        return a
-
-def plot_time_series_data(aTime_all, \
+def plot_time_series_data_w_variation(aTime_all, \
                           aData_all, \
+                          aData_upper_all, \
+                          aData_lower_all, \
                           sFilename_out,\
                           iDPI_in = None,\
                           iFlag_log_in = None,\
@@ -53,7 +43,8 @@ def plot_time_series_data(aTime_all, \
                           sLocation_legend_in=None,\
                           sTitle_in = None):
     #find how many data will be plotted
-    aData_all = np.array(aData_all)
+    aTime_all=np.array(aTime_all)
+    aData_all= np.array(aData_all)
     pShape = aData_all.shape
   
     nData = pShape[0]
@@ -163,7 +154,7 @@ def plot_time_series_data(aTime_all, \
         dSpace_y = dSpace_y_in
     else:
         iFlag_space_y =1
-        dSpace_y = (dMax_y - dMin_y) /4.0
+        dSpace_y = int((dMax_y - dMin_y) /4.0)
         pass
 
     fig = plt.figure( dpi=iDPI )
@@ -189,6 +180,7 @@ def plot_time_series_data(aTime_all, \
         sFormat_y = sFormat_y_in
     else:
         iFlag_format_y = 0
+        sFormat_y = '{:.1f}'
 
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
@@ -214,12 +206,23 @@ def plot_time_series_data(aTime_all, \
 
         x1 = aTime_all[i-1]
         y1 = aData_all[i-1]
-        tsp, = ax.plot( x1, y1, \
+        axp, = ax.plot( x1, y1, \
                  color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                 marker = aMarker[i-1] )
+                 label = aLabel_legend[i-1])
+        
 
-        aLegend_artist.append(tsp)
+        y1_upper=aData_upper_all[i-1]
+        y1_lower=aData_lower_all[i-1]
+        sc_var =ax.fill_between(x1, \
+                                y1_upper, \
+                                y1_lower, \
+                                alpha=0.3, color=aColor[i-1])
+
+     
+        aLegend_artist.append(axp)
         aLabel.append(aLabel_legend[i-1])
+        #variations
+
 
         #calculate linear regression
         iFlag_trend = aFlag_trend[i-1]
@@ -243,7 +246,7 @@ def plot_time_series_data(aTime_all, \
     ax.axis('on')
     ax.grid(which='major', color='grey', linestyle='--', axis='y')
 
-    
+    #ax.set_aspect(dRatio)  #this one set the y / x ratio
 
     ax.xaxis.set_major_locator(pYear)
     ax.xaxis.set_minor_locator(pMonth)
@@ -263,15 +266,9 @@ def plot_time_series_data(aTime_all, \
     #next Y axis
     ax.set_ylabel(sLabel_y,fontsize=12)
 
-    if (iReverse_y ==1): #be careful here
-        ax.set_ylim( dMax_y, dMin_y )
-    else:
-        ax.set_ylim( dMin_y, dMax_y )
-
-    if iFlag_log == 1:
-        #we need to change the ticklabel
+    if iFlag_log ==1:
         aLabel_y = []
-        
+        #we need to change the ticklabel
         if dSpace_y >= 1:
             dSpace_y = int(dSpace_y)
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
@@ -286,11 +283,8 @@ def plot_time_series_data(aTime_all, \
         else:
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
             for i in np.arange( 0, nlabel, 1 ):
-                ii = int(dMin_y) + i * dSpace_y
-                if (iFlag_format_y ==1):
-                    iii = sFormat_y.format(ii)
-                else:
-                    iii = float(fmt1(ii))
+                ii = int(dMin_y) + i * dSpace_y               
+                iii = sFormat_y.format(ii)                
                 sTicklabel = r'$10^{{{}}}$'.format( iii)
                 aLabel_y.append(sTicklabel)
                 pass
@@ -300,41 +294,44 @@ def plot_time_series_data(aTime_all, \
             pass
       
         ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-        
+ 
     else:
         #not log
 
         if iFlag_scientific_notation ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
-            formatter.set_scientific(True)
-            #formatter.set_powerlimits((-1,1)) # you might need to change here
-            ax.yaxis.set_major_formatter(formatter)
-            #most time, when you use scientific notation, you may not need set the space,
-            #but you may still set it using the method below
+            formatter.set_scientific(True)            
+            ax.yaxis.set_major_formatter(formatter)            
 
             pass
         else:
-            if (iFlag_format_y ==1):
-                ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
-
-            if (iFlag_space_y ==0):
-                #ax.yaxis.set_major_locator(ticker.AutoLocator())
-                #ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+            
+            if (iFlag_space_y ==0):                
                 ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
             else:
                 ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                #ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                pass
+
+            if (iFlag_format_y ==1):
+               
+                sFormat_y_dummy =  sFormat_y.replace("{", "{x")
+                ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) ) 
+                pass   
+            
 
             pass
 
+    if (iReverse_y ==1): #be careful here
+        ax.set_ylim( dMax_y, dMin_y )
+    else:
+        ax.set_ylim( dMin_y, dMax_y )
 
     ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, fontsize=12,ncol= ncolumn)
 
-    #save the result
-    #plt.show()
-    plt.savefig(sFilename_out, bbox_inches='tight')
 
+    plt.savefig(sFilename_out, bbox_inches='tight')
     plt.close('all')
     plt.clf()
-    #print('finished plotting')
+   

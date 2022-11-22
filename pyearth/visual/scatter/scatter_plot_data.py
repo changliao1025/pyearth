@@ -2,13 +2,21 @@ import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import matplotlib.patches as mpl_patches
-
 import scipy
-
-
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
+def fmt0(x):
+        a, b = '{:.1e}'.format(x).split('e')
+        b = int(b)
+        return r'${} \times 10^{{{}}}$'.format(a, b)
+
+def fmt1(x):
+        a = '{:.2f}'.format(x)
+        return a
+
+def fmt2(x):
+        a = '{:.2e}'.format(x)
+        return a
 
 def scatter_plot_data(aData_x, \
                       aData_y,\
@@ -20,7 +28,7 @@ def scatter_plot_data(aData_x, \
                       iDPI_in = None ,\
                       iFlag_log_x_in = None,\
                       iFlag_log_y_in = None,\
-                        iFlag_lowess_in = None,\
+                      iFlag_lowess_in = None,\
                       dMin_x_in = None, \
                       dMax_x_in = None, \
                       dMin_y_in = None, \
@@ -349,4 +357,5 @@ def scatter_plot_data(aData_x, \
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')
-    print('finished plotting')
+    plt.clf()
+   

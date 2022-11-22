@@ -82,6 +82,7 @@ def map_raster_data(aImage_in, \
         dData_max = dData_max_in
     else:
         dData_max = np.nanmax(aImage_in)
+        print(dData_max)
 
     if dData_min_in is not None:
         dData_min = dData_min_in

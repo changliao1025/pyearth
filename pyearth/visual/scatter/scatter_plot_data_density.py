@@ -8,6 +8,18 @@ import matplotlib.patches as mpl_patches
 import scipy
 
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
+def fmt0(x):
+        a, b = '{:.1e}'.format(x).split('e')
+        b = int(b)
+        return r'${} \times 10^{{{}}}$'.format(a, b)
+
+def fmt1(x):
+        a = '{:.1f}'.format(x)
+        return a
+
+def fmt2(x):
+        a = '{:.1e}'.format(x)
+        return a
 
 def scatter_plot_data_density(aData_x, \
                               aData_y,\
@@ -128,16 +140,16 @@ def scatter_plot_data_density(aData_x, \
         clip = [clip, clip]
     
     aLegend_artist = []
-    aLegend_label=[]
+    
 
     xx, yy, z = scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
     cmap = plt.get_cmap('BuPu')
     sc = ax_scatter.contourf(xx, yy, z, 5, cmap=cmap) 
-    aLegend_artist, aLegend_label = sc.legend_elements()
-    #aLegend_artist.append(artists)    
-
-    #sLabel = sLabel_legend
-    #aLegend_label.append(sLabel)
+    aLegend_artist, aLegend_label = sc.legend_elements(str_format=fmt2)
+    aLegend_label_new=[]
+    
+    
+    #aLegend_label_new.append(sLabel)
 
     ax_scatter.tick_params(axis="x", labelsize=13)
     ax_scatter.tick_params(axis="y", labelsize=13)

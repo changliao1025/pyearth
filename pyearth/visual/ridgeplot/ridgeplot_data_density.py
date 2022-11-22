@@ -159,5 +159,5 @@ def ridgeplot_data_density(aDict, \
     plt.savefig(sFilename_out, bbox_inches='tight')
 
     plt.close('all')
-    print('finished plotting')
+    plt.clf()
     return
