@@ -7,11 +7,8 @@ import matplotlib.ticker as ticker
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
+from pyearth.visual.formatter import log_formatter
 
-def log_formatter(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
 
 
 def plot_time_series_data_w_variation(aTime_all, \
@@ -139,22 +136,30 @@ def plot_time_series_data_w_variation(aTime_all, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData_all) #* 1.2
+        dMax_y = np.nanmax([aData_all,aData_upper_all,aData_lower_all]) #* 1.2
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData_all) #if it has negative value, change here
+        dMin_y = np.nanmin([aData_all,aData_upper_all, aData_lower_all]) #if it has negative value, change here
 
     if (dMax_y <= dMin_y ):
         return
+    else:
+        dMin_y = dMin_y - 0.13 * (dMax_y-dMin_y) 
+        dMax_y = dMax_y + 0.13 * (dMax_y-dMin_y) 
+       
 
     if dSpace_y_in is not None:
         iFlag_space_y =1
         dSpace_y = dSpace_y_in
     else:
         iFlag_space_y =1
-        dSpace_y = int((dMax_y - dMin_y) /4.0)
+        dSpace_y = (dMax_y - dMin_y) /4.0
+        if dSpace_y < 1:
+            pass
+        else:
+            dSpace_y = int(dSpace_y)
         pass
 
     fig = plt.figure( dpi=iDPI )
@@ -280,12 +285,13 @@ def plot_time_series_data_w_variation(aTime_all, \
             ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + int(dMin_y)
             ax.set_yticks( ticks)
             ax.set_yticklabels(aLabel_y)    
+            pass
         else:
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
             for i in np.arange( 0, nlabel, 1 ):
-                ii = int(dMin_y) + i * dSpace_y               
-                iii = sFormat_y.format(ii)                
-                sTicklabel = r'$10^{{{}}}$'.format( iii)
+                ii = int(dMin_y) + i * dSpace_y  
+                iii = sFormat_y.format(ii)  
+                sTicklabel = r'$10^{{{}}}$'.format( iii )
                 aLabel_y.append(sTicklabel)
                 pass
             ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y

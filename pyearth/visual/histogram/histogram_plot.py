@@ -1,30 +1,21 @@
 import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
-
+import matplotlib.ticker as ticker
 from pyearth.system.define_global_variables import *
 
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
+from pyearth.visual.formatter import log_formatter
 
-def fmt0(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
 
-def fmt1(x):
-        a = '{:.2f}'.format(x)
-        return a
-
-def fmt2(x):
-        a = '{:.2e}'.format(x)
-        return a
 
 def histogram_plot(aData_all, \
                    sFilename_out, \
                    iSize_x_in = None, \
                    iSize_y_in = None, \
                    ncolumn_in = None,\
+                     iFlag_scientific_notation_in = None,\
                    iFlag_log_in=None,\
                    aColor_in = None,\
                    iDPI_in = None, \
@@ -36,8 +27,9 @@ def histogram_plot(aData_all, \
                    sFormat_x_in=None,\
                    aLocation_legend_in =None,\
                    sLocation_legend_in=None,\
+                  
                    sTitle_in = None,\
-                   aLabel_legend_in = None):
+                   aLegend_in = None):
 
     """
     Draw a histogram for single dataset
@@ -59,6 +51,11 @@ def histogram_plot(aData_all, \
         iDPI = iDPI_in
     else:       
         iDPI = 300
+
+    if iFlag_scientific_notation_in is not None:
+        iFlag_scientific_notation = iFlag_scientific_notation_in
+    else:
+        iFlag_scientific_notation = 0
 
     if iFlag_log_in is not None:
         iFlag_log = iFlag_log_in
@@ -87,7 +84,8 @@ def histogram_plot(aData_all, \
         iFlag_space_y =1
         dSpace_x = (dMax_x - dMin_x) /10
         pass
-    
+
+   
 
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
@@ -114,8 +112,8 @@ def histogram_plot(aData_all, \
     else:        
         sTitle = ''
     
-    if aLabel_legend_in is not None:
-        aLabel_legend = aLabel_legend_in
+    if aLegend_in is not None:
+        aLabel_legend = aLegend_in
     else:
         aLabel_legend = np.full(nData,'')
 
@@ -169,18 +167,29 @@ def histogram_plot(aData_all, \
         #we need to change the ticklabel
         aLabel_x = []        
         xtickslocs = ax_histo.get_xticks()
-        xtickslabels = ax_histo.get_xticklabels()         
+        xtickslabels = ax_histo.get_xticklabels()  
         for i in np.arange( 0, len(xtickslocs), 1 ):
-            ii = xtickslocs[i]
-            if (iFlag_format_x ==1):
-                iii = sFormat_x.format(ii)
-            else:
-                iii = float(fmt1(ii))
+            ii = xtickslocs[i]  
+            iii = sFormat_x.format(ii)     
             sTicklabel = r'$10^{{{}}}$'.format( iii)
             aLabel_x.append(sTicklabel)
             pass    
-        #ax_histo.set_xticklabels(aLabel_x)    
+
         ax_histo.set_xticklabels(aLabel_x)    
+        pass
+    else:
+        if iFlag_scientific_notation ==1:
+            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter.set_scientific(True)            
+            ax_histo.xaxis.set_major_formatter(formatter)          
+            pass
+        else: 
+            if (iFlag_format_x ==1):               
+                sFormat_x_dummy =  sFormat_x.replace("{", "{x")
+                ax_histo.xaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_x_dummy ) ) 
+                pass              
+
+            pass
         pass
 
     

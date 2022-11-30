@@ -17,7 +17,7 @@ def fmt0(x):
         return r'${} \times 10^{{{}}}$'.format(a, b)
 
 def fmt1(x):
-        a = '{:.1f}'.format(x)
+        a = '{:.2f}'.format(x)
         return a
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -37,7 +37,6 @@ def map_raster_data_dc(aImage_in, \
     sFilename_output_in,\
        iFlag_scientific_notation_colorbar_in=None,\
           iFlag_contour_in = None,\
-    sColormap_in = None,\
         sTitle_in = None, \
             aInterval_in = None,\
                 aColor_in = None,\
@@ -116,10 +115,6 @@ def map_raster_data_dc(aImage_in, \
         dData_min = np.nanmin(aImage_in)    
     
 
-    if sColormap_in is not None:
-        sColormap = sColormap_in
-    else:
-        sColormap =  'rainbow'
     
     if sTitle_in is not None:
         sTitle = sTitle_in
@@ -162,10 +157,10 @@ def map_raster_data_dc(aImage_in, \
             extent=aImage_extent , transform=pProjection, linewidths=0.5)
 
         if iFlag_scientific_notation_colorbar == 1:            
-            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt0, fontsize=4)
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt0, fontsize=7)
         else:
             
-            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt1, fontsize=4)
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt1, fontsize=7)
 
     aPseudo_image = np.full((nrow, ncolumn), fill_value = np.nan)
 
@@ -203,14 +198,22 @@ def map_raster_data_dc(aImage_in, \
         transform=pProjection)   
     
     if aLegend_in is not None:
+        #plot the first on the top
+        sText = aLegend_in[0]
+        dLocation = 0.96
+        ax.text(0.03, dLocation, sText, \
+                verticalalignment='top', horizontalalignment='left',\
+                transform=ax.transAxes, \
+                color='black', fontsize=10)
+        #plot the remaining on the bot
         nlegend = len(aLegend_in)
-        for i in range(nlegend):
+        for i in range(1, nlegend,1):
             sText = aLegend_in[i]
-            dLocation = 0.06 + i * 0.04
+            dLocation =  nlegend * 0.06  - i * 0.05 - 0.03
             ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
                 transform=ax.transAxes, \
-                color='black', fontsize=6)
+                color='black', fontsize=10)
 
             pass
 
@@ -253,8 +256,8 @@ def map_raster_data_dc(aImage_in, \
 
     bounds0 = np.linspace(0,nInterval-1, nInterval)    
     bounds = bounds0[0:nInterval]
-    cb.ax.set_yticks(bounds, labels=aLabel)
-
+    #cb.ax.set_yticks(bounds, labels=aLabel)
+    cb.ax.set_yticklabels([aLabel[int(i)] for i in bounds]) # add the labels
 
     plt.savefig(sFilename_out , bbox_inches='tight')
     #.show()

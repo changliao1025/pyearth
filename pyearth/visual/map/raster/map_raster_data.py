@@ -8,18 +8,9 @@ import matplotlib as mpl
 
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-
+from pyearth.visual.formatter import log_formatter, float_formatter
 pProjection = ccrs.PlateCarree()
 
-def fmt0(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
-
-def fmt1(x):
-        a = '{:.1f}'.format(x)
-        return a
-        
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
@@ -45,6 +36,7 @@ def map_raster_data(aImage_in, \
     dData_max_in = None, \
     dData_min_in = None,\
         sExtend_in =None,\
+            sFormat_contour_in=None,\
         sUnit_in=None,\
             aLegend_in = None):
 
@@ -102,6 +94,11 @@ def map_raster_data(aImage_in, \
         iFlag_title=0
         sTitle =  ''
 
+    if sFormat_contour_in is not None:
+        sFormat_contour = sFormat_contour_in
+    else:
+        sFormat_contour =  '%1.3f'
+
     if sExtend_in is not None:
         sExtend = sExtend_in
     else:
@@ -143,24 +140,31 @@ def map_raster_data(aImage_in, \
             extent=aImage_extent , transform=pProjection, linewidths=0.5)
 
         if iFlag_scientific_notation_colorbar == 1:            
-            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt0, fontsize=4)
-        else:
-            
-            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt1, fontsize=4)
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=log_formatter, fontsize=7)
+        else:            
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=sFormat_contour, fontsize=7)
 
     ax.coastlines(color='black', linewidth=1)
     ax.set_title(sTitle)
 
 
     if aLegend_in is not None:
+        #plot the first on the top
+        sText = aLegend_in[0]
+        dLocation = 0.96
+        ax.text(0.03, dLocation, sText, \
+                verticalalignment='top', horizontalalignment='left',\
+                transform=ax.transAxes, \
+                color='black', fontsize=10)
+        #plot the remaining on the bot
         nlegend = len(aLegend_in)
-        for i in range(nlegend):
+        for i in range(1, nlegend,1):
             sText = aLegend_in[i]
-            dLocation = 0.06 + i * 0.04
+            dLocation =  nlegend * 0.06  - i * 0.05 - 0.03
             ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
                 transform=ax.transAxes, \
-                color='black', fontsize=6)
+                color='black', fontsize=10)
 
             pass
 

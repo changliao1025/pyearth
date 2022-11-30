@@ -12,19 +12,8 @@ from pyearth.system.define_global_variables import *
 
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
+from pyearth.visual.formatter import log_formatter
 
-def fmt0(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
-
-def fmt1(x):
-        a = '{:.2f}'.format(x)
-        return a
-
-def fmt2(x):
-        a = '{:.2e}'.format(x)
-        return a
 
 def plot_time_series_data(aTime_all, \
                           aData_all, \
@@ -287,10 +276,9 @@ def plot_time_series_data(aTime_all, \
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
             for i in np.arange( 0, nlabel, 1 ):
                 ii = int(dMin_y) + i * dSpace_y
-                if (iFlag_format_y ==1):
-                    iii = sFormat_y.format(ii)
-                else:
-                    iii = float(fmt1(ii))
+                
+                iii = sFormat_y.format(ii)
+                
                 sTicklabel = r'$10^{{{}}}$'.format( iii)
                 aLabel_y.append(sTicklabel)
                 pass
