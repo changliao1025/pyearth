@@ -81,7 +81,7 @@ def plot_time_series_analysis(aTime, \
         aLabel_legend =  np.full(nData,'')
 
     if sTitle_in is not None:
-        sTitle = sTitle_in.title()
+        sTitle = sTitle_in.capitalize()  #title will also convert units
     else:
         sTitle = ''
 
@@ -93,6 +93,7 @@ def plot_time_series_analysis(aTime, \
     if aColor_in is not None:
         aColor = aColor_in
     else:       
+       
         aColor= create_diverge_rgb_color_hex(nData)
         
 
@@ -142,6 +143,7 @@ def plot_time_series_analysis(aTime, \
     adf_test = adfuller(aData)
     print("ADF = " + str(adf_test[0]))
     print("p-value = " +str(adf_test[1])  )
+    print("Critical value = " , (adf_test[4])  )
 
     pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
@@ -171,9 +173,7 @@ def plot_time_series_analysis(aTime, \
         aLocation_legend=(1.0,1.0)
 
     sYear_format = mdates.DateFormatter('%Y')
-    aLegend_artist = list()
-    aLabel=list()
-
+    
     aData_tsa = pd.Series(aData, index=pd.date_range(aTime[0], \
                                                      periods=len(aTime), freq='M'), name = sVariable)
 
@@ -192,16 +192,33 @@ def plot_time_series_analysis(aTime, \
                                     sharex=True,  dpi=iDPI)
         
         for i, ax in enumerate(pAxGrid):        
-            tsp = ax.plot( aTime, aData_all[i], \
+            tsp, = ax.plot( aTime, aData_all[i], \
                      color = aColor[i+1], linestyle = aLinestyle[i+1] ,\
                      marker = aMarker[i+1] ,\
                      zorder=3)        
-            if i==0:
-                
+            if i==0:                
                 ax.set_title(sTitle,fontsize=13)        
-                aLegend_artist.append(tsp)
-                aLabel.append(aLabel_legend[i-1])  
                 
+                #we will not use legend method because it has 3 panels
+                if aLabel_legend_in is not None:
+                    #plot the first on the top
+                    sText = aLabel_legend_in[0]
+                    dLocation = 0.96
+                    ax.text(0.03, dLocation, sText, \
+                            verticalalignment='top', horizontalalignment='left',\
+                            transform=ax.transAxes, \
+                            color='black', fontsize=10)
+                    #plot the remaining on the bot
+                    nlegend = len(aLabel_legend_in)
+                    for i in range(1, nlegend,1):
+                        sText = aLabel_legend_in[i]
+                        dLocation =  nlegend * 0.06  - i * 0.05 - 0.03
+                        ax.text(0.03, dLocation, sText, \
+                            verticalalignment='top', horizontalalignment='left',\
+                            transform=ax.transAxes, \
+                            color='black', fontsize=10)
+                        pass  
+                           
                 
             if i == 2:
                 ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
@@ -212,6 +229,8 @@ def plot_time_series_analysis(aTime, \
             ax.xaxis.set_major_locator(pYear)
             ax.xaxis.set_minor_locator(pMonth)
             ax.xaxis.set_major_formatter(sYear_format)
+        
+                
     else:
         #include raw data
         aLabel_y = np.array([ sLabel_y, 'Trend','Season','Residual' ])
@@ -220,18 +239,20 @@ def plot_time_series_analysis(aTime, \
                                     figsize=(iSize_x, iSize_y),\
                                     sharex=True,  dpi=iDPI)
         for i, ax in enumerate(pAxGrid):       
-            tsp = ax.plot( aTime, aData_all[i], \
+            tsp, = ax.plot( aTime, aData_all[i], \
                      color = aColor[i], linestyle = aLinestyle[i] ,\
                      marker = aMarker[i] ,\
                      zorder=3)
             #the first plot has title          
             if i == 0:
+                #might have to consider log label here, refer to time series plot
                 aTickLabel_y =list()
                 ax.set_title(sTitle,fontsize=13)    
-                aLegend_artist.append(tsp)
-                aLabel.append(aLabel_legend[i-1])
+               
                 if iReverse_y ==1:
                     ax.set_ylim( dMin_y,dMax_y  )
+                
+                
 
             #the bottom plot has x label and provided y label     
             if i == 3:    
@@ -245,10 +266,7 @@ def plot_time_series_analysis(aTime, \
             ax.xaxis.set_minor_locator(pMonth)   
             ax.xaxis.set_major_formatter(sYear_format)
 
-        for i, ax in enumerate(pAxGrid):   
-            if i == 0:
-                ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
-                    loc=sLocation_legend, fontsize=12,ncol= 1)
+
 
     plt.savefig(sFilename_out, bbox_inches='tight')
     plt.close('all')

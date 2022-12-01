@@ -17,15 +17,6 @@ from pyearth.toolbox.math.stat.remap import remap
 pProjection_map_default = ccrs.Orthographic(central_longitude =  0.50*(-149.5+(-146.5)), \
         central_latitude = 0.50*(68.1+70.35), globe=None)
 
-
-def fmt0(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
-
-def fmt1(x):
-        a = '{:.1f}'.format(x)
-        return a
         
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -40,7 +31,7 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
         if self._useMathText:
             self.format = r'$\mathdefault{%s}$' % self.format
 
-def map_vector_polygon(iFiletype_in,\
+def map_vector_polyline_data(iFiletype_in,\
     sFilename_in, \
     sFilename_output_in,\
         iFlag_thickness_in =None,\
@@ -100,7 +91,7 @@ def map_vector_polygon(iFiletype_in,\
     if sColormap_in is not None:
         sColormap = sColormap_in
     else:
-        sColormap =  'rainbow'
+        sColormap =  'Spectral'
     
     if sTitle_in is not None:
         sTitle = sTitle_in
@@ -194,13 +185,18 @@ def map_vector_polygon(iFiletype_in,\
             codes[0] = mpath.Path.MOVETO
             path = mpath.Path(aCoords_gcs, codes)            
             x, y = zip(*path.vertices)
-
-
             iThickness = remap( dField, dField_min, dField_max, iThickness_min, iThickness_max )
-            if n_colors < 10:
-                line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=ccrs.PlateCarree())
-            else:               
-                line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=ccrs.PlateCarree())
+
+            color_index = (dField-dField_min ) /(dField_max - dField_min )
+            rgba = cmap(color_index)
+            if sColormap_in is not None:
+                line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=ccrs.PlateCarree())
+            else:
+                if n_colors < 10:
+                    line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=ccrs.PlateCarree())
+                else:               
+                    line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=ccrs.PlateCarree())
+            
             lID = lID + 1           
 
     pDataset = pLayer = pFeature  = None    
@@ -230,13 +226,14 @@ def map_vector_polygon(iFiletype_in,\
 
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
+        dLocation0 = 0.96
         for i in range(nlegend):
             sText = aLegend_in[i]
-            dLocation = 0.06 + i * 0.04
+            dLocation = dLocation0 - i * 0.06
             ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
                 transform=ax.transAxes, \
-                color='black', fontsize=6)
+                color='black', fontsize=10)
 
             pass
     if iFlag_title is None:

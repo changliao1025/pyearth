@@ -11,14 +11,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree()
 
-def fmt0(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
 
-def fmt1(x):
-        a = '{:.1f}'.format(x)
-        return a
         
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -33,7 +26,7 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
         if self._useMathText:
             self.format = r'$\mathdefault{%s}$' % self.format
 
-def map_vector_data(iFiletype_in,\
+def map_vector_polygon_data(iFiletype_in,\
     sFilename_in, \
     aImage_extent, \
     sFilename_output_in,\
