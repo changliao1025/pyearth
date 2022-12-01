@@ -38,6 +38,7 @@ def map_raster_data_dc(aImage_in, \
     dData_max_in = None, \
     dData_min_in = None,\
         sExtend_in =None,\
+            sFormat_contour_in = None,\
         sUnit_in=None,\
             aLabel_legend_in = None):
 

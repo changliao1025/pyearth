@@ -197,39 +197,11 @@ def plot_time_series_analysis(aTime, \
                      marker = aMarker[i+1] ,\
                      zorder=3)        
             if i==0:
-                aTickLabel_y =list()
+                
                 ax.set_title(sTitle,fontsize=13)        
                 aLegend_artist.append(tsp)
                 aLabel.append(aLabel_legend[i-1])  
-                if iFlag_log_in ==1:
-                    if dSpace_y >= 1:
-                        dSpace_y = int(dSpace_y)
-                        nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
-                        for j in np.arange(  nlabel ):
-                            ii = int(dMin_y) + j * dSpace_y
-                            sTicklabel = r'$10^{{{}}}$'.format( int(ii))
-                            aTickLabel_y.append(sTicklabel)
-                            pass
-                        ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + int(dMin_y)
-                        ax.set_yticks( ticks)
-                        ax.set_yticklabels(aTickLabel_y)    
-                    else:
-                        nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
-                        for j in np.arange( nlabel ):
-                            ii = int(dMin_y) + j * dSpace_y     
-                            iii = sFormat_y.format(ii)  
-                            sTicklabel = r'$10^{{{}}}$'.format( iii)
-                            aTickLabel_y.append(sTicklabel)
-                            pass
-                        ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
-                        ax.set_yticks( ticks)
-                        ax.set_yticklabels(aTickLabel_y)    
-                        pass      
-                    ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
-                    if iReverse_y ==1:
-                        ax.set_ylim( dMin_y,dMax_y  )
-                else:
-                    pass
+                
                 
             if i == 2:
                 ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
