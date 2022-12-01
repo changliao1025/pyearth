@@ -2,17 +2,13 @@ import os, sys
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-
 import pandas as pd
 from statsmodels.tsa.seasonal import STL
 from statsmodels.tsa.stattools import adfuller
-
 from pyearth.system.define_global_variables import *
-
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
 def plot_time_series_analysis(aTime, \
@@ -22,6 +18,7 @@ def plot_time_series_analysis(aTime, \
                               iDPI_in = None,\
                               iFlag_without_raw_in= None,\
                               iFlag_log_in = None,\
+                                iFlag_scientific_notation_in=None,\
                               iReverse_y_in = None, \
                               iSize_x_in = None, \
                               iSize_y_in = None, \
@@ -37,11 +34,15 @@ def plot_time_series_analysis(aTime, \
                               sLabel_x_in = None, \
                               sLabel_y_in = None, \
                               aLabel_legend_in = None,\
+                              aLocation_legend_in =None,\
+                              sLocation_legend_in=None,\
                               sDate_type_in = None,\
                               sFormat_y_in =None,\
                               sTitle_in = None):
-    #find how many data will be plotted
-
+   
+    aTime = np.array(aTime)
+    aData = np.array(aData)
+    pShape = aData.shape
 
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -71,13 +72,13 @@ def plot_time_series_analysis(aTime, \
     if sLabel_y_in is not None:
         sLabel_y = sLabel_y_in
     else:
-        sLabel_y = sVariable
+        sLabel_y = ''
 
     nData = 4
     if aLabel_legend_in is not None:
         aLabel_legend = aLabel_legend_in
-    else:
-        aLabel_legend = np.array([ sVariable, 'Trend','Season','Residual' ])
+    else:        
+        aLabel_legend =  np.full(nData,'')
 
     if sTitle_in is not None:
         sTitle = sTitle_in.title()
@@ -91,14 +92,9 @@ def plot_time_series_analysis(aTime, \
 
     if aColor_in is not None:
         aColor = aColor_in
-    else:
-        if(nData>=3):
-            aColor= create_diverge_rgb_color_hex(nData)
-        else:
-            if nData==2:
-                aColor= ['red','blue']
-            else:
-                aColor=['red']
+    else:       
+        aColor= create_diverge_rgb_color_hex(nData)
+        
 
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
@@ -118,36 +114,34 @@ def plot_time_series_analysis(aTime, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData) * 1.2
+        dMax_y = np.nanmax(aData) 
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData) * 0.8 #if it has negative value, change here
+        dMin_y = np.nanmin(aData) 
+
     if (dMax_y <= dMin_y ):
         return
+    else:
+        dMin_y = dMin_y - 0.13 * (dMax_y-dMin_y) 
+        dMax_y = dMax_y + 0.13 * (dMax_y-dMin_y)        
 
     if dSpace_y_in is not None:
         iFlag_space_y =1
         dSpace_y = dSpace_y_in
     else:
-        iFlag_space_y=0
+        iFlag_space_y =0
+        dSpace_y = (dMax_y - dMin_y) /4.0
+        if dSpace_y < 1:
+            pass
+        else:
+            dSpace_y = int(dSpace_y)
         pass
 
     adf_test = adfuller(aData)
-    #print(adf_test)
     print("ADF = " + str(adf_test[0]))
     print("p-value = " +str(adf_test[1])  )
-
-    #fig = plt.figure( dpi=iDPI )
-    #fig.set_figwidth( iSize_x )
-    #fig.set_figheight( iSize_y )
-
-    #pAxGrid = AxesGrid(fig, 111,
-    #                    nrows_ncols=(4,1),
-    #                    axes_pad=0.6,
-    #                    label_mode='')  # note the empty label_mode
-
 
     pYear = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
@@ -157,7 +151,6 @@ def plot_time_series_analysis(aTime, \
         else:
             print(sDate_type_in)
     else:
-        print(sDate_type_in)
         pass
 
     if sFormat_y_in is not None:
@@ -165,8 +158,21 @@ def plot_time_series_analysis(aTime, \
         sFormat_y = sFormat_y_in
     else:
         iFlag_format_y = 0
+        sFormat_y = '{:.1f}'
+    
+    if sLocation_legend_in is not None:
+        sLocation_legend = sLocation_legend_in
+    else:
+        sLocation_legend = "upper right"
+
+    if aLocation_legend_in is not None:
+        aLocation_legend = aLocation_legend_in
+    else:
+        aLocation_legend=(1.0,1.0)
 
     sYear_format = mdates.DateFormatter('%Y')
+    aLegend_artist = list()
+    aLabel=list()
 
     aData_tsa = pd.Series(aData, index=pd.date_range(aTime[0], \
                                                      periods=len(aTime), freq='M'), name = sVariable)
@@ -177,95 +183,101 @@ def plot_time_series_analysis(aTime, \
     aTSA = stl.fit()
     #part 1
     #plot time series
-
-
-
     if iFlag_without_raw == 1:
+        aLabel_y = np.array( ['Trend','Season','Residual' ])
         aData_all = [aTSA.trend, aTSA.seasonal, aTSA.resid ]
         iSize_y = iSize_y * 0.75
         fig, pAxGrid = plt.subplots(nrows= len(aData_all), \
                                     figsize=(iSize_x, iSize_y),\
                                     sharex=True,  dpi=iDPI)
+        
+        for i, ax in enumerate(pAxGrid):        
+            tsp = ax.plot( aTime, aData_all[i], \
+                     color = aColor[i+1], linestyle = aLinestyle[i+1] ,\
+                     marker = aMarker[i+1] ,\
+                     zorder=3)        
+            if i==0:
+                aTickLabel_y =list()
+                ax.set_title(sTitle,fontsize=13)        
+                aLegend_artist.append(tsp)
+                aLabel.append(aLabel_legend[i-1])  
+                if iFlag_log_in ==1:
+                    if dSpace_y >= 1:
+                        dSpace_y = int(dSpace_y)
+                        nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
+                        for j in np.arange(  nlabel ):
+                            ii = int(dMin_y) + j * dSpace_y
+                            sTicklabel = r'$10^{{{}}}$'.format( int(ii))
+                            aTickLabel_y.append(sTicklabel)
+                            pass
+                        ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + int(dMin_y)
+                        ax.set_yticks( ticks)
+                        ax.set_yticklabels(aTickLabel_y)    
+                    else:
+                        nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
+                        for j in np.arange( nlabel ):
+                            ii = int(dMin_y) + j * dSpace_y     
+                            iii = sFormat_y.format(ii)  
+                            sTicklabel = r'$10^{{{}}}$'.format( iii)
+                            aTickLabel_y.append(sTicklabel)
+                            pass
+                        ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
+                        ax.set_yticks( ticks)
+                        ax.set_yticklabels(aTickLabel_y)    
+                        pass      
+                    ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
+                    if iReverse_y ==1:
+                        ax.set_ylim( dMin_y,dMax_y  )
+                else:
+                    pass
+                
+            if i == 2:
+                ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
+                ax.set_xlabel('Year',fontsize=12)
+            ax.set_ylabel(aLabel_y[i],fontsize=12)     
+            ax.grid(which='major', color='lightgrey', linestyle=':', axis='y', zorder=1)
+            ax.set_xlim(dMin_x, dMax_x)
+            ax.xaxis.set_major_locator(pYear)
+            ax.xaxis.set_minor_locator(pMonth)
+            ax.xaxis.set_major_formatter(sYear_format)
     else:
+        #include raw data
+        aLabel_y = np.array([ sLabel_y, 'Trend','Season','Residual' ])
         aData_all = [aData, aTSA.trend, aTSA.seasonal, aTSA.resid ]
         fig, pAxGrid = plt.subplots(nrows= len(aData_all), \
                                     figsize=(iSize_x, iSize_y),\
                                     sharex=True,  dpi=iDPI)
-
-    for i, ax in enumerate(pAxGrid):
-
-
-        #ax.set_facecolor('#eafff5')
-        if iFlag_without_raw == 1:
-            ax.plot( aTime, aData_all[i], \
-                     color = aColor[i+1], linestyle = aLinestyle[i+1] ,\
-                     marker = aMarker[i+1] ,\
-                     label = aLabel_legend[i+1],\
-                     zorder=3)
-
-        else:
-            ax.plot( aTime, aData_all[i], \
+        for i, ax in enumerate(pAxGrid):       
+            tsp = ax.plot( aTime, aData_all[i], \
                      color = aColor[i], linestyle = aLinestyle[i] ,\
                      marker = aMarker[i] ,\
-                     label = aLabel_legend[i],\
                      zorder=3)
-
-        if  iFlag_without_raw == 0:
-            if i==0:
+            #the first plot has title          
+            if i == 0:
+                aTickLabel_y =list()
+                ax.set_title(sTitle,fontsize=13)    
+                aLegend_artist.append(tsp)
+                aLabel.append(aLabel_legend[i-1])
                 if iReverse_y ==1:
                     ax.set_ylim( dMin_y,dMax_y  )
 
-                ax.set_title(sTitle,fontsize=13)
-
-                if iFlag_log_in ==1:
-                    #we need to change the ticklabel
-                    aLabel_y = []
-                    for j in np.arange( dMin_y, dMax_y + 1, 1 ):
-                        sTicklabel = r'$10^{{{}}}$'.format(int(j))
-                        aLabel_y.append(sTicklabel)
-                        pass
-
-                    ax.set_yticks(np.arange( dMin_y, dMax_y +1, 1 ))
-                    ax.set_yticklabels(aLabel_y)
-                    pass
-                pass
-        else:
-            if i==0:
-                ax.set_title(sTitle,fontsize=13)
-
-
-        if iFlag_without_raw == 1:
-            ax.set_ylabel(aLabel_legend[i+1],fontsize=12)
-            if i == 2:
+            #the bottom plot has x label and provided y label     
+            if i == 3:    
                 ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
+                ax.set_xlabel('Year',fontsize=12)    
+            
+            ax.set_ylabel(aLabel_y[i],fontsize=12)                
+            ax.grid(which='major', color='lightgrey', linestyle=':', axis='y', zorder=1)
+            ax.set_xlim(dMin_x, dMax_x)
+            ax.xaxis.set_major_locator(pYear)
+            ax.xaxis.set_minor_locator(pMonth)   
+            ax.xaxis.set_major_formatter(sYear_format)
 
-                ax.set_xlabel('Year',fontsize=12)
+        for i, ax in enumerate(pAxGrid):   
+            if i == 0:
+                ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
+                    loc=sLocation_legend, fontsize=12,ncol= 1)
 
-        else:
-            ax.set_ylabel(aLabel_legend[i],fontsize=12)
-            if i == 3:
-                ax.plot((dMin_x, dMax_x), (0, 0), color='#000000', linestyle=':', zorder=2)
-                ax.set_xlabel('Year',fontsize=12)
-
-
-        ax.grid(which='major', color='lightgrey', linestyle=':', axis='y', zorder=1)
-
-
-        ax.set_xlim(dMin_x, dMax_x)
-        #ax.xaxis.set_major_locator(pYear)
-        #ax.xaxis.set_minor_locator(pMonth)
-
-
-    #we can now rewrite the plot function here
-
-
-
-
-
-    #save the result
-    #plt.show()
     plt.savefig(sFilename_out, bbox_inches='tight')
-
     plt.close('all')
     plt.clf()
-    #print('finished plotting')

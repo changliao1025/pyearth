@@ -7,13 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 
-
 from pyearth.system.define_global_variables import *
-
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
-from pyearth.visual.formatter import log_formatter
-
 
 def plot_time_series_data(aTime_all, \
                           aData_all, \
@@ -41,7 +37,8 @@ def plot_time_series_data(aTime_all, \
                           sFormat_y_in =None,\
                           sLocation_legend_in=None,\
                           sTitle_in = None):
-    #find how many data will be plotted
+                        
+    aTime_all = np.array(aTime_all)
     aData_all = np.array(aData_all)
     pShape = aData_all.shape
   
@@ -61,7 +58,6 @@ def plot_time_series_data(aTime_all, \
         iFlag_scientific_notation = iFlag_scientific_notation_in
     else:
         iFlag_scientific_notation = 0
-
 
     if aFlag_trend_in is not None:
         aFlag_trend = aFlag_trend_in
@@ -129,6 +125,7 @@ def plot_time_series_data(aTime_all, \
         dMax_x = dMax_x_in
     else:
         dMax_x = np.datetime64(np.nanmax(aTime_all), 'Y')
+
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
@@ -137,23 +134,30 @@ def plot_time_series_data(aTime_all, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax(aData_all) #* 1.2
+        dMax_y = np.nanmax(aData_all) 
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData_all) #if it has negative value, change here
+        dMin_y = np.nanmin(aData_all) 
 
     if (dMax_y <= dMin_y ):
         return
+    else:
+        dMin_y = dMin_y - 0.13 * (dMax_y-dMin_y) 
+        dMax_y = dMax_y + 0.13 * (dMax_y-dMin_y)
 
     if dSpace_y_in is not None:
-        iFlag_space_y =1
+        iFlag_space_y = 1
         dSpace_y = dSpace_y_in
     else:
-        iFlag_space_y =1
+        iFlag_space_y = 0
         dSpace_y = (dMax_y - dMin_y) /4.0
-        pass
+        if dSpace_y < 1:
+            pass
+        else:
+            dSpace_y = int(dSpace_y)
+        pass  
 
     fig = plt.figure( dpi=iDPI )
     fig.set_figwidth( iSize_x )
@@ -170,7 +174,6 @@ def plot_time_series_data(aTime_all, \
         else:
             print(sDate_type_in)
     else:
-        #print(sDate_type_in)
         pass
 
     if sFormat_y_in is not None:
@@ -178,6 +181,7 @@ def plot_time_series_data(aTime_all, \
         sFormat_y = sFormat_y_in
     else:
         iFlag_format_y = 0
+        sFormat_y = '{:.1f}'
 
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
@@ -197,10 +201,9 @@ def plot_time_series_data(aTime_all, \
     sYear_format = mdates.DateFormatter('%Y')
 
     #start loop for each data
-    aLegend_artist = []
-    aLabel=[]
+    aLegend_artist = list()
+    aLabel=list()
     for i in np.arange(1, nData+1):
-
         x1 = aTime_all[i-1]
         y1 = aData_all[i-1]
         tsp, = ax.plot( x1, y1, \
@@ -216,7 +219,6 @@ def plot_time_series_data(aTime_all, \
             nan_index = np.where(y1 == missing_value)
             y1[nan_index] = np.nan
             good_index = np.where(  ~np.isnan(y1))
-
             x_dummy = np.array( [i.timestamp() for i in x1 ] )
             x_dummy = x_dummy[good_index]
             y_dummy = y1[good_index]
@@ -232,35 +234,21 @@ def plot_time_series_data(aTime_all, \
     ax.axis('on')
     ax.grid(which='major', color='grey', linestyle='--', axis='y')
 
-    
-
     ax.xaxis.set_major_locator(pYear)
     ax.xaxis.set_minor_locator(pMonth)
     ax.xaxis.set_major_formatter(sYear_format)
     ax.tick_params(axis="x", labelsize=10)
     ax.tick_params(axis="y", labelsize=10)
-
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.15)
-
     ax.set_xlabel('Year',fontsize=12)
-
     ax.set_title( sTitle, loc='center', fontsize=15)
-
     ax.set_xlim(dMin_x, dMax_x)
 
-    #next Y axis
-    ax.set_ylabel(sLabel_y,fontsize=12)
-
-    if (iReverse_y ==1): #be careful here
-        ax.set_ylim( dMax_y, dMin_y )
-    else:
-        ax.set_ylim( dMin_y, dMax_y )
+    ax.set_ylabel(sLabel_y,fontsize=12)    
 
     if iFlag_log == 1:
-        #we need to change the ticklabel
-        aLabel_y = []
-        
+        aLabel_y = list()        
         if dSpace_y >= 1:
             dSpace_y = int(dSpace_y)
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
@@ -275,54 +263,43 @@ def plot_time_series_data(aTime_all, \
         else:
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
             for i in np.arange( 0, nlabel, 1 ):
-                ii = int(dMin_y) + i * dSpace_y
-                
-                iii = sFormat_y.format(ii)
-                
+                ii = int(dMin_y) + i * dSpace_y     
+                iii = sFormat_y.format(ii)  
                 sTicklabel = r'$10^{{{}}}$'.format( iii)
                 aLabel_y.append(sTicklabel)
                 pass
             ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
             ax.set_yticks( ticks)
             ax.set_yticklabels(aLabel_y)    
-            pass
-      
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-        
+            pass      
+        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
+        pass
     else:
-        #not log
-
         if iFlag_scientific_notation ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
-            #formatter.set_powerlimits((-1,1)) # you might need to change here
-            ax.yaxis.set_major_formatter(formatter)
-            #most time, when you use scientific notation, you may not need set the space,
-            #but you may still set it using the method below
-
+            ax.yaxis.set_major_formatter(formatter)           
             pass
         else:
-            if (iFlag_format_y ==1):
-                ax.yaxis.set_major_formatter(ticker.FormatStrFormatter( sFormat_y ) )
-
-            if (iFlag_space_y ==0):
-                #ax.yaxis.set_major_locator(ticker.AutoLocator())
-                #ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+            if (iFlag_space_y ==0):   
                 ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
             else:
                 ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
                 ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-
+            if (iFlag_format_y ==1):
+                sFormat_y_dummy =  sFormat_y.replace("{", "{x")
+                ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
             pass
 
+    if (iReverse_y ==1): 
+        ax.set_ylim( dMax_y, dMin_y )
+    else:
+        ax.set_ylim( dMin_y, dMax_y )
 
     ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, fontsize=12,ncol= ncolumn)
 
-    #save the result
-    #plt.show()
+ 
     plt.savefig(sFilename_out, bbox_inches='tight')
-
     plt.close('all')
     plt.clf()
-    #print('finished plotting')

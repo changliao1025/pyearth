@@ -1,24 +1,17 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
+
 import cartopy.crs as ccrs
-import cartopy.mpl.ticker as ticker
 import matplotlib as mpl
 from matplotlib import colors
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
+from pyearth.visual.formatter import log_formatter, float_formatter
 pProjection = ccrs.PlateCarree()
 
-def fmt0(x):
-        a, b = '{:.1e}'.format(x).split('e')
-        b = int(b)
-        return r'${} \times 10^{{{}}}$'.format(a, b)
 
-def fmt1(x):
-        a = '{:.2f}'.format(x)
-        return a
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
@@ -46,7 +39,7 @@ def map_raster_data_dc(aImage_in, \
     dData_min_in = None,\
         sExtend_in =None,\
         sUnit_in=None,\
-            aLegend_in = None):
+            aLabel_legend_in = None):
 
     aImage_in = np.array(aImage_in)
 
@@ -157,10 +150,9 @@ def map_raster_data_dc(aImage_in, \
             extent=aImage_extent , transform=pProjection, linewidths=0.5)
 
         if iFlag_scientific_notation_colorbar == 1:            
-            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt0, fontsize=7)
-        else:
-            
-            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=fmt1, fontsize=7)
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=log_formatter, fontsize=7)
+        else:            
+            ax.clabel(contourplot, contourplot.levels, inline=True, fmt=sFormat_contour, fontsize=7)
 
     aPseudo_image = np.full((nrow, ncolumn), fill_value = np.nan)
 
@@ -179,8 +171,6 @@ def map_raster_data_dc(aImage_in, \
     if len(dummy_index) !=0:
         aPseudo_image[dummy_index] = nInterval
 
-    #cmap = colors.ListedColormap(aColor)
-
     cmap = (mpl.colors.ListedColormap(aColor[1:ncolor-1])
         .with_extremes(over=aColor[ncolor-1], under=aColor[0]))
 
@@ -197,18 +187,18 @@ def map_raster_data_dc(aImage_in, \
         cmap = cmap0, \
         transform=pProjection)   
     
-    if aLegend_in is not None:
+    if aLabel_legend_in is not None:
         #plot the first on the top
-        sText = aLegend_in[0]
+        sText = aLabel_legend_in[0]
         dLocation = 0.96
         ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
                 transform=ax.transAxes, \
                 color='black', fontsize=10)
         #plot the remaining on the bot
-        nlegend = len(aLegend_in)
+        nlegend = len(aLabel_legend_in)
         for i in range(1, nlegend,1):
-            sText = aLegend_in[i]
+            sText = aLabel_legend_in[i]
             dLocation =  nlegend * 0.06  - i * 0.05 - 0.03
             ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
@@ -239,14 +229,11 @@ def map_raster_data_dc(aImage_in, \
         extend = sExtend,extendfrac='auto', \
         ticks=bounds)
 
-
     cb.ax.get_yaxis().set_ticks_position('right')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6) 
-    aLabel=list()
-
-    
+    aLabel=list()    
     for i in range(nInterval):
         if iFlag_scientific_notation_colorbar ==1:
             sLabel = '{:.1e}'.format(aInterval[i])
@@ -256,12 +243,11 @@ def map_raster_data_dc(aImage_in, \
 
     bounds0 = np.linspace(0,nInterval-1, nInterval)    
     bounds = bounds0[0:nInterval]
-    #cb.ax.set_yticks(bounds, labels=aLabel)
-    cb.ax.set_yticklabels([aLabel[int(i)] for i in bounds]) # add the labels
+    cb.ax.set_yticks( bounds)
+    cb.ax.set_yticklabels(aLabel)        
+    #cb.ax.set_yticklabels([aLabel[int(i)] for i in bounds]) # add the labels
 
     plt.savefig(sFilename_out , bbox_inches='tight')
-    #.show()
-
     plt.close('all')
     plt.clf()
 

@@ -7,8 +7,6 @@ import matplotlib.ticker as ticker
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
-from pyearth.visual.formatter import log_formatter
-
 
 
 def plot_time_series_data_w_variation(aTime_all, \
@@ -104,20 +102,25 @@ def plot_time_series_data_w_variation(aTime_all, \
 
     if aColor_in is not None:
         aColor = aColor_in
+        aColor_fill = aColor
     else:
         if(nData>=3):
             if (nData<=12):
                 aColor= create_diverge_rgb_color_hex(nData)
+                aColor_fill = aColor
             else:            
                 a = rand_hex_color(num=2)
                 b = polylinear_gradient(a, nData)
                 aColor = b['hex']
+                aColor_fill = aColor
                 pass
         else:
             if nData==2:
                 aColor= ['red','blue']
+                aColor_fill=aColor
             else:
-                aColor=['red']
+                aColor=['navy']
+                aColor_fill=['lightblue']
 
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
@@ -136,7 +139,7 @@ def plot_time_series_data_w_variation(aTime_all, \
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dMax_y = np.nanmax([aData_all,aData_upper_all,aData_lower_all]) #* 1.2
+        dMax_y = np.nanmax([aData_all,aData_upper_all,aData_lower_all]) 
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
@@ -147,8 +150,7 @@ def plot_time_series_data_w_variation(aTime_all, \
         return
     else:
         dMin_y = dMin_y - 0.13 * (dMax_y-dMin_y) 
-        dMax_y = dMax_y + 0.13 * (dMax_y-dMin_y) 
-       
+        dMax_y = dMax_y + 0.13 * (dMax_y-dMin_y)        
 
     if dSpace_y_in is not None:
         iFlag_space_y =1
@@ -177,7 +179,6 @@ def plot_time_series_data_w_variation(aTime_all, \
         else:
             print(sDate_type_in)
     else:
-        #print(sDate_type_in)
         pass
 
     if sFormat_y_in is not None:
@@ -205,29 +206,25 @@ def plot_time_series_data_w_variation(aTime_all, \
     sYear_format = mdates.DateFormatter('%Y')
 
     #start loop for each data
-    aLegend_artist = []
-    aLabel=[]
+    aLegend_artist = list()
+    aLabel=list()
     for i in np.arange(1, nData+1):
-
         x1 = aTime_all[i-1]
         y1 = aData_all[i-1]
-        axp, = ax.plot( x1, y1, \
-                 color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                 label = aLabel_legend[i-1])
-        
-
         y1_upper=aData_upper_all[i-1]
         y1_lower=aData_lower_all[i-1]
         sc_var =ax.fill_between(x1, \
                                 y1_upper, \
                                 y1_lower, \
-                                alpha=0.3, color=aColor[i-1])
+                                alpha=0.5, color=aColor_fill[i-1])
 
-     
+        axp, = ax.plot( x1, y1, \
+                 color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
+                 label = aLabel_legend[i-1])
+       
+
         aLegend_artist.append(axp)
         aLabel.append(aLabel_legend[i-1])
-        #variations
-
 
         #calculate linear regression
         iFlag_trend = aFlag_trend[i-1]
@@ -235,7 +232,6 @@ def plot_time_series_data_w_variation(aTime_all, \
             nan_index = np.where(y1 == missing_value)
             y1[nan_index] = np.nan
             good_index = np.where(  ~np.isnan(y1))
-
             x_dummy = np.array( [i.timestamp() for i in x1 ] )
             x_dummy = x_dummy[good_index]
             y_dummy = y1[good_index]
@@ -250,30 +246,20 @@ def plot_time_series_data_w_variation(aTime_all, \
 
     ax.axis('on')
     ax.grid(which='major', color='grey', linestyle='--', axis='y')
-
-    #ax.set_aspect(dRatio)  #this one set the y / x ratio
-
     ax.xaxis.set_major_locator(pYear)
     ax.xaxis.set_minor_locator(pMonth)
     ax.xaxis.set_major_formatter(sYear_format)
     ax.tick_params(axis="x", labelsize=10)
     ax.tick_params(axis="y", labelsize=10)
-
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.15)
-
     ax.set_xlabel('Year',fontsize=12)
-
     ax.set_title( sTitle, loc='center', fontsize=15)
-
     ax.set_xlim(dMin_x, dMax_x)
-
-    #next Y axis
     ax.set_ylabel(sLabel_y,fontsize=12)
 
     if iFlag_log ==1:
-        aLabel_y = []
-        #we need to change the ticklabel
+        aLabel_y =list()
         if dSpace_y >= 1:
             dSpace_y = int(dSpace_y)
             nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
@@ -300,31 +286,27 @@ def plot_time_series_data_w_variation(aTime_all, \
             pass
       
         ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
- 
+        pass 
     else:
-        #not log
-
         if iFlag_scientific_notation ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)            
-            ax.yaxis.set_major_formatter(formatter)            
-
+            ax.yaxis.set_major_formatter(formatter)   
             pass
-        else:
-            
+        else:            
             if (iFlag_space_y ==0):                
                 ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
             else:
                 ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
-                #ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
                 pass
 
-            if (iFlag_format_y ==1):
-               
+            if (iFlag_format_y ==1):               
                 sFormat_y_dummy =  sFormat_y.replace("{", "{x")
                 ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) ) 
                 pass   
-            
+            else:
+                pass
 
             pass
 
@@ -335,7 +317,6 @@ def plot_time_series_data_w_variation(aTime_all, \
 
     ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, fontsize=12,ncol= ncolumn)
-
 
     plt.savefig(sFilename_out, bbox_inches='tight')
     plt.close('all')

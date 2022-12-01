@@ -38,7 +38,7 @@ def map_raster_data(aImage_in, \
         sExtend_in =None,\
             sFormat_contour_in=None,\
         sUnit_in=None,\
-            aLegend_in = None):
+            aLabel_legend_in = None):
 
     aImage_in = np.array(aImage_in)
 
@@ -148,18 +148,18 @@ def map_raster_data(aImage_in, \
     ax.set_title(sTitle)
 
 
-    if aLegend_in is not None:
+    if aLabel_legend_in is not None:
         #plot the first on the top
-        sText = aLegend_in[0]
+        sText = aLabel_legend_in[0]
         dLocation = 0.96
         ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\
                 transform=ax.transAxes, \
                 color='black', fontsize=10)
         #plot the remaining on the bot
-        nlegend = len(aLegend_in)
+        nlegend = len(aLabel_legend_in)
         for i in range(1, nlegend,1):
-            sText = aLegend_in[i]
+            sText = aLabel_legend_in[i]
             dLocation =  nlegend * 0.06  - i * 0.05 - 0.03
             ax.text(0.03, dLocation, sText, \
                 verticalalignment='top', horizontalalignment='left',\

@@ -6,16 +6,13 @@ from pyearth.system.define_global_variables import *
 
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
-from pyearth.visual.formatter import log_formatter
-
-
 
 def histogram_plot(aData_all, \
                    sFilename_out, \
                    iSize_x_in = None, \
                    iSize_y_in = None, \
                    ncolumn_in = None,\
-                     iFlag_scientific_notation_in = None,\
+                   iFlag_scientific_notation_in = None,\
                    iFlag_log_in=None,\
                    aColor_in = None,\
                    iDPI_in = None, \
@@ -29,7 +26,7 @@ def histogram_plot(aData_all, \
                    sLocation_legend_in=None,\
                   
                    sTitle_in = None,\
-                   aLegend_in = None):
+                   aLabel_legend_in = None):
 
     """
     Draw a histogram for single dataset
@@ -79,9 +76,10 @@ def histogram_plot(aData_all, \
         dMax_x = np.max(aData_all)
 
     if dSpace_x_in is not None:        
+        iFlag_space_x = 0
         dSpace_x = dSpace_x_in
     else:       
-        iFlag_space_y =1
+        iFlag_space_x = 1
         dSpace_x = (dMax_x - dMin_x) /10
         pass
 
@@ -112,8 +110,8 @@ def histogram_plot(aData_all, \
     else:        
         sTitle = ''
     
-    if aLegend_in is not None:
-        aLabel_legend = aLegend_in
+    if aLabel_legend_in is not None:
+        aLabel_legend = aLabel_legend_in
     else:
         aLabel_legend = np.full(nData,'')
 
@@ -146,42 +144,44 @@ def histogram_plot(aData_all, \
     ax_histo = plt.axes(rect_histogram)
     ax_histo.tick_params(direction='in', top=True, right=True)
 
-
     aLegend_artist = []
     aLabel=[]
     for i in np.arange(1, nData+1):
         aData = aData_all[i-1]
         good_index = np.where( (aData >= dMin_x) & (aData<= dMax_x)  )    
         aData = aData[good_index]        
+
+        if iFlag_log == 1:
+            if dSpace_x >= 1:
+                dSpace_x = int(dSpace_x)
+            else:                
+                pass
+
         N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),\
             color=aColor[i-1], edgecolor='black')  
         aLegend_artist.append(hisp)    
         aLabel.append(aLabel_legend[i-1])
-
 
     ax_histo.set_xlabel(sLabel_x,fontsize=13 )
     ax_histo.set_ylabel(sLabel_y,fontsize=13 )     
     ax_histo.set_xlim( dMin_x-dSpace_x, dMax_x+dSpace_x )   
     ax_histo.axis('on')   
     if iFlag_log == 1:
-        #we need to change the ticklabel
-        aLabel_x = []        
+        aLabel_x =list()
         xtickslocs = ax_histo.get_xticks()
-        xtickslabels = ax_histo.get_xticklabels()  
         for i in np.arange( 0, len(xtickslocs), 1 ):
             ii = xtickslocs[i]  
             iii = sFormat_x.format(ii)     
             sTicklabel = r'$10^{{{}}}$'.format( iii)
             aLabel_x.append(sTicklabel)
-            pass    
-
+            pass 
         ax_histo.set_xticklabels(aLabel_x)    
         pass
     else:
         if iFlag_scientific_notation ==1:
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)            
-            ax_histo.xaxis.set_major_formatter(formatter)          
+            ax_histo.yaxis.set_major_formatter(formatter)          
             pass
         else: 
             if (iFlag_format_x ==1):               
@@ -192,9 +192,9 @@ def histogram_plot(aData_all, \
             pass
         pass
 
-    
-
-    #ax_histo.grid(which='major', color='white', linestyle='-', axis='y')   
+    iFlag_grid =0 #reserved option
+    if iFlag_grid==1:
+        ax_histo.grid(which='major', color='white', linestyle='-', axis='y')   
    
     ax_histo.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
               loc=sLocation_legend, fontsize=12)
