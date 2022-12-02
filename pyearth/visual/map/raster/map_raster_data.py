@@ -97,7 +97,7 @@ def map_raster_data(aImage_in, \
     if sFormat_contour_in is not None:
         sFormat_contour = sFormat_contour_in
     else:
-        sFormat_contour =  '%1.3f'
+        sFormat_contour =  '%1.1f'
 
     if sExtend_in is not None:
         sExtend = sExtend_in

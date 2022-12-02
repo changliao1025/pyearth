@@ -17,6 +17,7 @@ def plot_time_series_data(aTime_all, \
                           iDPI_in = None,\
                           iFlag_log_in = None,\
                           iFlag_scientific_notation_in = None,\
+                          iFlag_miniplot_in=None,\
                           ncolumn_in = None,\
                           aFlag_trend_in = None, \
                           iReverse_y_in = None, \
@@ -58,6 +59,7 @@ def plot_time_series_data(aTime_all, \
         iFlag_scientific_notation = iFlag_scientific_notation_in
     else:
         iFlag_scientific_notation = 0
+    
 
     if aFlag_trend_in is not None:
         aFlag_trend = aFlag_trend_in
@@ -144,8 +146,8 @@ def plot_time_series_data(aTime_all, \
     if (dMax_y <= dMin_y ):
         return
     else:
-        dMin_y = dMin_y - 0.13 * (dMax_y-dMin_y) 
-        dMax_y = dMax_y + 0.13 * (dMax_y-dMin_y)
+        dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y) 
+        dMax_y = dMax_y + 0.25 * (dMax_y-dMin_y)
 
     if dSpace_y_in is not None:
         iFlag_space_y = 1
@@ -159,20 +161,47 @@ def plot_time_series_data(aTime_all, \
             dSpace_y = int(dSpace_y)
         pass  
 
+    if iFlag_miniplot_in is not None:
+        iFlag_miniplot = iFlag_miniplot_in
+        #set up location and range
+        dMin_mini_x = dMin_x + (dMax_x-dMin_x) * 0.7
+        dMax_mini_x =  dMax_x - (dMax_x-dMin_x) * 0.1     
+        dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.34
+        dMax_mini_y = dMax_y - (dMax_y-dMin_y) * 0.51      
+    else:
+        iFlag_miniplot = 0
+
     fig = plt.figure( dpi=iDPI )
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
-    ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )
+
+    left, width = 0.1, 0.8
+    bottom, height = 0.1, 0.5
+    dY_mini = 0.60
+    dX_mini = 0.15
+    width_mini = 0.28
+    heigh_mini = 0.40
+    rect_full = [left, bottom, width, height]
+    rect_mini = [dY_mini, dX_mini, width_mini, heigh_mini]
+
+    ax_full = plt.axes(rect_full)
+    if iFlag_miniplot ==1:
+        ax_mini = plt.axes(rect_mini)
+        ax_all = [ax_full,ax_mini]
+    else:
+        ax_all= [ax_full]
 
     nYear = int( (dMax_x-dMin_x)/ 5 )
     pYear = mdates.YearLocator(nYear)   # every year
+    pYear_min = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
+    pMonth_min = mdates.MonthLocator(6)  # every month
 
     if sDate_type_in is not None:
         if sDate_type_in == 'month':
             pMonth = mdates.MonthLocator(3)
         else:
-            print(sDate_type_in)
+            pass
     else:
         pass
 
@@ -201,105 +230,176 @@ def plot_time_series_data(aTime_all, \
     sYear_format = mdates.DateFormatter('%Y')
 
     #start loop for each data
-    aLegend_artist = list()
-    aLabel=list()
-    for i in np.arange(1, nData+1):
-        x1 = aTime_all[i-1]
-        y1 = aData_all[i-1]
-        tsp, = ax.plot( x1, y1, \
-                 color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                 marker = aMarker[i-1] )
-
-        aLegend_artist.append(tsp)
-        aLabel.append(aLabel_legend[i-1])
-
-        #calculate linear regression
-        iFlag_trend = aFlag_trend[i-1]
-        if iFlag_trend ==1:
-            nan_index = np.where(y1 == missing_value)
-            y1[nan_index] = np.nan
-            good_index = np.where(  ~np.isnan(y1))
-            x_dummy = np.array( [i.timestamp() for i in x1 ] )
-            x_dummy = x_dummy[good_index]
-            y_dummy = y1[good_index]
-            coef = np.polyfit(x_dummy,y_dummy,1)
-            poly1d_fn = np.poly1d(coef)
-            mn=np.min(x_dummy)
-            mx=np.max(x_dummy)
-            x2=[mn,mx]
-            y2=poly1d_fn(x2)
-            x2 = [datetime.fromtimestamp(i) for i in x2 ]
-            ax.plot(x2,y2, color = 'orange', linestyle = '-.',  linewidth=0.5)
-
-    ax.axis('on')
-    ax.grid(which='major', color='grey', linestyle='--', axis='y')
-
-    ax.xaxis.set_major_locator(pYear)
-    ax.xaxis.set_minor_locator(pMonth)
-    ax.xaxis.set_major_formatter(sYear_format)
-    ax.tick_params(axis="x", labelsize=10)
-    ax.tick_params(axis="y", labelsize=10)
-    ax.set_xmargin(0.05)
-    ax.set_ymargin(0.15)
-    ax.set_xlabel('Year',fontsize=12)
-    ax.set_title( sTitle, loc='center', fontsize=15)
-    ax.set_xlim(dMin_x, dMax_x)
-
-    ax.set_ylabel(sLabel_y,fontsize=12)    
-
-    if iFlag_log == 1:
-        aLabel_y = list()        
-        if dSpace_y >= 1:
-            dSpace_y = int(dSpace_y)
-            nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
-            for i in np.arange( 0, nlabel, 1 ):
-                ii = int(dMin_y) + i * dSpace_y
-                sTicklabel = r'$10^{{{}}}$'.format( int(ii))
-                aLabel_y.append(sTicklabel)
-                pass
-            ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + int(dMin_y)
-            ax.set_yticks( ticks)
-            ax.set_yticklabels(aLabel_y)    
+    
+    for iax in range( len(ax_all) ):
+        ax = ax_all[iax]
+        ax.tick_params(direction='in', top=True, right=True)
+        if iax == 0:
+            aLegend_artist = []
+            aLabel=[]
         else:
-            nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
-            for i in np.arange( 0, nlabel, 1 ):
-                ii = int(dMin_y) + i * dSpace_y     
-                iii = sFormat_y.format(ii)  
-                sTicklabel = r'$10^{{{}}}$'.format( iii)
-                aLabel_y.append(sTicklabel)
-                pass
-            ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
-            ax.set_yticks( ticks)
-            ax.set_yticklabels(aLabel_y)    
-            pass      
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
-        pass
-    else:
-        if iFlag_scientific_notation ==1:
-            formatter = ticker.ScalarFormatter(useMathText=True)
-            formatter.set_scientific(True)
-            ax.yaxis.set_major_formatter(formatter)           
             pass
-        else:
-            if (iFlag_space_y ==0):   
-                ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+
+        for i in np.arange(1, nData+1):
+            x1 = aTime_all[i-1]
+            y1 = aData_all[i-1]
+            tsp, = ax.plot( x1, y1, \
+                     color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
+                     marker = aMarker[i-1] )
+
+            if iax == 0:
+                aLegend_artist.append(tsp)
+                aLabel.append(aLabel_legend[i-1])
+
+                #calculate linear regression
+                iFlag_trend = aFlag_trend[i-1]
+                if iFlag_trend ==1:
+                    nan_index = np.where(y1 == missing_value)
+                    y1[nan_index] = np.nan
+                    good_index = np.where(  ~np.isnan(y1))
+                    x_dummy = np.array( [i.timestamp() for i in x1 ] )
+                    x_dummy = x_dummy[good_index]
+                    y_dummy = y1[good_index]
+                    coef = np.polyfit(x_dummy,y_dummy,1)
+                    poly1d_fn = np.poly1d(coef)
+                    mn=np.min(x_dummy)
+                    mx=np.max(x_dummy)
+                    x2=[mn,mx]
+                    y2=poly1d_fn(x2)
+                    x2 = [datetime.fromtimestamp(i) for i in x2 ]
+                    ax.plot(x2,y2, color = 'orange', linestyle = '-.',  linewidth=0.5)
+
+                
             else:
-                ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-            if (iFlag_format_y ==1):
-                sFormat_y_dummy =  sFormat_y.replace("{", "{x")
-                ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
+                pass
+                              
+        #unqiue setting
+        if iax == 0:
+            ax.axis('on')
+            ax.grid(which='major', color='grey', linestyle='--', axis='y')        
+            ax.xaxis.set_major_locator(pYear)
+            ax.xaxis.set_minor_locator(pMonth)
+            ax.xaxis.set_major_formatter(sYear_format)
+            ax.tick_params(axis="x", labelsize=10)
+            ax.tick_params(axis="y", labelsize=10)
+            ax.set_xmargin(0.05)
+            ax.set_ymargin(0.15)
+            #y axis labels are different because space is different
+            if iFlag_log == 1:
+                aLabel_y = list()        
+                if dSpace_y >= 1:
+                    dSpace_y = int(dSpace_y)
+                    nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
+                    for i in np.arange( 0, nlabel, 1 ):
+                        ii = int(dMin_y) + i * dSpace_y
+                        sTicklabel = r'$10^{{{}}}$'.format( int(ii))
+                        aLabel_y.append(sTicklabel)
+                        pass
+                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + int(dMin_y)
+                    ax.set_yticks( ticks)
+                    ax.set_yticklabels(aLabel_y)    
+                else:
+                    nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
+                    for i in np.arange( 0, nlabel, 1 ):
+                        ii = int(dMin_y) + i * dSpace_y     
+                        iii = sFormat_y.format(ii)  
+                        sTicklabel = r'$10^{{{}}}$'.format( iii)
+                        aLabel_y.append(sTicklabel)
+                        pass
+                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
+                    ax.set_yticks( ticks)
+                    ax.set_yticklabels(aLabel_y)    
+                    pass      
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
+                pass
+            else:
+                if iFlag_scientific_notation ==1:
+                    formatter = ticker.ScalarFormatter(useMathText=True)
+                    formatter.set_scientific(True)
+                    ax.yaxis.set_major_formatter(formatter)           
+                    pass
+                else:
+                    if (iFlag_space_y ==0):   
+                        ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+                    else:
+                        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+                        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                    if (iFlag_format_y ==1):
+                        sFormat_y_dummy =  sFormat_y.replace("{", "{x")
+                        ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
+                    pass
+            ax.set_title( sTitle, loc='center', fontsize=15)
+            ax.set_xlim(dMin_x, dMax_x)            
+            ax.set_ylabel(sLabel_y,fontsize=12)   
+            if (iReverse_y ==1): 
+                ax.set_ylim( dMax_y, dMin_y )
+            else:
+                ax.set_ylim( dMin_y, dMax_y )
+            ax.set_xlabel('Year',fontsize=12)
+            ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
+                      loc=sLocation_legend, fontsize=12,ncol= ncolumn)
             pass
+        else:        
+            if iFlag_log == 1:
+                aLabel_y = list() 
+                dSpace_y_mini=   dSpace_y  / 4
+                if dSpace_y_mini >= 1:
+                    dSpace_y_mini = int(dSpace_y_mini)
+                    nlabel = int( (dMax_y- dMin_y) / dSpace_y_mini) + 1
+                    for i in np.arange( 0, nlabel, 1 ):
+                        ii = int(dMin_y) + i * dSpace_y_mini
+                        sTicklabel = r'$10^{{{}}}$'.format( int(ii))
+                        aLabel_y.append(sTicklabel)
+                        pass
+                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y_mini + int(dMin_y)
+                    ax.set_yticks( ticks)
+                    ax.set_yticklabels(aLabel_y)    
+                else:
+                    nlabel = int( (dMax_y- dMin_y) / dSpace_y_mini) + 1
+                    for i in np.arange( 0, nlabel, 1 ):
+                        ii = int(dMin_y) + i * dSpace_y_mini     
+                        iii = sFormat_y.format(ii)  
+                        sTicklabel = r'$10^{{{}}}$'.format( iii)
+                        aLabel_y.append(sTicklabel)
+                        pass
+                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y_mini + dMin_y
+                    ax.set_yticks( ticks)
+                    ax.set_yticklabels(aLabel_y)    
+                    pass      
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
+                pass
+            else:
+                if iFlag_scientific_notation ==1:
+                    formatter = ticker.ScalarFormatter(useMathText=True)
+                    formatter.set_scientific(True)
+                    ax.yaxis.set_major_formatter(formatter)           
+                    pass
+                else:
+                    if (iFlag_space_y ==0):   
+                        ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+                    else:
+                        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+                        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                    if (iFlag_format_y ==1):
+                        sFormat_y_dummy =  sFormat_y.replace("{", "{x")
+                        ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
+                    pass
+            
+            ax.xaxis.set_major_locator(pYear_min)
+            ax.xaxis.set_minor_locator(pMonth_min)
+            ax.xaxis.set_major_formatter(sYear_format)
+            ax.set_xlim(dMin_mini_x , dMax_mini_x)  
 
-    if (iReverse_y ==1): 
-        ax.set_ylim( dMax_y, dMin_y )
-    else:
-        ax.set_ylim( dMin_y, dMax_y )
+            if (iReverse_y ==1): 
+                ax.set_ylim( dMax_mini_y, dMin_mini_y )
+            else:
+                ax.set_ylim( dMin_mini_y, dMax_mini_y )    
+            pass      
 
-    ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
-              loc=sLocation_legend, fontsize=12,ncol= ncolumn)
+        #common setting 
+        
 
- 
+
     plt.savefig(sFilename_out, bbox_inches='tight')
     plt.close('all')
     plt.clf()

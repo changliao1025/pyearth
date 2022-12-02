@@ -92,10 +92,8 @@ def plot_time_series_analysis(aTime, \
 
     if aColor_in is not None:
         aColor = aColor_in
-    else:       
-       
-        aColor= create_diverge_rgb_color_hex(nData)
-        
+    else:              
+        aColor= create_diverge_rgb_color_hex(nData)        
 
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
@@ -203,7 +201,7 @@ def plot_time_series_analysis(aTime, \
                 if aLabel_legend_in is not None:
                     #plot the first on the top
                     sText = aLabel_legend_in[0]
-                    dLocation = 0.96
+                    dLocation = 0.95
                     ax.text(0.03, dLocation, sText, \
                             verticalalignment='top', horizontalalignment='left',\
                             transform=ax.transAxes, \
@@ -247,12 +245,9 @@ def plot_time_series_analysis(aTime, \
             if i == 0:
                 #might have to consider log label here, refer to time series plot
                 aTickLabel_y =list()
-                ax.set_title(sTitle,fontsize=13)    
-               
+                ax.set_title(sTitle,fontsize=13)                   
                 if iReverse_y ==1:
-                    ax.set_ylim( dMin_y,dMax_y  )
-                
-                
+                    ax.set_ylim( dMin_y,dMax_y  )               
 
             #the bottom plot has x label and provided y label     
             if i == 3:    

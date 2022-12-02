@@ -85,8 +85,7 @@ def create_qualitative_rgb_color_hex(ncolor, iFlag_reverse_in = None):
                                 '#3288bd', \
                                 '#5e4fa2']
             else:
-                print('Too many colors are requested!')
-                return -1
+                pass
                 
         #add the reverse feature
         if iFlag_reverse_in is not None:
