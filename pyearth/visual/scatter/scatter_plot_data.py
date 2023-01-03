@@ -155,8 +155,10 @@ def scatter_plot_data(aData_x, \
         #ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))'%.1f'
 
     if sFormat_y_in is not None:
-        sFormat_y = sFormat_y_in
-        ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        #sFormat_y = sFormat_y_in
+        #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        sFormat_y_dummy =  sFormat_y_in.replace("{", "{x")
+        ax_scatter.yaxis.set_major_formatter(ticker.StrMethodFormatter(  sFormat_y_dummy ) ) 
 
         #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))'%.1f'
 

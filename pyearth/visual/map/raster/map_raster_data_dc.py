@@ -63,6 +63,11 @@ def map_raster_data_dc(aImage_in, \
         iFlag_contour = iFlag_contour_in
     else:
         iFlag_contour = 0
+    
+    if sFormat_contour_in is not None:
+        sFormat_contour = sFormat_contour_in
+    else:
+        sFormat_contour =  '%1.1f'
 
     if aInterval_in is not None:
         iFlag_interval = 1

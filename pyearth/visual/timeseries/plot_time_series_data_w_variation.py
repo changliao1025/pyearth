@@ -150,8 +150,12 @@ def plot_time_series_data_w_variation(aTime_all, \
     if (dMax_y <= dMin_y ):
         return
     else:
-        dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y) 
-        dMax_y = dMax_y + 0.25 * (dMax_y-dMin_y)   #leave space for legend    
+        iFlag_force_limit = 1
+        if iFlag_force_limit ==1:
+            pass
+        else:
+            dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y) 
+            dMax_y = dMax_y + 0.25 * (dMax_y-dMin_y)   #leave space for legend    
 
     if dSpace_y_in is not None:
         iFlag_space_y =1
@@ -168,10 +172,15 @@ def plot_time_series_data_w_variation(aTime_all, \
     if iFlag_miniplot_in is not None:
         iFlag_miniplot = iFlag_miniplot_in
         #set up location and range
+        #dMin_mini_x = dMin_x + (dMax_x-dMin_x) * 0.7
+        #dMax_mini_x =  dMax_x - (dMax_x-dMin_x) * 0.1     
+        #dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.34
+        #dMax_mini_y = dMax_y - (dMax_y-dMin_y) * 0.51    
+
         dMin_mini_x = dMin_x + (dMax_x-dMin_x) * 0.7
         dMax_mini_x =  dMax_x - (dMax_x-dMin_x) * 0.1     
-        dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.34
-        dMax_mini_y = dMax_y - (dMax_y-dMin_y) * 0.51    
+        dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.05
+        dMax_mini_y = dMax_y - (dMax_y-dMin_y) * 0.65      
     else:
         iFlag_miniplot = 0
 
@@ -391,11 +400,9 @@ def plot_time_series_data_w_variation(aTime_all, \
                     ax.yaxis.set_major_formatter(formatter)           
                     pass
                 else:
-                    if (iFlag_space_y ==0):   
-                        ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
-                    else:
-                        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
-                        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                    dSpace_y_mini=   dSpace_y  / 4     
+                    ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y_mini))
+                    ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
                     if (iFlag_format_y ==1):
                         sFormat_y_dummy =  sFormat_y.replace("{", "{x")
                         ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             

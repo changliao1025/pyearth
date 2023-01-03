@@ -169,8 +169,10 @@ def scatter_plot_data_density(aData_x, \
   
 
     if sFormat_y_in is not None:
-        sFormat_y = sFormat_y_in
-        ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        #sFormat_y = sFormat_y_in
+        #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        sFormat_y_dummy =  sFormat_y_in.replace("{", "{x")
+        ax_scatter.yaxis.set_major_formatter(ticker.StrMethodFormatter(  sFormat_y_dummy ) ) 
 
     
     ax_scatter.tick_params(axis='y', pad=8)
@@ -209,7 +211,8 @@ def scatter_plot_data_density(aData_x, \
     else:
         dSpace_y = (dMax_y - dMin_y) /4.0
 
-    ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+    #ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+    ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
 
     if iFlag_log_x ==1:
         aLabel_x = []
