@@ -189,24 +189,24 @@ def boxplot_data(aData_in,\
             #draw lower q1
             x0 = [x_mid, x_mid]
             y0 = [q0_raw,q1_raw]
-            line, =ax.plot( x0, y0, \
+            line, = ax.plot( x0, y0, \
                          color = 'black', linestyle = '--', linewidth =1    ) 
             #draw short line
             x0 = [x_mid - 0.2 * dWidth, x_mid +  0.2 * dWidth]
             y0 = [q0_raw,q0_raw]
-            line, =ax.plot( x0, y0, \
+            line, = ax.plot( x0, y0, \
                          color = 'black', linestyle = '-'  , linewidth =1   ) 
             
             #draw upper q3
             x0 = [x_mid, x_mid]
             y0 = [q3_raw,q4_raw]
-            line, =ax.plot( x0, y0, \
+            line, = ax.plot( x0, y0, \
                          color = 'black', linestyle = '--'  , linewidth =1   ) 
             
             #draw short line
             x0 = [x_mid - 0.2 * dWidth,  x_mid +  0.2 * dWidth]
             y0 = [q4_raw,q4_raw]
-            line, =ax.plot( x0, y0, \
+            line, = ax.plot( x0, y0, \
                          color = 'black', linestyle = '-'  , linewidth =1   ) 
 
             #draw median

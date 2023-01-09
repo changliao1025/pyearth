@@ -98,7 +98,12 @@ def parse_xml_file_atm(sFilename_xml_in, sVariable_in):
 
     entry = root.findall('./fieldInfo/variableNames')
     dummy = (entry[0].text).strip()
-    sField = (dummy.split(" "))[0]
+    aField0 = dummy.split('\n')  #(dummy.split(" "))
+    aField = list()
+    for sField in aField0:
+        d = sField.strip()
+        e = d.split()
+        aField.append(e[0])
 
     entry = root.findall('./fieldInfo/fileNames')
     dummy = (entry[0].text).strip()
@@ -113,4 +118,4 @@ def parse_xml_file_atm(sFilename_xml_in, sVariable_in):
         
         
                 
-    return sFolder, sField, aFile
+    return sFolder, aField, aFile
