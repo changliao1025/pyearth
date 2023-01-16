@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-pyearth documentation!
+Welcome to pyearth documentation!
 ==============================================
 
 Contents:
@@ -12,7 +12,11 @@ Contents:
    :maxdepth: 2
 
    getting-started
-   api
+   algorithm/gis/gis.rst
+   algorithm/system/system.rst
+   algorithm/toolbox/toolbox.rst
+   algorithm/visual/visual.rst
+   algorithm/api
 
 Indices and tables
 ==================
