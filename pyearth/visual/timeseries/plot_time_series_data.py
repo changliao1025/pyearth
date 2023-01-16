@@ -10,6 +10,7 @@ import matplotlib.ticker as ticker
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
+from pyearth.visual.formatter import log_formatter, MathTextSciFormatter
 
 def plot_time_series_data(aTime_all, \
                           aData_all, \
@@ -195,7 +196,10 @@ def plot_time_series_data(aTime_all, \
     else:
         ax_all= [ax_full]
 
-    nYear = int( (dMax_x-dMin_x)/ 5 )
+    if int( (dMax_x-dMin_x)/ 5 ) >=5:
+        nYear = int( (dMax_x-dMin_x)/ 5 )
+    else:
+        nYear = 1
     pYear = mdates.YearLocator(nYear)   # every year
     pYear_min = mdates.YearLocator(1)   # every year
     pMonth = mdates.MonthLocator()  # every month
@@ -288,7 +292,12 @@ def plot_time_series_data(aTime_all, \
             ax.tick_params(axis="y", labelsize=10)
             ax.set_xmargin(0.05)
             ax.set_ymargin(0.15)
+            if (iReverse_y ==1): 
+                ax.set_ylim( dMax_y, dMin_y )
+            else:
+                ax.set_ylim( dMin_y, dMax_y )
             #y axis labels are different because space is different
+
             if iFlag_log == 1:
                 aLabel_y = list()        
                 if dSpace_y >= 1:
@@ -317,10 +326,15 @@ def plot_time_series_data(aTime_all, \
                 ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
                 pass
             else:
-                if iFlag_scientific_notation ==1:
-                    formatter = ticker.ScalarFormatter(useMathText=True)
-                    formatter.set_scientific(True)
-                    ax.yaxis.set_major_formatter(formatter)           
+                if iFlag_scientific_notation ==1:                    
+                    #formatter = ticker.ScalarFormatter(useMathText=True)
+                    #formatter.set_scientific(True)
+                    #y0 = int(np.log10(dMin_y))
+                    #y1=  int(np.log10(dMax_y))
+                    #formatter.set_powerlimits(( y0, y1))
+                    #ax.yaxis.set_major_formatter(formatter)         
+                    ax.yaxis.set_major_formatter( MathTextSciFormatter("%1.1e"))          
+
                     pass
                 else:
                     if (iFlag_space_y ==0):   
@@ -335,10 +349,7 @@ def plot_time_series_data(aTime_all, \
             ax.set_title( sTitle, loc='center', fontsize=15)
             ax.set_xlim(dMin_x, dMax_x)            
             ax.set_ylabel(sLabel_y,fontsize=12)   
-            if (iReverse_y ==1): 
-                ax.set_ylim( dMax_y, dMin_y )
-            else:
-                ax.set_ylim( dMin_y, dMax_y )
+            
             ax.set_xlabel('Year',fontsize=12)
             ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
                       loc=sLocation_legend, fontsize=12,ncol= ncolumn)
