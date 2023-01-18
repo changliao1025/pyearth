@@ -12,33 +12,65 @@ from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 from pyearth.visual.formatter import log_formatter, MathTextSciFormatter
 
-def plot_time_series_data(aTime_all, \
-                          aData_all, \
-                          sFilename_out,\
-                          iDPI_in = None,\
-                          iFlag_log_in = None,\
-                          iFlag_scientific_notation_in = None,\
-                          iFlag_miniplot_in=None,\
-                          ncolumn_in = None,\
-                          aFlag_trend_in = None, \
-                          iReverse_y_in = None, \
-                          iSize_x_in = None, \
-                          iSize_y_in = None, \
-                          dMax_x_in = None, \
-                          dMin_x_in = None, \
-                          dMax_y_in = None, \
-                          dMin_y_in = None, \
-                          dSpace_y_in = None,\
-                          aMarker_in = None,\
-                          aColor_in = None,\
-                          aLinestyle_in = None,\
-                          sLabel_y_in = None, \
-                          aLabel_legend_in = None,\
-                          aLocation_legend_in =None,\
-                          sDate_type_in = None,\
-                          sFormat_y_in =None,\
-                          sLocation_legend_in=None,\
+def plot_time_series_data(aTime_all, 
+                          aData_all, 
+                          sFilename_out,
+                          iDPI_in = None,
+                          iFlag_log_in = None,
+                          iFlag_scientific_notation_in = None,
+                          iFlag_miniplot_in=None,
+                          ncolumn_in = None,
+                          aFlag_trend_in = None, 
+                          iReverse_y_in = None, 
+                          iSize_x_in = None, 
+                          iSize_y_in = None, 
+                          dMax_x_in = None, 
+                          dMin_x_in = None, 
+                          dMax_y_in = None, 
+                          dMin_y_in = None, 
+                          dSpace_y_in = None,
+                          aMarker_in = None,
+                          aColor_in = None,
+                          aLinestyle_in = None,
+                          sLabel_y_in = None, 
+                          aLabel_legend_in = None,
+                          aLocation_legend_in =None,
+                          sDate_type_in = None,
+                          sFormat_y_in =None,
+                          sLocation_legend_in=None,
                           sTitle_in = None):
+    """
+    Plot time series data
+
+    Args:
+        aTime_all (list): List of datatime for each date series, each data time sereis can be different
+        aData_all (list): List of data for each date series
+        sFilename_out (str): The output figure filename
+        iDPI_in (_type_, optional): _description_. Defaults to None.
+        iFlag_log_in (_type_, optional): _description_. Defaults to None.
+        iFlag_scientific_notation_in (_type_, optional): _description_. Defaults to None.
+        iFlag_miniplot_in (_type_, optional): _description_. Defaults to None.
+        ncolumn_in (_type_, optional): _description_. Defaults to None.
+        aFlag_trend_in (_type_, optional): _description_. Defaults to None.
+        iReverse_y_in (_type_, optional): _description_. Defaults to None.
+        iSize_x_in (_type_, optional): _description_. Defaults to None.
+        iSize_y_in (_type_, optional): _description_. Defaults to None.
+        dMax_x_in (_type_, optional): _description_. Defaults to None.
+        dMin_x_in (_type_, optional): _description_. Defaults to None.
+        dMax_y_in (_type_, optional): _description_. Defaults to None.
+        dMin_y_in (_type_, optional): _description_. Defaults to None.
+        dSpace_y_in (_type_, optional): _description_. Defaults to None.
+        aMarker_in (_type_, optional): _description_. Defaults to None.
+        aColor_in (_type_, optional): _description_. Defaults to None.
+        aLinestyle_in (_type_, optional): _description_. Defaults to None.
+        sLabel_y_in (_type_, optional): _description_. Defaults to None.
+        aLabel_legend_in (_type_, optional): _description_. Defaults to None.
+        aLocation_legend_in (_type_, optional): _description_. Defaults to None.
+        sDate_type_in (_type_, optional): _description_. Defaults to None.
+        sFormat_y_in (_type_, optional): _description_. Defaults to None.
+        sLocation_legend_in (_type_, optional): _description_. Defaults to None.
+        sTitle_in (_type_, optional): _description_. Defaults to None.
+    """
                         
     aTime_all = np.array(aTime_all)
     aData_all = np.array(aData_all)
@@ -127,12 +159,23 @@ def plot_time_series_data(aTime_all, \
     if dMax_x_in is not None:
         dMax_x = dMax_x_in
     else:
-        dMax_x = np.datetime64(np.nanmax(aTime_all), 'Y')
+        dMax_x=datetime(1, 1, 1)
+        for i in range(nData):
+            dummy=np.nanmax(aTime_all[i])
+            dMax_x = np.max([dMax_x, dummy])
+        dMax_x_y = np.datetime64(dMax_x, 'Y')
+        dMax_x_m = np.datetime64(dMax_x, 'M')
 
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
-        dMin_x = np.datetime64(np.nanmin(aTime_all), 'Y')
+        #dMin_x = np.datetime64(np.nanmin(aTime_all), 'Y')
+        dMin_x=datetime(9999, 1, 1)
+        for i in range(nData):
+            dummy=np.nanmin(aTime_all[i])
+            dMin_x = np.min([dMin_x, dummy])
+        dMin_x_m = np.datetime64(dMin_x, 'M')
+        dMin_x_y = np.datetime64(dMin_x, 'Y')
 
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
@@ -166,11 +209,23 @@ def plot_time_series_data(aTime_all, \
             dSpace_y = int(dSpace_y)
         pass  
 
+    if int( (dMax_x_y-dMin_x_y)/ 2 ) >=2:
+        nYear = int( (dMax_x_y-dMin_x_y)/ 2 )
+        dMin_x = dMin_x_y
+        dMax_x = dMax_x_y
+
+    else:
+        nYear = 1
+        dMin_x = dMin_x_m
+        dMax_x = dMax_x_m
+
+
+
     if iFlag_miniplot_in is not None:
         iFlag_miniplot = iFlag_miniplot_in
         #set up location and range
         dMin_mini_x = dMin_x + (dMax_x-dMin_x) * 0.7
-        dMax_mini_x =  dMax_x - (dMax_x-dMin_x) * 0.1     
+        dMax_mini_x = dMax_x - (dMax_x-dMin_x) * 0.1     
         dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.1
         dMax_mini_y = dMin_y + (dMax_y-dMin_y) * 0.4      
     else:
@@ -196,14 +251,18 @@ def plot_time_series_data(aTime_all, \
     else:
         ax_all= [ax_full]
 
-    if int( (dMax_x-dMin_x)/ 5 ) >=5:
-        nYear = int( (dMax_x-dMin_x)/ 5 )
-    else:
-        nYear = 1
-    pYear = mdates.YearLocator(nYear)   # every year
-    pYear_min = mdates.YearLocator(1)   # every year
-    pMonth = mdates.MonthLocator()  # every month
-    pMonth_min = mdates.MonthLocator(6)  # every month
+    
+
+    if nYear == 1:
+        pYear = mdates.YearLocator(1)   # every year
+        pYear_min = mdates.YearLocator(1)   # every year
+        pMonth = mdates.MonthLocator()  # every month
+        pMonth_min = mdates.MonthLocator(3)  # every month
+    else:    
+        pYear = mdates.YearLocator(2)   # every year
+        pYear_min = mdates.YearLocator(1)   # every year
+        pMonth = mdates.MonthLocator(6)  # every month
+        pMonth_min = mdates.MonthLocator(6)  # every month
 
     if sDate_type_in is not None:
         if sDate_type_in == 'month':
@@ -236,7 +295,7 @@ def plot_time_series_data(aTime_all, \
         ncolumn = 1
 
     sYear_format = mdates.DateFormatter('%Y')
-
+    sMonth_format = mdates.DateFormatter('%Y-%m')
     #start loop for each data
     
     for iax in range( len(ax_all) ):
@@ -284,10 +343,15 @@ def plot_time_series_data(aTime_all, \
         #unqiue setting
         if iax == 0:
             ax.axis('on')
-            ax.grid(which='major', color='grey', linestyle='--', axis='y')        
-            ax.xaxis.set_major_locator(pYear)
-            ax.xaxis.set_minor_locator(pMonth)
-            ax.xaxis.set_major_formatter(sYear_format)
+            ax.grid(which='major', color='grey', linestyle='--', axis='y')     
+            if nYear ==1:
+                ax.xaxis.set_major_locator(pMonth)
+                ax.xaxis.set_minor_locator(pMonth)
+                ax.xaxis.set_major_formatter(sMonth_format)
+            else:   
+                ax.xaxis.set_major_locator(pYear)
+                #ax.xaxis.set_minor_locator(pMonth)
+                ax.xaxis.set_major_formatter(sYear_format)
             ax.tick_params(axis="x", labelsize=10)
             ax.tick_params(axis="y", labelsize=10)
             ax.set_xmargin(0.05)
@@ -347,12 +411,12 @@ def plot_time_series_data(aTime_all, \
                         ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
                     pass
             ax.set_title( sTitle, loc='center', fontsize=15)
-            ax.set_xlim(dMin_x, dMax_x)            
+            ax.set_xlim(dMin_x_m, dMax_x_m)            
             ax.set_ylabel(sLabel_y,fontsize=12)   
             
             ax.set_xlabel('Year',fontsize=12)
             ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
-                      loc=sLocation_legend, fontsize=12,ncol= ncolumn)
+                      loc=sLocation_legend, fontsize=10,ncol= ncolumn)
             pass
         else:        
             if iFlag_log == 1:
