@@ -5,7 +5,7 @@ from matplotlib import cm
 import cartopy.crs as ccrs
 import cartopy.mpl.ticker as ticker
 import matplotlib as mpl
-
+from osgeo import  osr, gdal, ogr
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -41,13 +41,17 @@ def map_vector_polygon_data(iFiletype_in,\
         sExtend_in =None,\
         sUnit_in=None,\
             aLegend_in = None):
+    
+    if iFiletype_in == 1: #geojson
+        pDriver = ogr.GetDriverByName('GeoJSON')
+    else:
+        if iFiletype_in == 2: #shapefile
+            pDriver = ogr.GetDriverByName('Esri Shapefile')
 
-    aImage_in = np.array(aImage_in)
+    pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    pLayer = pDataset.GetLayer(0)
 
-    pShape = aImage_in.shape
-    nrow, ncolumn = aImage_in.shape
-    iSize_x = ncolumn
-    iSize_y = nrow 
+   
     sFilename_out= sFilename_output_in
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -64,23 +68,7 @@ def map_vector_polygon_data(iFiletype_in,\
     else:
         iFlag_contour = 0
 
-    if dMissing_value_in is not None:
-        dMissing_value = dMissing_value_in
-    else:
-        dMissing_value= np.nanmin(aImage_in)
-
-    dummy_index = np.where(aImage_in == dMissing_value)
-    aImage_in[dummy_index] = np.nan    
-
-    if dData_max_in is not None:
-        dData_max = dData_max_in
-    else:
-        dData_max = np.nanmax(aImage_in)
-
-    if dData_min_in is not None:
-        dData_min = dData_min_in
-    else:
-        dData_min = np.nanmin(aImage_in)    
+    
     
 
     if sColormap_in is not None:
