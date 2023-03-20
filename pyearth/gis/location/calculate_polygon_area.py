@@ -1,7 +1,7 @@
 
 from math import cos, sin,  sqrt, pi
 import numpy as np
-def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, radius = 6378137.0):
+def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, iFlag_radius =None, dRadius_in= 6378137.0):
     """
     Computes area of spherical polygon, assuming spherical Earth. 
     Returns result in ratio of the sphere's area if the radius is specified. Otherwise, in the units of provided radius.
@@ -36,33 +36,38 @@ def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, ra
             aLongitude_in = np.append(aLongitude_in, aLongitude_in[0])
 
         # Get colatitude (a measure of surface distance as an angle)
-        a = sin(aLatitude_in/2)**2 + cos(aLatitude_in)* sin(aLongitude_in/2)**2
-        colat = 2*np.arctan2( sqrt(a), sqrt(1-a) )
+        a = np.sin(aLatitude_in/2)**2 + np.cos(aLatitude_in)* np.sin(aLongitude_in/2)**2
+        colat = 2*np.arctan2( np.sqrt(a), np.sqrt(1-a) )
 
         #azimuth of each point in segment from the arbitrary origin
-        az = np.arctan2(cos(aLatitude_in) * sin(aLongitude_in), sin(aLatitude_in)) % (2*pi)
+        az = np.arctan2(np.cos(aLatitude_in) * np.sin(aLongitude_in), np.sin(aLatitude_in)) % (2*np.pi)
 
         # Calculate step sizes
         # daz = np.diff(az) % (2*pi)
         daz = np.diff(az)
-        daz = (daz + pi) % (2 * pi) - pi
+        daz = (daz + np.pi) % (2 * np.pi) - np.pi
 
         # Determine average surface distance for each step
         deltas=np.diff(colat)/2
         colat=colat[0:-1]+deltas
 
         # Integral over azimuth is 1-cos(colatitudes)
-        integrands = (1-cos(colat)) * daz
+        integrands = (1-np.cos(colat)) * daz
 
         # Integrate and save the answer as a fraction of the unit sphere.
         # Note that the sum of the integrands will include a factor of 4pi.
-        area = abs(sum(integrands))/(4*pi) # Could be area of inside or outside
+        area = abs(sum(integrands))/(4*np.pi) # Could be area of inside or outside
 
         area = min(area,1-area)
-        if radius is not None: #return in units of radius
-            return area * 4*pi*radius**2
-        else: #return in ratio of sphere total area
+        if iFlag_radius is not None:
             return area
+        else:
+            if dRadius_in is not None: #return in units of radius
+                return area * 4*pi*dRadius_in**2
+            else: #return in ratio of sphere total area
+                radius = 6378137.0
+                return area * 4*pi*radius**2
+            
     elif iFlag_algorithm==2:
         #L'Huilier Theorem, assumes spherical earth
         #see:
