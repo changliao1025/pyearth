@@ -14,9 +14,6 @@ import matplotlib.path as mpath
 from pyearth.gis.spatialref.retrieve_shapefile_spatial_reference import retrieve_shapefile_spatial_reference
 from pyearth.toolbox.math.stat.remap import remap
 
-
-
-
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
         self.oom = order
@@ -41,11 +38,35 @@ def map_vector_polyline_data(iFiletype_in,
                              dMissing_value_in=None,
                              dData_max_in = None,
                              dData_min_in = None,
+                             sFont_in = None,
                              sExtend_in =None,
                              sUnit_in=None,
                              aLegend_in = None,
                              aExtent_in = None,
                              pProjection_map_in = None):
+    """
+    Map a vector polyline data
+
+    Args:
+        iFiletype_in (int): _description_
+        sFilename_in (_type_): _description_
+        sFilename_output_in (_type_): _description_
+        iFlag_thickness_in (_type_, optional): _description_. Defaults to None.
+        sField_thickness_in (_type_, optional): _description_. Defaults to None.
+        iFlag_scientific_notation_colorbar_in (_type_, optional): _description_. Defaults to None.
+        sColormap_in (_type_, optional): _description_. Defaults to None.
+        sTitle_in (_type_, optional): _description_. Defaults to None.
+        iDPI_in (_type_, optional): _description_. Defaults to None.
+        dMissing_value_in (_type_, optional): _description_. Defaults to None.
+        dData_max_in (_type_, optional): _description_. Defaults to None.
+        dData_min_in (_type_, optional): _description_. Defaults to None.
+        sFont_in (_type_, optional): _description_. Defaults to None.
+        sExtend_in (_type_, optional): _description_. Defaults to None.
+        sUnit_in (_type_, optional): _description_. Defaults to None.
+        aLegend_in (_type_, optional): _description_. Defaults to None.
+        aExtent_in (_type_, optional): _description_. Defaults to None.
+        pProjection_map_in (_type_, optional): _description_. Defaults to None.
+    """
 
 
 
@@ -102,7 +123,14 @@ def map_vector_polyline_data(iFiletype_in,
         sUnit = sUnit_in
     else:
         sUnit =  ''
-
+    
+    if sFont_in is not None:
+        sFont = sFont_in
+    else:    
+        sFont = 'Arial'
+    #update the font for the plot
+    mpl.rcParams['font.family'] = sFont
+    
     cmap = cm.get_cmap(sColormap)  
  
     pSrs = osr.SpatialReference()
@@ -126,7 +154,8 @@ def map_vector_polyline_data(iFiletype_in,
             dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
             dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
             dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )    
+            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+            
             #nvertex = len(aCoords_gcs)
             #for i in range(nvertex):
             #    dLon = aCoords_gcs[i][0]
@@ -236,7 +265,7 @@ def map_vector_polyline_data(iFiletype_in,
             ax.text(0.03, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=10)
+                    color='black', fontsize=10 )
 
             pass
 
