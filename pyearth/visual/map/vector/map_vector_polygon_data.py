@@ -7,7 +7,7 @@ import matplotlib as mpl
 from shapely.wkt import loads
 from osgeo import  osr, gdal, ogr
 
-import matplotlib.image as mpimg
+
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import matplotlib.ticker as mticker
@@ -17,7 +17,6 @@ from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree() #for latlon data only
-
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
@@ -33,6 +32,7 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
 
 def map_vector_polygon_data(iFiletype_in,
                             sFilename_in, 
+                            sVariable_in = None,
                             sFilename_output_in=None,
                             iFlag_scientific_notation_colorbar_in=None,
                             sColormap_in = None,
@@ -81,7 +81,27 @@ def map_vector_polygon_data(iFiletype_in,
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
-        iDPI = 300
+        iDPI = 150
+
+    if dMissing_value_in is not None:
+        dMissing_value = dMissing_value_in
+    else:
+        dMissing_value = -9999
+
+    if dData_min_in is not None:    
+        iFlag_data_min = 1
+        dData_min = dData_min_in
+    else:
+        iFlag_data_min = 0
+        pass
+
+    if dData_max_in is not None:    
+        iFlag_data_max = 1
+        dData_max = dData_max_in
+    else:        
+        iFlag_data_max = 0
+        pass
+
 
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
@@ -109,6 +129,11 @@ def map_vector_polygon_data(iFiletype_in,
         sUnit = sUnit_in
     else:
         sUnit =  ''
+    
+    if sVariable_in is not None:
+        sVariable = sVariable_in
+    else:
+        sVariable =  'id'
 
     cmap = cm.get_cmap(sColormap)
 
@@ -125,47 +150,88 @@ def map_vector_polygon_data(iFiletype_in,
     dLat_max = -90
     dLon_min = 180
     dLon_max = -180
+    aValue = list()
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        lID =0 
+        dValue = float(pFeature.GetField(sVariable))        
+        aValue.append(dValue)        
         if sGeometry_type =='POLYGON':
             dummy0 = loads( pGeometry_in.ExportToWkt() )
             aCoords_gcs = dummy0.exterior.coords
             aCoords_gcs= np.array(aCoords_gcs)
-            nvertex = len(aCoords_gcs)
-            for i in range(nvertex):
-                dLon = aCoords_gcs[i][0]
-                dLat = aCoords_gcs[i][1]
-                if dLon > dLon_max:
-                    dLon_max = dLon
-                if dLon < dLon_min:
-                    dLon_min = dLon
-                if dLat > dLat_max:
-                    dLat_max = dLat
-                if dLat < dLat_min:
-                    dLat_min = dLat
+            #nvertex = len(aCoords_gcs)
+            #get the bounding box from coordinates
+            dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
+            dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
+            dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
+            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )         
 
+            #for i in range(nvertex):
+            #    dLon = aCoords_gcs[i][0]
+            #    dLat = aCoords_gcs[i][1]
+            #    if dLon > dLon_max:
+            #        dLon_max = dLon
+            #    if dLon < dLon_min:
+            #        dLon_min = dLon
+            #    if dLat > dLat_max:
+            #        dLat_max = dLat
+            #    if dLat < dLat_min:
+            #        dLat_min = dLat
+
+    aValue = np.array(aValue)
+    if iFlag_data_min == 1  and iFlag_data_max ==1: #both are provided
+        aValue = np.clip(aValue, dData_min, dData_max)
+        dValue_max = np.max(aValue)
+        dValue_min = np.min(aValue)
+    else:
+
+        aValue = aValue[aValue != dMissing_value]
+        dValue_max = np.max(aValue)
+        dValue_min = np.min(aValue)
+        pass
+
+    print(sVariable,dValue_min, dValue_max )
+    if dValue_max == dValue_min:
+        iFlag_same_value = 1
+        return
+    else:   
+        iFlag_same_value = 0
+        pass
+
+
+    cmap = cm.get_cmap(sColormap)
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
         pProjection_map = ccrs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
    
-    ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection_map )
+    ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map )
     ax.set_global()
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        lID =0 
-        if sGeometry_type =='POLYGON':
-            dummy0 = loads( pGeometry_in.ExportToWkt() )
-            aCoords_gcs = dummy0.exterior.coords
-            aCoords_gcs= np.array(aCoords_gcs)
-            
-            polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, \
-                alpha=0.8, edgecolor = 'black',facecolor='none', \
-                    transform=ccrs.PlateCarree() )
-            ax.add_patch(polygon)                   
+        #get attribute
+        dValue = float(pFeature.GetField(sVariable))
+        if dValue != dMissing_value:
+            if dValue > dValue_max:
+                dValue = dValue_max
+            if dValue < dValue_min:
+                dValue = dValue_min
+
+            iColor_index = int( (dValue - dValue_min) / (dValue_max - dValue_min) * 255 )
+            #pick color from colormap
+            cmiColor_index = cmap(iColor_index)     
+            if sGeometry_type =='POLYGON':
+                dummy0 = loads( pGeometry_in.ExportToWkt() )
+                aCoords_gcs = dummy0.exterior.coords
+                aCoords_gcs= np.array(aCoords_gcs)
+                polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, \
+                    alpha=0.8, edgecolor = cmiColor_index,facecolor=cmiColor_index, \
+                        transform=ccrs.PlateCarree() )
+                ax.add_patch(polygon)               
+        else:
+            pass    
     
     if aExtent_in is None:
         marginx  = (dLon_max - dLon_min) / 20
@@ -174,13 +240,9 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         aExtent = aExtent_in
     
-    ax.set_extent( aExtent )  
-    
-
+    ax.set_extent( aExtent )      
     ax.coastlines(color='black', linewidth=1)
-
     ax.set_title(sTitle)
-
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
         for i in range(nlegend):
@@ -193,7 +255,25 @@ def map_vector_polygon_data(iFiletype_in,
 
             pass
 
-    
+    ax_cb= fig.add_axes([0.75, 0.15, 0.02, 0.6])
+
+    if iFlag_scientific_notation_colorbar==1:
+        formatter = OOMFormatter(fformat= "%1.1e")       
+        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical', 
+                               cmap=cmap,
+                               norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
+                               extend=sExtend, format=formatter)
+    else:
+        formatter = OOMFormatter(fformat= "%1.1f")
+        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical', 
+                               cmap=cmap,
+                               norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
+                               extend=sExtend, format=formatter)
+
+    cb.ax.get_yaxis().set_ticks_position('right')
+    cb.ax.get_yaxis().labelpad = 10
+    cb.ax.set_ylabel(sUnit, rotation=270)
+    cb.ax.tick_params(labelsize=6)
 
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
@@ -204,7 +284,7 @@ def map_vector_polygon_data(iFiletype_in,
     gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
     sDirname = os.path.dirname(sFilename_output_in)
 
-    pDataset = pLayer = pFeature  = None   
+    pDataset = pLayer = pFeature  = None
     if sFilename_output_in is None:
         plt.show()
     else:
