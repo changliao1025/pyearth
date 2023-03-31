@@ -103,9 +103,7 @@ def map_vector_polyline_data(iFiletype_in,
     else:
         sUnit =  ''
 
-    cmap = cm.get_cmap(sColormap)
-    pSpatialRef_shapefile = retrieve_shapefile_spatial_reference(sFilename_in)   
-
+    cmap = cm.get_cmap(sColormap)  
  
     pSrs = osr.SpatialReference()
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -124,18 +122,24 @@ def map_vector_polyline_data(iFiletype_in,
             aCoords_gcs = dummy0.coords
             aCoords_gcs= np.array(aCoords_gcs)
             aCoords_gcs = aCoords_gcs[:,0:2]
-            nvertex = len(aCoords_gcs)
-            for i in range(nvertex):
-                dLon = aCoords_gcs[i][0]
-                dLat = aCoords_gcs[i][1]
-                if dLon > dLon_max:
-                    dLon_max = dLon
-                if dLon < dLon_min:
-                    dLon_min = dLon
-                if dLat > dLat_max:
-                    dLat_max = dLat
-                if dLat < dLat_min:
-                    dLat_min = dLat
+
+            dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
+            dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
+            dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
+            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )    
+            #nvertex = len(aCoords_gcs)
+            #for i in range(nvertex):
+            #    dLon = aCoords_gcs[i][0]
+            #    dLat = aCoords_gcs[i][1]
+            #    if dLon > dLon_max:
+            #        dLon_max = dLon
+            #    if dLon < dLon_min:
+            #        dLon_min = dLon
+            #    if dLat > dLat_max:
+            #        dLat_max = dLat
+            #    if dLat < dLat_min:
+            #        dLat_min = dLat
+                    
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
@@ -149,20 +153,19 @@ def map_vector_polyline_data(iFiletype_in,
     ax.set_global()
 
     n_colors = pLayer.GetFeatureCount()
-
     colours = cm.rainbow(np.linspace(0, 1, n_colors))
-
     if iFlag_thickness ==1:
         aField =list()
         for pFeature in pLayer:
             dField = pFeature.GetField(sField_thickness)
             aField.append(dField)
-            aField = np.array(aField)
-            dField_max = np.max(aField)
-            dField_min = np.min(aField)
-            iThickness_max = 2.5
-            iThickness_min = 0.3
+            pass
 
+    aField = np.array(aField)
+    dField_max = np.max(aField)
+    dField_min = np.min(aField)
+    iThickness_max = 2.5
+    iThickness_min = 0.3
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
