@@ -127,9 +127,9 @@ def map_vector_polyline_data(iFiletype_in,
     if sFont_in is not None:
         sFont = sFont_in
     else:    
-        sFont = 'Arial'
-    #update the font for the plot
-    mpl.rcParams['font.family'] = sFont
+        sFont = "Times New Roman"
+
+    plt.rcParams["font.family"] = sFont
     
     cmap = cm.get_cmap(sColormap)  
  

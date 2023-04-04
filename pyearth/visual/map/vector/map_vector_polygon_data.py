@@ -42,6 +42,7 @@ def map_vector_polygon_data(iFiletype_in,
                             dData_max_in = None, 
                             dData_min_in = None,
                             sExtend_in =None,
+                            sFont_in = None,
                             sUnit_in=None,
                             aLegend_in = None,
                             aExtent_in = None,
@@ -130,6 +131,13 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         sUnit =  ''
     
+    if sFont_in is not None:
+        sFont = sFont_in
+    else:    
+        sFont = "Times New Roman"
+
+    plt.rcParams["font.family"] = sFont
+    
     if sVariable_in is not None:
         sVariable = sVariable_in
     else:
@@ -190,7 +198,7 @@ def map_vector_polygon_data(iFiletype_in,
         dValue_max = np.max(aValue)
         dValue_min = np.min(aValue)
         pass
-
+        
     print(sVariable,dValue_min, dValue_max )
     if dValue_max == dValue_min:
         iFlag_same_value = 1
