@@ -82,7 +82,7 @@ def map_vector_polygon_data(iFiletype_in,
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
-        iDPI = 150
+        iDPI = 300
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -167,31 +167,19 @@ def map_vector_polygon_data(iFiletype_in,
         if sGeometry_type =='POLYGON':
             dummy0 = loads( pGeometry_in.ExportToWkt() )
             aCoords_gcs = dummy0.exterior.coords
-            aCoords_gcs= np.array(aCoords_gcs)
-            #nvertex = len(aCoords_gcs)
-            #get the bounding box from coordinates
+            aCoords_gcs= np.array(aCoords_gcs)            
+            
             dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
             dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
             dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
             dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )         
 
-            #for i in range(nvertex):
-            #    dLon = aCoords_gcs[i][0]
-            #    dLat = aCoords_gcs[i][1]
-            #    if dLon > dLon_max:
-            #        dLon_max = dLon
-            #    if dLon < dLon_min:
-            #        dLon_min = dLon
-            #    if dLat > dLat_max:
-            #        dLat_max = dLat
-            #    if dLat < dLat_min:
-            #        dLat_min = dLat
 
     aValue = np.array(aValue)
     if iFlag_data_min == 1  and iFlag_data_max ==1: #both are provided
         aValue = np.clip(aValue, dData_min, dData_max)
-        dValue_max = np.max(aValue)
-        dValue_min = np.min(aValue)
+        dValue_max = dData_max # np.max(aValue)
+        dValue_min = dData_min # np.min(aValue)
     else:
 
         aValue = aValue[aValue != dMissing_value]
@@ -296,7 +284,15 @@ def map_vector_polygon_data(iFiletype_in,
     if sFilename_output_in is None:
         plt.show()
     else:
-        sFilename_out = os.path.join(sDirname, sFilename_output_in)
-        plt.savefig(sFilename_out, bbox_inches='tight')   
+        sFilename = os.path.basename(sFilename_output_in)
+        sFilename_out = os.path.join(sDirname, sFilename)
+        sExtension = os.path.splitext(sFilename)[1]
+        if sExtension == '.png':
+            plt.savefig(sFilename_out, bbox_inches='tight')
+        else:
+            if sExtension == '.pdf':
+                plt.savefig(sFilename_out, bbox_inches='tight')
+            else:
+                plt.savefig(sFilename_out, bbox_inches='tight', format ='ps')   
         plt.close('all')
         plt.clf()

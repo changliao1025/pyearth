@@ -156,18 +156,7 @@ def map_vector_polyline_data(iFiletype_in,
             dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
             dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
             
-            #nvertex = len(aCoords_gcs)
-            #for i in range(nvertex):
-            #    dLon = aCoords_gcs[i][0]
-            #    dLat = aCoords_gcs[i][1]
-            #    if dLon > dLon_max:
-            #        dLon_max = dLon
-            #    if dLon < dLon_min:
-            #        dLon_min = dLon
-            #    if dLat > dLat_max:
-            #        dLat_max = dLat
-            #    if dLat < dLat_min:
-            #        dLat_min = dLat
+           
                     
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
