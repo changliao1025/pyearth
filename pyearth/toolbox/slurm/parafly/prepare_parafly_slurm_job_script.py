@@ -52,7 +52,7 @@ def prepare_parafly_slurm_job_script(sBasename_job,  sBasename_parafly,   sDirec
     ofs =  open(sBasename_job,"w")  #write mode 
     sLine = '#!/bin/bash' + '\n'
     ofs.write( sLine ) 
-    sLine = '#SBATCH --account=e3sm' + '\n'
+    sLine = '#SBATCH --account=esmd' + '\n'
     ofs.write( sLine ) 
 
     #sLine = '#SBATCH --begin=now+1minutes' + '\n'

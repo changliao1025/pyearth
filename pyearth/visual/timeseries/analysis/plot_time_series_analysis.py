@@ -11,10 +11,10 @@ from statsmodels.tsa.stattools import adfuller
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def plot_time_series_analysis(aTime, \
-                              aData, \
-                              sFilename_out,\
-                              sVariable,\
+def plot_time_series_analysis(aTime, 
+                              aData, 
+                              sFilename_out,
+                              sVariable,
                               iDPI_in = None,\
                               iFlag_without_raw_in= None,\
                               iFlag_log_in = None,\
@@ -172,8 +172,11 @@ def plot_time_series_analysis(aTime, \
 
     sYear_format = mdates.DateFormatter('%Y')
     
-    aData_tsa = pd.Series(aData, index=pd.date_range(aTime[0], \
-                                                     periods=len(aTime), freq='M'), name = sVariable)
+    aData_tsa = pd.Series(aData, 
+         index=pd.date_range(aTime[0], 
+                                                     periods=len(aTime), 
+                                                     freq='M'), 
+                                                     name = sVariable)
 
     
     #https://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.STL.html#statsmodels.tsa.seasonal.STL

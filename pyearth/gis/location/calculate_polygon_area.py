@@ -56,17 +56,21 @@ def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, iF
 
         # Integrate and save the answer as a fraction of the unit sphere.
         # Note that the sum of the integrands will include a factor of 4pi.
-        area = abs(sum(integrands))/(4*np.pi) # Could be area of inside or outside
+        area = abs(sum(integrands)) # Could be area of inside or outside
 
-        area = min(area,1-area)
+        area = min(area,1-area) #
+
+
+        if dRadius_in is not None:
+            dArea_m = area * dRadius_in**2
+        else:
+            dRadius_in = 6378137.0  
+            dArea_m = area * dRadius_in**2
+
         if iFlag_radius is not None:
             return area
         else:
-            if dRadius_in is not None: #return in units of radius
-                return area * 4*pi*dRadius_in**2
-            else: #return in ratio of sphere total area
-                radius = 6378137.0
-                return area * 4*pi*radius**2
+            return dArea_m
             
     elif iFlag_algorithm==2:
         #L'Huilier Theorem, assumes spherical earth

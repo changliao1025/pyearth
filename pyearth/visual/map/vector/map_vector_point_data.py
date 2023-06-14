@@ -26,20 +26,20 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
         if self._useMathText:
             self.format = r'$\mathdefault{%s}$' % self.format
 
-def map_vector_point_data(iFiletype_in,\
-    sFilename_in, \
-    aImage_extent, \
-    sFilename_output_in,\
-       iFlag_scientific_notation_colorbar_in=None,\
-        iFlag_contour_in = None,\
-    sColormap_in = None,\
-        sTitle_in = None, \
-    iDPI_in = None,\
-    dMissing_value_in=None,\
-    dData_max_in = None, \
-    dData_min_in = None,\
-        sExtend_in =None,\
-        sUnit_in=None,\
+def map_vector_point_data(iFiletype_in,
+    sFilename_in, 
+    aImage_extent, 
+    sFilename_output_in,
+       iFlag_scientific_notation_colorbar_in=None,
+        iFlag_contour_in = None,
+    sColormap_in = None,
+        sTitle_in = None, 
+    iDPI_in = None,
+    dMissing_value_in=None,
+    dData_max_in = None, 
+    dData_min_in = None,
+        sExtend_in =None,
+        sUnit_in=None,
             aLegend_in = None):
 
     aImage_in = np.array(aImage_in)

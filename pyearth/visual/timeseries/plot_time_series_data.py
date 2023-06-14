@@ -1,7 +1,6 @@
-import os, sys
+
 from datetime import datetime
 import numpy as np
-
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -37,6 +36,7 @@ def plot_time_series_data(aTime_all,
                           aLocation_legend_in =None,
                           sDate_type_in = None,
                           sFormat_y_in =None,
+                          sFont_in = None,
                           sLocation_legend_in=None,
                           sTitle_in = None):
     """
@@ -128,6 +128,13 @@ def plot_time_series_data(aTime_all,
         sTitle = sTitle_in
     else:
         sTitle = ''
+    
+    if sFont_in is not None:
+        sFont = sFont_in
+    else:    
+        sFont = "Times New Roman"
+        
+    plt.rcParams["font.family"] = sFont
 
     if aMarker_in is not None:
         aMarker = aMarker_in
@@ -209,13 +216,11 @@ def plot_time_series_data(aTime_all,
             dSpace_y = int(dSpace_y)
         pass  
 
-    if int( (dMax_x_y-dMin_x_y)/ 2 ) >=2:
-        nYear = int( (dMax_x_y-dMin_x_y)/ 2 )
+    nYear = int( dMax_x_y-dMin_x_y ) + 1 
+    if nYear > 3:        
         dMin_x = dMin_x_y
         dMax_x = dMax_x_y
-
-    else:
-        nYear = 1
+    else:        
         dMin_x = dMin_x_m
         dMax_x = dMax_x_m
 
@@ -253,16 +258,18 @@ def plot_time_series_data(aTime_all,
 
     
 
-    if nYear == 1:
-        pYear = mdates.YearLocator(1)   # every year
-        pYear_min = mdates.YearLocator(1)   # every year
+    if nYear <= 3:
+        pYear = mdates.YearLocator()   # every year        
         pMonth = mdates.MonthLocator()  # every month
-        pMonth_min = mdates.MonthLocator(3)  # every month
-    else:    
-        pYear = mdates.YearLocator(2)   # every year
+
         pYear_min = mdates.YearLocator(1)   # every year
+        pMonth_min = mdates.MonthLocator(3)  # every 3 month
+    else:    
+        pYear = mdates.YearLocator(2)   # every 2 year
         pMonth = mdates.MonthLocator(6)  # every month
-        pMonth_min = mdates.MonthLocator(6)  # every month
+
+        pYear_min = mdates.YearLocator(1)   # every year
+        pMonth_min = mdates.MonthLocator(6)  # every 6 month
 
     if sDate_type_in is not None:
         if sDate_type_in == 'month':
@@ -344,13 +351,13 @@ def plot_time_series_data(aTime_all,
         if iax == 0:
             ax.axis('on')
             ax.grid(which='major', color='grey', linestyle='--', axis='y')     
-            if nYear ==1:
-                ax.xaxis.set_major_locator(pMonth)
+            if nYear <=3:
+                ax.xaxis.set_major_locator(pYear)
                 ax.xaxis.set_minor_locator(pMonth)
                 ax.xaxis.set_major_formatter(sMonth_format)
             else:   
                 ax.xaxis.set_major_locator(pYear)
-                #ax.xaxis.set_minor_locator(pMonth)
+                ax.xaxis.set_minor_locator(pMonth)
                 ax.xaxis.set_major_formatter(sYear_format)
             ax.tick_params(axis="x", labelsize=10)
             ax.tick_params(axis="y", labelsize=10)
@@ -397,7 +404,7 @@ def plot_time_series_data(aTime_all,
                     #y1=  int(np.log10(dMax_y))
                     #formatter.set_powerlimits(( y0, y1))
                     #ax.yaxis.set_major_formatter(formatter)         
-                    ax.yaxis.set_major_formatter( MathTextSciFormatter("%1.1e"))          
+                    ax.yaxis.set_major_formatter( MathTextSciFormatter("%1.2e"))          
 
                     pass
                 else:
