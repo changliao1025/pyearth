@@ -15,7 +15,7 @@ def retrieve_usgs_site_information_nwis(sSiteId):
             continue
         data = line.split("\t")
         if len(data) >= 4:
-            print(data)
+            #print(data)
             if data[0] == 'agency_cd':
                 index_lon = data.index('dec_long_va')
                 index_lat = data.index('dec_lat_va')

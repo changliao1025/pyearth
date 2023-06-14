@@ -187,7 +187,7 @@ def map_vector_polygon_data(iFiletype_in,
         dValue_min = np.min(aValue)
         pass
         
-    print(sVariable,dValue_min, dValue_max )
+    #print(sVariable,dValue_min, dValue_max )
     if dValue_max == dValue_min:
         iFlag_same_value = 1
         return

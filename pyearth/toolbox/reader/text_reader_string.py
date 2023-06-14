@@ -37,11 +37,11 @@ def text_reader_string( sFilename_in,     ncolumn_in = None,      nrow_in = None
         #print(' ')
     else :
         #get the total line number
-        ifs = open(sFilename_in, "r")
+        ifs = open(sFilename_in, "r", errors='ignore')
         nrow_out = len(ifs.readlines())
         ifs.close()
     sLine=' '
-    ifs = open(sFilename_in, "r")
+    ifs = open(sFilename_in, "r", errors='ignore')
     if iSkipline_in is not None:
         nrow_out =  nrow_out - iSkipline_in
         for i in range(iSkipline_in):

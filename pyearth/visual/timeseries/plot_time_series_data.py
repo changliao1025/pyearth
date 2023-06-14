@@ -404,7 +404,7 @@ def plot_time_series_data(aTime_all,
                     #y1=  int(np.log10(dMax_y))
                     #formatter.set_powerlimits(( y0, y1))
                     #ax.yaxis.set_major_formatter(formatter)         
-                    ax.yaxis.set_major_formatter( MathTextSciFormatter("%1.1e"))          
+                    ax.yaxis.set_major_formatter( MathTextSciFormatter("%1.2e"))          
 
                     pass
                 else:
