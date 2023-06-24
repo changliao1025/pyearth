@@ -8,6 +8,24 @@ It is designed to be a general-purpose library as it is inspired by the popular 
 
 Some of the code structure is inspired by the ArcGIS toolbox.
 
+### Dependency
+
+PyEarth depends on the following packages
+
+1. `numpy`
+2. `gdal`
+3. `netCDF4`
+4. `shapely`
+5. `cartopy`
+6. `matplotlib`
+7. `pandas`
+8. `scipy`
+9. `statsmodels`
+
+### Documentation
+
+Please refer to the [documentation](https://pyearth.readthedocs.io) for details on how to get started using the PyEarth package.
+
 ### Installation
 
 `PyEarth` depends on several other packages, including gdal, which cannot be installed through `pip` easily. You are recommended to use `conda` to install dependency if necessary.
