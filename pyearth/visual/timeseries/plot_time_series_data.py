@@ -289,12 +289,12 @@ def plot_time_series_data(aTime_all,
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
     else:
-        sLocation_legend = "upper right"
+        sLocation_legend = None #remove the setting so it becomes automatical
 
     if aLocation_legend_in is not None:
         aLocation_legend = aLocation_legend_in
     else:
-        aLocation_legend=(1.0,1.0)
+        aLocation_legend= None #(1.0,1.0)
 
     if ncolumn_in is not None:
         ncolumn = ncolumn_in
