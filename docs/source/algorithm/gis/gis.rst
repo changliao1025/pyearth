@@ -1,5 +1,5 @@
 #########
-GDAL
+GIS/RS
 #########
 
 *************************
@@ -44,4 +44,3 @@ Location related functions
 * calculate_distance_based_on_lon_lat: calculate the great circle distance between two points based on their longitude and latitude
 * calculate_polygon_area: calcualte the spherical area of a polygon
 * convert_360_to_180: convert longitude from 0-360 to -180 to 180
-* 

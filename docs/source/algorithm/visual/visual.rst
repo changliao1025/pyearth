@@ -14,15 +14,19 @@ Formatter
 Barplot
 *********
 
+* barplot_data
+
 ************
 Boxplot
 ************
 
+* boxplot_data
 
 ************
 Histogram
 ************
 
+* histogram_data
 
 ************
 Ladder plot
