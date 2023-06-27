@@ -31,7 +31,7 @@ def envi_write_header(sFilename_in, aHeader_in):
     pFile.write(sLine)
     sLine = 'description = ' + aHeader_in['sFilename'] + '\n'
     pFile.write(sLine)
-    sLine = 'samples = '  + aHeader_in['ncolumn'] + '\n'
+    sLine = 'samples = ' + aHeader_in['ncolumn'] + '\n'
     pFile.write(sLine)
     sLine = 'lines = ' + aHeader_in['nrow'] + '\n'
     pFile.write(sLine)

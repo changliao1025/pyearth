@@ -1,5 +1,9 @@
-def find_index_by_latlon(dLon_in, dLat_in, dLon_min_in, dLat_max_in, 
-    dResolution_x_in,dResolution_y_in,
+def find_index_by_latlon(dLon_in, 
+                         dLat_in, 
+                         dLon_min_in, 
+                         dLat_max_in, 
+    dResolution_x_in,
+    dResolution_y_in,
      iFlag_center_in = None):
     """
     Find the index of a lcoation in a large 2D array, we requre the location is at center, the longitude should be in the same range (-180, 180) or (0, 360)
