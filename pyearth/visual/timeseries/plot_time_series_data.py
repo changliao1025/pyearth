@@ -73,7 +73,7 @@ def plot_time_series_data(aTime_all,
     """
                         
     aTime_all = np.array(aTime_all)
-    aData_all = np.array(aData_all)
+    aData_all = np.array(aData_all) #each list is a data series, but length may be different
     pShape = aData_all.shape
   
     nData = pShape[0]
@@ -186,13 +186,20 @@ def plot_time_series_data(aTime_all,
 
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
-    else:
-        dMax_y = np.nanmax(aData_all) 
-
+    else:   
+        dMax_y = np.nanmax(aData_all[0])
+        for i in range(1,nData):
+            dummy=np.nanmax(aData_all[i])
+            dMax_y = np.max([dMax_y, dummy])     
+        
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData_all) 
+        dMin_y = np.nanmin(aData_all[0]) 
+        for i in range(1,nData):
+            dummy=np.nanmin(aData_all[i])
+            dMin_y = np.min([dMin_y, dummy])
+
 
     if (dMax_y <= dMin_y ):
         return

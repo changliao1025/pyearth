@@ -4,26 +4,28 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
 from scipy.stats import gaussian_kde
+
 sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
-def ridgeplot_data_density(aDict, \
-    aData, \
-        sFilename_out,\
-            iSize_x_in = None, \
-                              iSize_y_in = None, \
-                              iDPI_in = None,\
-                              iFlag_scientific_notation_x_in=None,\
-                              iFlag_scientific_notation_y_in=None,\
-                              iFlag_log_x_in=None,\
-                              iFlag_log_y_in=None,\
-                              dMin_x_in = None, \
-                              dMax_x_in = None, \
-                              dSpace_x_in = None, \
-                              sFormat_x_in =None,\
-                              sLabel_x_in = None, \
-                              sLabel_y_in = None, \
-                              sLabel_legend_in = None, \
+def ridgeplot_data_density(aDict, 
+    aData, 
+        sFilename_out,
+            iSize_x_in = None, 
+                              iSize_y_in = None, 
+                              iDPI_in = None,
+                              iFlag_scientific_notation_x_in=None,
+                              iFlag_scientific_notation_y_in=None,
+                              iFlag_log_x_in=None,
+                              iFlag_log_y_in=None,
+                              dMin_x_in = None, 
+                              dMax_x_in = None, 
+                              dSpace_x_in = None, 
+                              sFormat_x_in =None,
+                              sLabel_x_in = None, 
+                              sLabel_y_in = None, 
+                              sLabel_legend_in = None, 
                               sTitle_in = None):
     nData = len(aDict)
+    
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
     else:
@@ -79,6 +81,7 @@ def ridgeplot_data_density(aDict, \
     else:
         sTitle = ''
 
+    plt.rcParams["font.family"] = "Times New Roman"
     fig = plt.figure( dpi=iDPI )
     
 
@@ -140,9 +143,9 @@ def ridgeplot_data_density(aDict, \
 
         ax.get_yaxis().set_visible(False)
         sText = aDict[i+1]
-        ax.text(0.70, 0.40, sText, \
-        verticalalignment='bottom', horizontalalignment='left',\
-            transform=ax.transAxes, \
+        ax.text(0.85, 0.40, sText, 
+        verticalalignment='bottom', horizontalalignment='left',
+            transform=ax.transAxes, 
             color= pal[i], fontsize=10, fontweight='bold')
 
         if i < (nData-1):

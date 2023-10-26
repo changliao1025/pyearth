@@ -4,7 +4,7 @@ import numpy as np
 import cartopy.crs as ccrs
 import cartopy.mpl.ticker as ticker
 import matplotlib as mpl
-from shapely.wkt import loads
+#from shapely.wkt import loads
 from osgeo import  osr, gdal, ogr
 
 
@@ -14,6 +14,7 @@ import matplotlib.ticker as mticker
 import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
+from pyearth.gis.gdal.gdal_functions import get_geometry_coords
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree() #for latlon data only
@@ -35,9 +36,12 @@ def map_vector_polygon_data(iFiletype_in,
                             sVariable_in = None,
                             sFilename_output_in=None,
                             iFlag_scientific_notation_colorbar_in=None,
+                            iFont_size_in = None,
                             sColormap_in = None,
                             sTitle_in = None, 
                             iDPI_in = None,
+                            iSize_x_in = None, 
+                            iSize_y_in = None, 
                             dMissing_value_in=None,
                             dData_max_in = None, 
                             dData_min_in = None,
@@ -83,6 +87,21 @@ def map_vector_polygon_data(iFiletype_in,
         iDPI = iDPI_in
     else:
         iDPI = 300
+
+    if iSize_x_in is not None:
+        iSize_x = iSize_x_in
+    else:
+        iSize_x = 8
+
+    if iSize_y_in is not None:
+        iSize_y = iSize_y_in
+    else:
+        iSize_y = 8
+    
+    if iFont_size_in is not None:
+        iFont_size = iFont_size_in
+    else:
+        iFont_size = 12
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -146,8 +165,7 @@ def map_vector_polygon_data(iFiletype_in,
     cmap = cm.get_cmap(sColormap)
 
     fig = plt.figure( dpi = iDPI  )
-    iSize_x= 8 
-    iSize_y= 8
+    
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
@@ -165,7 +183,8 @@ def map_vector_polygon_data(iFiletype_in,
         dValue = float(pFeature.GetField(sVariable))        
         aValue.append(dValue)        
         if sGeometry_type =='POLYGON':
-            dummy0 = loads( pGeometry_in.ExportToWkt() )
+            #dummy0 = loads( pGeometry_in.ExportToWkt() )
+            aCoords_gcs = get_geometry_coords(pGeometry_in)
             aCoords_gcs = dummy0.exterior.coords
             aCoords_gcs= np.array(aCoords_gcs)            
             
@@ -186,6 +205,8 @@ def map_vector_polygon_data(iFiletype_in,
         dValue_max = np.max(aValue)
         dValue_min = np.min(aValue)
         pass
+
+    print(dValue_min, dValue_max )
         
     #print(sVariable,dValue_min, dValue_max )
     if dValue_max == dValue_min:
@@ -247,7 +268,7 @@ def map_vector_polygon_data(iFiletype_in,
             ax.text(0.03, dLocation, sText, \
                     verticalalignment='top', horizontalalignment='left',\
                     transform=ax.transAxes, \
-                    color='black', fontsize=6)
+                    color='black', fontsize=iFont_size)
 
             pass
 
@@ -260,16 +281,17 @@ def map_vector_polygon_data(iFiletype_in,
                                norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
                                extend=sExtend, format=formatter)
     else:
-        formatter = OOMFormatter(fformat= "%1.1f")
+        formatter = OOMFormatter(fformat= "%1.2f")
         cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical', 
                                cmap=cmap,
                                norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
                                extend=sExtend, format=formatter)
 
     cb.ax.get_yaxis().set_ticks_position('right')
-    cb.ax.get_yaxis().labelpad = 10
-    cb.ax.set_ylabel(sUnit, rotation=270)
-    cb.ax.tick_params(labelsize=6)
+    cb.ax.get_yaxis().labelpad = 5
+    cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+    cb.ax.get_yaxis().set_label_position('left')
+    cb.ax.tick_params(labelsize=iFont_size-2)
 
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')

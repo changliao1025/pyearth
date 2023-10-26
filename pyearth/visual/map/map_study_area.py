@@ -8,11 +8,12 @@ import matplotlib.patches as mpatches
 import matplotlib.image as mpimg
 import cartopy.crs as ccrs
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
-from shapely.wkt import loads
+
 from osgeo import  osr, gdal, ogr
 from pyearth.gis.gdal.read.gdal_read_geotiff_file import gdal_read_geotiff_file
 from pyearth.gis.gdal.gdal_functions import reproject_coordinates, reproject_coordinates_batch
 from pyearth.gis.gdal.gdal_functions import Google_MetersPerPixel
+from pyearth.gis.gdal.gdal_functions import get_geometry_coords
 import requests
 def plot_study_area(sFilename_dem_in ,sFilename_out,
                     sFilename_polygon_in = None,
@@ -31,13 +32,14 @@ def plot_study_area(sFilename_dem_in ,sFilename_out,
     dummy = gdal_read_geotiff_file(sFilename_dem_in)
     aImage_in = dummy[0]
     dResolution_x = dummy[1]
-    dOriginX=dummy[2]
-    dOriginY=dummy[3]
-    nrow=dummy[4]
-    ncolumn=dummy[5]
-    missing_value = dummy[6]
-    pProjection = dummy[8]
-    pSpatial_reference_source = dummy[9]
+    dResolution_y = dummy[2]
+    dOriginX=dummy[3]
+    dOriginY=dummy[4]
+    nrow=dummy[5]
+    ncolumn=dummy[6]
+    missing_value = dummy[7]
+    pProjection = dummy[9]
+    pSpatial_reference_source = dummy[10]
 
 
     #set up dem projection
@@ -92,8 +94,9 @@ def plot_study_area(sFilename_dem_in ,sFilename_out,
             pGeometry_in = pFeature.GetGeometryRef()
             sGeometry_type = pGeometry_in.GetGeometryName()
             if sGeometry_type =='LINESTRING':
-                dummy0 = loads( pGeometry_in.ExportToWkt() )
-                aCoords_gcs = dummy0.coords
+                #dummy0 = loads( pGeometry_in.ExportToWkt() )
+                #aCoords_gcs = dummy0.coords
+                aCoords_gcs = get_geometry_coords(pGeometry_in)
                 aCoords_gcs= np.array(aCoords_gcs)
                 aCoords_gcs = aCoords_gcs[:,0:2]
                 nvertex = len(aCoords_gcs)
@@ -232,7 +235,7 @@ def plot_study_area(sFilename_dem_in ,sFilename_out,
     else:
         dummy = gdal_read_geotiff_file(sFilename_slope_in)
         aSlope= dummy[0]
-        missing_value = dummy[6]
+        missing_value = dummy[7]
         aSlope = aSlope[np.where(aSlope != missing_value)]
         dMax_x=60
         dMin_x=0

@@ -35,11 +35,13 @@ def scatter_plot_multiple_data(aData_x, \
                       sFormat_y_in =None,\
                       sLabel_x_in =None,\
                       sLabel_y_in = None , \
+                      aLabel_point_in = None,\
                         aColor_in=None,\
                         aMarker_in=None,\
                       aLabel_legend_in = None,\
                         aSize_in=None,\
-                      sTitle_in = None):
+                      sTitle_in = None,\
+                        sFont_in = None):
     #number of dataset
 
     #aData_in = np.array(aData_y)    
@@ -101,6 +103,13 @@ def scatter_plot_multiple_data(aData_x, \
         aLabel_legend = aLabel_legend_in
     else:
         aLabel_legend = ''
+    
+    if sFont_in is not None:
+        sFont = sFont_in
+    else:
+        sFont = "Times New Roman"
+
+    plt.rcParams["font.family"] = sFont
 
     if sTitle_in is not None:
         sTitle = sTitle_in
@@ -229,16 +238,30 @@ def scatter_plot_multiple_data(aData_x, \
             x = aData_x[i]
             y = aData_y[i]
 
+            #treatment for nan data
+            x = np.array(x)
+            y = np.array(y)
+            x = x.flatten()
+            y = y.flatten()
+            a = np.logical_and(~np.isnan(x), ~np.isnan(y))
+            x = x[a]
+            y = y[a]
+
             sc = ax_scatter.scatter(x, y, s=aSize[i], alpha=0.5,color=aColor[i],marker=aMarker[i])
             if iax == 0:
                 aLegend_artist.append(sc)
                 slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
                 sR = "slope:" +  "{:.2f}".format( slope ) +  r"; $r^2$:" +  "{:.2f}".format(  r_value**2 )
                 aLabel.append(aLabel_legend[i] + ': ' + sR)
+
+                if i ==0 and aLabel_point_in is not None:
+
+                    for j in range(len(x)):
+                        ax_scatter.annotate(aLabel_point_in[j], (x[j], y[j]),fontsize=16)
+                    pass
             #ax_scatter.set_facecolor('silver')  
 
-        if iax == 0:  
-       
+        if iax == 0:        
     
             ax_scatter.axis('on')
             ax_scatter.grid(which='major', color='grey', linestyle='--', axis='y')
@@ -249,9 +272,9 @@ def scatter_plot_multiple_data(aData_x, \
             ax_scatter.set_xmargin(0.05)
             ax_scatter.set_ymargin(0.15)
 
-            ax_scatter.set_xlabel(sLabel_X,fontsize=12)
-            ax_scatter.set_ylabel(sLabel_Y,fontsize=12)
-            ax_scatter.set_title( sTitle, loc='center', fontsize=15)
+            ax_scatter.set_xlabel(sLabel_X,fontsize=16)
+            ax_scatter.set_ylabel(sLabel_Y,fontsize=16)
+            ax_scatter.set_title( sTitle, loc='center', fontsize=20)
             # round to nearest years...
 
             if sFormat_x_in is not None:
@@ -269,7 +292,7 @@ def scatter_plot_multiple_data(aData_x, \
             ax_scatter.tick_params(axis='y', pad=8)
             ax_scatter.set_xlim( dMin_x, dMax_x * 1.05)
             ax_scatter.set_ylim( dMin_x, dMax_x * 1.05)
-        else:
+        else:            
             ax_scatter.set_xlim( dMin_x, dMax_x * 0.1 )
             ax_scatter.set_ylim( dMin_x, dMax_x * 0.1)
             pass
@@ -347,7 +370,7 @@ def scatter_plot_multiple_data(aData_x, \
         if iax ==0:
 
             ax_scatter.legend(aLegend_artist, aLabel,\
-                      loc="upper left", fontsize=12)
+                      loc="upper left", fontsize=16)
 
         ax_scatter.tick_params(which='both', # Options for both major and minor ticks
                            top='off', # turn off top ticks
@@ -357,7 +380,11 @@ def scatter_plot_multiple_data(aData_x, \
 
         if iax ==0:
             for i in range(nData):
-                x = aData_x[i].flatten()
+                x = aData_x[i].flatten()               
+                #treatment for nan data                
+                a = np.where(~np.isnan(x))
+                x = x[a]
+               
                 try:
                     if np.max(x) > np.min(x):
                         density = gaussian_kde(x)
@@ -372,6 +399,8 @@ def scatter_plot_multiple_data(aData_x, \
 
                 #y margin
                 y = aData_y[i].flatten()
+                a = np.where(~np.isnan(y))
+                y = y[a]
 
                 density = gaussian_kde(y)
                 xx = np.linspace(dMin_y, dMax_y,1000)
@@ -381,27 +410,28 @@ def scatter_plot_multiple_data(aData_x, \
         
         if iax ==0:
 
-            #horizontal
-            line = mlines.Line2D([0.0, 0.1], [0.1, 0.1], color='black', linestyle = 'dotted')
-            transform = ax_scatter.transAxes
-            line.set_transform(transform)
-            ax_scatter.add_line(line)
-
-            #vertical
-            line = mlines.Line2D([0.1, 0.1], [0.1, 0.0], color='black', linestyle = 'dotted')
-            transform = ax_scatter.transAxes
-            line.set_transform(transform)
-            ax_scatter.add_line(line)
-
-            line = mlines.Line2D([0.1, (dY_mini-left)/width ], [0.1, (dX_mini-bottom+ width_mini)/height], color='black', linestyle = 'dotted')
-            transform = ax_scatter.transAxes
-            line.set_transform(transform)
-            ax_scatter.add_line(line)
-
-            line = mlines.Line2D([0.1,  (dY_mini-left)/width], [0.0, (dX_mini-bottom)/height], color='black', linestyle = 'dotted')
-            transform = ax_scatter.transAxes
-            line.set_transform(transform)
-            ax_scatter.add_line(line)
+            if iFlag_miniplot ==1:
+                #horizontal
+                line = mlines.Line2D([0.0, 0.1], [0.1, 0.1], color='black', linestyle = 'dotted')
+                transform = ax_scatter.transAxes
+                line.set_transform(transform)
+                ax_scatter.add_line(line)
+    
+                #vertical
+                line = mlines.Line2D([0.1, 0.1], [0.1, 0.0], color='black', linestyle = 'dotted')
+                transform = ax_scatter.transAxes
+                line.set_transform(transform)
+                ax_scatter.add_line(line)
+    
+                line = mlines.Line2D([0.1, (dY_mini-left)/width ], [0.1, (dX_mini-bottom+ width_mini)/height], color='black', linestyle = 'dotted')
+                transform = ax_scatter.transAxes
+                line.set_transform(transform)
+                ax_scatter.add_line(line)
+    
+                line = mlines.Line2D([0.1,  (dY_mini-left)/width], [0.0, (dX_mini-bottom)/height], color='black', linestyle = 'dotted')
+                transform = ax_scatter.transAxes
+                line.set_transform(transform)
+                ax_scatter.add_line(line)
 
 
 

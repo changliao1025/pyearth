@@ -9,7 +9,8 @@ import matplotlib.ticker as mticker
 from osgeo import  osr, gdal, ogr
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from shapely.wkt import loads
+#from shapely.wkt import loads
+from pyearth.gis.gdal.gdal_functions import get_geometry_coords
 import matplotlib.path as mpath
 from pyearth.gis.spatialref.retrieve_shapefile_spatial_reference import retrieve_shapefile_spatial_reference
 from pyearth.toolbox.math.stat.remap import remap
@@ -35,6 +36,8 @@ def map_vector_polyline_data(iFiletype_in,
                              sColormap_in = None,
                              sTitle_in = None,
                              iDPI_in = None,
+                              iSize_x_in = None, 
+                            iSize_y_in = None, 
                              dMissing_value_in=None,
                              dData_max_in = None,
                              dData_min_in = None,
@@ -75,6 +78,16 @@ def map_vector_polyline_data(iFiletype_in,
         iDPI = iDPI_in
     else:
         iDPI = 300
+    
+    if iSize_x_in is not None:
+        iSize_x = iSize_x_in
+    else:
+        iSize_x = 8
+
+    if iSize_y_in is not None:
+        iSize_y = iSize_y_in
+    else:
+        iSize_y = 8
 
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
@@ -146,7 +159,8 @@ def map_vector_polyline_data(iFiletype_in,
         sGeometry_type = pGeometry_in.GetGeometryName()
         dField = pFeature.GetField(sField_thickness)
         if sGeometry_type =='LINESTRING':
-            dummy0 = loads( pGeometry_in.ExportToWkt() )
+            #dummy0 = loads( pGeometry_in.ExportToWkt() )
+            aCoords_gcs = get_geometry_coords(pGeometry_in)
             aCoords_gcs = dummy0.coords
             aCoords_gcs= np.array(aCoords_gcs)
             aCoords_gcs = aCoords_gcs[:,0:2]
@@ -164,9 +178,9 @@ def map_vector_polyline_data(iFiletype_in,
         pProjection_map = ccrs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
    
    
-    fig = plt.figure( dpi=300)
-    fig.set_figwidth( 4 )
-    fig.set_figheight( 4 )
+    fig = plt.figure( dpi=iDPI)
+    fig.set_figwidth( iSize_x )
+    fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.15, 0.75, 0.8] , projection=pProjection_map ) #request.crs
     ax.set_global()
 

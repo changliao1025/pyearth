@@ -3,10 +3,20 @@
 [![DOI](https://zenodo.org/badge/67889575.svg)](https://zenodo.org/badge/latestdoi/67889575)
 [![Downloads](https://static.pepy.tech/badge/pyearth)](https://pepy.tech/project/pyearth)
 
-PyEarth is a lightweight Python package to support various Earth science tasks.
-It is designed to be a general-purpose library as it is inspired by the popular IDL Coyote library (http://www.idlcoyote.com/).
+Every hiker/camper would love to have a leatherman pocket knife around because it is versatile and reliable, sometimes life saving.
 
-Some of the code structure is inspired by the ArcGIS toolbox.
+This is why I developed PyEarth, a lightweight Python package to support various Earth science tasks.
+
+It is supposed to be lightweight, so that you won't be stopped by Conda install because of some dependency issues.
+You can also clone it and just use the functions you need.
+
+It is supposed to be versatile, so that you can use it for various tasks, such as GIS, data processing, plotting, etc.
+
+I use it in my daily work, and nearly all my acdemics papers use it in some way.
+
+It is designed to be a general-purpose library as it is inspired by the popular IDL Coyote library. Some of the code structure is inspired by the ArcGIS toolbox.
+
+If you find this package useful, please cite it and also consider sponsoring it.
 
 ### Dependency
 
@@ -15,12 +25,11 @@ PyEarth depends on the following packages
 1. `numpy`
 2. `gdal`
 3. `netCDF4`
-4. `shapely`
-5. `cartopy`
-6. `matplotlib`
-7. `pandas`
-8. `scipy`
-9. `statsmodels`
+4. `cartopy`
+5. `matplotlib`
+6. `pandas`
+7. `scipy`
+8. `statsmodels`
 
 ### Documentation
 
