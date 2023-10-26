@@ -1,5 +1,5 @@
 import os, sys
-from netCDF4 import Dataset
+import netCDF4 as nc
 from pyearth.system.define_global_variables import *
 
 def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, aDimension_in):
@@ -9,10 +9,10 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
         print("Nope, the path doesn't reach your file. Go research filepath in python")
         exit
 
-    pDatasets_in = Dataset(sFilename_old)
+    pDatasets_in = nc.Dataset(sFilename_old)
     netcdf_format = pDatasets_in.file_format
     #output file
-    pDatasets_out = Dataset(sFilename_new, "w", format=netcdf_format)
+    pDatasets_out = nc.Dataset(sFilename_new, "w", format=netcdf_format)
     aDimension_key=list()
     aDimension_value=list()
     for sKey, iValue in pDatasets_in.dimensions.items():
@@ -62,10 +62,10 @@ def add_multiple_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, aVar
         print("Nope, the path doesn't reach your file. Go research filepath in python")
         exit
     missing_value=-9999
-    pDatasets_in = Dataset(sFilename_old)
+    pDatasets_in = nc.Dataset(sFilename_old)
     netcdf_format = pDatasets_in.file_format
     #output file
-    pDatasets_out = Dataset(sFilename_new, "w", format=netcdf_format)
+    pDatasets_out = nc.Dataset(sFilename_new, "w", format=netcdf_format)
     aDimension_key=list()
     aDimension_value=list()
     for sKey, iValue in pDatasets_in.dimensions.items():

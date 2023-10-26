@@ -66,7 +66,7 @@ def gdal_read_geotiff_file(sFilename_in):
         pBand = None      
         pBand = None
 
-        return aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
+        return aData_out, dPixelWidth, pPixelHeight, dOriginX, dOriginY, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
 
 
 def gdal_read_geotiff_file_multiple_band(sFilename_in):
@@ -133,4 +133,4 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in):
         pDriver = None
         pDataset = None
         pBand = None
-        return aData_out, pPixelWidth, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
+        return aData_out, pPixelWidth, pPixelHeight, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
