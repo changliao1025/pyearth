@@ -55,7 +55,7 @@ def map_netcdf_file(
                             aLegend_in = None,
                             aExtent_in = None,
                             pProjection_map_in=None,
-                               aBoundary_in=None):
+                             pBoundary_in = None):
     """
     Extract data from a NetCDF file based on a bounding box.
 
@@ -143,12 +143,28 @@ def map_netcdf_file(
     else:
         sVariable =  'id'
 
+    if pBoundary_in is None:
+        pBoundary = None
+    else:
+        #for the reason that a geometry object will be crash if the associated dataset is closed, we must pass wkt string
+        #https://gdal.org/api/python_gotchas.html
+        pBoundary = ogr.CreateGeometryFromWkt(pBoundary_in)
+        #pBoundary = pBoundary_in #only works for shapely geometry object
+
     cmap = cm.get_cmap(sColormap)
 
     fig = plt.figure( dpi = iDPI  )
     
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
+    cmap = cm.get_cmap(sColormap)
+
+
+    #how can we define the boundary of the map?
+    #if the boundary is not defined, we will use the boundary of the data
+    #if the boundary is defined, we will use the boundary of the data
+
+    
 
     pSrs = osr.SpatialReference()  
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -166,10 +182,33 @@ def map_netcdf_file(
             pass
         else:   
             #regular grid
+            nVertex = 4
             dLongitude_min = np.min(aLongitude)
             dLongitude_max = np.max(aLongitude)
             dLatitude_min = np.min(aLatitude)
             dLatitude_max = np.max(aLatitude)
+
+            if pProjection_map_in is not None:
+                pProjection_map = pProjection_map_in
+            else:
+                if pBoundary_in is None:
+                    pProjection_map = ccrs.Orthographic(central_longitude =  0.50*(dLongitude_min+dLongitude_max),  
+                                                    central_latitude = 0.50*(dLatitude_min+dLatitude_max), globe=None)
+                else:
+                    #get the center of the boundary
+                    centroid = pBoundary.Centroid()
+                    # Extract coordinates
+                    centroid_x = centroid.GetX()
+                    centroid_y = centroid.GetY()
+                    pProjection_map = ccrs.Orthographic(central_longitude =  centroid_x,  
+                                                    central_latitude = centroid_y, globe=None)
+
+                    pass
+
+            ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map )
+            ax.set_global()
+
+
             ncolum = len(aLongitude)
             nrow = len(aLatitude)
             dResolution_x = (dLongitude_max - dLongitude_min) / (ncolum - 1)
@@ -181,10 +220,47 @@ def map_netcdf_file(
                 for j in range(0, nrow):
                     dLongitude_cell_center = dLongitude_min + i * dResolution_x
                     dLatitude_cell_center = dLatitude_min + j * dResolution_y
-                    if (dLongitude_cell_center >= aLongitude_box_min) \
-                    and (dLongitude_cell_center <= aLongitude_box_max) \
-                    and (dLatitude_cell_center >= aLatitude_box_min)\
-                    and (dLatitude_cell_center <= aLatitude_box_max):
+                    #create 
+                    pPoint = ogr.Geometry(ogr.wkbPoint)
+                    pPoint.AddPoint(dLongitude_cell_center, dLatitude_cell_center)            
+                    if pPoint.Within(pBoundary):
+
+                        #get the value
+                        dValue = ds.variables[sVariable][j,i]
+                        #get its cell shape
+                        aCoords_gcs = np.full((nVertex, 2), np.nan)              
+                        
+                        x1 = dLongitude_cell_center - dResolution_x/2
+                        y1 = dLatitude_cell_center - dResolution_y/2
+                        aCoords_gcs[0,:] = x1, y1
+                  
+
+                        x1 = dLongitude_cell_center + dResolution_x/2
+                        y1 = dLatitude_cell_center - dResolution_y/2
+                        aCoords_gcs[1,:] = x1, y1
+                       
+
+                        x1 = dLongitude_cell_center + dResolution_x/2
+                        y1 = dLatitude_cell_center + dResolution_y/2
+                        aCoords_gcs[2,:] = x1, y1
+                        
+
+                        x1 = dLongitude_cell_center - dResolution_x/2
+                        y1 = dLatitude_cell_center + dResolution_y/2
+                        aCoords_gcs[3,:] = x1, y1
+                      
+                        iColor_index = int( (dValue - dValue_min) / (dValue_max - dValue_min) * 255 )
+                        #pick color from colormap
+                        cmiColor_index = cmap(iColor_index)       
+                  
+                       
+
+                        
+                        
+                        polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, \
+                            alpha=0.8, edgecolor = cmiColor_index,facecolor=cmiColor_index, \
+                                transform=ccrs.PlateCarree() )
+                        ax.add_patch(polygon)       
                         
                         pass
                     else:

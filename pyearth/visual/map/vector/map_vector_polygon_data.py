@@ -185,7 +185,7 @@ def map_vector_polygon_data(iFiletype_in,
         if sGeometry_type =='POLYGON':
             #dummy0 = loads( pGeometry_in.ExportToWkt() )
             aCoords_gcs = get_geometry_coords(pGeometry_in)
-            aCoords_gcs = dummy0.exterior.coords
+            #aCoords_gcs = dummy0.exterior.coords
             aCoords_gcs= np.array(aCoords_gcs)            
             
             dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
@@ -240,8 +240,9 @@ def map_vector_polygon_data(iFiletype_in,
             #pick color from colormap
             cmiColor_index = cmap(iColor_index)     
             if sGeometry_type =='POLYGON':
-                dummy0 = loads( pGeometry_in.ExportToWkt() )
-                aCoords_gcs = dummy0.exterior.coords
+                #dummy0 = loads( pGeometry_in.ExportToWkt() )
+                aCoords_gcs = get_geometry_coords(pGeometry_in)
+                #aCoords_gcs = dummy0.exterior.coords
                 aCoords_gcs= np.array(aCoords_gcs)
                 polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, \
                     alpha=0.8, edgecolor = cmiColor_index,facecolor=cmiColor_index, \
