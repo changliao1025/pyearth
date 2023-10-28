@@ -2,19 +2,14 @@ import os
 import numpy as np
 
 import cartopy.crs as ccrs
-import cartopy.mpl.ticker as ticker
 import matplotlib as mpl
 #from shapely.wkt import loads
-from osgeo import  osr, gdal, ogr
-
+from osgeo import  osr, ogr
 import netCDF4 as nc
 import matplotlib.pyplot as plt
-import matplotlib.path as mpath
-import matplotlib.ticker as mticker
+
 import matplotlib.patches as mpatches
 import matplotlib.cm as cm
-from pyearth.toolbox.data.cgpercentiles import cgpercentiles
-from pyearth.gis.gdal.gdal_functions import get_geometry_coords
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 pProjection = ccrs.PlateCarree() #for latlon data only
@@ -31,14 +26,10 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
         if self._useMathText:
             self.format = r'$\mathdefault{%s}$' % self.format
 
-def map_netcdf_file(
-                    sFilename_netcdf_in, 
-                             
-                             sFilename_out,    
-                             
-                               iFlag_unstructured_in =None,
-                             sVariable_in = None,
-                            sFilename_output_in=None,
+def map_netcdf_file(    sFilename_netcdf_in,        
+                                sVariable_in ,                                                        
+                               iFlag_unstructured_in =None,                            
+                            sFolder_output_in=None,
                             iFlag_scientific_notation_colorbar_in=None,
                             iFont_size_in = None,
                             sColormap_in = None,
@@ -67,7 +58,7 @@ def map_netcdf_file(
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
-        iDPI = 300
+        iDPI = 100
 
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
@@ -91,14 +82,14 @@ def map_netcdf_file(
 
     if dData_min_in is not None:    
         iFlag_data_min = 1
-        dData_min = dData_min_in
+        dValue_min = dData_min_in
     else:
         iFlag_data_min = 0
         pass
 
     if dData_max_in is not None:    
         iFlag_data_max = 1
-        dData_max = dData_max_in
+        dValue_max = dData_max_in
     else:        
         iFlag_data_max = 0
         pass
@@ -138,10 +129,9 @@ def map_netcdf_file(
 
     plt.rcParams["font.family"] = sFont
     
-    if sVariable_in is not None:
-        sVariable = sVariable_in
-    else:
-        sVariable =  'id'
+    
+    sVariable = sVariable_in
+   
 
     if pBoundary_in is None:
         pBoundary = None
@@ -150,21 +140,21 @@ def map_netcdf_file(
         #https://gdal.org/api/python_gotchas.html
         pBoundary = ogr.CreateGeometryFromWkt(pBoundary_in)
         #pBoundary = pBoundary_in #only works for shapely geometry object
+        pBoundary_box = pBoundary.GetEnvelope()
 
     cmap = cm.get_cmap(sColormap)
 
-    fig = plt.figure( dpi = iDPI  )
-    
-    fig.set_figwidth( iSize_x )
-    fig.set_figheight( iSize_y )
-    cmap = cm.get_cmap(sColormap)
+
 
 
     #how can we define the boundary of the map?
     #if the boundary is not defined, we will use the boundary of the data
     #if the boundary is defined, we will use the boundary of the data
 
-    
+    #there are two ways to define the max and min of the data
+    #the fist way is to use the max and min of the data,
+    #this approach also have two sub-approaches: whole data, or data within the boundary
+    #the second way is user defined max and min of the data
 
     pSrs = osr.SpatialReference()  
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -172,10 +162,20 @@ def map_netcdf_file(
 
     try:
         ds = nc.Dataset(sFilename_netcdf_in, 'r')
-        aLatitude = ds.variables['lat'][:]
-        aLongitude = ds.variables['lon'][:]
 
-        aLongitude_box_min, aLatitude_box_min, aLongitude_box_max, aLatitude_box_max = bbox
+        #get all the dimensions
+        aDimension = ds.dimensions.keys()
+        #get the time dimension by name
+        aTime = ds.variables['time']
+        nTime = len(aTime)
+
+        aLatitude = ds.variables['lat'][:]
+        aLongitude = ds.variables['lon'][:] - 180
+
+        #read the variable 
+        aData = ds.variables[sVariable][:]
+        #deal with the time 
+
 
         if iFlag_unstructured_in is not None:
             #unstructured grid
@@ -205,68 +205,153 @@ def map_netcdf_file(
 
                     pass
 
-            ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map )
-            ax.set_global()
+            
 
 
-            ncolum = len(aLongitude)
+            ncolumn = len(aLongitude)
             nrow = len(aLatitude)
-            dResolution_x = (dLongitude_max - dLongitude_min) / (ncolum - 1)
+            dResolution_x = (dLongitude_max - dLongitude_min) / (ncolumn - 1)
             dResolution_y = (dLatitude_max - dLatitude_min) / (nrow - 1)
 
+            #get max and min of the data
+            
+            if pBoundary_in is not None:
+
+                aData_dump = list()
+                for i in range(0, nrow):
+                    for j in range(0, ncolumn):
+                        dLongitude_cell_center = dLongitude_min + j * dResolution_x
+                        dLatitude_cell_center = dLatitude_min + i * dResolution_y
+                        #create 
+                        pPoint = ogr.Geometry(ogr.wkbPoint)
+                        pPoint.AddPoint(dLongitude_cell_center, dLatitude_cell_center)            
+                        if pPoint.Within(pBoundary):
+                            aData_dump.append(aData[:,i,j])
+                            pass
+
+                aData_dump = np.array(aData_dump)
+                if iFlag_data_max == 0:                    
+                    dValue_max  = np.max(aData_dump)
+                if iFlag_data_min == 0:
+                    dValue_min  = np.min(aData_dump)
+            else:
+                if iFlag_data_max == 0:
+                    dValue_max  = np.max(aData)
+                
+                if iFlag_data_min == 0:
+                    dValue_min  = np.min(aData)
+
+
             #the bounding box should be applied to cell center
+            for iStep in range(0, nTime):
+                sStep = '{:03d}'.format(iStep)
+                fig = plt.figure( dpi = iDPI  )    
+                fig.set_figwidth( iSize_x )
+                fig.set_figheight( iSize_y )
+                ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map )
+                ax.set_global()
+                #redefine the filename and title
+                sFilename_out = os.path.join(sFolder_output, sVariable + '_' + sStep + '.png')
 
-            for i in range(0, ncolum):
-                for j in range(0, nrow):
-                    dLongitude_cell_center = dLongitude_min + i * dResolution_x
-                    dLatitude_cell_center = dLatitude_min + j * dResolution_y
-                    #create 
-                    pPoint = ogr.Geometry(ogr.wkbPoint)
-                    pPoint.AddPoint(dLongitude_cell_center, dLatitude_cell_center)            
-                    if pPoint.Within(pBoundary):
+                for i in range(0, nrow):
+                    for j in range(0, ncolumn):
+                        dLongitude_cell_center = dLongitude_min + j * dResolution_x
+                        dLatitude_cell_center = dLatitude_min + i * dResolution_y
+                        #create 
+                        pPoint = ogr.Geometry(ogr.wkbPoint)
+                        pPoint.AddPoint(dLongitude_cell_center, dLatitude_cell_center)            
+                        if pPoint.Within(pBoundary):
+                            #get the value
+                            dValue = aData[iStep,i,j]
+                            #get its cell shape
+                            aCoords_gcs = np.full((nVertex, 2), np.nan)              
 
-                        #get the value
-                        dValue = ds.variables[sVariable][j,i]
-                        #get its cell shape
-                        aCoords_gcs = np.full((nVertex, 2), np.nan)              
+                            x1 = dLongitude_cell_center - dResolution_x/2
+                            y1 = dLatitude_cell_center - dResolution_y/2
+                            aCoords_gcs[0,:] = x1, y1
+
+
+                            x1 = dLongitude_cell_center + dResolution_x/2
+                            y1 = dLatitude_cell_center - dResolution_y/2
+                            aCoords_gcs[1,:] = x1, y1
+
+
+                            x1 = dLongitude_cell_center + dResolution_x/2
+                            y1 = dLatitude_cell_center + dResolution_y/2
+                            aCoords_gcs[2,:] = x1, y1
+
+
+                            x1 = dLongitude_cell_center - dResolution_x/2
+                            y1 = dLatitude_cell_center + dResolution_y/2
+                            aCoords_gcs[3,:] = x1, y1
+
+                            iColor_index = int( (dValue - dValue_min) / (dValue_max - dValue_min) * 255 )
+                            #pick color from colormap
+                            cmiColor_index = cmap(iColor_index)                           
+
+                            polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, \
+                                alpha=0.8, edgecolor = cmiColor_index,facecolor=cmiColor_index, \
+                                    transform=ccrs.PlateCarree() )
+                            ax.add_patch(polygon)       
+
+                            pass
+                        else:
+                            pass
                         
-                        x1 = dLongitude_cell_center - dResolution_x/2
-                        y1 = dLatitude_cell_center - dResolution_y/2
-                        aCoords_gcs[0,:] = x1, y1
-                  
-
-                        x1 = dLongitude_cell_center + dResolution_x/2
-                        y1 = dLatitude_cell_center - dResolution_y/2
-                        aCoords_gcs[1,:] = x1, y1
-                       
-
-                        x1 = dLongitude_cell_center + dResolution_x/2
-                        y1 = dLatitude_cell_center + dResolution_y/2
-                        aCoords_gcs[2,:] = x1, y1
-                        
-
-                        x1 = dLongitude_cell_center - dResolution_x/2
-                        y1 = dLatitude_cell_center + dResolution_y/2
-                        aCoords_gcs[3,:] = x1, y1
-                      
-                        iColor_index = int( (dValue - dValue_min) / (dValue_max - dValue_min) * 255 )
-                        #pick color from colormap
-                        cmiColor_index = cmap(iColor_index)       
-                  
-                       
-
-                        
-                        
-                        polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, \
-                            alpha=0.8, edgecolor = cmiColor_index,facecolor=cmiColor_index, \
-                                transform=ccrs.PlateCarree() )
-                        ax.add_patch(polygon)       
-                        
-                        pass
+                #add extent
+                if aExtent_in is None:
+                    if pBoundary_in is None:
+                        marginx  = (dLongitude_max - dLongitude_min) / 20
+                        marginy  = (dLatitude_max - dLatitude_min) / 20
+                        aExtent = [dLongitude_min - marginx , dLongitude_max + marginx , dLatitude_min -marginy , dLatitude_max + marginy]
                     else:
-                        pass
+
+                        marginx  = (pBoundary_box[1] - pBoundary_box[0]) / 20
+                        marginy  = (pBoundary_box[3] - pBoundary_box[2]) / 20
+                        aExtent = [pBoundary_box[0] - marginx , pBoundary_box[1] + marginx , pBoundary_box[2] -marginy , pBoundary_box[3] + marginy]
+                else:
+                    aExtent = aExtent_in
+
+                ax.set_extent(aExtent)
+                ax.coastlines(color='black', linewidth=1)
+                ax.set_title(sTitle)
+                ax_cb= fig.add_axes([0.75, 0.15, 0.02, 0.6])
+
+                if iFlag_scientific_notation_colorbar==1:
+                    formatter = OOMFormatter(fformat= "%1.1e")       
+                    cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical', 
+                                           cmap=cmap,
+                                           norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+                else:
+                    formatter = OOMFormatter(fformat= "%1.2f")
+                    cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical', 
+                                           cmap=cmap,
+                                           norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+
+                cb.ax.get_yaxis().set_ticks_position('right')
+                cb.ax.get_yaxis().labelpad = 5
+                cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+                cb.ax.get_yaxis().set_label_position('left')
+                cb.ax.tick_params(labelsize=iFont_size-2)
+
+                gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                                  linewidth=1, color='gray', alpha=0.5, linestyle='--')
+                gl.xformatter = LONGITUDE_FORMATTER
+                gl.yformatter = LATITUDE_FORMATTER
+
+                gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
+                gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
+                
+                if sFolder_output_in is None:
+                    plt.show()
+                else:                   
                     
-        
+                    plt.savefig(sFilename_out, bbox_inches='tight')
+                   
+                    plt.close('all')
+                    plt.clf()
 
         print("Extraction successful!")
     except Exception as e:
@@ -275,8 +360,28 @@ def map_netcdf_file(
 # Example usage:
 
 if __name__ == "__main__":
-    sFilename_netcdf_in_path = "path_to_input_netcdf_file.nc"
-    sFilename_netcdf_out_path = "path_to_output_netcdf_file.nc"
-    bbox = (-90, 30, -70, 40)  # Example bounding box
+    sFilename_netcdf_in_path = "/compyfs/inputdata/lnd/dlnd7/mingpan/ming_daily_2019.nc"
+ 
+    sVariable_in = "QOVER"
 
-    map_netcdf_file(sFilename_netcdf_in_path, sFilename_netcdf_out_path, bbox)
+    sFolder_output = '/qfs/people/liao313/workspace/python/pyearth/figures/'
+    
+    
+    aExtent = [-150.015625, -146.234375, 67.921875, 70.328125]
+    dLongitude_left, dLongitude_right, dLatitude_bot, dLatitude_top = aExtent
+    pRing = ogr.Geometry(ogr.wkbLinearRing)
+    pRing.AddPoint(dLongitude_left, dLatitude_top)
+    pRing.AddPoint(dLongitude_right, dLatitude_top)
+    pRing.AddPoint(dLongitude_right, dLatitude_bot)
+    pRing.AddPoint(dLongitude_left, dLatitude_bot)
+    pRing.AddPoint(dLongitude_left, dLatitude_top)
+    pBoundary = ogr.Geometry(ogr.wkbPolygon)
+    pBoundary.AddGeometry(pRing)
+    pBoundary_wkt =  pBoundary.ExportToWkt() 
+
+    sTitle = 'Qver'
+    sUnit = 'mm/day'
+
+    map_netcdf_file(sFilename_netcdf_in_path, sVariable_in, sFolder_output_in=sFolder_output, 
+                    pBoundary_in=pBoundary_wkt, iFlag_scientific_notation_colorbar_in =1,
+                    sTitle_in = sTitle, sUnit_in=sUnit)
