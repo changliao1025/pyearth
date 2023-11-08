@@ -1,8 +1,9 @@
 from datetime import datetime
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
+
+
 from pyearth.system.define_global_variables import *
 
 
@@ -104,13 +105,13 @@ def plot_time_series_data_with_two_y_axis(aTime_all, aData_all,
     else:
         pass
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax1 = fig.add_axes([0.1, 0.5, 0.8, 0.4])
-    pYear = mdates.YearLocator(1)   # every year
-    pMonth = mdates.MonthLocator()  # every month
-    sYear_format = mdates.DateFormatter('%Y')
+    pYear = mpl.dates.YearLocator(1)   # every year
+    pMonth = mpl.dates.MonthLocator()  # every month
+    sYear_format = mpl.dates.DateFormatter('%Y')
     # plot the first axis
     i = 1
     x1 = aTime_all[i-1]
@@ -169,12 +170,12 @@ def plot_time_series_data_with_two_y_axis(aTime_all, aData_all,
     x_max = np.datetime64(aTime_all[1][-1], 'Y') + np.timedelta64(1, 'Y')
     ax1.set_xlim(x_min, x_max)
     if dMax_y1 < 1000 and dMax_y1 > 0.001:
-        ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+        ax1.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
     else:
-        ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+        ax1.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))
 
-    ax1.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y1))
-    ax2.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y2))
+    ax1.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace_y1))
+    ax2.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace_y2))
     if (iReverse_y == 1):
         ax1.set_ylim(dMax_y1, dMin_y1)
     else:
@@ -183,8 +184,8 @@ def plot_time_series_data_with_two_y_axis(aTime_all, aData_all,
     ax1.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
     ax2.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
     print(sFilename_out)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()
     # print('finished plotting')

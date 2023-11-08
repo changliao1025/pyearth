@@ -1,8 +1,8 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import matplotlib as mpl
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
+
 def fmt0(x):
         a, b = '{:.1e}'.format(x).split('e')
         b = int(b)
@@ -98,7 +98,7 @@ def scatter_plot_data_density(aData_x,
     else:
         sTitle = ''
 
-    fig = plt.figure( dpi=iDPI )
+    fig = mpl.pyplot.figure( dpi=iDPI )
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
@@ -110,11 +110,11 @@ def scatter_plot_data_density(aData_x,
     rect_histy = [left + width + spacing, bottom, 0.15, height]
 
 
-    ax_scatter = plt.axes(rect_scatter)
+    ax_scatter = mpl.pyplot.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
-    ax_histx = plt.axes(rect_histx)
+    ax_histx = mpl.pyplot.axes(rect_histx)
     ax_histx.tick_params(direction='in', labelbottom=False)
-    ax_histy = plt.axes(rect_histy)
+    ax_histy = mpl.pyplot.axes(rect_histy)
     ax_histy.tick_params(direction='in', labelleft=False)
 
     nPoint = len(aData_x)
@@ -142,7 +142,7 @@ def scatter_plot_data_density(aData_x,
     
 
     xx, yy, z = scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
-    cmap = plt.get_cmap('BuPu')
+    cmap = mpl.pyplot.get_cmap('BuPu')
     sc = ax_scatter.contourf(xx, yy, z, 5, cmap=cmap) 
     aLegend_artist, aLegend_label = sc.legend_elements(str_format=fmt2)
     aLegend_label_new=[]
@@ -163,19 +163,19 @@ def scatter_plot_data_density(aData_x,
     # round to nearest years...
     if sFormat_x_in is not None:
         sFormat_x=sFormat_x_in
-        ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_x))
+        ax_scatter.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_x))
 
   
 
     if sFormat_y_in is not None:
         #sFormat_y = sFormat_y_in
-        #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        #ax_scatter.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
         sFormat_y_dummy =  sFormat_y_in.replace("{", "{x")
-        ax_scatter.yaxis.set_major_formatter(ticker.StrMethodFormatter(  sFormat_y_dummy ) ) 
+        ax_scatter.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter(  sFormat_y_dummy ) ) 
 
     
     ax_scatter.tick_params(axis='y', pad=8)
-    #ax_scatter.yaxis.set_major_locator(ticker.MaxNLocator(nbins = 5, prune='lower' ))
+    #ax_scatter.yaxis.set_major_locator(mpl.ticker.MaxNLocator(nbins = 5, prune='lower' ))
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
@@ -210,8 +210,8 @@ def scatter_plot_data_density(aData_x,
     else:
         dSpace_y = (dMax_y - dMin_y) /4.0
 
-    #ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
-    ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
+    #ax_scatter.xaxis.set_major_locator(mpl.ticker.MaxNLocator(prune='upper', nbins=5))
+    ax_scatter.xaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_x))
 
     if iFlag_log_x ==1:
         aLabel_x = []
@@ -224,7 +224,7 @@ def scatter_plot_data_density(aData_x,
         ax_scatter.set_xticklabels(aLabel_x)
     else:
         if iFlag_scientific_notation_x ==1:
-            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter = mpl.ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             formatter.set_powerlimits((-1,1)) # you might need to change here
             ax_scatter.xaxis.set_major_formatter(formatter)
@@ -232,7 +232,7 @@ def scatter_plot_data_density(aData_x,
             pass
         pass
 
-    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
+    ax_scatter.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_y))
 
     if iFlag_log_y ==1:
         aLabel_y = []
@@ -246,7 +246,7 @@ def scatter_plot_data_density(aData_x,
         pass
     else:
         if iFlag_scientific_notation_y ==1:
-            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter = mpl.ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             formatter.set_powerlimits((-1,1)) # you might need to change here
             ax_scatter.yaxis.set_major_formatter(formatter)
@@ -298,7 +298,7 @@ def scatter_plot_data_density(aData_x,
 
     ax_histx.axis('on')
     ax_histx.grid(which='major', color='white', linestyle='-', axis='x')
-    ax_histx.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x/2))
+    ax_histx.xaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_x/2))
     ax_histx.spines['right'].set_visible(False)
     ax_histx.spines['top'].set_visible(False)
     ax_histx.spines['bottom'].set_visible(False)
@@ -326,7 +326,7 @@ def scatter_plot_data_density(aData_x,
 
     ax_histy.axis('on')
     ax_histy.grid(which='major', color='white', linestyle='-', axis='y')
-    ax_histy.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y/2))
+    ax_histy.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_y/2))
     ax_histy.spines['right'].set_visible(False)
     ax_histy.spines['top'].set_visible(False)
     ax_histy.spines['bottom'].set_visible(False)
@@ -343,7 +343,7 @@ def scatter_plot_data_density(aData_x,
                          bottom='off') # turn off bottom ticks
 
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
+    mpl.pyplot.close('all')
     print('finished plotting')

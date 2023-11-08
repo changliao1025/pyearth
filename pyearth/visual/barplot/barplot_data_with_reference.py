@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import matplotlib.patches as mpl_patches
+import matplotlib as mpl
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -134,7 +133,7 @@ def barplot_data_with_reference(aData_in,
     else:
         aHatch = np.fill(nData, '+')
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -203,7 +202,7 @@ def barplot_data_with_reference(aData_in,
         pass
 
     if iFlag_scientific_notation == 1:
-        formatter = ticker.ScalarFormatter(useMathText=True)
+        formatter = mpl.ticker.ScalarFormatter(useMathText=True)
         formatter.set_scientific(True)
         # formatter.set_powerlimits((-1,1)) # you might need to change here
         ax.yaxis.set_major_formatter(formatter)
@@ -218,7 +217,7 @@ def barplot_data_with_reference(aData_in,
                 color='black', fontsize=13)
 
     if (iFlag_format_y == 1):
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
     ax.set_xlim(dMin_x, dMax_x)
     ax.set_ylim(dMin_y, dMax_y)
@@ -229,7 +228,7 @@ def barplot_data_with_reference(aData_in,
         # labels = []
         for i in range(nsub):
             # handles.append(
-            p = mpl_patches.Rectangle(
+            p = mpl.patches.Rectangle(
                 (0, 0), 2, 2, hatch=aHatch[i], facecolor='w', label=aLabel_z_in[i])  # )
             leg_artists.append(p)
             aLabel.append(aLabel_z_in[i])
@@ -239,9 +238,9 @@ def barplot_data_with_reference(aData_in,
               fontsize=14,
               ncol=ncolumn)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()
 
     return

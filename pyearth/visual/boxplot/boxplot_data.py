@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import matplotlib.patches as patches
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -143,7 +141,7 @@ def boxplot_data(aData_in,
     else:
         aHatch = np.full(nData, '+')
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -190,7 +188,7 @@ def boxplot_data(aData_in,
             y_top = q3_raw
             height = y_top-y_bot
             # draw box
-            rect = patches.Rectangle((x_left, y_bot), dWidth, height, linewidth=0.5,
+            rect = mpl.patches.Rectangle((x_left, y_bot), dWidth, height, linewidth=0.5,
                                      facecolor=aColor[j-1], edgecolor='k')  # , hatch = aHatch[j-1 ]
 
             if i == 1:
@@ -253,7 +251,7 @@ def boxplot_data(aData_in,
     ax.set_xticklabels(aLabel_x_in)
 
     if (iFlag_format_y == 1):
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
     ax.set_xlim(-1, nData)
     ax.set_ylim(dMin_y, dMax_y)
@@ -263,6 +261,6 @@ def boxplot_data(aData_in,
     ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend, fontsize=12, ncol=ncolumn)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()

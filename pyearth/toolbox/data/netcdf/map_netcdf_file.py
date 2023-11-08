@@ -2,13 +2,9 @@ import os
 import numpy as np
 from osgeo import osr, ogr
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.cm as cm
-import cartopy.crs as ccrs
+import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-
-pProjection = ccrs.PlateCarree()  # for latlon data only
+pProjection = cpl.crs.PlateCarree()  # for latlon data only
 
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -134,7 +130,7 @@ def map_netcdf_file(sFilename_netcdf_in,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    mpl.pyplot.rcParams["font.family"] = sFont
 
     sVariable = sVariable_in
 
@@ -147,7 +143,7 @@ def map_netcdf_file(sFilename_netcdf_in,
         # pBoundary = pBoundary_in #only works for shapely geometry object
         pBoundary_box = pBoundary.GetEnvelope()
 
-    cmap = cm.get_cmap(sColormap)
+    cmap = mpl.cm.get_cmap(sColormap)
 
     # how can we define the boundary of the map?
     # if the boundary is not defined, we will use the boundary of the data
@@ -192,7 +188,7 @@ def map_netcdf_file(sFilename_netcdf_in,
                 pProjection_map = pProjection_map_in
             else:
                 if pBoundary_in is None:
-                    pProjection_map = ccrs.Orthographic(central_longitude=0.50*(dLongitude_min+dLongitude_max),
+                    pProjection_map = cpl.crs.Orthographic(central_longitude=0.50*(dLongitude_min+dLongitude_max),
                                                         central_latitude=0.50*(dLatitude_min+dLatitude_max), globe=None)
                 else:
                     # get the center of the boundary
@@ -200,7 +196,7 @@ def map_netcdf_file(sFilename_netcdf_in,
                     # Extract coordinates
                     centroid_x = centroid.GetX()
                     centroid_y = centroid.GetY()
-                    pProjection_map = ccrs.Orthographic(central_longitude=centroid_x,
+                    pProjection_map = cpl.crs.Orthographic(central_longitude=centroid_x,
                                                         central_latitude=centroid_y, globe=None)
 
                     pass
@@ -242,7 +238,7 @@ def map_netcdf_file(sFilename_netcdf_in,
             # the bounding box should be applied to cell center
             for iStep in range(0, nTime):
                 sStep = '{:03d}'.format(iStep)
-                fig = plt.figure(dpi=iDPI)
+                fig = mpl.pyplot.figure(dpi=iDPI)
                 fig.set_figwidth(iSize_x)
                 fig.set_figheight(iSize_y)
                 ax = fig.add_axes([0.08, 0.1, 0.62, 0.7],
@@ -287,9 +283,9 @@ def map_netcdf_file(sFilename_netcdf_in,
                             # pick color from colormap
                             cmiColor_index = cmap(iColor_index)
 
-                            polygon = mpatches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
+                            polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
                                                        alpha=0.8, edgecolor=cmiColor_index, facecolor=cmiColor_index,
-                                                       transform=ccrs.PlateCarree())
+                                                       transform=cpl.crs.PlateCarree())
                             ax.add_patch(polygon)
 
                             pass
@@ -338,7 +334,7 @@ def map_netcdf_file(sFilename_netcdf_in,
                 cb.ax.get_yaxis().set_label_position('left')
                 cb.ax.tick_params(labelsize=iFont_size-2)
 
-                gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                                   linewidth=1, color='gray', alpha=0.5, linestyle='--')
                 gl.xformatter = LONGITUDE_FORMATTER
                 gl.yformatter = LATITUDE_FORMATTER

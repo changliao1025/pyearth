@@ -1,5 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 from mpl_toolkits.axes_grid1 import AxesGrid
 
 def ridgeplot_data_density(aDict,
@@ -86,8 +87,8 @@ def ridgeplot_data_density(aDict,
     else:
         sTitle = ''
 
-    plt.rcParams["font.family"] = "Times New Roman"
-    fig = plt.figure(dpi=iDPI)
+    mpl.pyplot.rcParams["font.family"] = "Times New Roman"
+    fig = mpl.pyplot.figure(dpi=iDPI)
 
     # we generate a color palette with Seaborn.color_palette()
     pal = sns.color_palette(palette='coolwarm', n_colors=nData)
@@ -157,8 +158,8 @@ def ridgeplot_data_density(aDict,
             ax.set_xlabel(sText,  fontsize=15)
             pass
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()
     return

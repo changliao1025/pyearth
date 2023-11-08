@@ -1,29 +1,23 @@
-import os, sys
 import numpy as np
-import matplotlib as mpl
-
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import matplotlib.ticker as ticker
 from datetime import datetime
 
-
+import matplotlib as mpl
 
 from pyearth.system.define_global_variables import *
-from pyearth.visual.plot.calculate_ticks_space import calculate_ticks_space
+from pyearth.visual.calculate_ticks_space import calculate_ticks_space
 
-def plot_time_series_data_monthly_fill(aTime, aData, \
-    sFilename_out,\
-    iDPI_in = None,\
-    iFlag_trend_in = None, \
-    iReverse_Y_in = None, \
-    iSize_X_in = None, \
-    iSize_Y_in = None, \
-    dMax_Y_in =None, \
-    dMin_Y_in = None, \
-    sMarker_in =None,\
-    sLabel_Y_in = None, \
-    sLabel_legend_in = None,\
+def plot_time_series_data_monthly_fill(aTime, aData,  
+    sFilename_out, 
+    iDPI_in = None, 
+    iFlag_trend_in = None,  
+    iReverse_Y_in = None,  
+    iSize_X_in = None,  
+    iSize_Y_in = None,  
+    dMax_Y_in =None,  
+    dMin_Y_in = None,  
+    sMarker_in =None, 
+    sLabel_Y_in = None,  
+    sLabel_legend_in = None, 
     sTitle_in = None):
 
     if iDPI_in is not None:        
@@ -86,21 +80,21 @@ def plot_time_series_data_monthly_fill(aTime, aData, \
 
     
 
-    fig = plt.figure( dpi=iDPI )
+    fig = mpl.pyplot.figure( dpi=iDPI )
     fig.set_figwidth( iSize_X)   
     fig.set_figheight( iSize_Y)         
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4] )  
-    pYear = mdates.YearLocator(5)   # every year
-    pMonth = mdates.MonthLocator()  # every month
-    sYear_format = mdates.DateFormatter('%Y')
+    pYear = mpl.dates.YearLocator(5)   # every year
+    pMonth = mpl.dates.MonthLocator()  # every month
+    sYear_format = mpl.dates.DateFormatter('%Y')
     x1 = aTime    
     y1 = (aData[1])[0]
     y_top = (aData[0])[0]
     y_bot = (aData[2])[0]
     ax.fill_between(x1, y_top, y_bot,  facecolor='cornflowerblue')
-    ax.plot( x1, y1, \
-             color = 'red', linestyle = '--' ,\
-                  marker=sMarker, markeredgecolor='blue' ,\
+    ax.plot( x1, y1,  
+             color = 'red', linestyle = '--' , 
+                  marker=sMarker, markeredgecolor='blue' , 
                        label= sLabel_legend)
                        
     #calculate linear regression
@@ -139,16 +133,16 @@ def plot_time_series_data_monthly_fill(aTime, aData, \
     x_max = np.datetime64(aTime[nstress-1], 'Y') + np.timedelta64(1, 'Y')
     ax.set_xlim(x_min, x_max)
     if dMax_Y < 1000 and dMax_Y > 0.1:
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
     else: 
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))
     dummy = calculate_ticks_space([y1,y_top,y_bot], nstep_in =5, iFlag_small_in= 1)
     dSpace = dummy[0]
     if(dSpace<= 0):
         ax.invert_yaxis()
 
     else:
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace))
         dMin_Y = dummy[1]
         dMax_Y = dummy[2]
         if (iReverse_Y ==1):
@@ -156,8 +150,8 @@ def plot_time_series_data_monthly_fill(aTime, aData, \
         else:
             ax.set_ylim( dMin_Y, dMax_Y )
     ax.legend(bbox_to_anchor=(1.0,1.0), loc="upper right",fontsize=12)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
                        
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()
     #print('finished plotting')

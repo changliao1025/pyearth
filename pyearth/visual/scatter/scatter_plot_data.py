@@ -1,7 +1,7 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
 def scatter_plot_data(aData_x,  
@@ -93,7 +93,7 @@ def scatter_plot_data(aData_x,
     else:
         sTitle = ''
 
-    fig = plt.figure( dpi=iDPI )
+    fig = mpl.pyplot.figure( dpi=iDPI )
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
@@ -105,13 +105,13 @@ def scatter_plot_data(aData_x,
     rect_histy = [left + width + spacing, bottom, 0.15, height]
 
     
-    ax_scatter = plt.axes(rect_scatter)
+    ax_scatter = mpl.pyplot.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
     iFlag_histgram=1
     if iFlag_histgram ==1:
-        ax_histx = plt.axes(rect_histx)
+        ax_histx = mpl.pyplot.axes(rect_histx)
         ax_histx.tick_params(direction='in', labelbottom=False)
-        ax_histy = plt.axes(rect_histy)
+        ax_histy = mpl.pyplot.axes(rect_histy)
         ax_histy.tick_params(direction='in', labelleft=False)
 
 
@@ -128,7 +128,7 @@ def scatter_plot_data(aData_x,
     aLegend_label=[]
 
     
-    cmap = plt.get_cmap('BuPu')
+    cmap = mpl.pyplot.get_cmap('BuPu')
 
     sc= ax_scatter.scatter(x, y,  alpha=0.5,cmap=cmap)
     #ax_scatter.set_facecolor('silver')
@@ -152,17 +152,17 @@ def scatter_plot_data(aData_x,
 
     if sFormat_x_in is not None:
         sFormat_x=sFormat_x_in
-        ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_x))
+        ax_scatter.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_x))
 
-        #ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))'%.1f'
+        #ax_scatter.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))'%.1f'
 
     if sFormat_y_in is not None:
         #sFormat_y = sFormat_y_in
-        #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        #ax_scatter.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
         sFormat_y_dummy =  sFormat_y_in.replace("{", "{x")
-        ax_scatter.yaxis.set_major_formatter(ticker.StrMethodFormatter(  sFormat_y_dummy ) ) 
+        ax_scatter.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter(  sFormat_y_dummy ) ) 
 
-        #ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))'%.1f'
+        #ax_scatter.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))'%.1f'
 
     ax_scatter.tick_params(axis='y', pad=8)
     if dMin_x_in is not None:
@@ -199,8 +199,8 @@ def scatter_plot_data(aData_x,
     ax_scatter.set_ylim( dMin_y, dMax_y)
 
 
-    #ax_scatter.xaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=4))
-    ax_scatter.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x))
+    #ax_scatter.xaxis.set_major_locator(mpl.ticker.MaxNLocator(prune='upper', nbins=4))
+    ax_scatter.xaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_x))
 
 
     if iFlag_log_x ==1:
@@ -214,7 +214,7 @@ def scatter_plot_data(aData_x,
         ax_scatter.set_xticklabels(aLabel_x)
     else:
         if iFlag_scientific_notation_x ==1:
-            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter = mpl.ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             #formatter.set_powerlimits((-1,6)) # you might need to change here
             ax_scatter.xaxis.set_major_formatter(formatter)
@@ -222,7 +222,7 @@ def scatter_plot_data(aData_x,
             pass
 
 
-    ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
+    ax_scatter.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_y))
 
 
     if iFlag_log_y ==1:
@@ -237,7 +237,7 @@ def scatter_plot_data(aData_x,
         pass
     else:
         if iFlag_scientific_notation_y ==1:
-            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter = mpl.ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             #formatter.set_powerlimits((-1,6)) # you might need to change here
             ax_scatter.yaxis.set_major_formatter(formatter)
@@ -301,7 +301,7 @@ def scatter_plot_data(aData_x,
 
         ax_histx.axis('on')
         ax_histx.grid(which='major', color='white', linestyle='-', axis='x')
-        ax_histx.xaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_x/2.0))
+        ax_histx.xaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_x/2.0))
         ax_histx.spines['right'].set_visible(False)
         ax_histx.spines['top'].set_visible(False)
         ax_histx.spines['bottom'].set_visible(False)
@@ -329,7 +329,7 @@ def scatter_plot_data(aData_x,
 
         ax_histy.axis('on')
         ax_histy.grid(which='major', color='white', linestyle='-', axis='y')
-        ax_histy.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y/2.0))
+        ax_histy.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_y/2.0))
         ax_histy.spines['right'].set_visible(False)
         ax_histy.spines['top'].set_visible(False)
         ax_histy.spines['bottom'].set_visible(False)
@@ -346,8 +346,8 @@ def scatter_plot_data(aData_x,
                              bottom='off') # turn off bottom ticks
 
     ax_scatter.set_title( sTitle, loc='center', fontsize=15)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()
    

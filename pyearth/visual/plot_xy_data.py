@@ -1,8 +1,8 @@
 
 from datetime import datetime
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -192,7 +192,7 @@ def plot_xy_data(aX_all,
         iFlag_replace_xtick = 0
         pass
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -250,17 +250,17 @@ def plot_xy_data(aX_all,
     ax.set_xlim(dMin_x, dMax_x)
 
     # if dMax_y < 1000 and dMax_y > 0.001:
-    #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+    #    ax.yaxis.set_major_formatter( mpl.ticker.FormatStrFormatter('%.1f'))
     # else:
-    #    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))
+    #    ax.yaxis.set_major_formatter( mpl.ticker.FormatStrFormatter('%.1e'))
     if (iFlag_format_y == 1):
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
     if (iFlag_space_y == 0):
-        ax.yaxis.set_major_locator(ticker.AutoLocator())
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+        ax.yaxis.set_major_locator(mpl.ticker.AutoLocator())
+        ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
     else:
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace_y))
 
     if (iReverse_y == 1):
         ax.set_ylim(dMax_y, dMin_y)
@@ -294,7 +294,7 @@ def plot_xy_data(aX_all,
               fontsize=8,
               ncol=ncolumn)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()

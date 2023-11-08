@@ -1,9 +1,10 @@
 
 from datetime import datetime
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
+
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
@@ -133,7 +134,7 @@ def plot_time_series_data(aTime_all,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    mpl.pyplot.rcParams["font.family"] = sFont
 
     if aMarker_in is not None:
         aMarker = aMarker_in
@@ -239,7 +240,7 @@ def plot_time_series_data(aTime_all,
     else:
         iFlag_miniplot = 0
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -252,29 +253,29 @@ def plot_time_series_data(aTime_all,
     rect_full = [left, bottom, width, height]
     rect_mini = [dY_mini, dX_mini, width_mini, heigh_mini]
 
-    ax_full = plt.axes(rect_full)
+    ax_full = mpl.pyplot.axes(rect_full)
     if iFlag_miniplot == 1:
-        ax_mini = plt.axes(rect_mini)
+        ax_mini = mpl.pyplot.axes(rect_mini)
         ax_all = [ax_full, ax_mini]
     else:
         ax_all = [ax_full]
 
     if nYear <= 3:
-        pYear = mdates.YearLocator()   # every year
-        pMonth = mdates.MonthLocator()  # every month
+        pYear = mpl.dates.YearLocator()   # every year
+        pMonth = mpl.dates.MonthLocator()  # every month
 
-        pYear_min = mdates.YearLocator(1)   # every year
-        pMonth_min = mdates.MonthLocator(3)  # every 3 month
+        pYear_min = mpl.dates.YearLocator(1)   # every year
+        pMonth_min = mpl.dates.MonthLocator(3)  # every 3 month
     else:
-        pYear = mdates.YearLocator(2)   # every 2 year
-        pMonth = mdates.MonthLocator(6)  # every month
+        pYear = mpl.dates.YearLocator(2)   # every 2 year
+        pMonth = mpl.dates.MonthLocator(6)  # every month
 
-        pYear_min = mdates.YearLocator(1)   # every year
-        pMonth_min = mdates.MonthLocator(6)  # every 6 month
+        pYear_min = mpl.dates.YearLocator(1)   # every year
+        pMonth_min = mpl.dates.MonthLocator(6)  # every 6 month
 
     if sDate_type_in is not None:
         if sDate_type_in == 'month':
-            pMonth = mdates.MonthLocator(3)
+            pMonth = mpl.dates.MonthLocator(3)
         else:
             pass
     else:
@@ -302,8 +303,8 @@ def plot_time_series_data(aTime_all,
     else:
         ncolumn = 1
 
-    sYear_format = mdates.DateFormatter('%Y')
-    sMonth_format = mdates.DateFormatter('%Y-%m')
+    sYear_format = mpl.dates.DateFormatter('%Y')
+    sMonth_format = mpl.dates.DateFormatter('%Y-%m')
     # start loop for each data
 
     for iax in range(len(ax_all)):
@@ -395,11 +396,11 @@ def plot_time_series_data(aTime_all,
                     ax.set_yticks(ticks)
                     ax.set_yticklabels(aLabel_y)
                     pass
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
                 pass
             else:
                 if iFlag_scientific_notation == 1:
-                    # formatter = ticker.ScalarFormatter(useMathText=True)
+                    # formatter = mpl.ticker.ScalarFormatter(useMathText=True)
                     # formatter.set_scientific(True)
                     # y0 = int(np.log10(dMin_y))
                     # y1=  int(np.log10(dMax_y))
@@ -411,15 +412,15 @@ def plot_time_series_data(aTime_all,
                 else:
                     if (iFlag_space_y == 0):
                         ax.yaxis.set_major_locator(
-                            ticker.MaxNLocator(prune='upper', nbins=5))
+                            mpl.ticker.MaxNLocator(prune='upper', nbins=5))
                     else:
                         ax.yaxis.set_major_locator(
-                            ticker.MultipleLocator(dSpace_y))
-                        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                            mpl.ticker.MultipleLocator(dSpace_y))
+                        ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
                     if (iFlag_format_y == 1):
                         sFormat_y_dummy = sFormat_y.replace("{", "{x")
                         ax.yaxis.set_major_formatter(
-                            ticker.StrMethodFormatter(sFormat_y_dummy))
+                            mpl.ticker.StrMethodFormatter(sFormat_y_dummy))
                     pass
             ax.set_title(sTitle, loc='center', fontsize=15)
             ax.set_xlim(dMin_x_m, dMax_x_m)
@@ -457,23 +458,23 @@ def plot_time_series_data(aTime_all,
                     ax.set_yticks(ticks)
                     ax.set_yticklabels(aLabel_y)
                     pass
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
                 pass
             else:
                 if iFlag_scientific_notation == 1:
-                    formatter = ticker.ScalarFormatter(useMathText=True)
+                    formatter = mpl.ticker.ScalarFormatter(useMathText=True)
                     formatter.set_scientific(True)
                     ax.yaxis.set_major_formatter(formatter)
                     pass
                 else:
                     dSpace_y_mini = dSpace_y / 4
                     ax.yaxis.set_major_locator(
-                        ticker.MultipleLocator(dSpace_y_mini))
-                    ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+                        mpl.ticker.MultipleLocator(dSpace_y_mini))
+                    ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
                     if (iFlag_format_y == 1):
                         sFormat_y_dummy = sFormat_y.replace("{", "{x")
                         ax.yaxis.set_major_formatter(
-                            ticker.StrMethodFormatter(sFormat_y_dummy))
+                            mpl.ticker.StrMethodFormatter(sFormat_y_dummy))
                     pass
 
             ax.xaxis.set_major_locator(pYear_min)
@@ -489,6 +490,6 @@ def plot_time_series_data(aTime_all,
 
         # common setting
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()

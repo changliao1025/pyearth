@@ -1,15 +1,13 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-
 import matplotlib as mpl
-from matplotlib import colors
-import cartopy.crs as ccrs
+import cartopy as cpl
+
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.visual.formatter import log_formatter
-pProjection = ccrs.PlateCarree()
+pProjection = cpl.crs.PlateCarree()
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
     def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
@@ -139,7 +137,7 @@ def map_raster_data_dc(aImage_in,
     dummy_index = np.where(aImage_in < dData_min)
     aImage_in[dummy_index] = dData_min
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
 
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection)
 
@@ -187,7 +185,7 @@ def map_raster_data_dc(aImage_in,
     dummy_color = list()
     for i in uni_index:
         dummy_color.append(aColor[i])
-    cmap0 = colors.ListedColormap(dummy_color)
+    cmap0 = mpl.colors.ListedColormap(dummy_color)
 
     dcrasterplot = ax.imshow(aPseudo_image, origin='upper',
                              extent=aImage_extent,
@@ -218,7 +216,7 @@ def map_raster_data_dc(aImage_in,
     ax.set_title(sTitle)
     ax.set_extent(aImage_extent)
 
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
@@ -231,7 +229,7 @@ def map_raster_data_dc(aImage_in,
     bounds = np.linspace(0, nInterval-1, nInterval, endpoint=True)
 
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-    cb = plt.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm), cax=ax_cb,
+    cb = mpl.pyplot.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm), cax=ax_cb,
                       extend=sExtend, extendfrac='auto',
                       ticks=bounds)
 
@@ -253,6 +251,6 @@ def map_raster_data_dc(aImage_in,
     cb.ax.set_yticklabels(aLabel)
     # cb.ax.set_yticklabels([aLabel[int(i)] for i in bounds]) # add the labels
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()

@@ -1,10 +1,8 @@
-import os
-import sys
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import matplotlib as mpl
-import matplotlib.lines as mlines
+
+
+
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -106,7 +104,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
     else:
         sTitle = ''
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -123,16 +121,16 @@ def scatter_plot_multiple_data_w_density(aData_x,
 
     # sns.regplot(x, y, lowess=True)
     # ax_scatter = sns.regplot(x=aData_x, y=aData_y, marker="+", lowess=True)
-    ax_scatter_full = plt.axes(rect_scatter)
+    ax_scatter_full = mpl.pyplot.axes(rect_scatter)
     if iFlag_miniplot == 1:
-        ax_scatter_mini = plt.axes(rect_scatter_mini)
+        ax_scatter_mini = mpl.pyplot.axes(rect_scatter_mini)
         ax_scatter_all = [ax_scatter_full, ax_scatter_mini]
     else:
         ax_scatter_all = [ax_scatter_full]
 
-    ax_histx = plt.axes(rect_histx)
+    ax_histx = mpl.pyplot.axes(rect_histx)
     ax_histx.tick_params(direction='in', labelbottom=False)
-    ax_histy = plt.axes(rect_histy)
+    ax_histy = mpl.pyplot.axes(rect_histy)
     ax_histy.tick_params(direction='in', labelleft=False)
 
     for i in range(nData):
@@ -261,16 +259,16 @@ def scatter_plot_multiple_data_w_density(aData_x,
             if sFormat_x_in is not None:
                 sFormat_x = sFormat_x_in
                 ax_scatter.xaxis.set_major_formatter(
-                    ticker.FormatStrFormatter(sFormat_x))
+                    mpl.ticker.FormatStrFormatter(sFormat_x))
 
-                # ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))'%.1f'
+                # ax_scatter.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))'%.1f'
 
             if sFormat_y_in is not None:
                 sFormat_y = sFormat_y_in
                 ax_scatter.yaxis.set_major_formatter(
-                    ticker.FormatStrFormatter(sFormat_y))
+                    mpl.ticker.FormatStrFormatter(sFormat_y))
 
-                # ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))'%.1f'
+                # ax_scatter.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))'%.1f'
 
             ax_scatter.tick_params(axis='y', pad=8)
             ax_scatter.set_xlim(dMin_x, dMax_x)
@@ -281,7 +279,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
             pass
 
         ax_scatter.xaxis.set_major_locator(
-            ticker.MaxNLocator(prune='upper', nbins=5))
+            mpl.ticker.MaxNLocator(prune='upper', nbins=5))
 
         if iFlag_log_x == 1:
             aLabel_x = []
@@ -294,7 +292,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
             ax_scatter.set_xticklabels(aLabel_x)
         else:
             if iFlag_scientific_notation_x == 1:
-                formatter = ticker.ScalarFormatter(useMathText=True)
+                formatter = mpl.ticker.ScalarFormatter(useMathText=True)
                 formatter.set_scientific(True)
                 # you might need to change here
                 formatter.set_powerlimits((-1, 1))
@@ -303,7 +301,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
                 pass
 
         ax_scatter.yaxis.set_major_locator(
-            ticker.MultipleLocator(base=dSpace_y))
+            mpl.ticker.MultipleLocator(base=dSpace_y))
 
         if iFlag_log_y == 1:
             aLabel_y = []
@@ -317,7 +315,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
             pass
         else:
             if iFlag_scientific_notation_y == 1:
-                formatter = ticker.ScalarFormatter(useMathText=True)
+                formatter = mpl.ticker.ScalarFormatter(useMathText=True)
                 formatter.set_scientific(True)
                 # you might need to change here
                 formatter.set_powerlimits((-1, 1))
@@ -327,7 +325,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
 
         ax_scatter.set_aspect(dRatio)  # this one set the y / x ratio
 
-        line = mlines.Line2D([0, 1], [0, 1], color='black', linestyle='dashed')
+        line = mpl.lines.Line2D([0, 1], [0, 1], color='black', linestyle='dashed')
         transform = ax_scatter.transAxes
         line.set_transform(transform)
         ax_scatter.add_line(line)
@@ -381,7 +379,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
                 ax_histx.grid(which='major', color='white',
                               linestyle='-', axis='x')
                 ax_histx.xaxis.set_major_locator(
-                    ticker.MultipleLocator(base=dSpace_x/2.0))
+                    mpl.ticker.MultipleLocator(base=dSpace_x/2.0))
                 ax_histx.spines['right'].set_visible(False)
                 ax_histx.spines['top'].set_visible(False)
                 ax_histx.spines['bottom'].set_visible(False)
@@ -413,7 +411,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
                 ax_histy.grid(which='major', color='white',
                               linestyle='-', axis='y')
                 ax_histy.yaxis.set_major_locator(
-                    ticker.MultipleLocator(base=dSpace_y/2.0))
+                    mpl.ticker.MultipleLocator(base=dSpace_y/2.0))
                 ax_histy.spines['right'].set_visible(False)
                 ax_histy.spines['top'].set_visible(False)
                 ax_histy.spines['bottom'].set_visible(False)
@@ -431,32 +429,32 @@ def scatter_plot_multiple_data_w_density(aData_x,
         if iax == 0:
 
             # horizontal
-            line = mlines.Line2D([0.0, 0.1], [0.1, 0.1],
+            line = mpl.lines.Line2D([0.0, 0.1], [0.1, 0.1],
                                  color='black', linestyle='dotted')
             transform = ax_scatter.transAxes
             line.set_transform(transform)
             ax_scatter.add_line(line)
 
             # vertical
-            line = mlines.Line2D([0.1, 0.1], [0.1, 0.0],
+            line = mpl.lines.Line2D([0.1, 0.1], [0.1, 0.0],
                                  color='black', linestyle='dotted')
             transform = ax_scatter.transAxes
             line.set_transform(transform)
             ax_scatter.add_line(line)
 
-            line = mlines.Line2D([0.1, (dY_mini-left)/width], [0.1, (dX_mini -
+            line = mpl.lines.Line2D([0.1, (dY_mini-left)/width], [0.1, (dX_mini -
                                  bottom + width_mini)/height], color='black', linestyle='dotted')
             transform = ax_scatter.transAxes
             line.set_transform(transform)
             ax_scatter.add_line(line)
 
-            line = mlines.Line2D([0.1,  (dY_mini-left)/width], [0.0,
+            line = mpl.lines.Line2D([0.1,  (dY_mini-left)/width], [0.0,
                                  (dX_mini-bottom)/height], color='black', linestyle='dotted')
             transform = ax_scatter.transAxes
             line.set_transform(transform)
             ax_scatter.add_line(line)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
+    mpl.pyplot.close('all')
     print('finished plotting')
