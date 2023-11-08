@@ -1,8 +1,8 @@
-import os, sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import scipy
+
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
 
@@ -29,6 +29,10 @@ def scatter_plot_data(aData_x, \
                       sLabel_y_in = None , \
                       sLabel_legend_in = None,\
                       sTitle_in = None):
+    try:
+        import scipy
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
 
     if iSize_x_in is not None:
         iSize_x = iSize_x_in

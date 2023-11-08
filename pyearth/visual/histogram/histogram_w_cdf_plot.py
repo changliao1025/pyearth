@@ -1,9 +1,8 @@
-import os, sys
+
 import numpy as np
-from scipy.stats import gaussian_kde
+
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-from matplotlib.ticker import MaxNLocator
+
 import matplotlib.patches as mpl_patches
 
 def histogram_w_cdf_plot(aData, \

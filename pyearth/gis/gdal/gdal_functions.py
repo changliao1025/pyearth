@@ -5,7 +5,6 @@ from osgeo import ogr, osr, gdal, gdalconst
 
 gdal.UseExceptions()    # Enable exceptions
 
-
 def reproject_coordinates(dx_in, dy_in, pSpatial_reference_source_in, pSpatial_reference_target_in=None):
     """ Reproject a pair of x,y coordinates. 
 
@@ -88,52 +87,6 @@ def reproject_coordinates_batch(aX_in, aY_in, pSpatial_reference_source_in, pSpa
     
     return aX_out,aY_out
 
-def obtain_raster_metadata_geotiff(sFilename_geotiff_in):
-    """retrieve the metadata of a geotiff file
-
-    Args:
-        sFilename_geotiff (string): The filename of geotiff
-
-    Returns:
-       Tuple: dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, pSpatial_reference, pProjection, pGeotransform
-    """
-
-    if os.path.exists(sFilename_geotiff_in):
-        pass
-    else:
-        print('The file does not exist!')
-        return
-    
-    sDriverName='GTiff'    
-    pDriver = gdal.GetDriverByName(sDriverName)
-    if pDriver is None:
-        print ("%s pDriver not available.\n" % sDriverName)
-    else:
-        print  ("%s pDriver IS available.\n" % sDriverName) 
-   
-    pDataset = gdal.Open(sFilename_geotiff_in, gdal.GA_ReadOnly)
-
-    if pDataset is None:
-        print("Couldn't open this file: " + sFilename_geotiff_in)
-        sys.exit("Try again!")
-    else: 
-        pProjection = pDataset.GetProjection()
-        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
-    
-    
-        ncolumn = pDataset.RasterXSize
-        nrow = pDataset.RasterYSize
-        #nband = pDataset.RasterCount
-
-        pGeotransform = pDataset.GetGeoTransform()
-        dOriginX = pGeotransform[0]
-        dOriginY = pGeotransform[3]
-        dPixelWidth = pGeotransform[1]
-        pPixelHeight = pGeotransform[5]       
-        
-        
-        return dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, pSpatial_reference, pProjection, pGeotransform
-
 def obtain_shapefile_metadata(sFilename_shapefile_in):
     """
     Obtain the metadata of a shapefile
@@ -186,7 +139,6 @@ def obtain_shapefile_metadata(sFilename_shapefile_in):
                 top_max = np.max([top_max,  pEnvelope[3]])
 
         return left_min, right_max, bot_min, top_max
-
 
 def get_geometry_coords(geometry):
     

@@ -3,16 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib as mpl
-import matplotlib.patches as mpl_patches
-from scipy.stats import gaussian_kde
-from scipy import stats
 import matplotlib.lines as mlines
-import matplotlib.transforms as mtransforms
-
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
-
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
-from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 
 def scatter_plot_multiple_data_w_density(aData_x, \
                       aData_y,\
@@ -41,7 +34,11 @@ def scatter_plot_multiple_data_w_density(aData_x, \
                         aSize_in=None,\
                       sTitle_in = None):
     #number of dataset
-
+    try:
+        from scipy.stats import gaussian_kde
+        from scipy import stats
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
     #aData_in = np.array(aData_y)    
     
     nData=len(aData_y)

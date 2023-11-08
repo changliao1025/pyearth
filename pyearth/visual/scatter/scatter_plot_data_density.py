@@ -1,11 +1,8 @@
-import os, sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from matplotlib.ticker import MaxNLocator
-import matplotlib.patches as mpl_patches
 
-import scipy
 
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
 def fmt0(x):
@@ -43,6 +40,10 @@ def scatter_plot_data_density(aData_x, \
                               sLabel_y_in = None, \
                               sLabel_legend_in = None, \
                               sTitle_in = None):
+    try:
+        import scipy
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
 
     if iSize_x_in is not None:
         iSize_x = iSize_x_in

@@ -15,14 +15,10 @@ REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
 REQUIRED = [    
-    "cartopy",
-    "gdal",
+    "numpy", 
+    "gdal",    
     "matplotlib",
-    "netCDF4",
-    "numpy",    
-    "pandas",
-    "scipy",
-    "statsmodels",
+    "cartopy", 
 ]
 
 CLASSIFY = [
@@ -60,5 +56,8 @@ setup(
     url=URL,
     packages=find_packages(),
     install_requires=REQUIRED,
-    classifiers=CLASSIFY
+    classifiers=CLASSIFY,
+    extras_require={
+        'statistics': ['netCDF4','pandas', 'scipy', 'statsmodels']
+    }
 )

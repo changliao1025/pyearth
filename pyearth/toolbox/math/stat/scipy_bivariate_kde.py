@@ -1,6 +1,6 @@
 import numpy as np
 
-from scipy.stats import gaussian_kde
+
 
 def kde_support(aData_in, bw_in, iGridsize_in, cut_in, aClip_in):
     """
@@ -38,6 +38,11 @@ def scipy_bivariate_kde(aX_in, aY_in, bw_in, iGridsize_in, cut_in, aClip_in):
     Returns:
         numpy.array: kde
     """    
+
+    try:
+        from scipy.stats import gaussian_kde
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
     
 
     data = np.c_[aX_in, aY_in]

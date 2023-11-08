@@ -1,11 +1,8 @@
 import numpy as np
-import pandas as pd
-import seaborn as sns
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
-from scipy.stats import gaussian_kde
 
-sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
 def ridgeplot_data_density(aDict, 
     aData, 
         sFilename_out,
@@ -24,6 +21,15 @@ def ridgeplot_data_density(aDict,
                               sLabel_y_in = None, 
                               sLabel_legend_in = None, 
                               sTitle_in = None):
+    
+    try:   
+        import seaborn as sns
+        from scipy.stats import gaussian_kde
+        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
+    except ImportError as e:
+        raise ImportError("The package 'sns and scipy' is required for this function to run.") from e
+
+
     nData = len(aDict)
     
     if iSize_x_in is not None:

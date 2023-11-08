@@ -1,10 +1,7 @@
 import os, sys
 import numpy as np
-from scipy.stats import gaussian_kde
+
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-from matplotlib.ticker import MaxNLocator
-import matplotlib.patches as mpl_patches
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.create_line_style import create_line_style
 

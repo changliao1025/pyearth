@@ -1,9 +1,8 @@
-import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-import scipy
+
 from pyearth.system.define_global_variables import *
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
@@ -32,6 +31,12 @@ def histogram_plot(aData_all, \
     """
     Draw a histogram for single/multiple dataset
     """
+
+    try:
+        import scipy
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
+    
     aData_all = np.array(aData_all)
     pShape = aData_all.shape
   

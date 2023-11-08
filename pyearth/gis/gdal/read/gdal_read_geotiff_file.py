@@ -2,7 +2,7 @@ import os, sys
 import numpy as np
 from osgeo import gdal, osr
 
-def gdal_read_geotiff_file(sFilename_in):
+def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
     """Read a Geotiff format raster file.
 
     Args:
@@ -17,6 +17,8 @@ def gdal_read_geotiff_file(sFilename_in):
     else:
         print('The file does not exist!')
         return
+    
+    
 
     sDriverName='GTiff'
     pDriver = gdal.GetDriverByName(sDriverName)  
@@ -45,22 +47,27 @@ def gdal_read_geotiff_file(sFilename_in):
         dOriginY = pGeotransform[3]
         dPixelWidth = pGeotransform[1]
         pPixelHeight = pGeotransform[5]
-
-        pBand = pDataset.GetRasterBand(1)
-
-        # Data type of the values
-        gdal.GetDataTypeName(pBand.DataType)
-        # Compute statistics if needed
-        if pBand.GetMinimum() is None or pBand.GetMaximum() is None:
-            pBand.ComputeStatistics(0)
-
-        dMissing_value = pBand.GetNoDataValue()
-       
-        aData_out = pBand.ReadAsArray(0, 0, ncolumn, nrow)
-    
         #we will use one of them to keep the consistency
-        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
-       
+        pSpatial_reference = osr.SpatialReference(wkt=pProjection)  
+
+        if iFlag_metadata_only ==1:
+            pass
+        else:    
+            if nband >1: 
+                print('This is a multi-band raster file!')
+                print('We will only read the first band!')
+                pass
+
+            pBand = pDataset.GetRasterBand(1)
+
+            # Data type of the values
+            gdal.GetDataTypeName(pBand.DataType)
+            # Compute statistics if needed
+            if pBand.GetMinimum() is None or pBand.GetMaximum() is None:
+                pBand.ComputeStatistics(0)
+
+            dMissing_value = pBand.GetNoDataValue()
+            aData_out = pBand.ReadAsArray(0, 0, ncolumn, nrow)                
 
         pDataset = None
         pBand = None      

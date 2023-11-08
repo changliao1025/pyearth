@@ -24,12 +24,16 @@ PyEarth depends on the following packages
 
 1. `numpy`
 2. `gdal`
-3. `netCDF4`
+3. `matplotlib`
 4. `cartopy`
-5. `matplotlib`
-6. `pandas`
-7. `scipy`
-8. `statsmodels`
+
+
+PyEarth also has optional dependency packages for several functions:
+
+1. `netCDF4` for netCDF support
+2. `pandas` for pandas dataframes 
+3. `scipy` for scientific computing
+4. `statsmodels` for statistical analysis
 
 ### Documentation
 

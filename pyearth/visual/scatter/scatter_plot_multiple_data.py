@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib as mpl
 import matplotlib.patches as mpl_patches
-from scipy.stats import gaussian_kde
-from scipy import stats
+
 import matplotlib.lines as mlines
 import matplotlib.transforms as mtransforms
 
@@ -45,6 +44,11 @@ def scatter_plot_multiple_data(aData_x, \
     #number of dataset
 
     #aData_in = np.array(aData_y)    
+    try:
+        from scipy.stats import gaussian_kde
+        from scipy import stats
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
     
     nData=len(aData_y)
     
