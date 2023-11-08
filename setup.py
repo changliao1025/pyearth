@@ -2,7 +2,7 @@
 import io
 import os
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
 NAME = "pyearth"
 DESCRIPTION = \
@@ -58,6 +58,6 @@ setup(
     install_requires=REQUIRED,
     classifiers=CLASSIFY,
     extras_require={
-        'statistics': ['netCDF4','pandas', 'scipy', 'statsmodels']
+        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels']
     }
 )
