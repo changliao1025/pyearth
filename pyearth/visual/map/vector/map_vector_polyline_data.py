@@ -1,18 +1,16 @@
 import os
 import numpy as np
+from osgeo import  osr, gdal, ogr
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import cartopy.crs as ccrs
-import cartopy.mpl.ticker as ticker
+import matplotlib.path as mpath
 import matplotlib as mpl
 import matplotlib.ticker as mticker
-from osgeo import  osr, gdal, ogr
-from pyearth.toolbox.data.cgpercentiles import cgpercentiles
+import cartopy.crs as ccrs
+
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-#from shapely.wkt import loads
-from pyearth.gis.gdal.gdal_functions import get_geometry_coords
-import matplotlib.path as mpath
-from pyearth.gis.spatialref.retrieve_shapefile_spatial_reference import retrieve_shapefile_spatial_reference
+from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+
 from pyearth.toolbox.math.stat.remap import remap
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -160,7 +158,7 @@ def map_vector_polyline_data(iFiletype_in,
         dField = pFeature.GetField(sField_thickness)
         if sGeometry_type =='LINESTRING':
             #dummy0 = loads( pGeometry_in.ExportToWkt() )
-            aCoords_gcs = get_geometry_coords(pGeometry_in)
+            aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
             aCoords_gcs = dummy0.coords
             aCoords_gcs= np.array(aCoords_gcs)
             aCoords_gcs = aCoords_gcs[:,0:2]
@@ -204,9 +202,8 @@ def map_vector_polyline_data(iFiletype_in,
         sGeometry_type = pGeometry_in.GetGeometryName()
         dField = pFeature.GetField(sField_thickness)
         if sGeometry_type =='LINESTRING':
-            dummy0 = loads( pGeometry_in.ExportToWkt() )
-            aCoords_gcs = dummy0.coords
-            aCoords_gcs= np.array(aCoords_gcs)
+            aCoords_gcs = get_geometry_coordinates(pGeometry_in)                
+            aCoords_gcs = np.array(aCoords_gcs)
             aCoords_gcs = aCoords_gcs[:,0:2]
             nvertex = len(aCoords_gcs)        
 

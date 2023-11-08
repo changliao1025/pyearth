@@ -1,16 +1,19 @@
-import os, sys
-from netCDF4 import Dataset
+import os
 def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, aVariable_in):
+    try:
+        import netCDF4 as nc
+    except ImportError as e:
+        raise ImportError("The package 'netCDF4' is required for this function to run.") from e
 
     if os.path.exists(sFilename_old):
         print("Yep, I can read that file: "+ sFilename_old)
     else:
         print("Nope, the path doesn't reach your file. Go research filepath in python")
         exit
-    pDatasets_in = Dataset(sFilename_old)
+    pDatasets_in = nc.Dataset(sFilename_old)
     netcdf_format = pDatasets_in.file_format
     #output file
-    pDatasets_out = Dataset(sFilename_new, "w", format=netcdf_format)
+    pDatasets_out = nc.Dataset(sFilename_new, "w", format=netcdf_format)
     for sKey, iValue in pDatasets_in.dimensions.items():
         dummy = len(iValue)
         if not iValue.isunlimited():            
@@ -63,8 +66,7 @@ def replace_variable_in_netcdf(sFilename_old, sFilename_new, aData_in, aVariable
                 pass
             else:
                 pVar3.setncatts( { sAttribute: pValue.getncattr(sAttribute) } )
-        pVar3.missing_value = -9999
-  
+        pVar3.missing_value = -9999 
     
     
     #pVar3.description = sVariable_in

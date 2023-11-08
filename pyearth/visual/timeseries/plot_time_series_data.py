@@ -1,44 +1,43 @@
 
 from datetime import datetime
 import numpy as np
-
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 from pyearth.visual.formatter import log_formatter, MathTextSciFormatter
 
-def plot_time_series_data(aTime_all, 
-                          aData_all, 
+
+def plot_time_series_data(aTime_all,
+                          aData_all,
                           sFilename_out,
-                          iDPI_in = None,
-                          iFlag_log_in = None,
-                          iFlag_scientific_notation_in = None,
+                          iDPI_in=None,
+                          iFlag_log_in=None,
+                          iFlag_scientific_notation_in=None,
                           iFlag_miniplot_in=None,
-                          ncolumn_in = None,
-                          aFlag_trend_in = None, 
-                          iReverse_y_in = None, 
-                          iSize_x_in = None, 
-                          iSize_y_in = None, 
-                          dMax_x_in = None, 
-                          dMin_x_in = None, 
-                          dMax_y_in = None, 
-                          dMin_y_in = None, 
-                          dSpace_y_in = None,
-                          aMarker_in = None,
-                          aColor_in = None,
-                          aLinestyle_in = None,
-                          sLabel_y_in = None, 
-                          aLabel_legend_in = None,
-                          aLocation_legend_in =None,
-                          sDate_type_in = None,
-                          sFormat_y_in =None,
-                          sFont_in = None,
+                          ncolumn_in=None,
+                          aFlag_trend_in=None,
+                          iReverse_y_in=None,
+                          iSize_x_in=None,
+                          iSize_y_in=None,
+                          dMax_x_in=None,
+                          dMin_x_in=None,
+                          dMax_y_in=None,
+                          dMin_y_in=None,
+                          dSpace_y_in=None,
+                          aMarker_in=None,
+                          aColor_in=None,
+                          aLinestyle_in=None,
+                          sLabel_y_in=None,
+                          aLabel_legend_in=None,
+                          aLocation_legend_in=None,
+                          sDate_type_in=None,
+                          sFormat_y_in=None,
+                          sFont_in=None,
                           sLocation_legend_in=None,
-                          sTitle_in = None):
+                          sTitle_in=None):
     """
     Plot time series data
 
@@ -71,11 +70,12 @@ def plot_time_series_data(aTime_all,
         sLocation_legend_in (_type_, optional): _description_. Defaults to None.
         sTitle_in (_type_, optional): _description_. Defaults to None.
     """
-                        
+
     aTime_all = np.array(aTime_all)
-    aData_all = np.array(aData_all) #each list is a data series, but length may be different
+    # each list is a data series, but length may be different
+    aData_all = np.array(aData_all)
     pShape = aData_all.shape
-  
+
     nData = pShape[0]
 
     if iDPI_in is not None:
@@ -92,7 +92,6 @@ def plot_time_series_data(aTime_all,
         iFlag_scientific_notation = iFlag_scientific_notation_in
     else:
         iFlag_scientific_notation = 0
-    
 
     if aFlag_trend_in is not None:
         aFlag_trend = aFlag_trend_in
@@ -122,41 +121,41 @@ def plot_time_series_data(aTime_all,
     if aLabel_legend_in is not None:
         aLabel_legend = aLabel_legend_in
     else:
-        aLabel_legend = np.full(nData,'')
+        aLabel_legend = np.full(nData, '')
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
         sTitle = ''
-    
+
     if sFont_in is not None:
         sFont = sFont_in
-    else:    
+    else:
         sFont = "Times New Roman"
-        
+
     plt.rcParams["font.family"] = sFont
 
     if aMarker_in is not None:
         aMarker = aMarker_in
     else:
-        aMarker=np.full(nData, '+')
+        aMarker = np.full(nData, '+')
 
     if aColor_in is not None:
         aColor = aColor_in
     else:
-        if(nData>=3):
-            if (nData<=12):
-                aColor= create_diverge_rgb_color_hex(nData)
-            else:            
+        if (nData >= 3):
+            if (nData <= 12):
+                aColor = create_diverge_rgb_color_hex(nData)
+            else:
                 a = rand_hex_color(num=2)
                 b = polylinear_gradient(a, nData)
                 aColor = b['hex']
                 pass
         else:
-            if nData==2:
-                aColor= ['red','blue']
+            if nData == 2:
+                aColor = ['red', 'blue']
             else:
-                aColor=['red']
+                aColor = ['red']
 
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
@@ -166,9 +165,9 @@ def plot_time_series_data(aTime_all,
     if dMax_x_in is not None:
         dMax_x = dMax_x_in
     else:
-        dMax_x=datetime(1, 1, 1)
+        dMax_x = datetime(1, 1, 1)
         for i in range(nData):
-            dummy=np.nanmax(aTime_all[i])
+            dummy = np.nanmax(aTime_all[i])
             dMax_x = np.max([dMax_x, dummy])
         dMax_x_y = np.datetime64(dMax_x, 'Y')
         dMax_x_m = np.datetime64(dMax_x, 'M')
@@ -176,39 +175,38 @@ def plot_time_series_data(aTime_all,
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
-        #dMin_x = np.datetime64(np.nanmin(aTime_all), 'Y')
-        dMin_x=datetime(9999, 1, 1)
+        # dMin_x = np.datetime64(np.nanmin(aTime_all), 'Y')
+        dMin_x = datetime(9999, 1, 1)
         for i in range(nData):
-            dummy=np.nanmin(aTime_all[i])
+            dummy = np.nanmin(aTime_all[i])
             dMin_x = np.min([dMin_x, dummy])
         dMin_x_m = np.datetime64(dMin_x, 'M')
         dMin_x_y = np.datetime64(dMin_x, 'Y')
 
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
-    else:   
+    else:
         dMax_y = np.nanmax(aData_all[0])
-        for i in range(1,nData):
-            dummy=np.nanmax(aData_all[i])
-            dMax_y = np.max([dMax_y, dummy])     
-        
+        for i in range(1, nData):
+            dummy = np.nanmax(aData_all[i])
+            dMax_y = np.max([dMax_y, dummy])
+
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = np.nanmin(aData_all[0]) 
-        for i in range(1,nData):
-            dummy=np.nanmin(aData_all[i])
+        dMin_y = np.nanmin(aData_all[0])
+        for i in range(1, nData):
+            dummy = np.nanmin(aData_all[i])
             dMin_y = np.min([dMin_y, dummy])
 
-
-    if (dMax_y <= dMin_y ):
+    if (dMax_y <= dMin_y):
         return
     else:
         iFlag_force_limit = 1
-        if iFlag_force_limit ==1:
+        if iFlag_force_limit == 1:
             pass
         else:
-            dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y) 
+            dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y)
             dMax_y = dMax_y + 0.25 * (dMax_y-dMin_y)
 
     if dSpace_y_in is not None:
@@ -216,36 +214,34 @@ def plot_time_series_data(aTime_all,
         dSpace_y = dSpace_y_in
     else:
         iFlag_space_y = 0
-        dSpace_y = (dMax_y - dMin_y) /4.0
+        dSpace_y = (dMax_y - dMin_y) / 4.0
         if dSpace_y < 1:
             pass
         else:
             dSpace_y = int(dSpace_y)
-        pass  
+        pass
 
-    nYear = int( dMax_x_y-dMin_x_y ) + 1 
-    if nYear > 3:        
+    nYear = int(dMax_x_y-dMin_x_y) + 1
+    if nYear > 3:
         dMin_x = dMin_x_y
         dMax_x = dMax_x_y
-    else:        
+    else:
         dMin_x = dMin_x_m
         dMax_x = dMax_x_m
 
-
-
     if iFlag_miniplot_in is not None:
         iFlag_miniplot = iFlag_miniplot_in
-        #set up location and range
+        # set up location and range
         dMin_mini_x = dMin_x + (dMax_x-dMin_x) * 0.7
-        dMax_mini_x = dMax_x - (dMax_x-dMin_x) * 0.1     
+        dMax_mini_x = dMax_x - (dMax_x-dMin_x) * 0.1
         dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.1
-        dMax_mini_y = dMin_y + (dMax_y-dMin_y) * 0.4      
+        dMax_mini_y = dMin_y + (dMax_y-dMin_y) * 0.4
     else:
         iFlag_miniplot = 0
 
-    fig = plt.figure( dpi=iDPI )
-    fig.set_figwidth( iSize_x )
-    fig.set_figheight( iSize_y )
+    fig = plt.figure(dpi=iDPI)
+    fig.set_figwidth(iSize_x)
+    fig.set_figheight(iSize_y)
 
     left, width = 0.1, 0.8
     bottom, height = 0.1, 0.5
@@ -257,21 +253,19 @@ def plot_time_series_data(aTime_all,
     rect_mini = [dY_mini, dX_mini, width_mini, heigh_mini]
 
     ax_full = plt.axes(rect_full)
-    if iFlag_miniplot ==1:
+    if iFlag_miniplot == 1:
         ax_mini = plt.axes(rect_mini)
-        ax_all = [ax_full,ax_mini]
+        ax_all = [ax_full, ax_mini]
     else:
-        ax_all= [ax_full]
-
-    
+        ax_all = [ax_full]
 
     if nYear <= 3:
-        pYear = mdates.YearLocator()   # every year        
+        pYear = mdates.YearLocator()   # every year
         pMonth = mdates.MonthLocator()  # every month
 
         pYear_min = mdates.YearLocator(1)   # every year
         pMonth_min = mdates.MonthLocator(3)  # every 3 month
-    else:    
+    else:
         pYear = mdates.YearLocator(2)   # every 2 year
         pMonth = mdates.MonthLocator(6)  # every month
 
@@ -296,12 +290,12 @@ def plot_time_series_data(aTime_all,
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
     else:
-        sLocation_legend = None #remove the setting so it becomes automatical
+        sLocation_legend = None  # remove the setting so it becomes automatical
 
     if aLocation_legend_in is not None:
         aLocation_legend = aLocation_legend_in
     else:
-        aLocation_legend= None #(1.0,1.0)
+        aLocation_legend = None  # (1.0,1.0)
 
     if ncolumn_in is not None:
         ncolumn = ncolumn_in
@@ -310,59 +304,59 @@ def plot_time_series_data(aTime_all,
 
     sYear_format = mdates.DateFormatter('%Y')
     sMonth_format = mdates.DateFormatter('%Y-%m')
-    #start loop for each data
-    
-    for iax in range( len(ax_all) ):
+    # start loop for each data
+
+    for iax in range(len(ax_all)):
         ax = ax_all[iax]
         ax.tick_params(direction='in', top=True, right=True)
         if iax == 0:
             aLegend_artist = []
-            aLabel=[]
+            aLabel = []
         else:
             pass
 
         for i in np.arange(1, nData+1):
             x1 = aTime_all[i-1]
             y1 = aData_all[i-1]
-            tsp, = ax.plot( x1, y1, \
-                     color = aColor[i-1], linestyle = aLinestyle[i-1] ,\
-                     marker = aMarker[i-1] )
+            tsp, = ax.plot(x1, y1,
+                           color=aColor[i-1], linestyle=aLinestyle[i-1],
+                           marker=aMarker[i-1])
 
             if iax == 0:
                 aLegend_artist.append(tsp)
                 aLabel.append(aLabel_legend[i-1])
 
-                #calculate linear regression
+                # calculate linear regression
                 iFlag_trend = aFlag_trend[i-1]
-                if iFlag_trend ==1:
+                if iFlag_trend == 1:
                     nan_index = np.where(y1 == missing_value)
                     y1[nan_index] = np.nan
-                    good_index = np.where(  ~np.isnan(y1))
-                    x_dummy = np.array( [i.timestamp() for i in x1 ] )
+                    good_index = np.where(~np.isnan(y1))
+                    x_dummy = np.array([i.timestamp() for i in x1])
                     x_dummy = x_dummy[good_index]
                     y_dummy = y1[good_index]
-                    coef = np.polyfit(x_dummy,y_dummy,1)
+                    coef = np.polyfit(x_dummy, y_dummy, 1)
                     poly1d_fn = np.poly1d(coef)
-                    mn=np.min(x_dummy)
-                    mx=np.max(x_dummy)
-                    x2=[mn,mx]
-                    y2=poly1d_fn(x2)
-                    x2 = [datetime.fromtimestamp(i) for i in x2 ]
-                    ax.plot(x2,y2, color = 'orange', linestyle = '-.',  linewidth=0.5)
+                    mn = np.min(x_dummy)
+                    mx = np.max(x_dummy)
+                    x2 = [mn, mx]
+                    y2 = poly1d_fn(x2)
+                    x2 = [datetime.fromtimestamp(i) for i in x2]
+                    ax.plot(x2, y2, color='orange',
+                            linestyle='-.',  linewidth=0.5)
 
-                
             else:
                 pass
-                              
-        #unqiue setting
+
+        # unqiue setting
         if iax == 0:
             ax.axis('on')
-            ax.grid(which='major', color='grey', linestyle='--', axis='y')     
-            if nYear <=3:
+            ax.grid(which='major', color='grey', linestyle='--', axis='y')
+            if nYear <= 3:
                 ax.xaxis.set_major_locator(pYear)
                 ax.xaxis.set_minor_locator(pMonth)
                 ax.xaxis.set_major_formatter(sMonth_format)
-            else:   
+            else:
                 ax.xaxis.set_major_locator(pYear)
                 ax.xaxis.set_minor_locator(pMonth)
                 ax.xaxis.set_major_formatter(sYear_format)
@@ -370,126 +364,130 @@ def plot_time_series_data(aTime_all,
             ax.tick_params(axis="y", labelsize=10)
             ax.set_xmargin(0.05)
             ax.set_ymargin(0.15)
-            if (iReverse_y ==1): 
-                ax.set_ylim( dMax_y, dMin_y )
+            if (iReverse_y == 1):
+                ax.set_ylim(dMax_y, dMin_y)
             else:
-                ax.set_ylim( dMin_y, dMax_y )
-            #y axis labels are different because space is different
+                ax.set_ylim(dMin_y, dMax_y)
+            # y axis labels are different because space is different
 
             if iFlag_log == 1:
-                aLabel_y = list()        
+                aLabel_y = list()
                 if dSpace_y >= 1:
                     dSpace_y = int(dSpace_y)
-                    nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
-                    for i in np.arange( 0, nlabel, 1 ):
+                    nlabel = int((dMax_y - dMin_y) / dSpace_y) + 1
+                    for i in np.arange(0, nlabel, 1):
                         ii = int(dMin_y) + i * dSpace_y
-                        sTicklabel = r'$10^{{{}}}$'.format( int(ii))
+                        sTicklabel = r'$10^{{{}}}$'.format(int(ii))
                         aLabel_y.append(sTicklabel)
                         pass
-                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + int(dMin_y)
-                    ax.set_yticks( ticks)
-                    ax.set_yticklabels(aLabel_y)    
+                    ticks = np.arange(0, nlabel, 1) * dSpace_y + int(dMin_y)
+                    ax.set_yticks(ticks)
+                    ax.set_yticklabels(aLabel_y)
                 else:
-                    nlabel = int( (dMax_y- dMin_y) / dSpace_y) + 1
-                    for i in np.arange( 0, nlabel, 1 ):
-                        ii = int(dMin_y) + i * dSpace_y     
-                        iii = sFormat_y.format(ii)  
-                        sTicklabel = r'$10^{{{}}}$'.format( iii)
+                    nlabel = int((dMax_y - dMin_y) / dSpace_y) + 1
+                    for i in np.arange(0, nlabel, 1):
+                        ii = int(dMin_y) + i * dSpace_y
+                        iii = sFormat_y.format(ii)
+                        sTicklabel = r'$10^{{{}}}$'.format(iii)
                         aLabel_y.append(sTicklabel)
                         pass
-                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y + dMin_y
-                    ax.set_yticks( ticks)
-                    ax.set_yticklabels(aLabel_y)    
-                    pass      
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
+                    ticks = np.arange(0, nlabel, 1) * dSpace_y + dMin_y
+                    ax.set_yticks(ticks)
+                    ax.set_yticklabels(aLabel_y)
+                    pass
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
                 pass
             else:
-                if iFlag_scientific_notation ==1:                    
-                    #formatter = ticker.ScalarFormatter(useMathText=True)
-                    #formatter.set_scientific(True)
-                    #y0 = int(np.log10(dMin_y))
-                    #y1=  int(np.log10(dMax_y))
-                    #formatter.set_powerlimits(( y0, y1))
-                    #ax.yaxis.set_major_formatter(formatter)         
-                    ax.yaxis.set_major_formatter( MathTextSciFormatter("%1.2e"))          
+                if iFlag_scientific_notation == 1:
+                    # formatter = ticker.ScalarFormatter(useMathText=True)
+                    # formatter.set_scientific(True)
+                    # y0 = int(np.log10(dMin_y))
+                    # y1=  int(np.log10(dMax_y))
+                    # formatter.set_powerlimits(( y0, y1))
+                    # ax.yaxis.set_major_formatter(formatter)
+                    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
                     pass
                 else:
-                    if (iFlag_space_y ==0):   
-                        ax.yaxis.set_major_locator(ticker.MaxNLocator(prune='upper', nbins=5))
+                    if (iFlag_space_y == 0):
+                        ax.yaxis.set_major_locator(
+                            ticker.MaxNLocator(prune='upper', nbins=5))
                     else:
-                        ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y))
+                        ax.yaxis.set_major_locator(
+                            ticker.MultipleLocator(dSpace_y))
                         ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-                    if (iFlag_format_y ==1):
-                        sFormat_y_dummy =  sFormat_y.replace("{", "{x")
-                        ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
+                    if (iFlag_format_y == 1):
+                        sFormat_y_dummy = sFormat_y.replace("{", "{x")
+                        ax.yaxis.set_major_formatter(
+                            ticker.StrMethodFormatter(sFormat_y_dummy))
                     pass
-            ax.set_title( sTitle, loc='center', fontsize=15)
-            ax.set_xlim(dMin_x_m, dMax_x_m)            
-            ax.set_ylabel(sLabel_y,fontsize=12)   
-            
-            ax.set_xlabel('Year',fontsize=12)
-            ax.legend(aLegend_artist, aLabel,bbox_to_anchor=aLocation_legend, \
-                      loc=sLocation_legend, fontsize=10,ncol= ncolumn)
+            ax.set_title(sTitle, loc='center', fontsize=15)
+            ax.set_xlim(dMin_x_m, dMax_x_m)
+            ax.set_ylabel(sLabel_y, fontsize=12)
+
+            ax.set_xlabel('Year', fontsize=12)
+            ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
+                      loc=sLocation_legend, fontsize=10, ncol=ncolumn)
             pass
-        else:        
+        else:
             if iFlag_log == 1:
-                aLabel_y = list() 
-                dSpace_y_mini=   dSpace_y  / 4
+                aLabel_y = list()
+                dSpace_y_mini = dSpace_y / 4
                 if dSpace_y_mini >= 1:
                     dSpace_y_mini = int(dSpace_y_mini)
-                    nlabel = int( (dMax_y- dMin_y) / dSpace_y_mini) + 1
-                    for i in np.arange( 0, nlabel, 1 ):
+                    nlabel = int((dMax_y - dMin_y) / dSpace_y_mini) + 1
+                    for i in np.arange(0, nlabel, 1):
                         ii = int(dMin_y) + i * dSpace_y_mini
-                        sTicklabel = r'$10^{{{}}}$'.format( int(ii))
+                        sTicklabel = r'$10^{{{}}}$'.format(int(ii))
                         aLabel_y.append(sTicklabel)
                         pass
-                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y_mini + int(dMin_y)
-                    ax.set_yticks( ticks)
-                    ax.set_yticklabels(aLabel_y)    
+                    ticks = np.arange(0, nlabel, 1) * \
+                        dSpace_y_mini + int(dMin_y)
+                    ax.set_yticks(ticks)
+                    ax.set_yticklabels(aLabel_y)
                 else:
-                    nlabel = int( (dMax_y- dMin_y) / dSpace_y_mini) + 1
-                    for i in np.arange( 0, nlabel, 1 ):
-                        ii = int(dMin_y) + i * dSpace_y_mini     
-                        iii = sFormat_y.format(ii)  
-                        sTicklabel = r'$10^{{{}}}$'.format( iii)
+                    nlabel = int((dMax_y - dMin_y) / dSpace_y_mini) + 1
+                    for i in np.arange(0, nlabel, 1):
+                        ii = int(dMin_y) + i * dSpace_y_mini
+                        iii = sFormat_y.format(ii)
+                        sTicklabel = r'$10^{{{}}}$'.format(iii)
                         aLabel_y.append(sTicklabel)
                         pass
-                    ticks = np.arange( 0, nlabel, 1 ) * dSpace_y_mini + dMin_y
-                    ax.set_yticks( ticks)
-                    ax.set_yticklabels(aLabel_y)    
-                    pass      
-                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())        
+                    ticks = np.arange(0, nlabel, 1) * dSpace_y_mini + dMin_y
+                    ax.set_yticks(ticks)
+                    ax.set_yticklabels(aLabel_y)
+                    pass
+                ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
                 pass
             else:
-                if iFlag_scientific_notation ==1:
+                if iFlag_scientific_notation == 1:
                     formatter = ticker.ScalarFormatter(useMathText=True)
                     formatter.set_scientific(True)
-                    ax.yaxis.set_major_formatter(formatter)           
+                    ax.yaxis.set_major_formatter(formatter)
                     pass
                 else:
-                    dSpace_y_mini=   dSpace_y  / 4                    
-                    ax.yaxis.set_major_locator(ticker.MultipleLocator(dSpace_y_mini))
+                    dSpace_y_mini = dSpace_y / 4
+                    ax.yaxis.set_major_locator(
+                        ticker.MultipleLocator(dSpace_y_mini))
                     ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
-                    if (iFlag_format_y ==1):
-                        sFormat_y_dummy =  sFormat_y.replace("{", "{x")
-                        ax.yaxis.set_major_formatter(ticker.StrMethodFormatter( sFormat_y_dummy ) )             
+                    if (iFlag_format_y == 1):
+                        sFormat_y_dummy = sFormat_y.replace("{", "{x")
+                        ax.yaxis.set_major_formatter(
+                            ticker.StrMethodFormatter(sFormat_y_dummy))
                     pass
-            
+
             ax.xaxis.set_major_locator(pYear_min)
             ax.xaxis.set_minor_locator(pMonth_min)
             ax.xaxis.set_major_formatter(sYear_format)
-            ax.set_xlim(dMin_mini_x , dMax_mini_x)  
+            ax.set_xlim(dMin_mini_x, dMax_mini_x)
 
-            if (iReverse_y ==1): 
-                ax.set_ylim( dMax_mini_y, dMin_mini_y )
+            if (iReverse_y == 1):
+                ax.set_ylim(dMax_mini_y, dMin_mini_y)
             else:
-                ax.set_ylim( dMin_mini_y, dMax_mini_y )    
-            pass      
+                ax.set_ylim(dMin_mini_y, dMax_mini_y)
+            pass
 
-        #common setting 
-        
-
+        # common setting
 
     plt.savefig(sFilename_out, bbox_inches='tight')
     plt.close('all')

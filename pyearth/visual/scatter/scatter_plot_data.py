@@ -2,32 +2,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
-
-def scatter_plot_data(aData_x, \
-                      aData_y,\
-                      sFilename_out, \
-                      iFlag_scientific_notation_x_in=None,\
-                      iFlag_scientific_notation_y_in=None,\
-                      iSize_x_in = None, \
-                      iSize_y_in = None,  \
-                      iDPI_in = None ,\
-                      iFlag_log_x_in = None,\
-                      iFlag_log_y_in = None,\
-                      iFlag_lowess_in = None,\
-                      dMin_x_in = None, \
-                      dMax_x_in = None, \
-                      dMin_y_in = None, \
-                      dMax_y_in = None, \
-                      dSpace_x_in = None, \
-                      dSpace_y_in = None, \
-                      sFormat_x_in =None,\
-                      sFormat_y_in =None,\
-                      sLabel_x_in =None,\
-                      sLabel_y_in = None , \
-                      sLabel_legend_in = None,\
+def scatter_plot_data(aData_x,  
+                      aData_y, 
+                      sFilename_out,  
+                      iFlag_scientific_notation_x_in=None, 
+                      iFlag_scientific_notation_y_in=None, 
+                      iSize_x_in = None,  
+                      iSize_y_in = None,   
+                      iDPI_in = None , 
+                      iFlag_log_x_in = None, 
+                      iFlag_log_y_in = None, 
+                      iFlag_lowess_in = None, 
+                      dMin_x_in = None,  
+                      dMax_x_in = None,  
+                      dMin_y_in = None,  
+                      dMax_y_in = None,  
+                      dSpace_x_in = None,  
+                      dSpace_y_in = None,  
+                      sFormat_x_in =None, 
+                      sFormat_y_in =None, 
+                      sLabel_x_in =None, 
+                      sLabel_y_in = None ,  
+                      sLabel_legend_in = None, 
                       sTitle_in = None):
     try:
         import scipy
@@ -253,9 +251,9 @@ def scatter_plot_data(aData_x, \
 
         y_sm, y_std, order = scatter_lowess(aData_x, aData_y, f=1./3.)
         ax_scatter.plot(x[order], y_sm[order], color='tomato')
-        sc_lowess =ax_scatter.fill_between(x[order], \
-                                y_sm[order] - 1.96*y_std[order], \
-                                y_sm[order] + 1.96*y_std[order], \
+        sc_lowess =ax_scatter.fill_between(x[order],  
+                                y_sm[order] - 1.96*y_std[order],  
+                                y_sm[order] + 1.96*y_std[order],  
                                 alpha=0.3)
 
         aLegend_artist.append(sc_lowess)
@@ -265,7 +263,7 @@ def scatter_plot_data(aData_x, \
         aLegend_label.append(sLabel_legend_lowess)
 
     ax_scatter.set_aspect(dRatio, 'box')  #this one set the y / x ratio
-    ax_scatter.legend(aLegend_artist, aLegend_label,\
+    ax_scatter.legend(aLegend_artist, aLegend_label, 
                       loc="upper right", fontsize=12)
 
     
@@ -274,15 +272,15 @@ def scatter_plot_data(aData_x, \
     
     print(slope, intercept, r_value, p_value, std_err)
     sText = r'R: ' + "{:.2f}".format( r_value )
-    ax_scatter.text(0.05, 0.95, sText, \
-    verticalalignment='top', horizontalalignment='left',\
-            transform=ax_scatter.transAxes, \
+    ax_scatter.text(0.05, 0.95, sText,  
+    verticalalignment='top', horizontalalignment='left', 
+            transform=ax_scatter.transAxes,  
             color='black', fontsize=12)
     
     sText = 'P-value: ' + "{:.2E}".format( p_value )
-    ax_scatter.text(0.05, 0.9, sText, \
-    verticalalignment='top', horizontalalignment='left',\
-            transform=ax_scatter.transAxes, \
+    ax_scatter.text(0.05, 0.9, sText,  
+    verticalalignment='top', horizontalalignment='left', 
+            transform=ax_scatter.transAxes,  
             color='black', fontsize=12)
 
     ax_scatter.tick_params(which='both', # Options for both major and minor ticks

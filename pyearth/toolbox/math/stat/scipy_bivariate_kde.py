@@ -1,8 +1,9 @@
 import numpy as np
-
-
-
-def kde_support(aData_in, bw_in, iGridsize_in, cut_in, aClip_in):
+def kde_support(aData_in,
+                bw_in,
+                iGridsize_in,
+                cut_in,
+                aClip_in):
     """
     Establish support for a kernel density estimate.
 
@@ -20,7 +21,13 @@ def kde_support(aData_in, bw_in, iGridsize_in, cut_in, aClip_in):
     support_max = min(aData_in.max() + bw_in * cut_in, aClip_in[1])
     return np.linspace(support_min, support_max, iGridsize_in)
 
-def scipy_bivariate_kde(aX_in, aY_in, bw_in, iGridsize_in, cut_in, aClip_in):
+
+def scipy_bivariate_kde(aX_in,
+                        aY_in,
+                        bw_in,
+                        iGridsize_in,
+                        cut_in,
+                        aClip_in):
     """
     Compute a bivariate kde using scipy.
 
@@ -33,20 +40,20 @@ def scipy_bivariate_kde(aX_in, aY_in, bw_in, iGridsize_in, cut_in, aClip_in):
         aClip_in (numpy.array): Bound
 
     Raises:
-        
+
 
     Returns:
         numpy.array: kde
-    """    
+    """
 
     try:
-        from scipy.stats import gaussian_kde
+        import scipy
     except ImportError as e:
-        raise ImportError("The package 'scipy' is required for this function to run.") from e
-    
+        raise ImportError(
+            "The package 'scipy' is required for this function to run.") from e
 
     data = np.c_[aX_in, aY_in]
-    kde = gaussian_kde(data.T, bw_method=bw_in)
+    kde = scipy.stats.gaussian_kde(data.T, bw_method=bw_in)
     data_std = data.std(axis=0, ddof=1)
     if isinstance(bw_in, str):
         bw_in = "scotts" if bw_in == "scott" else bw_in
@@ -58,9 +65,11 @@ def scipy_bivariate_kde(aX_in, aY_in, bw_in, iGridsize_in, cut_in, aClip_in):
         msg = ("Cannot specify a different bandwidth for each dimension "
                "with the scipy backend. You should install statsmodels.")
         raise ValueError(msg)
-        
-    x_support = kde_support(data[:, 0], bw_x, iGridsize_in, cut_in, aClip_in[0])
-    y_support = kde_support(data[:, 1], bw_y, iGridsize_in, cut_in, aClip_in[1])
+
+    x_support = kde_support(
+        data[:, 0], bw_x, iGridsize_in, cut_in, aClip_in[0])
+    y_support = kde_support(
+        data[:, 1], bw_y, iGridsize_in, cut_in, aClip_in[1])
     xx, yy = np.meshgrid(x_support, y_support)
     z = kde([xx.ravel(), yy.ravel()]).reshape(xx.shape)
     return xx, yy, z

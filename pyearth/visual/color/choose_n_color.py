@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import random as rnd
+
 def choose_n_color(nColor_in, pColorMap_in):
     """
     choose color from colormap
@@ -55,7 +55,7 @@ def rand_hex_color(num=1):
     ''' Generate random hex colors, default is one,
       returning a string. If num is greater than
       1, an array of strings is returned. '''
-    colors = [   RGB_to_hex([x*255 for x in rnd.rand(3)])    for i in range(num)  ]
+    colors = [   RGB_to_hex([x*255 for x in np.random.rand(3)])    for i in range(num)  ]
     if num == 1:
        return colors[0]
     else:

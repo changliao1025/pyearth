@@ -1,8 +1,21 @@
 import numpy as np
 from datetime import datetime
-import requests
+
 from pyearth.toolbox.date.day_in_month import day_in_month
-def retrieve_nwis_discharge(sSite, iYear_start, iMonth_start, iDay_start,  iYear_end, iMonth_end, iDay_end):
+
+def retrieve_nwis_discharge(sSite, 
+                            iYear_start, 
+                            iMonth_start, 
+                            iDay_start,  
+                            iYear_end, 
+                            iMonth_end, 
+                            iDay_end):
+    try:
+        import requests
+    except ImportError as e:
+        raise ImportError(
+            "The package 'requests' is required for this function to run.") from e
+    
     nwis_dv_url = 'https://waterservices.usgs.gov/nwis/dv/'
 
     aDate= list()

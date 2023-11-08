@@ -7,7 +7,7 @@ def check_if_duplicates(aList_in):
     Returns:
         int: 1-no duplicate, 0-has duplicate
     """
-    
+
     iFlag_unique = 1
     for elem in aList_in:
         if aList_in.count(elem) > 1:
@@ -15,5 +15,5 @@ def check_if_duplicates(aList_in):
             break
         else:
             pass
-    
+
     return iFlag_unique

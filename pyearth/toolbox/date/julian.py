@@ -1,6 +1,6 @@
-from datetime import datetime
-import math
 
+import math
+from datetime import datetime
 
 def __to_format(jd: float, fmt: str) -> float:
     """

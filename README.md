@@ -80,5 +80,4 @@ Copyright © 2022, Battelle Memorial Institute
 
 Several publications describe the algorithms used in `PyEarth` in detail. If you make use of `PyEarth` in your work, please consider including a reference to the following:
 
-* Chang Liao. (2022). PyEarth: A lightweight Python package for Earth science (0.1.20). Zenodo. https://doi.org/10.5281/zenodo.6368652
-
+* Chang Liao. (2022). PyEarth: A lightweight Python package for Earth science (Software). Zenodo. https://doi.org/10.5281/zenodo.6109987
