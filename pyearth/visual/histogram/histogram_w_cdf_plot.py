@@ -1,7 +1,8 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpl_patches
+import matplotlib as mpl
+
+
 
 def histogram_w_cdf_plot(aData,
                          sFilename_out,
@@ -70,7 +71,7 @@ def histogram_w_cdf_plot(aData,
 
     good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -79,7 +80,7 @@ def histogram_w_cdf_plot(aData,
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
 
-    ax_histo = plt.axes(rect_histogram)
+    ax_histo = mpl.pyplot.axes(rect_histogram)
     ax_histo.tick_params(direction='in', top=True, right=True)
     aData = aData[good_index]
     ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x), density=True)
@@ -90,7 +91,7 @@ def histogram_w_cdf_plot(aData,
     ax_histo.axis('on')
     ax_histo.grid(which='major', color='white', linestyle='-', axis='y')
 
-    handles = [mpl_patches.Rectangle(
+    handles = [mpl.patches.Rectangle(
         (0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
 
     # create the corresponding number of labels (= the text you want to display)
@@ -111,6 +112,6 @@ def histogram_w_cdf_plot(aData,
     ax_cdf.plot(bins_count[1:], cdf)
 
     ax_histo.set_title(sTitle)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
+    mpl.pyplot.close('all')

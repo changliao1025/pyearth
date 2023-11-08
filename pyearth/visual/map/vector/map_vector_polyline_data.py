@@ -1,14 +1,11 @@
 import os
 import numpy as np
 from osgeo import  osr, gdal, ogr
-import matplotlib.pyplot as plt
-from matplotlib import cm
-import matplotlib.path as mpath
-import matplotlib as mpl
-import matplotlib.ticker as mticker
-import cartopy.crs as ccrs
 
+import matplotlib as mpl
+import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 
 from pyearth.toolbox.math.stat.remap import remap
@@ -140,9 +137,9 @@ def map_vector_polyline_data(iFiletype_in,
     else:    
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    mpl.pyplot.rcParams["font.family"] = sFont
     
-    cmap = cm.get_cmap(sColormap)  
+    cmap = mpl.cm.get_cmap(sColormap)  
  
     pSrs = osr.SpatialReference()
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -173,17 +170,17 @@ def map_vector_polyline_data(iFiletype_in,
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
-        pProjection_map = ccrs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
+        pProjection_map = cpl.crs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
    
    
-    fig = plt.figure( dpi=iDPI)
+    fig = mpl.pyplot.figure( dpi=iDPI)
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.15, 0.75, 0.8] , projection=pProjection_map ) #request.crs
     ax.set_global()
 
     n_colors = pLayer.GetFeatureCount()
-    colours = cm.rainbow(np.linspace(0, 1, n_colors))
+    colours = mpl.cm.rainbow(np.linspace(0, 1, n_colors))
     if iFlag_thickness ==1:
         aField =list()
         for pFeature in pLayer:
@@ -215,21 +212,21 @@ def map_vector_polyline_data(iFiletype_in,
                 dLon_label = aCoords_gcs[lIndex_mid][0]
                 dLat_label = aCoords_gcs[lIndex_mid][1]
 
-            codes = np.full(nvertex, mpath.Path.LINETO, dtype=int )
-            codes[0] = mpath.Path.MOVETO
-            path = mpath.Path(aCoords_gcs, codes)
+            codes = np.full(nvertex, mpl.path.Path.LINETO, dtype=int )
+            codes[0] = mpl.path.Path.MOVETO
+            path = mpl.path.Path(aCoords_gcs, codes)
             x, y = zip(*path.vertices)
             iThickness = remap( dField, dField_min, dField_max, iThickness_min, iThickness_max )
 
             color_index = (dField-dField_min ) /(dField_max - dField_min )
             rgba = cmap(color_index)
             if sColormap_in is not None:
-                line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=ccrs.PlateCarree())
+                line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.PlateCarree())
             else:
                 if n_colors < 10:
-                    line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=ccrs.PlateCarree())
+                    line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=cpl.crs.PlateCarree())
                 else:
-                    line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=ccrs.PlateCarree())
+                    line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=cpl.crs.PlateCarree())
 
             lID = lID + 1
 
@@ -247,12 +244,12 @@ def map_vector_polyline_data(iFiletype_in,
 
     ax.coastlines(color='black', linewidth=1)
 
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
-    gl.xlocator = mticker.MaxNLocator(5)
-    gl.ylocator = mticker.MaxNLocator(5)
+    gl.xlocator = mpl.ticker.MaxNLocator(5)
+    gl.ylocator = mpl.ticker.MaxNLocator(5)
     gl.xlabel_style = {'size': 8, 'color': 'k', 'rotation':0, 'ha':'right'}
     gl.ylabel_style = {'size': 8, 'color': 'k', 'rotation':90,'weight': 'normal'}
 
@@ -281,10 +278,10 @@ def map_vector_polyline_data(iFiletype_in,
     pDataset = pLayer = pFeature  = None   
     sDirname = os.path.dirname(sFilename_output_in)
     if sFilename_output_in is None:
-        plt.show()
+        mpl.pyplot.show()
     else:
         sFilename_out = os.path.join(sDirname, sFilename_output_in)
-        plt.savefig(sFilename_out, bbox_inches='tight')   
-        plt.close('all')
-        plt.clf()
+        mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')   
+        mpl.pyplot.close('all')
+        mpl.pyplot.clf()
     

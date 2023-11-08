@@ -1,9 +1,6 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import matplotlib as mpl
-import matplotlib.lines as mlines
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -108,14 +105,14 @@ def scatter_plot_multiple_data(aData_x,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    mpl.pyplot.rcParams["font.family"] = sFont
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
         sTitle = ''
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -132,9 +129,9 @@ def scatter_plot_multiple_data(aData_x,
 
     # sns.regplot(x, y, lowess=True)
     # ax_scatter = sns.regplot(x=aData_x, y=aData_y, marker="+", lowess=True)
-    ax_scatter_full = plt.axes(rect_scatter)
+    ax_scatter_full = mpl.pyplot.axes(rect_scatter)
     if iFlag_miniplot == 1:
-        ax_scatter_mini = plt.axes(rect_scatter_mini)
+        ax_scatter_mini = mpl.pyplot.axes(rect_scatter_mini)
         ax_scatter_all = [ax_scatter_full, ax_scatter_mini]
     else:
         ax_scatter_all = [ax_scatter_full]
@@ -281,16 +278,16 @@ def scatter_plot_multiple_data(aData_x,
             if sFormat_x_in is not None:
                 sFormat_x = sFormat_x_in
                 ax_scatter.xaxis.set_major_formatter(
-                    ticker.FormatStrFormatter(sFormat_x))
+                    mpl.ticker.FormatStrFormatter(sFormat_x))
 
-                # ax_scatter.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1e'))'%.1f'
+                # ax_scatter.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))'%.1f'
 
             if sFormat_y_in is not None:
                 sFormat_y = sFormat_y_in
                 ax_scatter.yaxis.set_major_formatter(
-                    ticker.FormatStrFormatter(sFormat_y))
+                    mpl.ticker.FormatStrFormatter(sFormat_y))
 
-                # ax_scatter.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))'%.1f'
+                # ax_scatter.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))'%.1f'
 
             ax_scatter.tick_params(axis='y', pad=8)
             ax_scatter.set_xlim(dMin_x, dMax_x * 1.05)
@@ -301,7 +298,7 @@ def scatter_plot_multiple_data(aData_x,
             pass
 
         ax_scatter.xaxis.set_major_locator(
-            ticker.MaxNLocator(prune='upper', nbins=5))
+            mpl.ticker.MaxNLocator(prune='upper', nbins=5))
 
         if iFlag_log_x == 1:
             aLabel_x = []
@@ -314,7 +311,7 @@ def scatter_plot_multiple_data(aData_x,
             ax_scatter.set_xticklabels(aLabel_x)
         else:
             if iFlag_scientific_notation_x == 1:
-                formatter = ticker.ScalarFormatter(useMathText=True)
+                formatter = mpl.ticker.ScalarFormatter(useMathText=True)
                 formatter.set_scientific(True)
                 # you might need to change here
                 formatter.set_powerlimits((-1, 1))
@@ -322,9 +319,9 @@ def scatter_plot_multiple_data(aData_x,
             else:
                 pass
 
-        # ax_scatter.yaxis.set_major_locator(ticker.MultipleLocator(base = dSpace_y))
+        # ax_scatter.yaxis.set_major_locator(mpl.ticker.MultipleLocator(base = dSpace_y))
         ax_scatter.yaxis.set_major_locator(
-            ticker.MaxNLocator(prune='upper', nbins=5))
+            mpl.ticker.MaxNLocator(prune='upper', nbins=5))
 
         if iFlag_log_y == 1:
             aLabel_y = []
@@ -338,7 +335,7 @@ def scatter_plot_multiple_data(aData_x,
             pass
         else:
             if iFlag_scientific_notation_y == 1:
-                formatter = ticker.ScalarFormatter(useMathText=True)
+                formatter = mpl.ticker.ScalarFormatter(useMathText=True)
                 formatter.set_scientific(True)
                 # you might need to change here
                 formatter.set_powerlimits((-1, 1))
@@ -348,7 +345,7 @@ def scatter_plot_multiple_data(aData_x,
 
         ax_scatter.set_aspect(dRatio)  # this one set the y / x ratio
 
-        line = mlines.Line2D([0, 1], [0, 1], color='black', linestyle='dashed')
+        line = mpl.lines.Line2D([0, 1], [0, 1], color='black', linestyle='dashed')
         transform = ax_scatter.transAxes
         line.set_transform(transform)
         ax_scatter.add_line(line)
@@ -410,32 +407,32 @@ def scatter_plot_multiple_data(aData_x,
 
             if iFlag_miniplot == 1:
                 # horizontal
-                line = mlines.Line2D(
+                line = mpl.lines.Line2D(
                     [0.0, 0.1], [0.1, 0.1], color='black', linestyle='dotted')
                 transform = ax_scatter.transAxes
                 line.set_transform(transform)
                 ax_scatter.add_line(line)
 
                 # vertical
-                line = mlines.Line2D(
+                line = mpl.lines.Line2D(
                     [0.1, 0.1], [0.1, 0.0], color='black', linestyle='dotted')
                 transform = ax_scatter.transAxes
                 line.set_transform(transform)
                 ax_scatter.add_line(line)
 
-                line = mlines.Line2D([0.1, (dY_mini-left)/width], [
+                line = mpl.lines.Line2D([0.1, (dY_mini-left)/width], [
                                      0.1, (dX_mini-bottom + width_mini)/height], color='black', linestyle='dotted')
                 transform = ax_scatter.transAxes
                 line.set_transform(transform)
                 ax_scatter.add_line(line)
 
-                line = mlines.Line2D([0.1,  (dY_mini-left)/width], [0.0,
+                line = mpl.lines.Line2D([0.1,  (dY_mini-left)/width], [0.0,
                                      (dX_mini-bottom)/height], color='black', linestyle='dotted')
                 transform = ax_scatter.transAxes
                 line.set_transform(transform)
                 ax_scatter.add_line(line)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
+    mpl.pyplot.close('all')
     print('finished plotting')

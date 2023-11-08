@@ -1,7 +1,7 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpl_patches
+
+import matplotlib as mpl
 
 
 def cdf_plot(aData,
@@ -71,7 +71,7 @@ def cdf_plot(aData,
 
     good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -80,7 +80,7 @@ def cdf_plot(aData,
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
 
-    ax_cdf = plt.axes(rect_histogram)
+    ax_cdf = mpl.pyplot.axes(rect_histogram)
     ax_cdf.tick_params(direction='in', top=True, right=True)
 
     aData = aData[good_index]
@@ -101,7 +101,7 @@ def cdf_plot(aData,
     ax_cdf.axis('on')
     ax_cdf.grid(which='major', color='white', linestyle='-', axis='y')
 
-    handles = [mpl_patches.Rectangle(
+    handles = [mpl.patches.Rectangle(
         (0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
 
     # create the corresponding number of labels (= the text you want to display)
@@ -115,6 +115,6 @@ def cdf_plot(aData,
 
     ax_cdf.set_title(sTitle)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
+    mpl.pyplot.close('all')

@@ -1,6 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
@@ -134,7 +135,7 @@ def histogram_plot(aData_all,
             else:
                 aColor = ['lightblue']
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -143,7 +144,7 @@ def histogram_plot(aData_all,
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
 
-    ax_histo = plt.axes(rect_histogram)
+    ax_histo = mpl.pyplot.axes(rect_histogram)
     ax_histo.tick_params(direction='in', top=True, right=True)
 
     aLegend_artist = []
@@ -220,7 +221,7 @@ def histogram_plot(aData_all,
         pass
     else:
         if iFlag_scientific_notation == 1:
-            formatter = ticker.ScalarFormatter(useMathText=True)
+            formatter = mpl.ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             ax_histo.yaxis.set_major_formatter(formatter)
             pass
@@ -228,7 +229,7 @@ def histogram_plot(aData_all,
             if (iFlag_format_x == 1):
                 sFormat_x_dummy = sFormat_x.replace("{", "{x")
                 ax_histo.xaxis.set_major_formatter(
-                    ticker.StrMethodFormatter(sFormat_x_dummy))
+                    mpl.ticker.StrMethodFormatter(sFormat_x_dummy))
                 pass
 
             pass
@@ -246,7 +247,7 @@ def histogram_plot(aData_all,
                         loc=sLocation_legend, fontsize=12)
 
     ax_histo.set_title(sTitle)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()

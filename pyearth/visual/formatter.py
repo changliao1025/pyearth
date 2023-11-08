@@ -1,4 +1,4 @@
-import matplotlib.ticker as ticker
+import matplotlib as mpl
 def log_formatter(x):
     a, b = '{:.1e}'.format(x).split('e')
     b = int(b)
@@ -8,7 +8,7 @@ def float_formatter(x):
     a = '{:.1f}'.format(x)
     return a
 
-class MathTextSciFormatter(ticker.Formatter):
+class MathTextSciFormatter(mpl.ticker.Formatter):
     def __init__(self, fmt="%1.2e"):
         self.fmt = fmt
     def __call__(self, x, pos=None):

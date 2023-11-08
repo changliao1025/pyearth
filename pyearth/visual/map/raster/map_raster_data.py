@@ -1,13 +1,13 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import cm
+
 import matplotlib as mpl
-import cartopy.crs as ccrs
+import cartopy as cpl
+
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.visual.formatter import log_formatter
-pProjection = ccrs.PlateCarree()
+pProjection = cpl.crs.PlateCarree()
 
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -110,7 +110,7 @@ def map_raster_data(aImage_in,
     else:
         sUnit = ''
 
-    cmap = cm.get_cmap(sColormap)
+    cmap = mpl.cm.get_cmap(sColormap)
 
     dummy_index = np.where(aImage_in > dData_max)
     aImage_in[dummy_index] = dData_max
@@ -118,7 +118,7 @@ def map_raster_data(aImage_in,
     dummy_index = np.where(aImage_in < dData_min)
     aImage_in[dummy_index] = dData_min
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     # fig.set_figwidth( iSize_x )
     # fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection)
@@ -171,7 +171,7 @@ def map_raster_data(aImage_in,
 
     ax.set_extent(aImage_extent)
 
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
@@ -185,11 +185,11 @@ def map_raster_data(aImage_in,
 
     if iFlag_scientific_notation_colorbar == 1:
         formatter = OOMFormatter(fformat="%1.1e")
-        cb = plt.colorbar(rasterplot, cax=ax_cb,
+        cb = mpl.pyplot.colorbar(rasterplot, cax=ax_cb,
                           extend=sExtend, format=formatter)
     else:
         formatter = OOMFormatter(fformat="%1.1f")
-        cb = plt.colorbar(rasterplot, cax=ax_cb,
+        cb = mpl.pyplot.colorbar(rasterplot, cax=ax_cb,
                           extend=sExtend, format=formatter)
 
     cb.ax.get_yaxis().set_ticks_position('right')
@@ -197,8 +197,8 @@ def map_raster_data(aImage_in,
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
     # .show()
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()

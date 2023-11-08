@@ -2,12 +2,12 @@ import os
 import numpy as np
 from osgeo import osr, gdal, ogr
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.cm as cm
+
 import cartopy.crs as ccrs
-from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+
 
 pProjection = ccrs.PlateCarree()  # for latlon data only
 
@@ -150,16 +150,16 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    mpl.pyplot.rcParams["font.family"] = sFont
 
     if sVariable_in is not None:
         sVariable = sVariable_in
     else:
         sVariable = 'id'
 
-    cmap = cm.get_cmap(sColormap)
+    cmap = mpl.cm.get_cmap(sColormap)
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
 
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
@@ -210,7 +210,7 @@ def map_vector_polygon_data(iFiletype_in,
         iFlag_same_value = 0
         pass
 
-    cmap = cm.get_cmap(sColormap)
+    cmap = mpl.cm.get_cmap(sColormap)
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
@@ -239,7 +239,7 @@ def map_vector_polygon_data(iFiletype_in,
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 # aCoords_gcs = dummy0.exterior.coords
                 aCoords_gcs = np.array(aCoords_gcs)
-                polygon = mpatches.Polygon(aCoords_gcs[:, 0:2], 
+                polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], 
                                            closed=True, 
                                            linewidth=0.25,
                                            alpha=0.8, 
@@ -308,17 +308,17 @@ def map_vector_polygon_data(iFiletype_in,
 
     pDataset = pLayer = pFeature = None
     if sFilename_output_in is None:
-        plt.show()
+        mpl.pyplot.show()
     else:
         sFilename = os.path.basename(sFilename_output_in)
         sFilename_out = os.path.join(sDirname, sFilename)
         sExtension = os.path.splitext(sFilename)[1]
         if sExtension == '.png':
-            plt.savefig(sFilename_out, bbox_inches='tight')
+            mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
         else:
             if sExtension == '.pdf':
-                plt.savefig(sFilename_out, bbox_inches='tight')
+                mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
             else:
-                plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
-        plt.close('all')
-        plt.clf()
+                mpl.pyplot.savefig(sFilename_out, bbox_inches='tight', format='ps')
+        mpl.pyplot.close('all')
+        mpl.pyplot.clf()

@@ -1,14 +1,12 @@
 # plot a map of study area which has google earth image, slope, and dem
 import numpy as np
 from osgeo import osr, gdal, ogr
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.path as mpath
-import matplotlib.ticker as mticker
-import matplotlib.patches as mpatches
-import matplotlib.image as mpimg
-import cartopy.crs as ccrs
+
+import matplotlib as mpl
+import cartopy as cpl
+
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
 from pyearth.gis.spatialref.reproject_coodinates import reproject_coordinates, reproject_coordinates_batch
 from pyearth.gis.location.Google_MetersPerPixel import Google_MetersPerPixel
@@ -29,7 +27,7 @@ def plot_study_area(sFilename_dem_in,
             "The package 'requests' is required for this function to run.") from e
 
     # set up figure size and dpi
-    fig = plt.figure(dpi=300)
+    fig = mpl.pyplot.figure(dpi=300)
     fig.set_figwidth(4)
     fig.set_figheight(4)
     # ==============================================================================
@@ -49,7 +47,7 @@ def plot_study_area(sFilename_dem_in,
     pSpatial_reference_source = dummy[10]
 
     # set up dem projection
-    dem_proj = ccrs.AlbersEqualAre(central_longitude=pSpatial_reference_source.GetProjPar('longitude_of_center'),
+    dem_proj = cpl.crs.AlbersEqualAre(central_longitude=pSpatial_reference_source.GetProjPar('longitude_of_center'),
                                    central_latitude=pSpatial_reference_source.GetProjPar(
                                        'latitude_of_center'),
                                    standard_parallels=(pSpatial_reference_source.GetProjPar('standard_parallel_1'),
@@ -83,7 +81,7 @@ def plot_study_area(sFilename_dem_in,
     aImage_in[np.where(aImage_in == missing_value)] = np.nan
     #
     demplot = ax_dem.imshow(aImage_in, origin='upper',
-                            extent=aImage_extent, cmap=cm.terrain, transform=dem_proj)
+                            extent=aImage_extent, cmap=mpl.cm.terrain, transform=dem_proj)
     # change all spines
     for axis in ['top', 'bottom', 'left', 'right']:
         ax_dem.spines[axis].set_linewidth(0.5)
@@ -108,12 +106,12 @@ def plot_study_area(sFilename_dem_in,
                 aCoords_gcs = aCoords_gcs[:, 0:2]
                 nvertex = len(aCoords_gcs)
 
-                codes = np.full(nvertex, mpath.Path.LINETO, dtype=int)
-                codes[0] = mpath.Path.MOVETO
-                path = mpath.Path(aCoords_gcs, codes)
+                codes = np.full(nvertex, mpl.path.Path.LINETO, dtype=int)
+                codes[0] = mpl.path.Path.MOVETO
+                path = mpl.path.Path(aCoords_gcs, codes)
                 x, y = zip(*path.vertices)
                 line, = ax_dem.plot(
-                    x, y, color='b', transform=ccrs.PlateCarree())
+                    x, y, color='b', transform=cpl.crs.PlateCarree())
                 lID = lID + 1
 
     # plot point if available
@@ -131,16 +129,16 @@ def plot_study_area(sFilename_dem_in,
                 aCoords_gcs = aCoords_gcs[:, 0:2]
                 nvertex = len(aCoords_gcs)
 
-                codes = np.full(nvertex, mpath.Path.LINETO, dtype=int)
-                codes[0] = mpath.Path.MOVETO
-                path = mpath.Path(aCoords_gcs, codes)
+                codes = np.full(nvertex, mpl.path.Path.LINETO, dtype=int)
+                codes[0] = mpl.path.Path.MOVETO
+                path = mpl.path.Path(aCoords_gcs, codes)
                 x, y = zip(*path.vertices)
                 line, = ax_dem.plot(
-                    x, y, color='b', transform=ccrs.PlateCarree())
+                    x, y, color='b', transform=cpl.crs.PlateCarree())
                 lID = lID + 1
 
     # draw gridlines
-    gl = ax_dem.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+    gl = ax_dem.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                           linewidth=1, color='gray', alpha=0.3, linestyle='--')
 
     gl.left_labels = False
@@ -157,7 +155,7 @@ def plot_study_area(sFilename_dem_in,
 
     # draw colorbar
     ax_cb = fig.add_axes([0.2, 0.2, 0.02, 0.5])
-    cb = plt.colorbar(demplot, cax=ax_cb, extend='both')
+    cb = mpl.pyplot.colorbar(demplot, cax=ax_cb, extend='both')
     cb.ax.get_yaxis().set_ticks_position('left')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel('Unit: meter', rotation=270)
@@ -165,7 +163,7 @@ def plot_study_area(sFilename_dem_in,
 
     # ==============================================
     # google earth
-    ge_proj = ccrs.Mercator()  # central_longitude=dLongitude_center)
+    ge_proj = cpl.crs.Mercator()  # central_longitude=dLongitude_center)
 
     pSpatial_reference_source = osr.SpatialReference()
     pSpatial_reference_source.ImportFromEPSG(4326)
@@ -206,12 +204,12 @@ def plot_study_area(sFilename_dem_in,
     # save and close the file
     f.close()
 
-    img = mpimg.imread('google_map.png')
+    img = mpl.image.imread('google_map.png')
     ax_ge.imshow(img, extent=aImage_extent,       transform=ge_proj)
-    gl_ge = ax_ge.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+    gl_ge = ax_ge.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                             linewidth=1, color='gray', alpha=0.3, linestyle='--')
-    # gl_ge.xlocator = mticker.FixedLocator(aLon_range)
-    # gl_ge.ylocator = mticker.FixedLocator(aLat_range)
+    # gl_ge.xlocator = mpl.ticker.FixedLocator(aLon_range)
+    # gl_ge.ylocator = mpl.ticker.FixedLocator(aLat_range)
     gl_ge.xformatter = LongitudeFormatter()
     gl_ge.yformatter = LatitudeFormatter()
     gl_ge.right_labels = False
@@ -236,9 +234,9 @@ def plot_study_area(sFilename_dem_in,
             if sGeometry_type == 'POLYGON':
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 aCoords_gcs = np.array(aCoords_gcs)
-                polygon = mpatches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
+                polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
                                            alpha=0.8, edgecolor='b',
-                                           transform=ccrs.PlateCarree())
+                                           transform=cpl.crs.PlateCarree())
                 ax_ge.add_patch(polygon)
 
     # histogram
@@ -260,13 +258,13 @@ def plot_study_area(sFilename_dem_in,
         ax_histo.set_xlabel(sLabel_x, fontsize=4)
         ax_histo.set_ylabel(sLabel_y, fontsize=4)
         ax_histo.set_xlim(dMin_x, dMax_x)
-        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter = mpl.ticker.ScalarFormatter(useMathText=True)
         formatter.set_scientific(True)
         ax_histo.yaxis.set_major_formatter(formatter)
         ax_histo.tick_params(axis='x', labelsize=5)
         ax_histo.tick_params(axis='y', labelsize=5)
         ax_histo.yaxis.offsetText.set_fontsize(5)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
     return

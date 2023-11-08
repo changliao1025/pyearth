@@ -1,8 +1,6 @@
-
-
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -111,7 +109,7 @@ def barplot_data_stacked(aData_in,
     else:
         aHatch = np.fill(nData, '+')
 
-    fig = plt.figure(dpi=iDPI)
+    fig = mpl.pyplot.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -139,16 +137,17 @@ def barplot_data_stacked(aData_in,
         pass
 
     if (iFlag_format_y == 1):
-        ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(sFormat_y))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
     ax.set_ylim(dMin_y, dMax_y)
     ax.legend(bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend,
               fontsize=12,
               ncol=ncolumn)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    
+    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    mpl.pyplot.close('all')
+    mpl.pyplot.clf()
 
     return
