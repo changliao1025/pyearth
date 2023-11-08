@@ -5,9 +5,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
-import pandas as pd
-from statsmodels.tsa.seasonal import STL
-from statsmodels.tsa.stattools import adfuller
+
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -39,6 +38,14 @@ def plot_time_series_analysis(aTime,
                               sDate_type_in = None,\
                               sFormat_y_in =None,\
                               sTitle_in = None):
+    
+    try:
+        import pandas as pd
+        from statsmodels.tsa.seasonal import STL
+        from statsmodels.tsa.stattools import adfuller
+    except ImportError as e:
+        raise ImportError("The package 'pandas and statsmodels' is required for this function to run.") from e
+
    
     aTime = np.array(aTime)
     aData = np.array(aData)
@@ -172,11 +179,8 @@ def plot_time_series_analysis(aTime,
 
     sYear_format = mdates.DateFormatter('%Y')
     
-    aData_tsa = pd.Series(aData, 
-         index=pd.date_range(aTime[0], 
-                                                     periods=len(aTime), 
-                                                     freq='M'), 
-                                                     name = sVariable)
+    aTS = pd.date_range(aTime[0],         periods=len(aTime),      freq='M')
+    aData_tsa = pd.Series(aData,    index= aTS,      name = sVariable)
 
     
     #https://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.STL.html#statsmodels.tsa.seasonal.STL

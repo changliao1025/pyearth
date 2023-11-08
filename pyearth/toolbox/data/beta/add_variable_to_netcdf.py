@@ -1,8 +1,13 @@
-import os, sys
-import netCDF4 as nc
+import os
 from pyearth.system.define_global_variables import *
 
 def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in, sUnit_in, aDimension_in):
+
+    try:
+        import netCDF4 as nc
+    except ImportError as e:
+        raise ImportError("The package 'netCDF4' is required for this function to run.") from e
+    
     if os.path.exists(sFilename_old):
         print("Yep, I can read that file!")
     else:
@@ -56,6 +61,11 @@ def add_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, sVariable_in,
 
 
 def add_multiple_variable_to_netcdf(sFilename_old, sFilename_new, aData_in, aVariable_in, aUnit_in, aDimension_in):
+    try:
+        import netCDF4 as nc
+    except ImportError as e:
+        raise ImportError("The package 'netCDF4' is required for this function to run.") from e
+    
     if os.path.exists(sFilename_old):
         print("Yep, I can read that file!")
     else:

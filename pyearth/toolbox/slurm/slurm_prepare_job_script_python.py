@@ -1,7 +1,19 @@
-import os, sys
+import os
+import sys
 from pyearth.system.define_global_variables import *
 
-def slurm_prepare_job_script_python(iIndex_start, iIndex_end,      sBasename_job,     sDirectory_job,     sFilename_python,       iWalltime_in = None,     nNode_in = None,     nThread_in = None,   sAccount =None,    sEmail=None,      sQueue_in = None):
+
+def slurm_prepare_job_script_python(iIndex_start,
+                                    iIndex_end,
+                                    sBasename_job,
+                                    sDirectory_job,
+                                    sFilename_python,
+                                    iWalltime_in=None,
+                                    nNode_in=None,
+                                    nThread_in=None,
+                                    sAccount=None,
+                                    sEmail=None,
+                                    sQueue_in=None):
     """
     Prepare a slurm job script for python without checkpoint
 
@@ -36,13 +48,12 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end,      sBasename_job
     else:
         iWalltime = 2
 
-
     nTask = iIndex_end - iIndex_start + 1
     nChunkPerThread = nTask // nThread
 
-    sNode =  "{:0d}".format(iNode  )
-    sTask =   "{:0d}".format(nTask  )
-    sWalltime ="{:0d}".format(iWalltime  )
+    sNode = "{:0d}".format(iNode)
+    sTask = "{:0d}".format(nTask)
+    sWalltime = "{:0d}".format(iWalltime)
     os.chdir(sDirectory_job)
 
     for iRank in range(1, nThread+1):
@@ -52,74 +63,78 @@ def slurm_prepare_job_script_python(iIndex_start, iIndex_end,      sBasename_job
         else:
             iStart = (iRank-2) * nChunkPerThread + iIndex_start
             iEnd = (iRank-1) * nChunkPerThread + iIndex_start - 1
-            sStart = "{:0d}".format(iStart  )
-            sEnd =  "{:0d}".format(iEnd  )
+            sStart = "{:0d}".format(iStart)
+            sEnd = "{:0d}".format(iEnd)
 
-        sFilename_job = sDirectory_job + slash + sBasename_job + "{:03d}".format(iRank) + '.job'
-        pFile =  open(sFilename_job,"w")  #write mode
+        sFilename_job = sDirectory_job + slash + \
+            sBasename_job + "{:03d}".format(iRank) + '.job'
+        pFile = open(sFilename_job, "w")  # write mode
         sLine = '#!/bin/bash' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
 
         if sAccount is not None:
-            sLine = '#SBATCH --account=' + sAccount  + '\n'
-            pFile.write( sLine )
+            sLine = '#SBATCH --account=' + sAccount + '\n'
+            pFile.write(sLine)
 
         sLine = '#SBATCH --begin=now+1minutes' + '\n'
-        #pFile.write( sLine )
+        # pFile.write( sLine )
 
         sLine = '#SBATCH --cpus-per-task=1 ' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
 
         sLine = '#SBATCH --dependency=singleton ' + '\n'
-        #pFile.write( sLine )
+        # pFile.write( sLine )
         sLine = '#SBATCH --error=stderr_%j.err' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
         sLine = '#SBATCH --job-name=' \
-            + sBasename_job + "{:03d}".format(iRank) + '  # create a name for your job' + '\n'
-        pFile.write( sLine )
+            + sBasename_job + \
+                "{:03d}".format(iRank) + \
+            '  # create a name for your job' + '\n'
+        pFile.write(sLine)
         sLine = '#SBATCH --mail-type=ALL' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
 
         if sEmail is not None:
             sLine = '#SBATCH --mail-user=' + sEmail + '\n'
-            pFile.write( sLine )
+            pFile.write(sLine)
 
         sLine = '#SBATCH --nodes=' + sNode + ' # node count' + '\n'
-        pFile.write( sLine )
-        sLine = '#SBATCH --ntasks=1'  + ' # total number of tasks' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
+        sLine = '#SBATCH --ntasks=1' + ' # total number of tasks' + '\n'
+        pFile.write(sLine)
         sLine = '#SBATCH --output=stdout_%j.out' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
 
-        sLine = '#SBATCH --partition=' + sQueue + '\n'  #can be improved here
-        pFile.write( sLine )
+        sLine = '#SBATCH --partition=' + sQueue + '\n'  # can be improved here
+        pFile.write(sLine)
 
-        sLine = '#SBATCH --time=' + sWalltime +':00:00      # total run time limit (HH:MM:SS)' + '\n'
-        pFile.write( sLine )
+        sLine = '#SBATCH --time=' + sWalltime + \
+            ':00:00      # total run time limit (HH:MM:SS)' + '\n'
+        pFile.write(sLine)
 
         sLine = 'module purge' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
         sLine = 'module load anaconda3/2019.03' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
         sLine = 'source /share/apps/anaconda3/2019.03/etc/profile.d/conda.sh' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
         sLine = 'unset PYTHONHOME' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
         sLine = 'conda activate gdalenv' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
 
         sLine = 'python ' + sFilename_python \
             + ' --iIndex_start ' + sStart \
-            + ' --iIndex_end '  + sEnd + '\n'
-        pFile.write( sLine )
+            + ' --iIndex_end ' + sEnd + '\n'
+        pFile.write(sLine)
 
         sLine = 'echo " Job " ' + '${SLURM_JOBID}' + ' is launched' + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
 
         sLine = 'conda deactivate' + '\n'
-        pFile.write( sLine )
-        sLine = 'echo "Finished"'      + '\n'
-        pFile.write( sLine )
+        pFile.write(sLine)
+        sLine = 'echo "Finished"' + '\n'
+        pFile.write(sLine)
         pFile.close()
 
     return

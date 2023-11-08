@@ -1,6 +1,8 @@
 import datetime
 import pyearth.toolbox.date.julian as julian
-def day_in_month(iYear_in, iMonth_in,iFlag_leap_year_in=None):
+def day_in_month(iYear_in, 
+                 iMonth_in,
+                 iFlag_leap_year_in=None):
     """
     Calculate how many days in a month
 
@@ -33,8 +35,5 @@ def day_in_month(iYear_in, iMonth_in,iFlag_leap_year_in=None):
             if iMonth_in ==2:
                 dayinmon = 29
             
-   
-    
-  
 
     return dayinmon

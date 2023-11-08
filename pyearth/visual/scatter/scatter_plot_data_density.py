@@ -1,12 +1,7 @@
-import os, sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from matplotlib.ticker import MaxNLocator
-import matplotlib.patches as mpl_patches
-
-import scipy
-
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
 def fmt0(x):
         a, b = '{:.1e}'.format(x).split('e')
@@ -21,28 +16,32 @@ def fmt2(x):
         a = '{:.1e}'.format(x)
         return a
 
-def scatter_plot_data_density(aData_x, \
-                              aData_y,\
-                              sFilename_out, \
-                              iSize_x_in = None, \
-                              iSize_y_in = None, \
-                              iDPI_in = None,\
-                              iFlag_scientific_notation_x_in=None,\
-                              iFlag_scientific_notation_y_in=None,\
-                              iFlag_log_x_in=None,\
-                              iFlag_log_y_in=None,\
-                              dMin_x_in = None, \
-                              dMax_x_in = None, \
-                              dMin_y_in = None, \
-                              dMax_y_in = None, \
-                              dSpace_x_in = None, \
-                              dSpace_y_in = None, \
-                              sFormat_x_in =None,\
-                              sFormat_y_in =None,\
-                              sLabel_x_in = None, \
-                              sLabel_y_in = None, \
-                              sLabel_legend_in = None, \
+def scatter_plot_data_density(aData_x, 
+                              aData_y,
+                              sFilename_out, 
+                              iSize_x_in = None, 
+                              iSize_y_in = None, 
+                              iDPI_in = None,
+                              iFlag_scientific_notation_x_in=None,
+                              iFlag_scientific_notation_y_in=None,
+                              iFlag_log_x_in=None,
+                              iFlag_log_y_in=None,
+                              dMin_x_in = None, 
+                              dMax_x_in = None, 
+                              dMin_y_in = None, 
+                              dMax_y_in = None, 
+                              dSpace_x_in = None, 
+                              dSpace_y_in = None, 
+                              sFormat_x_in =None,
+                              sFormat_y_in =None,
+                              sLabel_x_in = None, 
+                              sLabel_y_in = None, 
+                              sLabel_legend_in = None, 
                               sTitle_in = None):
+    try:
+        import scipy
+    except ImportError as e:
+        raise ImportError("The package 'scipy' is required for this function to run.") from e
 
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
@@ -257,27 +256,27 @@ def scatter_plot_data_density(aData_x, \
     dRatio = (float(iSize_y)/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
     ax_scatter.set_aspect(dRatio, 'box')  #this one set the y / x ratio
 
-    ax_scatter.legend(aLegend_artist, aLegend_label,\
+    ax_scatter.legend(aLegend_artist, aLegend_label,
                       loc="upper right", fontsize=12)
                       
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
    
     sText = sLabel_legend
-    ax_scatter.text(0.05, 0.95, sText, \
-    verticalalignment='top', horizontalalignment='left',\
-            transform=ax_scatter.transAxes, \
+    ax_scatter.text(0.05, 0.95, sText, 
+    verticalalignment='top', horizontalalignment='left',
+            transform=ax_scatter.transAxes, 
             color='black', fontsize=12)
 
     sText = r'R: ' + "{:.2f}".format( r_value )
-    ax_scatter.text(0.05, 0.9, sText, \
-    verticalalignment='top', horizontalalignment='left',\
-            transform=ax_scatter.transAxes, \
+    ax_scatter.text(0.05, 0.9, sText, 
+    verticalalignment='top', horizontalalignment='left',
+            transform=ax_scatter.transAxes, 
             color='black', fontsize=12)
     
     sText = r'P-value: ' + "{:.2e}".format( p_value )
-    ax_scatter.text(0.05, 0.85, sText, \
-    verticalalignment='top', horizontalalignment='left',\
-            transform=ax_scatter.transAxes, \
+    ax_scatter.text(0.05, 0.85, sText, 
+    verticalalignment='top', horizontalalignment='left',
+            transform=ax_scatter.transAxes, 
             color='black', fontsize=12)
 
     

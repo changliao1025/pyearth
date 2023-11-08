@@ -1,31 +1,36 @@
 import numpy as np
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
-from scipy.stats import gaussian_kde
 
-sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
-def ridgeplot_data_density(aDict, 
-    aData, 
-        sFilename_out,
-            iSize_x_in = None, 
-                              iSize_y_in = None, 
-                              iDPI_in = None,
-                              iFlag_scientific_notation_x_in=None,
-                              iFlag_scientific_notation_y_in=None,
-                              iFlag_log_x_in=None,
-                              iFlag_log_y_in=None,
-                              dMin_x_in = None, 
-                              dMax_x_in = None, 
-                              dSpace_x_in = None, 
-                              sFormat_x_in =None,
-                              sLabel_x_in = None, 
-                              sLabel_y_in = None, 
-                              sLabel_legend_in = None, 
-                              sTitle_in = None):
+def ridgeplot_data_density(aDict,
+                           aData,
+                           sFilename_out,
+                           iSize_x_in=None,
+                           iSize_y_in=None,
+                           iDPI_in=None,
+                           iFlag_scientific_notation_x_in=None,
+                           iFlag_scientific_notation_y_in=None,
+                           iFlag_log_x_in=None,
+                           iFlag_log_y_in=None,
+                           dMin_x_in=None,
+                           dMax_x_in=None,
+                           dSpace_x_in=None,
+                           sFormat_x_in=None,
+                           sLabel_x_in=None,
+                           sLabel_y_in=None,
+                           sLabel_legend_in=None,
+                           sTitle_in=None):
+
+    try:
+        import seaborn as sns
+        from scipy.stats import gaussian_kde
+        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
+    except ImportError as e:
+        raise ImportError(
+            "The package 'sns and scipy' is required for this function to run.") from e
+
     nData = len(aDict)
-    
+
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
     else:
@@ -82,82 +87,75 @@ def ridgeplot_data_density(aDict,
         sTitle = ''
 
     plt.rcParams["font.family"] = "Times New Roman"
-    fig = plt.figure( dpi=iDPI )
-    
+    fig = plt.figure(dpi=iDPI)
 
     # we generate a color palette with Seaborn.color_palette()
     pal = sns.color_palette(palette='coolwarm', n_colors=nData)
 
-    fig.set_figwidth( iSize_x )
-    fig.set_figheight( iSize_y ) 
-    axgr = AxesGrid(fig, 111, 
+    fig.set_figwidth(iSize_x)
+    fig.set_figheight(iSize_y)
+    axgr = AxesGrid(fig, 111,
                     nrows_ncols=(nData, 1),
-                    axes_pad=-0.1,      
+                    axes_pad=-0.1,
                     label_mode='')  # note the empty label_mode
-
-                   
 
     if dMin_x_in is None:
         for i in range(nData):
-            aData_dummy = np.array(aData[i]   )
-            dMin_x_dummy = np.min(aData_dummy)          
-            if i ==0:
-                dMin_x = dMin_x_dummy              
+            aData_dummy = np.array(aData[i])
+            dMin_x_dummy = np.min(aData_dummy)
+            if i == 0:
+                dMin_x = dMin_x_dummy
             else:
-                dMin_x = np.min([dMin_x, dMin_x_dummy] )
-              
+                dMin_x = np.min([dMin_x, dMin_x_dummy])
+
     else:
         dMin_x = dMin_x_in
-    
+
     if dMax_x_in is None:
         for i in range(nData):
-            aData_dummy = np.array(aData[i]   )           
+            aData_dummy = np.array(aData[i])
             dMax_x_dummy = np.max(aData_dummy)
-            if i ==0:              
+            if i == 0:
                 dMax_x = dMax_x_dummy
-            else:               
+            else:
                 dMax_x = np.max([dMax_x, dMax_x_dummy])
     else:
         dMax_x = dMax_x_in
 
-    
-
     for i, ax in enumerate(axgr):
-        aData_dummy = aData[i]        
+        aData_dummy = aData[i]
 
         density = gaussian_kde(aData_dummy)
-        xx = np.linspace(dMin_x, dMax_x,1000)
+        xx = np.linspace(dMin_x, dMax_x, 1000)
         yy = density(xx)
-        ax.plot(xx,yy, color='w',linewidth=0.5)#
-        ax.fill_between(xx, yy, 0,  linewidth=1.5, color = pal[i])
+        ax.plot(xx, yy, color='w', linewidth=0.5)
+        ax.fill_between(xx, yy, 0,  linewidth=1.5, color=pal[i])
         dMin_y = np.min(yy)
         dMax_y = np.max(yy)
-        
-        dRatio = (float((iSize_y/nData))/iSize_x) / ( (dMax_y-dMin_y )/ ( dMax_x-dMin_x ) )
+
+        dRatio = (float((iSize_y/nData))/iSize_x) / \
+            ((dMax_y-dMin_y) / (dMax_x-dMin_x))
         ax.set_aspect(dRatio, 'box')
 
         ax.spines.left.set_visible(False)
         ax.spines.right.set_visible(False)
         ax.spines.top.set_visible(False)
-        ax.spines.bottom.set_visible(False)        
+        ax.spines.bottom.set_visible(False)
 
         ax.get_yaxis().set_visible(False)
         sText = aDict[i+1]
-        ax.text(0.85, 0.40, sText, 
-        verticalalignment='bottom', horizontalalignment='left',
-            transform=ax.transAxes, 
-            color= pal[i], fontsize=10, fontweight='bold')
+        ax.text(0.85, 0.40, sText,
+                verticalalignment='bottom', horizontalalignment='left',
+                transform=ax.transAxes,
+                color=pal[i], fontsize=10, fontweight='bold')
 
         if i < (nData-1):
-            
+
             ax.axes.xaxis.set_visible(False)
-        else:  
+        else:
             sText = sLabel_x
             ax.set_xlabel(sText,  fontsize=15)
             pass
-    
-   
-    
 
     plt.savefig(sFilename_out, bbox_inches='tight')
 

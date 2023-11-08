@@ -1,5 +1,5 @@
 
-from math import cos, sin,  sqrt, pi
+from math import cos, sin, sqrt, pi
 import numpy as np
 def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, iFlag_radius =None, dRadius_in= 6378137.0):
     """

@@ -1,6 +1,13 @@
-import requests
-squaremile2squarekm = 2.58999
+
+
 def retrieve_usgs_site_information_nwis(sSiteId):
+    try:
+        import requests
+    except ImportError as e:
+        raise ImportError(
+            "The package 'requests' is required for this function to run.") from e
+    
+    squaremile2squarekm = 2.58999
     
     nwis_site_url = f"https://waterservices.usgs.gov/nwis/site/?format=rdb&siteOutput=Expanded&sites={sSiteId}"
     response = requests.get(nwis_site_url)
