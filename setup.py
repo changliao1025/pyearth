@@ -2,7 +2,7 @@
 import io
 import os
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
 NAME = "pyearth"
 DESCRIPTION = \
@@ -10,7 +10,7 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.22"
+VERSION = "0.1.23"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
@@ -58,6 +58,6 @@ setup(
     install_requires=REQUIRED,
     classifiers=CLASSIFY,
     extras_require={
-        'statistics': ['netCDF4','pandas', 'scipy', 'statsmodels']
+        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels']
     }
 )
