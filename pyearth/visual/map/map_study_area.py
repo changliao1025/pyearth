@@ -35,16 +35,16 @@ def plot_study_area(sFilename_dem_in,
     # ==============================================================================
 
     dummy = gdal_read_geotiff_file(sFilename_dem_in)
-    aImage_in = dummy[0]
-    dResolution_x = dummy[1]
-    dResolution_y = dummy[2]
-    dOriginX = dummy[3]
-    dOriginY = dummy[4]
-    nrow = dummy[5]
-    ncolumn = dummy[6]
-    missing_value = dummy[7]
-    pProjection = dummy[9]
-    pSpatial_reference_source = dummy[10]
+    aImage_in = dummy['dataOut']
+    dResolution_x = dummy['pixelWidth']
+    dResolution_y = dummy['pixelHeight']
+    dOriginX = dummy['originX']
+    dOriginY = dummy['originY']
+    nrow = dummy['nrow']
+    ncolumn = dummy['ncolumn']
+    missing_value = dummy['missingValue']
+    pProjection = dummy['projection']
+    pSpatial_reference_source = dummy['spatialReference']
 
     # set up dem projection
     dem_proj = cpl.crs.AlbersEqualAre(central_longitude=pSpatial_reference_source.GetProjPar('longitude_of_center'),
@@ -61,7 +61,7 @@ def plot_study_area(sFilename_dem_in,
     dLon_min = dOriginX
     dLon_max = dOriginX + ncolumn * dResolution_x
     dLat_max = dOriginY
-    dLat_min = dOriginY - nrow * dResolution_x
+    dLat_min = dOriginY + nrow * dResolution_y
 
     pSpatial_reference_target = osr.SpatialReference()
     pSpatial_reference_target.ImportFromEPSG(4326)
@@ -75,8 +75,10 @@ def plot_study_area(sFilename_dem_in,
         aLon, aLat, pSpatial_reference_source, pSpatial_reference_target)
     dLongitude_center = np.mean(aLon)
     dLatitude_center = np.mean(aLat)
-    aImage_extent = [dLon_min - dResolution_x, dLon_max +
-                     dResolution_x, dLat_min - dResolution_x,  dLat_max+dResolution_x]
+    aImage_extent = [dLon_min - dResolution_x, 
+                     dLon_max + dResolution_x, 
+                     dLat_min + dResolution_y,  
+                     dLat_max - dResolution_y]
 
     aImage_in[np.where(aImage_in == missing_value)] = np.nan
     #
