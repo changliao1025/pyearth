@@ -1,7 +1,9 @@
 import os
+import sys
 import numpy as np
 from osgeo import osr, ogr
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 pProjection = cpl.crs.PlateCarree()  # for latlon data only
@@ -23,10 +25,11 @@ class OOMFormatter(mpl.ticker.ScalarFormatter):
             self.format = r'$\mathdefault{%s}$' % self.format
 
 
+
 def map_netcdf_file(sFilename_netcdf_in,
                     sVariable_in,
-                    iFlag_unstructured_in=None,
-                    sFolder_output_in=None,
+                    sFolder_output_in,
+                    iFlag_unstructured_in=None,                    
                     iFlag_scientific_notation_colorbar_in=None,
                     iFont_size_in=None,
                     sColormap_in=None,
@@ -35,8 +38,11 @@ def map_netcdf_file(sFilename_netcdf_in,
                     iSize_x_in=None,
                     iSize_y_in=None,
                     dMissing_value_in=None,
+                    dConvert_factor_in=None,
                     dData_max_in=None,
                     dData_min_in=None,
+                    dResolution_x_in=None,
+                    dResolution_y_in=None,
                     sExtend_in=None,
                     sFont_in=None,
                     sUnit_in=None,
@@ -98,6 +104,11 @@ def map_netcdf_file(sFilename_netcdf_in,
         iFlag_data_max = 0
         pass
 
+    if dConvert_factor_in is not None:
+        dConvert_factor = dConvert_factor_in
+    else:
+        dConvert_factor = 1.0
+
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
     else:
@@ -130,7 +141,7 @@ def map_netcdf_file(sFilename_netcdf_in,
     else:
         sFont = "Times New Roman"
 
-    mpl.pyplot.rcParams["font.family"] = sFont
+    plt.rcParams["font.family"] = sFont
 
     sVariable = sVariable_in
 
@@ -158,20 +169,33 @@ def map_netcdf_file(sFilename_netcdf_in,
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
 
     try:
-        ds = nc.Dataset(sFilename_netcdf_in, 'r')
+        pDatasets_in = nc.Dataset(sFilename_netcdf_in, 'r')
+        pDatasets_in.set_auto_mask(False)
 
         # get all the dimensions
-        aDimension = ds.dimensions.keys()
-        # get the time dimension by name
-        aTime = ds.variables['time']
-        nTime = len(aTime)
+        aDimension = pDatasets_in.dimensions.keys()
+        for sKey, aValue in pDatasets_in.variables.items():    
+            if sKey == 'time':
+                aTime = aValue
+                nTime = len(aTime)
 
-        aLatitude = ds.variables['lat'][:]
-        aLongitude = ds.variables['lon'][:] - 180
+            if sKey == 'lat':
+                aLatitude = aValue[:]
+                
+            if sKey == 'lon':
+                dummy = aValue[:]
+                if np.min(dummy) < 0:
+                    aLongitude = dummy
+                else:
+                    aLongitude = dummy - 180
 
-        # read the variable
-        aData = ds.variables[sVariable][:]
+            if sKey == sVariable:
+                aData = aValue[:] * dConvert_factor
+                pass
+            
+        
         # deal with the time
+        print('Extracting data ...')
 
         if iFlag_unstructured_in is not None:
             # unstructured grid
@@ -203,10 +227,18 @@ def map_netcdf_file(sFilename_netcdf_in,
 
             ncolumn = len(aLongitude)
             nrow = len(aLatitude)
-            dResolution_x = (dLongitude_max - dLongitude_min) / (ncolumn - 1)
-            dResolution_y = (dLatitude_max - dLatitude_min) / (nrow - 1)
+            if dResolution_x_in is not None:
+                dResolution_x = dResolution_x_in
+            else:
+                dResolution_x = (dLongitude_max - dLongitude_min) / (ncolumn - 1)
+            
+            if dResolution_y_in is not None:
+                dResolution_y = dResolution_y_in
+            else:
+                dResolution_y = (dLatitude_max - dLatitude_min) / (nrow - 1)
 
             # get max and min of the data
+            print(dResolution_x, dResolution_y)
 
             if pBoundary_in is not None:
 
@@ -235,10 +267,16 @@ def map_netcdf_file(sFilename_netcdf_in,
                 if iFlag_data_min == 0:
                     dValue_min = np.min(aData)
 
+            print(dValue_min, dValue_max)
+            #flush the print buffer 
+            
+            sys.stdout.flush()
+
+
             # the bounding box should be applied to cell center
             for iStep in range(0, nTime):
                 sStep = '{:03d}'.format(iStep)
-                fig = mpl.pyplot.figure(dpi=iDPI)
+                fig = plt.figure(dpi=iDPI)
                 fig.set_figwidth(iSize_x)
                 fig.set_figheight(iSize_y)
                 ax = fig.add_axes([0.08, 0.1, 0.62, 0.7],
@@ -246,7 +284,7 @@ def map_netcdf_file(sFilename_netcdf_in,
                 ax.set_global()
                 # redefine the filename and title
                 sFilename_out = os.path.join(
-                    sFolder_output, sVariable + '_' + sStep + '.png')
+                    sFolder_output_in, sVariable + '_' + sStep + '.png')
 
                 for i in range(0, nrow):
                     for j in range(0, ncolumn):
@@ -256,7 +294,20 @@ def map_netcdf_file(sFilename_netcdf_in,
                         pPoint = ogr.Geometry(ogr.wkbPoint)
                         pPoint.AddPoint(dLongitude_cell_center,
                                         dLatitude_cell_center)
-                        if pPoint.Within(pBoundary):
+                        
+                        iFlag_include = 1
+                        if pBoundary_in is None:
+                            iFlag_include = 1 
+                            pass
+                        else:
+                            if pPoint.Within(pBoundary):
+                                iFlag_include = 1
+                            else:
+                                iFlag_include = 0
+                                pass
+                            pass
+                        
+                        if iFlag_include == 1:
                             # get the value
                             dValue = aData[iStep, i, j]
                             # get its cell shape
@@ -278,15 +329,19 @@ def map_netcdf_file(sFilename_netcdf_in,
                             y1 = dLatitude_cell_center + dResolution_y/2
                             aCoords_gcs[3, :] = x1, y1
 
-                            iColor_index = int(
-                                (dValue - dValue_min) / (dValue_max - dValue_min) * 255)
-                            # pick color from colormap
-                            cmiColor_index = cmap(iColor_index)
+                            #dealing with missing value
+                            if dValue < dValue_min:
+                                pass
+                            else:
+                                iColor_index = int(
+                                    (dValue - dValue_min) / (dValue_max - dValue_min) * 255)
+                                # pick color from colormap
+                                cmiColor_index = cmap(iColor_index)
 
-                            polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
-                                                       alpha=0.8, edgecolor=cmiColor_index, facecolor=cmiColor_index,
-                                                       transform=cpl.crs.PlateCarree())
-                            ax.add_patch(polygon)
+                                polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
+                                                           alpha=0.8, edgecolor=cmiColor_index, facecolor=cmiColor_index,
+                                                           transform=cpl.crs.PlateCarree())
+                                ax.add_patch(polygon)
 
                             pass
                         else:
@@ -344,44 +399,14 @@ def map_netcdf_file(sFilename_netcdf_in,
                 gl.ylabel_style = {'size': 10, 'color': 'k',
                                    'rotation': 90, 'weight': 'normal'}
 
-                if sFolder_output_in is None:
-                    plt.show()
-                else:
+                
 
-                    plt.savefig(sFilename_out, bbox_inches='tight')
-
-                    plt.close('all')
-                    plt.clf()
+                plt.savefig(sFilename_out, bbox_inches='tight')
+                plt.close('all')
+                plt.clf()
 
         print("Extraction successful!")
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Example usage:
 
-
-if __name__ == "__main__":
-    sFilename_netcdf_in_path = "/compyfs/inputdata/lnd/dlnd7/mingpan/ming_daily_2019.nc"
-
-    sVariable_in = "QOVER"
-
-    sFolder_output = '/qfs/people/liao313/workspace/python/pyearth/figures/'
-
-    aExtent = [-150.015625, -146.234375, 67.921875, 70.328125]
-    dLongitude_left, dLongitude_right, dLatitude_bot, dLatitude_top = aExtent
-    pRing = ogr.Geometry(ogr.wkbLinearRing)
-    pRing.AddPoint(dLongitude_left, dLatitude_top)
-    pRing.AddPoint(dLongitude_right, dLatitude_top)
-    pRing.AddPoint(dLongitude_right, dLatitude_bot)
-    pRing.AddPoint(dLongitude_left, dLatitude_bot)
-    pRing.AddPoint(dLongitude_left, dLatitude_top)
-    pBoundary = ogr.Geometry(ogr.wkbPolygon)
-    pBoundary.AddGeometry(pRing)
-    pBoundary_wkt = pBoundary.ExportToWkt()
-
-    sTitle = 'Qver'
-    sUnit = 'mm/day'
-
-    map_netcdf_file(sFilename_netcdf_in_path, sVariable_in, sFolder_output_in=sFolder_output,
-                    pBoundary_in=pBoundary_wkt, iFlag_scientific_notation_colorbar_in=1,
-                    sTitle_in=sTitle, sUnit_in=sUnit)
