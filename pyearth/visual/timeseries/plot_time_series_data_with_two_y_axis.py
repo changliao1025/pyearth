@@ -1,8 +1,7 @@
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-
-
+import matplotlib.pyplot as plt
 
 from pyearth.system.define_global_variables import *
 
@@ -105,7 +104,7 @@ def plot_time_series_data_with_two_y_axis(aTime_all, aData_all,
     else:
         pass
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax1 = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -184,8 +183,8 @@ def plot_time_series_data_with_two_y_axis(aTime_all, aData_all,
     ax1.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
     ax2.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
     print(sFilename_out)
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()
     # print('finished plotting')

@@ -1,8 +1,8 @@
 
 import numpy as np
 
-
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import cartopy as cpl
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -114,7 +114,7 @@ def map_vector_point_data(iFiletype_in,
     dummy_index = np.where(aImage_in < dData_min)
     aImage_in[dummy_index] = dData_min
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     # fig.set_figwidth( iSize_x )
     # fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection)
@@ -174,11 +174,11 @@ def map_vector_point_data(iFiletype_in,
 
     if iFlag_scientific_notation_colorbar == 1:
         formatter = OOMFormatter(fformat="%1.1e")
-        cb = mpl.pyplot.colorbar(rasterplot, cax=ax_cb,
+        cb = plt.colorbar(rasterplot, cax=ax_cb,
                           extend=sExtend, format=formatter)
     else:
         formatter = OOMFormatter(fformat="%1.1f")
-        cb = mpl.pyplot.colorbar(rasterplot, cax=ax_cb,
+        cb = plt.colorbar(rasterplot, cax=ax_cb,
                           extend=sExtend, format=formatter)
 
     cb.ax.get_yaxis().set_ticks_position('right')
@@ -186,8 +186,8 @@ def map_vector_point_data(iFiletype_in,
     cb.ax.set_ylabel(sUnit, rotation=270)
     cb.ax.tick_params(labelsize=6)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
     # .show()
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()

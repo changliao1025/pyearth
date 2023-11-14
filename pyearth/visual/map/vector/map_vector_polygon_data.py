@@ -2,7 +2,7 @@ import os
 import numpy as np
 from osgeo import osr, gdal, ogr
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -150,7 +150,7 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         sFont = "Times New Roman"
 
-    mpl.pyplot.rcParams["font.family"] = sFont
+    plt.rcParams["font.family"] = sFont
 
     if sVariable_in is not None:
         sVariable = sVariable_in
@@ -159,7 +159,7 @@ def map_vector_polygon_data(iFiletype_in,
 
     cmap = mpl.cm.get_cmap(sColormap)
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
 
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
@@ -308,17 +308,17 @@ def map_vector_polygon_data(iFiletype_in,
 
     pDataset = pLayer = pFeature = None
     if sFilename_output_in is None:
-        mpl.pyplot.show()
+        plt.show()
     else:
         sFilename = os.path.basename(sFilename_output_in)
         sFilename_out = os.path.join(sDirname, sFilename)
         sExtension = os.path.splitext(sFilename)[1]
         if sExtension == '.png':
-            mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+            plt.savefig(sFilename_out, bbox_inches='tight')
         else:
             if sExtension == '.pdf':
-                mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+                plt.savefig(sFilename_out, bbox_inches='tight')
             else:
-                mpl.pyplot.savefig(sFilename_out, bbox_inches='tight', format='ps')
-        mpl.pyplot.close('all')
-        mpl.pyplot.clf()
+                plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
+        plt.close('all')
+        plt.clf()

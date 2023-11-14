@@ -1,6 +1,7 @@
 
 import numpy as np
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import cartopy as cpl
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -137,7 +138,7 @@ def map_raster_data_dc(aImage_in,
     dummy_index = np.where(aImage_in < dData_min)
     aImage_in[dummy_index] = dData_min
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
 
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection)
 
@@ -229,7 +230,7 @@ def map_raster_data_dc(aImage_in,
     bounds = np.linspace(0, nInterval-1, nInterval, endpoint=True)
 
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-    cb = mpl.pyplot.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm), cax=ax_cb,
+    cb = plt.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm), cax=ax_cb,
                       extend=sExtend, extendfrac='auto',
                       ticks=bounds)
 
@@ -251,6 +252,6 @@ def map_raster_data_dc(aImage_in,
     cb.ax.set_yticklabels(aLabel)
     # cb.ax.set_yticklabels([aLabel[int(i)] for i in bounds]) # add the labels
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.close('all')
+    plt.clf()

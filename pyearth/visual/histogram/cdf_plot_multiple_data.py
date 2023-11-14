@@ -1,6 +1,6 @@
 
 import numpy as np
-
+import matplotlib.pyplot as plt
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.create_line_style import create_line_style
 
@@ -71,7 +71,7 @@ def cdf_plot_multiple_data(aData,
     else:
         aLabel_legend = np.full(nData, '', dtype=str)
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -80,7 +80,7 @@ def cdf_plot_multiple_data(aData,
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
 
-    ax_cdf = mpl.pyplot.axes(rect_histogram)
+    ax_cdf = plt.axes(rect_histogram)
     ax_cdf.tick_params(direction='in', top=True, right=True)
 
     labels = []
@@ -112,6 +112,6 @@ def cdf_plot_multiple_data(aData,
 
     ax_cdf.set_title(sTitle)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
+    plt.close('all')

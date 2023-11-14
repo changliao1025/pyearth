@@ -134,7 +134,7 @@ def plot_time_series_data(aTime_all,
     else:
         sFont = "Times New Roman"
 
-    mpl.pyplot.rcParams["font.family"] = sFont
+    plt.rcParams["font.family"] = sFont
 
     if aMarker_in is not None:
         aMarker = aMarker_in
@@ -240,7 +240,7 @@ def plot_time_series_data(aTime_all,
     else:
         iFlag_miniplot = 0
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -253,9 +253,9 @@ def plot_time_series_data(aTime_all,
     rect_full = [left, bottom, width, height]
     rect_mini = [dY_mini, dX_mini, width_mini, heigh_mini]
 
-    ax_full = mpl.pyplot.axes(rect_full)
+    ax_full = plt.axes(rect_full)
     if iFlag_miniplot == 1:
-        ax_mini = mpl.pyplot.axes(rect_mini)
+        ax_mini = plt.axes(rect_mini)
         ax_all = [ax_full, ax_mini]
     else:
         ax_all = [ax_full]
@@ -490,6 +490,6 @@ def plot_time_series_data(aTime_all,
 
         # common setting
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.close('all')
+    plt.clf()

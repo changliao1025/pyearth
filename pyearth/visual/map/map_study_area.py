@@ -3,6 +3,7 @@ import numpy as np
 from osgeo import osr, gdal, ogr
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import cartopy as cpl
 
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
@@ -27,7 +28,7 @@ def plot_study_area(sFilename_dem_in,
             "The package 'requests' is required for this function to run.") from e
 
     # set up figure size and dpi
-    fig = mpl.pyplot.figure(dpi=300)
+    fig = plt.figure(dpi=300)
     fig.set_figwidth(4)
     fig.set_figheight(4)
     # ==============================================================================
@@ -157,7 +158,7 @@ def plot_study_area(sFilename_dem_in,
 
     # draw colorbar
     ax_cb = fig.add_axes([0.2, 0.2, 0.02, 0.5])
-    cb = mpl.pyplot.colorbar(demplot, cax=ax_cb, extend='both')
+    cb = plt.colorbar(demplot, cax=ax_cb, extend='both')
     cb.ax.get_yaxis().set_ticks_position('left')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel('Unit: meter', rotation=270)
@@ -267,6 +268,6 @@ def plot_study_area(sFilename_dem_in,
         ax_histo.tick_params(axis='y', labelsize=5)
         ax_histo.yaxis.offsetText.set_fontsize(5)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
     return

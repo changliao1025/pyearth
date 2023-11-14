@@ -2,7 +2,7 @@ import numpy as np
 from datetime import datetime
 
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.calculate_ticks_space import calculate_ticks_space
 
@@ -79,7 +79,7 @@ def plot_time_series_data_monthly_fill(aTime,
     if (dMax_Y <= dMin_Y):
         return
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_X)
     fig.set_figheight(iSize_Y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -150,8 +150,8 @@ def plot_time_series_data_monthly_fill(aTime,
         else:
             ax.set_ylim(dMin_Y, dMax_Y)
     ax.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()
     # print('finished plotting')

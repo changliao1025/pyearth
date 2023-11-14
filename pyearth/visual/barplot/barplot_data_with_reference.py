@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -133,7 +133,7 @@ def barplot_data_with_reference(aData_in,
     else:
         aHatch = np.fill(nData, '+')
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -238,9 +238,9 @@ def barplot_data_with_reference(aData_in,
               fontsize=14,
               ncol=ncolumn)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()
 
     return

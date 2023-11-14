@@ -1,7 +1,7 @@
 
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 
 def scatter_plot_data(aData_x,  
@@ -93,7 +93,7 @@ def scatter_plot_data(aData_x,
     else:
         sTitle = ''
 
-    fig = mpl.pyplot.figure( dpi=iDPI )
+    fig = plt.figure( dpi=iDPI )
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
@@ -105,13 +105,13 @@ def scatter_plot_data(aData_x,
     rect_histy = [left + width + spacing, bottom, 0.15, height]
 
     
-    ax_scatter = mpl.pyplot.axes(rect_scatter)
+    ax_scatter = plt.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
     iFlag_histgram=1
     if iFlag_histgram ==1:
-        ax_histx = mpl.pyplot.axes(rect_histx)
+        ax_histx = plt.axes(rect_histx)
         ax_histx.tick_params(direction='in', labelbottom=False)
-        ax_histy = mpl.pyplot.axes(rect_histy)
+        ax_histy = plt.axes(rect_histy)
         ax_histy.tick_params(direction='in', labelleft=False)
 
 
@@ -128,7 +128,7 @@ def scatter_plot_data(aData_x,
     aLegend_label=[]
 
     
-    cmap = mpl.pyplot.get_cmap('BuPu')
+    cmap = plt.get_cmap('BuPu')
 
     sc= ax_scatter.scatter(x, y,  alpha=0.5,cmap=cmap)
     #ax_scatter.set_facecolor('silver')
@@ -346,8 +346,8 @@ def scatter_plot_data(aData_x,
                              bottom='off') # turn off bottom ticks
 
     ax_scatter.set_title( sTitle, loc='center', fontsize=15)
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()
    

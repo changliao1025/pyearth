@@ -1,6 +1,7 @@
 
 import numpy as np
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 from pyearth.toolbox.math.stat.scipy_bivariate_kde import scipy_bivariate_kde
 
 def fmt0(x):
@@ -98,7 +99,7 @@ def scatter_plot_data_density(aData_x,
     else:
         sTitle = ''
 
-    fig = mpl.pyplot.figure( dpi=iDPI )
+    fig = plt.figure( dpi=iDPI )
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
@@ -110,11 +111,11 @@ def scatter_plot_data_density(aData_x,
     rect_histy = [left + width + spacing, bottom, 0.15, height]
 
 
-    ax_scatter = mpl.pyplot.axes(rect_scatter)
+    ax_scatter = plt.axes(rect_scatter)
     ax_scatter.tick_params(direction='in', top=True, right=True)
-    ax_histx = mpl.pyplot.axes(rect_histx)
+    ax_histx = plt.axes(rect_histx)
     ax_histx.tick_params(direction='in', labelbottom=False)
-    ax_histy = mpl.pyplot.axes(rect_histy)
+    ax_histy = plt.axes(rect_histy)
     ax_histy.tick_params(direction='in', labelleft=False)
 
     nPoint = len(aData_x)
@@ -142,7 +143,7 @@ def scatter_plot_data_density(aData_x,
     
 
     xx, yy, z = scipy_bivariate_kde(x, y , bw, gridsize, cut, clip)
-    cmap = mpl.pyplot.get_cmap('BuPu')
+    cmap = plt.get_cmap('BuPu')
     sc = ax_scatter.contourf(xx, yy, z, 5, cmap=cmap) 
     aLegend_artist, aLegend_label = sc.legend_elements(str_format=fmt2)
     aLegend_label_new=[]
@@ -343,7 +344,7 @@ def scatter_plot_data_density(aData_x,
                          bottom='off') # turn off bottom ticks
 
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
+    plt.close('all')
     print('finished plotting')
