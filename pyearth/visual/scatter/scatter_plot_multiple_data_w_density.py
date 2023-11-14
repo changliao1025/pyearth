@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib as mpl
-
-
+import matplotlib.pyplot as plt
 
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
@@ -104,7 +103,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
     else:
         sTitle = ''
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -121,16 +120,16 @@ def scatter_plot_multiple_data_w_density(aData_x,
 
     # sns.regplot(x, y, lowess=True)
     # ax_scatter = sns.regplot(x=aData_x, y=aData_y, marker="+", lowess=True)
-    ax_scatter_full = mpl.pyplot.axes(rect_scatter)
+    ax_scatter_full = plt.axes(rect_scatter)
     if iFlag_miniplot == 1:
-        ax_scatter_mini = mpl.pyplot.axes(rect_scatter_mini)
+        ax_scatter_mini = plt.axes(rect_scatter_mini)
         ax_scatter_all = [ax_scatter_full, ax_scatter_mini]
     else:
         ax_scatter_all = [ax_scatter_full]
 
-    ax_histx = mpl.pyplot.axes(rect_histx)
+    ax_histx = plt.axes(rect_histx)
     ax_histx.tick_params(direction='in', labelbottom=False)
-    ax_histy = mpl.pyplot.axes(rect_histy)
+    ax_histy = plt.axes(rect_histy)
     ax_histy.tick_params(direction='in', labelleft=False)
 
     for i in range(nData):
@@ -454,7 +453,7 @@ def scatter_plot_multiple_data_w_density(aData_x,
             line.set_transform(transform)
             ax_scatter.add_line(line)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
+    plt.close('all')
     print('finished plotting')

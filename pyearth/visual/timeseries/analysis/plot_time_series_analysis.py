@@ -1,9 +1,9 @@
 import os
 import sys
-from datetime import datetime
+
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -188,7 +188,7 @@ def plot_time_series_analysis(aTime,
         aLabel_y = np.array(['Trend', 'Season', 'Residual'])
         aData_all = [aTSA.trend, aTSA.seasonal, aTSA.resid]
         iSize_y = iSize_y * 0.75
-        fig, pAxGrid = mpl.pyplot.subplots(nrows=len(aData_all),
+        fig, pAxGrid = plt.subplots(nrows=len(aData_all),
                                            figsize=(iSize_x, iSize_y),
                                            sharex=True,  dpi=iDPI)
 
@@ -236,7 +236,7 @@ def plot_time_series_analysis(aTime,
         # include raw data
         aLabel_y = np.array([sLabel_y, 'Trend', 'Season', 'Residual'])
         aData_all = [aData, aTSA.trend, aTSA.seasonal, aTSA.resid]
-        fig, pAxGrid = mpl.pyplot.subplots(nrows=len(aData_all),
+        fig, pAxGrid = plt.subplots(nrows=len(aData_all),
                                            figsize=(iSize_x, iSize_y),
                                            sharex=True,  dpi=iDPI)
         for i, ax in enumerate(pAxGrid):
@@ -266,6 +266,6 @@ def plot_time_series_analysis(aTime,
             ax.xaxis.set_minor_locator(pMonth)
             ax.xaxis.set_major_formatter(sYear_format)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.close('all')
+    plt.clf()

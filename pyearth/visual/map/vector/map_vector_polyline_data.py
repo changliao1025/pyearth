@@ -3,6 +3,7 @@ import numpy as np
 from osgeo import  osr, gdal, ogr
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -137,7 +138,7 @@ def map_vector_polyline_data(iFiletype_in,
     else:    
         sFont = "Times New Roman"
 
-    mpl.pyplot.rcParams["font.family"] = sFont
+    plt.rcParams["font.family"] = sFont
     
     cmap = mpl.cm.get_cmap(sColormap)  
  
@@ -173,7 +174,7 @@ def map_vector_polyline_data(iFiletype_in,
         pProjection_map = cpl.crs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
    
    
-    fig = mpl.pyplot.figure( dpi=iDPI)
+    fig = plt.figure( dpi=iDPI)
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.15, 0.75, 0.8] , projection=pProjection_map ) #request.crs
@@ -278,10 +279,10 @@ def map_vector_polyline_data(iFiletype_in,
     pDataset = pLayer = pFeature  = None   
     sDirname = os.path.dirname(sFilename_output_in)
     if sFilename_output_in is None:
-        mpl.pyplot.show()
+        plt.show()
     else:
         sFilename_out = os.path.join(sDirname, sFilename_output_in)
-        mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')   
-        mpl.pyplot.close('all')
-        mpl.pyplot.clf()
+        plt.savefig(sFilename_out, bbox_inches='tight')   
+        plt.close('all')
+        plt.clf()
     

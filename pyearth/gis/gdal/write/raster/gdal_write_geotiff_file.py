@@ -5,10 +5,12 @@ from osgeo import gdal
 def gdal_write_geotiff_file(sFilename_in,
                             aData_in,
                             dPixelWidth_in,
+                            dPixelHeight_in,
                             dOriginX_in,
                             dOriginY_in,
                             dMissing_value_in,
-                            pSpatial_reference_in):
+                            pSpatial_reference_in,
+                            datatype=gdal.GDT_Float32):
     """
     Write a Geotiff standard format raster file
 
@@ -44,7 +46,7 @@ def gdal_write_geotiff_file(sFilename_in,
         ncolumn,
         nrow,
         nband,
-        gdal.GDT_Float32, )
+        datatype)
 
     pDataset.SetGeoTransform([
         dOriginX_in,    # 0
@@ -52,7 +54,7 @@ def gdal_write_geotiff_file(sFilename_in,
         0,                      # 2
         dOriginY_in,    # 3
         0,                      # 4
-        -dPixelWidth_in])
+        dPixelHeight_in])
 
     pProjection = pSpatial_reference_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)
@@ -74,10 +76,12 @@ def gdal_write_geotiff_file(sFilename_in,
 def gdal_write_geotiff_file_multiple_band(sFilename_in,
                                           aData_in,
                                           dPixelWidth_in,
+                                          dPixelHeight_in,
                                           dOriginX_in,
                                           dOriginY_in,
                                           dMissing_value_in,
-                                          pSpatial_reference_in):
+                                          pSpatial_reference_in,
+                                          datatype=gdal.GDT_Float32):
     """
     Write a multi-band geotiff raster file
 
@@ -112,7 +116,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
                               ncolumn,
                               nrow,
                               nband,
-                              gdal.GDT_Float32)
+                              datatype)
 
     # Write metadata
 
@@ -121,7 +125,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
                               0.0,
                               dOriginY_in,
                               0.0,
-                              -dPixelWidth_in])
+                              dPixelHeight_in])
 
     pProjection = pSpatial_reference_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)

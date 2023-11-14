@@ -1,7 +1,7 @@
 import numpy as np
 
 import matplotlib as mpl
-from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
 
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
@@ -123,7 +123,7 @@ def plot3d_time_series_data_fill(aTime_all,
     if (dMax_z <= dMin_z):
         return
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -189,8 +189,8 @@ def plot3d_time_series_data_fill(aTime_all,
     ax.set_zlabel(sLabel_z)
     ax.set_box_aspect((6, 6, 3))
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()
     # print('finished plotting')

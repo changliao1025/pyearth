@@ -3,6 +3,7 @@ import numpy as np
 from osgeo import osr, gdal, ogr
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import cartopy as cpl
 
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
@@ -27,7 +28,7 @@ def plot_study_area(sFilename_dem_in,
             "The package 'requests' is required for this function to run.") from e
 
     # set up figure size and dpi
-    fig = mpl.pyplot.figure(dpi=300)
+    fig = plt.figure(dpi=300)
     fig.set_figwidth(4)
     fig.set_figheight(4)
     # ==============================================================================
@@ -35,16 +36,16 @@ def plot_study_area(sFilename_dem_in,
     # ==============================================================================
 
     dummy = gdal_read_geotiff_file(sFilename_dem_in)
-    aImage_in = dummy[0]
-    dResolution_x = dummy[1]
-    dResolution_y = dummy[2]
-    dOriginX = dummy[3]
-    dOriginY = dummy[4]
-    nrow = dummy[5]
-    ncolumn = dummy[6]
-    missing_value = dummy[7]
-    pProjection = dummy[9]
-    pSpatial_reference_source = dummy[10]
+    aImage_in = dummy['dataOut']
+    dResolution_x = dummy['pixelWidth']
+    dResolution_y = dummy['pixelHeight']
+    dOriginX = dummy['originX']
+    dOriginY = dummy['originY']
+    nrow = dummy['nrow']
+    ncolumn = dummy['ncolumn']
+    missing_value = dummy['missingValue']
+    pProjection = dummy['projection']
+    pSpatial_reference_source = dummy['spatialReference']
 
     # set up dem projection
     dem_proj = cpl.crs.AlbersEqualAre(central_longitude=pSpatial_reference_source.GetProjPar('longitude_of_center'),
@@ -61,7 +62,7 @@ def plot_study_area(sFilename_dem_in,
     dLon_min = dOriginX
     dLon_max = dOriginX + ncolumn * dResolution_x
     dLat_max = dOriginY
-    dLat_min = dOriginY - nrow * dResolution_x
+    dLat_min = dOriginY + nrow * dResolution_y
 
     pSpatial_reference_target = osr.SpatialReference()
     pSpatial_reference_target.ImportFromEPSG(4326)
@@ -75,8 +76,10 @@ def plot_study_area(sFilename_dem_in,
         aLon, aLat, pSpatial_reference_source, pSpatial_reference_target)
     dLongitude_center = np.mean(aLon)
     dLatitude_center = np.mean(aLat)
-    aImage_extent = [dLon_min - dResolution_x, dLon_max +
-                     dResolution_x, dLat_min - dResolution_x,  dLat_max+dResolution_x]
+    aImage_extent = [dLon_min - dResolution_x, 
+                     dLon_max + dResolution_x, 
+                     dLat_min + dResolution_y,  
+                     dLat_max - dResolution_y]
 
     aImage_in[np.where(aImage_in == missing_value)] = np.nan
     #
@@ -155,7 +158,7 @@ def plot_study_area(sFilename_dem_in,
 
     # draw colorbar
     ax_cb = fig.add_axes([0.2, 0.2, 0.02, 0.5])
-    cb = mpl.pyplot.colorbar(demplot, cax=ax_cb, extend='both')
+    cb = plt.colorbar(demplot, cax=ax_cb, extend='both')
     cb.ax.get_yaxis().set_ticks_position('left')
     cb.ax.get_yaxis().labelpad = 10
     cb.ax.set_ylabel('Unit: meter', rotation=270)
@@ -265,6 +268,6 @@ def plot_study_area(sFilename_dem_in,
         ax_histo.tick_params(axis='y', labelsize=5)
         ax_histo.yaxis.offsetText.set_fontsize(5)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
     return

@@ -1,6 +1,7 @@
 
 import numpy as np
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -105,14 +106,14 @@ def scatter_plot_multiple_data(aData_x,
     else:
         sFont = "Times New Roman"
 
-    mpl.pyplot.rcParams["font.family"] = sFont
+    plt.rcParams["font.family"] = sFont
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
         sTitle = ''
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -129,9 +130,9 @@ def scatter_plot_multiple_data(aData_x,
 
     # sns.regplot(x, y, lowess=True)
     # ax_scatter = sns.regplot(x=aData_x, y=aData_y, marker="+", lowess=True)
-    ax_scatter_full = mpl.pyplot.axes(rect_scatter)
+    ax_scatter_full = plt.axes(rect_scatter)
     if iFlag_miniplot == 1:
-        ax_scatter_mini = mpl.pyplot.axes(rect_scatter_mini)
+        ax_scatter_mini = plt.axes(rect_scatter_mini)
         ax_scatter_all = [ax_scatter_full, ax_scatter_mini]
     else:
         ax_scatter_all = [ax_scatter_full]
@@ -432,7 +433,7 @@ def scatter_plot_multiple_data(aData_x,
                 line.set_transform(transform)
                 ax_scatter.add_line(line)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
+    plt.close('all')
     print('finished plotting')

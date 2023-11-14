@@ -9,7 +9,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         sFilename_in (string): The file name
 
     Returns:
-        tuple: aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+        tuple: aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
     """
     
     if os.path.exists(sFilename_in):
@@ -46,7 +46,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         dOriginX = pGeotransform[0]
         dOriginY = pGeotransform[3]
         dPixelWidth = pGeotransform[1]
-        pPixelHeight = pGeotransform[5]
+        dPixelHeight = pGeotransform[5]
         #we will use one of them to keep the consistency
         pSpatial_reference = osr.SpatialReference(wkt=pProjection)  
 
@@ -73,10 +73,35 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         pBand = None             
 
         if iFlag_metadata_only == 1:
-            return dPixelWidth, pPixelHeight, dOriginX, dOriginY, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
+            pData = {
+                'pixelWidth': dPixelWidth,
+                'pixelHeight': dPixelHeight,
+                'originX': dOriginX,
+                'originY': dOriginY,
+                'nrow': nrow,
+                'ncolumn': ncolumn,
+                'missingValue': dMissing_value,
+                'geotransform': pGeotransform,
+                'projection': pProjection,
+                'spatialReference': pSpatial_reference
+            }
+            return pData
+           
         else:   
-            return aData_out, dPixelWidth, pPixelHeight, dOriginX, dOriginY, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
-
+            pData = {
+                'dataOut': aData_out,
+                'pixelWidth': dPixelWidth,
+                'pixelHeight': dPixelHeight,
+                'originX': dOriginX,
+                'originY': dOriginY,
+                'nrow': nrow,
+                'ncolumn': ncolumn,
+                'missingValue': dMissing_value,
+                'geotransform': pGeotransform,
+                'projection': pProjection,
+                'spatialReference': pSpatial_reference
+            }
+            return pData
 
 def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
     
@@ -86,7 +111,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
         sFilename_in (string): The filename
 
     Returns:
-        tuple: aData_out, pPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+        tuple: aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
     """
     
     if os.path.exists(sFilename_in):
@@ -119,8 +144,8 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
         pGeotransform = pDataset.GetGeoTransform()
         dOriginX = pGeotransform[0]
         dOriginY = pGeotransform[3]
-        pPixelWidth = pGeotransform[1]
-        pPixelHeight = pGeotransform[5]
+        dPixelWidth = pGeotransform[1]
+        dPixelHeight = pGeotransform[5]
 
         pBand = pDataset.GetRasterBand(1)
         
@@ -143,6 +168,31 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
         pDataset = None
         pBand = None
         if iFlag_metadata_only == 1:
-            return pPixelWidth, pPixelHeight, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
+            pData = {
+                'pixelWidth': dPixelWidth,
+                'pixelHeight': dPixelHeight,
+                'originX': dOriginX,
+                'originY': dOriginY,
+                'nrow': nrow,
+                'ncolumn': ncolumn,
+                'missingValue': dMissing_value,
+                'geotransform': pGeotransform,
+                'projection': pProjection,
+                'spatialReference': pSpatial_reference
+            }
+            return pData
         else:
-            return aData_out, pPixelWidth, pPixelHeight, dOriginX, dOriginY, nband, nrow, ncolumn, dMissing_value, pGeotransform, pProjection,  pSpatial_reference
+            pData = {
+                'dataOut': aData_out,
+                'pixelWidth': dPixelWidth,
+                'pixelHeight': dPixelHeight,
+                'originX': dOriginX,
+                'originY': dOriginY,
+                'nrow': nrow,
+                'ncolumn': ncolumn,
+                'missingValue': dMissing_value,
+                'geotransform': pGeotransform,
+                'projection': pProjection,
+                'spatialReference': pSpatial_reference
+            }
+            return pData

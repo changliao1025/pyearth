@@ -2,7 +2,7 @@
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -192,7 +192,7 @@ def plot_xy_data(aX_all,
         iFlag_replace_xtick = 0
         pass
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
@@ -294,7 +294,7 @@ def plot_xy_data(aX_all,
               fontsize=8,
               ncol=ncolumn)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()

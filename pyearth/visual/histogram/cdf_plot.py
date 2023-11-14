@@ -2,7 +2,7 @@
 import numpy as np
 
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 
 def cdf_plot(aData,
              sFilename_out,
@@ -71,7 +71,7 @@ def cdf_plot(aData,
 
     good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -80,7 +80,7 @@ def cdf_plot(aData,
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
 
-    ax_cdf = mpl.pyplot.axes(rect_histogram)
+    ax_cdf = plt.axes(rect_histogram)
     ax_cdf.tick_params(direction='in', top=True, right=True)
 
     aData = aData[good_index]
@@ -115,6 +115,6 @@ def cdf_plot(aData,
 
     ax_cdf.set_title(sTitle)
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
+    plt.close('all')

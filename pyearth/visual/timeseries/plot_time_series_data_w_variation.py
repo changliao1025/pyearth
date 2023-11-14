@@ -2,7 +2,7 @@
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
@@ -183,7 +183,7 @@ def plot_time_series_data_w_variation(aTime_all,
     else:
         iFlag_miniplot = 0
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -196,9 +196,9 @@ def plot_time_series_data_w_variation(aTime_all,
     rect_full = [left, bottom, width, height]
     rect_mini = [dY_mini, dX_mini, width_mini, heigh_mini]
 
-    ax_full = mpl.pyplot.axes(rect_full)
+    ax_full = plt.axes(rect_full)
     if iFlag_miniplot == 1:
-        ax_mini = mpl.pyplot.axes(rect_mini)
+        ax_mini = plt.axes(rect_mini)
         ax_all = [ax_full, ax_mini]
     else:
         ax_all = [ax_full]
@@ -422,6 +422,6 @@ def plot_time_series_data_w_variation(aTime_all,
                 ax.set_ylim(dMin_mini_y, dMax_mini_y)
             pass
 
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.close('all')
+    plt.clf()

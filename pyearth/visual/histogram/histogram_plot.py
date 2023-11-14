@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
@@ -135,7 +135,7 @@ def histogram_plot(aData_all,
             else:
                 aColor = ['lightblue']
 
-    fig = mpl.pyplot.figure(dpi=iDPI)
+    fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
@@ -144,7 +144,7 @@ def histogram_plot(aData_all,
     spacing = 0.005
     rect_histogram = [left, bottom, width, height]
 
-    ax_histo = mpl.pyplot.axes(rect_histogram)
+    ax_histo = plt.axes(rect_histogram)
     ax_histo.tick_params(direction='in', top=True, right=True)
 
     aLegend_artist = []
@@ -247,7 +247,7 @@ def histogram_plot(aData_all,
                         loc=sLocation_legend, fontsize=12)
 
     ax_histo.set_title(sTitle)
-    mpl.pyplot.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    mpl.pyplot.close('all')
-    mpl.pyplot.clf()
+    plt.close('all')
+    plt.clf()
