@@ -4,6 +4,8 @@ import numpy as np
 from osgeo import osr, ogr
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Polygon
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 pProjection = cpl.crs.PlateCarree()  # for latlon data only
@@ -50,13 +52,36 @@ def map_netcdf_file(sFilename_netcdf_in,
                     aExtent_in=None,
                     pProjection_map_in=None,
                     pBoundary_in=None):
-    """
-    Extract data from a NetCDF file based on a bounding box.
+    """map a netcdf file using a variable
 
     Args:
-        sFilename_netcdf_in (str): Path to the input NetCDF file.
-        sFilename_netcdf_out (str): Path to the output NetCDF file.
-        bbox (tuple): Bounding box as a tuple in the format (aLongitude_box_min, aLatitude_box_min, aLongitude_box_max, aLatitude_box_max).
+        sFilename_netcdf_in (_type_): _description_
+        sVariable_in (_type_): _description_
+        sFolder_output_in (_type_): _description_
+        iFlag_unstructured_in (_type_, optional): _description_. Defaults to None.
+        iFlag_scientific_notation_colorbar_in (_type_, optional): _description_. Defaults to None.
+        iFont_size_in (_type_, optional): _description_. Defaults to None.
+        sColormap_in (_type_, optional): _description_. Defaults to None.
+        sTitle_in (_type_, optional): _description_. Defaults to None.
+        iDPI_in (_type_, optional): _description_. Defaults to None.
+        iSize_x_in (_type_, optional): _description_. Defaults to None.
+        iSize_y_in (_type_, optional): _description_. Defaults to None.
+        dMissing_value_in (_type_, optional): _description_. Defaults to None.
+        dConvert_factor_in (_type_, optional): _description_. Defaults to None.
+        dData_max_in (_type_, optional): _description_. Defaults to None.
+        dData_min_in (_type_, optional): _description_. Defaults to None.
+        dResolution_x_in (_type_, optional): _description_. Defaults to None.
+        dResolution_y_in (_type_, optional): _description_. Defaults to None.
+        sExtend_in (_type_, optional): _description_. Defaults to None.
+        sFont_in (_type_, optional): _description_. Defaults to None.
+        sUnit_in (_type_, optional): _description_. Defaults to None.
+        aLegend_in (_type_, optional): _description_. Defaults to None.
+        aExtent_in (_type_, optional): _description_. Defaults to None.
+        pProjection_map_in (_type_, optional): _description_. Defaults to None.
+        pBoundary_in (_type_, optional): _description_. Defaults to None.
+
+    Raises:
+        ImportError: _description_
     """
 
     try:
@@ -173,7 +198,7 @@ def map_netcdf_file(sFilename_netcdf_in,
         pDatasets_in.set_auto_mask(False)
 
         # get all the dimensions
-        aDimension = pDatasets_in.dimensions.keys()
+        
         for sKey, aValue in pDatasets_in.variables.items():    
             if sKey == 'time':
                 aTime = aValue
@@ -186,13 +211,17 @@ def map_netcdf_file(sFilename_netcdf_in,
                 dummy = aValue[:]
                 if np.min(dummy) < 0:
                     aLongitude = dummy
+                    iFlag_cutoff = 0
                 else:
                     aLongitude = dummy - 180
+                    iFlag_cutoff = 1
 
             if sKey == sVariable:
                 aData = aValue[:] * dConvert_factor
+                
                 pass
-            
+
+        
         
         # deal with the time
         print('Extracting data ...')
@@ -227,6 +256,12 @@ def map_netcdf_file(sFilename_netcdf_in,
 
             ncolumn = len(aLongitude)
             nrow = len(aLatitude)
+            if iFlag_cutoff == 1:
+                #shift the data
+                shift = int(ncolumn/2)
+                aData = np.roll(aData, shift, axis=2)                   
+                pass
+            
             if dResolution_x_in is not None:
                 dResolution_x = dResolution_x_in
             else:
@@ -239,41 +274,71 @@ def map_netcdf_file(sFilename_netcdf_in,
 
             # get max and min of the data
             print(dResolution_x, dResolution_y)
+            # Pre-calculate half resolutions
+            half_res_x = dResolution_x / 2
+            half_res_y = dResolution_y / 2
 
+
+            #predefine a lat-lon meshgrid using the center of the cell
+            aLongitude_center = np.arange(ncolumn) * dResolution_x + dLongitude_min + half_res_x
+            aLatitude_center = np.arange(nrow) * dResolution_y + dLatitude_min + half_res_y
+
+            aLongitude_grid, aLatitude_grid = np.meshgrid(aLongitude_center, aLatitude_center)
+            # Create a mask for cells within the boundary
+            aMask = np.ones((nrow, ncolumn), dtype=bool)
             if pBoundary_in is not None:
+                for i in range(nrow):
+                    for j in range(ncolumn):
+                        pPoint = ogr.Geometry(ogr.wkbPoint)
+                        pPoint.AddPoint(aLongitude_grid[i, j], aLatitude_grid[i, j])
+                        if not pPoint.Within(pBoundary):
+                            aMask[i, j] = False
 
+            #find min and max of the data
+            if iFlag_data_max == 1 and iFlag_data_min == 1:
                 aData_dump = list()
                 for i in range(0, nrow):
                     for j in range(0, ncolumn):
-                        dLongitude_cell_center = dLongitude_min + j * dResolution_x
-                        dLatitude_cell_center = dLatitude_min + i * dResolution_y
-                        # create
-                        pPoint = ogr.Geometry(ogr.wkbPoint)
-                        pPoint.AddPoint(dLongitude_cell_center,
-                                        dLatitude_cell_center)
-                        if pPoint.Within(pBoundary):
+                        if not aMask[i, j]:
+                            continue
+                        aData_dump.append(aData[:, i, j])
+                        pass
+                aData_dump = np.array(aData_dump)
+                print(np.max(aData_dump))
+                pass
+            else:
+                if pBoundary_in is not None:
+                    aData_dump = list()
+                    for i in range(0, nrow):
+                        for j in range(0, ncolumn):
+                            if not aMask[i, j]:
+                                continue
+
                             aData_dump.append(aData[:, i, j])
                             pass
 
-                aData_dump = np.array(aData_dump)
-                if iFlag_data_max == 0:
-                    dValue_max = np.max(aData_dump)
-                if iFlag_data_min == 0:
-                    dValue_min = np.min(aData_dump)
-            else:
-                if iFlag_data_max == 0:
-                    dValue_max = np.max(aData)
+                    aData_dump = np.array(aData_dump)
+                    if iFlag_data_max == 0:
+                        dValue_max = np.max(aData_dump)
+                    if iFlag_data_min == 0:
+                        dValue_min = np.min(aData_dump)
+                else:
+                    if iFlag_data_max == 0:
+                        dValue_max = np.max(aData)
 
-                if iFlag_data_min == 0:
-                    dValue_min = np.min(aData)
+                    if iFlag_data_min == 0:
+                        dValue_min = np.min(aData)
 
             print(dValue_min, dValue_max)
             #flush the print buffer 
             
             sys.stdout.flush()
 
-
+            
             # the bounding box should be applied to cell center
+            # Pre-calculate the color indices
+            color_indices = np.clip(((aData - dValue_min) / (dValue_max - dValue_min) * 255).astype(int), 0, 255)
+
             for iStep in range(0, nTime):
                 sStep = '{:03d}'.format(iStep)
                 fig = plt.figure(dpi=iDPI)
@@ -286,72 +351,53 @@ def map_netcdf_file(sFilename_netcdf_in,
                 sFilename_out = os.path.join(
                     sFolder_output_in, sVariable + '_' + sStep + '.png')
 
+                aPolygon = []
+                aColor = []
                 for i in range(0, nrow):
                     for j in range(0, ncolumn):
-                        dLongitude_cell_center = dLongitude_min + j * dResolution_x
-                        dLatitude_cell_center = dLatitude_min + i * dResolution_y
-                        # create
-                        pPoint = ogr.Geometry(ogr.wkbPoint)
-                        pPoint.AddPoint(dLongitude_cell_center,
-                                        dLatitude_cell_center)
-                        
-                        iFlag_include = 1
-                        if pBoundary_in is None:
-                            iFlag_include = 1 
-                            pass
-                        else:
-                            if pPoint.Within(pBoundary):
-                                iFlag_include = 1
-                            else:
-                                iFlag_include = 0
-                                pass
-                            pass
-                        
-                        if iFlag_include == 1:
-                            # get the value
-                            dValue = aData[iStep, i, j]
-                            # get its cell shape
-                            aCoords_gcs = np.full((nVertex, 2), np.nan)
+                        if not aMask[i, j]:
+                            continue
 
-                            x1 = dLongitude_cell_center - dResolution_x/2
-                            y1 = dLatitude_cell_center - dResolution_y/2
-                            aCoords_gcs[0, :] = x1, y1
+                        dLongitude_cell_center = aLongitude_grid[i, j]
+                        dLatitude_cell_center = aLatitude_grid[i, j]
+                        dValue = aData[iStep, i, j]
 
-                            x1 = dLongitude_cell_center + dResolution_x/2
-                            y1 = dLatitude_cell_center - dResolution_y/2
-                            aCoords_gcs[1, :] = x1, y1
+                        # get its cell shape
+                        aCoords_gcs = np.full((nVertex, 2), np.nan)
 
-                            x1 = dLongitude_cell_center + dResolution_x/2
-                            y1 = dLatitude_cell_center + dResolution_y/2
-                            aCoords_gcs[2, :] = x1, y1
+                        # Define coordinates for each vertex
+                        coords = [(dLongitude_cell_center - half_res_x, dLatitude_cell_center - half_res_y),
+                                  (dLongitude_cell_center + half_res_x, dLatitude_cell_center - half_res_y),
+                                  (dLongitude_cell_center + half_res_x, dLatitude_cell_center + half_res_y),
+                                  (dLongitude_cell_center - half_res_x, dLatitude_cell_center + half_res_y)]
 
-                            x1 = dLongitude_cell_center - dResolution_x/2
-                            y1 = dLatitude_cell_center + dResolution_y/2
-                            aCoords_gcs[3, :] = x1, y1
+                        # Fill aCoords_gcs using a loop
+                        for idx, (x, y) in enumerate(coords):
+                            aCoords_gcs[idx, :] = x, y
 
-                            #dealing with missing value
-                            if dValue < dValue_min:
-                                pass
-                            else:
-                                iColor_index = int(
-                                    (dValue - dValue_min) / (dValue_max - dValue_min) * 255)
-                                # pick color from colormap
-                                cmiColor_index = cmap(iColor_index)
-
-                                polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], closed=True, linewidth=0.25,
-                                                           alpha=0.8, edgecolor=cmiColor_index, facecolor=cmiColor_index,
-                                                           transform=cpl.crs.PlateCarree())
-                                ax.add_patch(polygon)
-
-                            pass
-                        else:
-                            pass
+                        #dealing with missing value
+                        if dValue > dValue_min:
+                            iColor_index = color_indices[iStep, i, j]
+                            # pick color from colormap       
+                            aColor.append(cmap(iColor_index))
+                            aPolygon.append(aCoords_gcs[:, 0:2])
 
                 # add extent
+                # Create a PatchCollection with the polygons
+                aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+                pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
+                                      facecolor=aColor, linewidths=0.25, 
+                                      transform=cpl.crs.PlateCarree())
+                ax.add_collection(pPC)
                 if aExtent_in is None:
                     if pBoundary_in is None:
                         marginx = (dLongitude_max - dLongitude_min) / 20
                         marginy = (dLatitude_max - dLatitude_min) / 20
+                        if dLongitude_min - marginx  < -180 or dLongitude_max + marginx > 180:
+                            marginx = 0                       
+                        if dLatitude_min - marginy < -90 or dLatitude_max + marginy > 90:
+                            marginy = 0                       
+                        
                         aExtent = [dLongitude_min - marginx, dLongitude_max +
                                    marginx, dLatitude_min - marginy, dLatitude_max + marginy]
                     else:
@@ -404,6 +450,7 @@ def map_netcdf_file(sFilename_netcdf_in,
                 plt.savefig(sFilename_out, bbox_inches='tight')
                 plt.close('all')
                 plt.clf()
+                print(sFilename_out)
 
         print("Extraction successful!")
     except Exception as e:
