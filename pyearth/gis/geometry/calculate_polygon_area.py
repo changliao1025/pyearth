@@ -1,7 +1,8 @@
 
 from math import cos, sin, sqrt, pi
 import numpy as np
-def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, iFlag_radius =None, dRadius_in= 6378137.0):
+from pyearth.system.define_global_variables import *  
+def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, iFlag_radius =None, dRadius_in= earth_radius):
     """
     Computes area of spherical polygon, assuming spherical Earth. 
     Returns result in ratio of the sphere's area if the radius is specified. Otherwise, in the units of provided radius.
@@ -64,7 +65,7 @@ def calculate_polygon_area(aLongitude_in, aLatitude_in,  iFlag_algorithm = 0, iF
         if dRadius_in is not None:
             dArea_m = area * dRadius_in**2
         else:
-            dRadius_in = 6378137.0  
+            dRadius_in = earth_radius
             dArea_m = area * dRadius_in**2
 
         if iFlag_radius is not None:

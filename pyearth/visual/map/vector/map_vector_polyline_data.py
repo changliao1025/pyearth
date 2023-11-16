@@ -1,9 +1,9 @@
 import os
 import numpy as np
 from osgeo import  osr, gdal, ogr
-
-import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -157,7 +157,7 @@ def map_vector_polyline_data(iFiletype_in,
         if sGeometry_type =='LINESTRING':
             #dummy0 = loads( pGeometry_in.ExportToWkt() )
             aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
-            aCoords_gcs = dummy0.coords
+            
             aCoords_gcs= np.array(aCoords_gcs)
             aCoords_gcs = aCoords_gcs[:,0:2]
 
@@ -194,6 +194,10 @@ def map_vector_polyline_data(iFiletype_in,
     dField_min = np.min(aField)
     iThickness_max = 2.5
     iThickness_min = 0.3
+
+    #switch to collection in next development
+    aPolyline = list()
+    aColor = list()
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()

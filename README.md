@@ -81,3 +81,12 @@ Copyright © 2022, Battelle Memorial Institute
 Several publications describe the algorithms used in `PyEarth` in detail. If you make use of `PyEarth` in your work, please consider including a reference to the following:
 
 * Chang Liao. (2022). PyEarth: A lightweight Python package for Earth science (Software). Zenodo. https://doi.org/10.5281/zenodo.6109987
+
+
+PyEarth is also supporting several other Python packages/projects, including:
+
+* Liao et al., (2023). pyflowline: a mesh-independent river network generator for hydrologic models. Journal of Open Source Software, 8(91), 5446, https://doi.org/10.21105/joss.05446
+
+* Liao. C. (2022). HexWatershed: a mesh independent flow direction model for hydrologic models (0.1.1). Zenodo. https://doi.org/10.5281/zenodo.6425881
+
+

@@ -3,13 +3,16 @@ import numpy as np
 from osgeo import osr, gdal, ogr
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Polygon
+import cartopy as cpl
+
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 
 
-pProjection = ccrs.PlateCarree()  # for latlon data only
+pProjection = cpl.crs.PlateCarree()  # for latlon data only
 
 
 class OOMFormatter(mpl.ticker.ScalarFormatter):
@@ -214,11 +217,14 @@ def map_vector_polygon_data(iFiletype_in,
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
-        pProjection_map = ccrs.Orthographic(central_longitude=0.50*(
+        pProjection_map = cpl.crs.Orthographic(central_longitude=0.50*(
             dLon_max+dLon_min),  central_latitude=0.50*(dLat_max+dLat_min), globe=None)
 
     ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map)
     ax.set_global()
+    #use an advanced method for plotting
+    aPolygon = list()
+    aColor = list()
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
@@ -233,22 +239,31 @@ def map_vector_polygon_data(iFiletype_in,
             iColor_index = int((dValue - dValue_min) /
                                (dValue_max - dValue_min) * 255)
             # pick color from colormap
-            cmiColor_index = cmap(iColor_index)
+            #cmiColor_index = cmap(iColor_index)
             if sGeometry_type == 'POLYGON':
                 # dummy0 = loads( pGeometry_in.ExportToWkt() )
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 # aCoords_gcs = dummy0.exterior.coords
                 aCoords_gcs = np.array(aCoords_gcs)
-                polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], 
-                                           closed=True, 
-                                           linewidth=0.25,
-                                           alpha=0.8, 
-                                           edgecolor=cmiColor_index, 
-                                           facecolor=cmiColor_index,
-                                           transform=ccrs.PlateCarree())
-                ax.add_patch(polygon)
+                aColor.append(cmap(iColor_index))
+                aPolygon.append(aCoords_gcs[:, 0:2])
+                #polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], 
+                #                           closed=True, 
+                #                           linewidth=0.25,
+                #                           alpha=0.8, 
+                #                           edgecolor=cmiColor_index, 
+                #                           facecolor=cmiColor_index,
+                #                           transform=ccrs.PlateCarree())
+                #ax.add_patch(polygon)
+
         else:
             pass
+    
+    aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+    pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
+                                      facecolor=aColor, linewidths=0.25, 
+                                      transform=cpl.crs.PlateCarree())
+    ax.add_collection(pPC)
 
     if aExtent_in is None:
         marginx = (dLon_max - dLon_min) / 20
@@ -296,7 +311,7 @@ def map_vector_polygon_data(iFiletype_in,
     cb.ax.get_yaxis().set_label_position('left')
     cb.ax.tick_params(labelsize=iFont_size-2)
 
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
