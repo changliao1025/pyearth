@@ -6,30 +6,10 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 import cartopy as cpl
-
-
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
-
-
+from pyearth.visual.formatter import OOMFormatter
 pProjection = cpl.crs.PlateCarree()  # for latlon data only
-
-
-class OOMFormatter(mpl.ticker.ScalarFormatter):
-    def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
-        self.oom = order
-        self.fformat = fformat
-        mpl.ticker.ScalarFormatter.__init__(
-            self, useOffset=offset, useMathText=mathText)
-
-    def _set_order_of_magnitude(self):
-        self.orderOfMagnitude = self.oom
-
-    def _set_format(self, vmin=None, vmax=None):
-        self.format = self.fformat
-        if self._useMathText:
-            self.format = r'$\mathdefault{%s}$' % self.format
-
 
 def map_vector_polygon_data(iFiletype_in,
                             sFilename_in,
@@ -225,11 +205,13 @@ def map_vector_polygon_data(iFiletype_in,
     #use an advanced method for plotting
     aPolygon = list()
     aColor = list()
+    aValue = list()
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
         # get attribute
         dValue = float(pFeature.GetField(sVariable))
+        aValue.append(dValue)
         if dValue != dMissing_value:
             if dValue > dValue_max:
                 dValue = dValue_max
@@ -259,6 +241,9 @@ def map_vector_polygon_data(iFiletype_in,
         else:
             pass
     
+
+    aValue = np.array(aValue)
+    print(np.max(aValue))
     aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
     pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
                                       facecolor=aColor, linewidths=0.25, 

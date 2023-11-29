@@ -8,25 +8,8 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from pyearth.visual.formatter import OOMFormatter
 pProjection = cpl.crs.PlateCarree()  # for latlon data only
-
-
-class OOMFormatter(mpl.ticker.ScalarFormatter):
-    def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
-        self.oom = order
-        self.fformat = fformat
-        mpl.ticker.ScalarFormatter.__init__(
-            self, useOffset=offset, useMathText=mathText)
-
-    def _set_order_of_magnitude(self):
-        self.orderOfMagnitude = self.oom
-
-    def _set_format(self, vmin=None, vmax=None):
-        self.format = self.fformat
-        if self._useMathText:
-            self.format = r'$\mathdefault{%s}$' % self.format
-
-
 
 def map_netcdf_file(sFilename_netcdf_in,
                     sVariable_in,
