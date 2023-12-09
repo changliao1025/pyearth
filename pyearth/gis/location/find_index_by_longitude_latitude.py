@@ -1,4 +1,4 @@
-def find_index_by_latlon(dLon_in,
+def find_index_by_longitude_latitude(dLon_in,
                          dLat_in,
                          dLon_min_in,
                          dLat_max_in,

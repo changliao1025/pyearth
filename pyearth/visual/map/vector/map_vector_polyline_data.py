@@ -215,12 +215,12 @@ def map_vector_polyline_data(iFiletype_in,
             color_index = (dField-dField_min ) /(dField_max - dField_min )
             rgba = cmap(color_index)
             if sColormap_in is not None:
-                line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.PlateCarree())
+                line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.Geodetic())
             else:
                 if n_colors < 10:
-                    line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=cpl.crs.PlateCarree())
+                    line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=cpl.crs.Geodetic())
                 else:
-                    line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=cpl.crs.PlateCarree())
+                    line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=cpl.crs.Geodetic())
 
             lID = lID + 1
 

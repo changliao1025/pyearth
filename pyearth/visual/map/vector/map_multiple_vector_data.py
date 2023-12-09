@@ -368,7 +368,7 @@ def map_multiple_vector_data(aFiletype_in,
                 #dummy0 = loads( pGeometry_in.ExportToWkt() )
                 #aCoords_gcs = dummy0.coords
                 #aCoords_gcs= np.array(aCoords_gcs)
-                aCoords_gcs = get_geometry_coords(pGeometry_in)
+                aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 aCoords_gcs = aCoords_gcs[:,0:2]
                 ax.plot(aCoords_gcs[0], aCoords_gcs[1], 'o', color= sColor, markersize=2, transform=ccrs.Geodetic())                
             else:
@@ -376,7 +376,7 @@ def map_multiple_vector_data(aFiletype_in,
                     #dummy0 = loads( pGeometry_in.ExportToWkt() )
                     #aCoords_gcs = dummy0.coords
                     #aCoords_gcs= np.array(aCoords_gcs)
-                    aCoords_gcs = get_geometry_coords(pGeometry_in)
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                     aCoords_gcs = aCoords_gcs[:,0:2]
                     nvertex = len(aCoords_gcs)
                     codes = np.full(nvertex, mpath.Path.LINETO, dtype=int )
@@ -389,7 +389,7 @@ def map_multiple_vector_data(aFiletype_in,
                         #dummy0 = loads( pGeometry_in.ExportToWkt() )
                         #aCoords_gcs = dummy0.exterior.coords
                         #aCoords_gcs = np.array(aCoords_gcs)
-                        aCoords_gcs = get_geometry_coords(pGeometry_in)
+                        aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                         if iFlag_fill == 1:
                             polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, 
                                            alpha=0.8, edgecolor = sColor,facecolor= sColor, 

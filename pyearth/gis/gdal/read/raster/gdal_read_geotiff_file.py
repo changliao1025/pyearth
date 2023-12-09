@@ -34,6 +34,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         print("Couldn't open this file: " + sFilename_in)
         sys.exit("Try again!")
     else:       
+        dMissing_value = -9999.0
         pProjection = pDataset.GetProjection()
 
         pDataset.GetMetadata()
@@ -80,7 +81,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
                 'originY': dOriginY,
                 'nrow': nrow,
                 'ncolumn': ncolumn,
-                'missingValue': dMissing_value,
+                #'missingValue': dMissing_value,
                 'geotransform': pGeotransform,
                 'projection': pProjection,
                 'spatialReference': pSpatial_reference
@@ -175,7 +176,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
                 'originY': dOriginY,
                 'nrow': nrow,
                 'ncolumn': ncolumn,
-                'missingValue': dMissing_value,
+                #'missingValue': dMissing_value,
                 'geotransform': pGeotransform,
                 'projection': pProjection,
                 'spatialReference': pSpatial_reference

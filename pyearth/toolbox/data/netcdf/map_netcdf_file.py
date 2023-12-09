@@ -1,6 +1,7 @@
 import os
 import sys
 import numpy as np
+from datetime import datetime
 from osgeo import osr, ogr
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ pProjection = cpl.crs.PlateCarree()  # for latlon data only
 def map_netcdf_file(sFilename_netcdf_in,
                     sVariable_in,
                     sFolder_output_in,
+                    iFlag_monthly_in=None,
                     iFlag_unstructured_in=None,                    
                     iFlag_scientific_notation_colorbar_in=None,
                     iFont_size_in=None,
@@ -92,6 +94,11 @@ def map_netcdf_file(sFilename_netcdf_in,
         iFont_size = iFont_size_in
     else:
         iFont_size = 12
+
+    if iFlag_monthly_in is not None:
+        iFlag_monthly = iFlag_monthly_in
+    else:
+        iFlag_monthly = 0
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -180,6 +187,9 @@ def map_netcdf_file(sFilename_netcdf_in,
         pDatasets_in = nc.Dataset(sFilename_netcdf_in, 'r')
         pDatasets_in.set_auto_mask(False)
 
+        #get the year information from the filename 
+        sYear = sFilename_netcdf_in[-7:-3]
+        iYear = int(sYear)
         # get all the dimensions
         
         for sKey, aValue in pDatasets_in.variables.items():    
@@ -316,124 +326,257 @@ def map_netcdf_file(sFilename_netcdf_in,
             #flush the print buffer 
             
             sys.stdout.flush()
-
             
             # the bounding box should be applied to cell center
-            # Pre-calculate the color indices
-            color_indices = np.clip(((aData - dValue_min) / (dValue_max - dValue_min) * 255).astype(int), 0, 255)
+            
+            #use the first day as index 
+            pDate0 = datetime(iYear, 1, 1)
+            if iFlag_monthly == 1:
+                for iMonth in range(1,13):
+                    sMonth = '{:02d}'.format(iMonth)
+                    fig = plt.figure(dpi=iDPI)
+                    fig.set_figwidth(iSize_x)
+                    fig.set_figheight(iSize_y)
+                    ax = fig.add_axes([0.08, 0.1, 0.62, 0.7],
+                                      projection=pProjection_map)
+                    ax.set_global()
+                    # redefine the filename and title
+                    sFilename_out = os.path.join(
+                        sFolder_output_in, sVariable + '_' + sMonth + '.png')
 
-            for iStep in range(0, nTime):
-                sStep = '{:03d}'.format(iStep)
-                fig = plt.figure(dpi=iDPI)
-                fig.set_figwidth(iSize_x)
-                fig.set_figheight(iSize_y)
-                ax = fig.add_axes([0.08, 0.1, 0.62, 0.7],
-                                  projection=pProjection_map)
-                ax.set_global()
-                # redefine the filename and title
-                sFilename_out = os.path.join(
-                    sFolder_output_in, sVariable + '_' + sStep + '.png')
-
-                aPolygon = []
-                aColor = []
-                for i in range(0, nrow):
-                    for j in range(0, ncolumn):
-                        if not aMask[i, j]:
-                            continue
-
-                        dLongitude_cell_center = aLongitude_grid[i, j]
-                        dLatitude_cell_center = aLatitude_grid[i, j]
-                        dValue = aData[iStep, i, j]
-
-                        # get its cell shape
-                        aCoords_gcs = np.full((nVertex, 2), np.nan)
-
-                        # Define coordinates for each vertex
-                        coords = [(dLongitude_cell_center - half_res_x, dLatitude_cell_center - half_res_y),
-                                  (dLongitude_cell_center + half_res_x, dLatitude_cell_center - half_res_y),
-                                  (dLongitude_cell_center + half_res_x, dLatitude_cell_center + half_res_y),
-                                  (dLongitude_cell_center - half_res_x, dLatitude_cell_center + half_res_y)]
-
-                        # Fill aCoords_gcs using a loop
-                        for idx, (x, y) in enumerate(coords):
-                            aCoords_gcs[idx, :] = x, y
-
-                        #dealing with missing value
-                        if dValue > dValue_min:
-                            iColor_index = color_indices[iStep, i, j]
-                            # pick color from colormap       
-                            aColor.append(cmap(iColor_index))
-                            aPolygon.append(aCoords_gcs[:, 0:2])
-
-                # add extent
-                # Create a PatchCollection with the polygons
-                aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
-                pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
-                                      facecolor=aColor, linewidths=0.25, 
-                                      transform=cpl.crs.PlateCarree())
-                ax.add_collection(pPC)
-                if aExtent_in is None:
-                    if pBoundary_in is None:
-                        marginx = (dLongitude_max - dLongitude_min) / 20
-                        marginy = (dLatitude_max - dLatitude_min) / 20
-                        if dLongitude_min - marginx  < -180 or dLongitude_max + marginx > 180:
-                            marginx = 0                       
-                        if dLatitude_min - marginy < -90 or dLatitude_max + marginy > 90:
-                            marginy = 0                       
-                        
-                        aExtent = [dLongitude_min - marginx, dLongitude_max +
-                                   marginx, dLatitude_min - marginy, dLatitude_max + marginy]
+                    #get the start and end index 
+                    pDate_start = datetime(iYear, iMonth, 1)
+                    if iMonth == 12:
+                        pDate_end = datetime(iYear+1, 1, 1)
                     else:
+                        pDate_end = datetime(iYear, iMonth+1, 1)
 
-                        marginx = (pBoundary_box[1] - pBoundary_box[0]) / 20
-                        marginy = (pBoundary_box[3] - pBoundary_box[2]) / 20
-                        aExtent = [pBoundary_box[0] - marginx, pBoundary_box[1] +
-                                   marginx, pBoundary_box[2] - marginy, pBoundary_box[3] + marginy]
-                else:
-                    aExtent = aExtent_in
+                    iStart = (pDate_start - pDate0).days
+                    iEnd = (pDate_end - pDate0).days
+                    
+                    aPolygon = []
+                    aColor = []
+                    aData_dummy = []
+                    for i in range(0, nrow):
+                        for j in range(0, ncolumn):
+                            if not aMask[i, j]:
+                                continue
 
-                ax.set_extent(aExtent)
-                ax.coastlines(color='black', linewidth=1)
-                ax.set_title(sTitle)
-                ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])
+                            dLongitude_cell_center = aLongitude_grid[i, j]
+                            dLatitude_cell_center = aLatitude_grid[i, j]
+                            data_dummy = aData[iStart:iEnd, i, j]
+                            dValue = np.mean(data_dummy)
+                            aData_dummy.append(dValue)
 
-                if iFlag_scientific_notation_colorbar == 1:
-                    formatter = OOMFormatter(fformat="%1.1e")
-                    cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                                   cmap=cmap,
-                                                   norm=mpl.colors.Normalize(
-                                                       dValue_min, dValue_max),  # vmax and vmin
-                                                   extend=sExtend, format=formatter)
-                else:
-                    formatter = OOMFormatter(fformat="%1.2f")
-                    cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                                   cmap=cmap,
-                                                   norm=mpl.colors.Normalize(
-                                                       dValue_min, dValue_max),  # vmax and vmin
-                                                   extend=sExtend, format=formatter)
+                            # get its cell shape
+                            aCoords_gcs = np.full((nVertex, 2), np.nan)
 
-                cb.ax.get_yaxis().set_ticks_position('right')
-                cb.ax.get_yaxis().labelpad = 5
-                cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
-                cb.ax.get_yaxis().set_label_position('left')
-                cb.ax.tick_params(labelsize=iFont_size-2)
+                            # Define coordinates for each vertex
+                            coords = [(dLongitude_cell_center - half_res_x, dLatitude_cell_center - half_res_y),
+                                      (dLongitude_cell_center + half_res_x, dLatitude_cell_center - half_res_y),
+                                      (dLongitude_cell_center + half_res_x, dLatitude_cell_center + half_res_y),
+                                      (dLongitude_cell_center - half_res_x, dLatitude_cell_center + half_res_y)]
 
-                gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
-                                  linewidth=1, color='gray', alpha=0.5, linestyle='--')
-                gl.xformatter = LONGITUDE_FORMATTER
-                gl.yformatter = LATITUDE_FORMATTER
+                            # Fill aCoords_gcs using a loop
+                            for idx, (x, y) in enumerate(coords):
+                                aCoords_gcs[idx, :] = x, y
 
-                gl.xlabel_style = {'size': 10, 'color': 'k',
-                                   'rotation': 0, 'ha': 'right'}
-                gl.ylabel_style = {'size': 10, 'color': 'k',
-                                   'rotation': 90, 'weight': 'normal'}
+                            #dealing with missing value
+                            if dValue > dValue_min: 
+                                iColor_index = np.clip(((dValue - dValue_min) / (dValue_max - dValue_min) * 255).astype(int), 0, 255)
+                                # pick color from colormap       
+                                aColor.append(cmap(iColor_index))
+                                aPolygon.append(aCoords_gcs[:, 0:2])
 
-                
+                    print(np.max(aData_dummy))
+                    # add extent
+                    # Create a PatchCollection with the polygons
+                    aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+                    pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
+                                          facecolor=aColor, linewidths=0.25, 
+                                          transform=cpl.crs.PlateCarree())
+                    ax.add_collection(pPC)
+                    if aExtent_in is None:
+                        if pBoundary_in is None:
+                            marginx = (dLongitude_max - dLongitude_min) / 20
+                            marginy = (dLatitude_max - dLatitude_min) / 20
+                            if dLongitude_min - marginx  < -180 or dLongitude_max + marginx > 180:
+                                marginx = 0                       
+                            if dLatitude_min - marginy < -90 or dLatitude_max + marginy > 90:
+                                marginy = 0                       
 
-                plt.savefig(sFilename_out, bbox_inches='tight')
-                plt.close('all')
-                plt.clf()
-                print(sFilename_out)
+                            aExtent = [dLongitude_min - marginx, dLongitude_max +
+                                       marginx, dLatitude_min - marginy, dLatitude_max + marginy]
+                        else:
+
+                            marginx = (pBoundary_box[1] - pBoundary_box[0]) / 20
+                            marginy = (pBoundary_box[3] - pBoundary_box[2]) / 20
+                            aExtent = [pBoundary_box[0] - marginx, pBoundary_box[1] +
+                                       marginx, pBoundary_box[2] - marginy, pBoundary_box[3] + marginy]
+                    else:
+                        aExtent = aExtent_in
+
+                    ax.set_extent(aExtent)
+                    ax.coastlines(color='black', linewidth=1)
+                    ax.set_title(sTitle)
+                    ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])
+
+                    if iFlag_scientific_notation_colorbar == 1:
+                        formatter = OOMFormatter(fformat="%1.1e")
+                        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                                       cmap=cmap,
+                                                       norm=mpl.colors.Normalize(
+                                                           dValue_min, dValue_max),  # vmax and vmin
+                                                       extend=sExtend, format=formatter)
+                    else:
+                        formatter = OOMFormatter(fformat="%1.2f")
+                        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                                       cmap=cmap,
+                                                       norm=mpl.colors.Normalize(
+                                                           dValue_min, dValue_max),  # vmax and vmin
+                                                       extend=sExtend, format=formatter)
+
+                    cb.ax.get_yaxis().set_ticks_position('right')
+                    cb.ax.get_yaxis().labelpad = 5
+                    cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+                    cb.ax.get_yaxis().set_label_position('left')
+                    cb.ax.tick_params(labelsize=iFont_size-2)
+
+                    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
+                                      linewidth=1, color='gray', alpha=0.5, linestyle='--')
+                    gl.xformatter = LONGITUDE_FORMATTER
+                    gl.yformatter = LATITUDE_FORMATTER
+
+                    gl.xlabel_style = {'size': 10, 'color': 'k',
+                                       'rotation': 0, 'ha': 'right'}
+                    gl.ylabel_style = {'size': 10, 'color': 'k',
+                                       'rotation': 90, 'weight': 'normal'}
+
+
+
+                    plt.savefig(sFilename_out, bbox_inches='tight')
+                    plt.close('all')
+                    plt.clf()
+                    print(sFilename_out)
+                    pass
+                pass
+            else:
+                # Pre-calculate the color indices
+                color_indices = np.clip(((aData - dValue_min) / (dValue_max - dValue_min) * 255).astype(int), 0, 255)
+            
+
+                for iStep in range(0, nTime):
+                    sStep = '{:03d}'.format(iStep)
+                    fig = plt.figure(dpi=iDPI)
+                    fig.set_figwidth(iSize_x)
+                    fig.set_figheight(iSize_y)
+                    ax = fig.add_axes([0.08, 0.1, 0.62, 0.7],
+                                      projection=pProjection_map)
+                    ax.set_global()
+                    # redefine the filename and title
+                    sFilename_out = os.path.join(
+                        sFolder_output_in, sVariable + '_' + sStep + '.png')
+
+                    aPolygon = []
+                    aColor = []
+                    for i in range(0, nrow):
+                        for j in range(0, ncolumn):
+                            if not aMask[i, j]:
+                                continue
+
+                            dLongitude_cell_center = aLongitude_grid[i, j]
+                            dLatitude_cell_center = aLatitude_grid[i, j]
+                            dValue = aData[iStep, i, j]
+
+                            # get its cell shape
+                            aCoords_gcs = np.full((nVertex, 2), np.nan)
+
+                            # Define coordinates for each vertex
+                            coords = [(dLongitude_cell_center - half_res_x, dLatitude_cell_center - half_res_y),
+                                      (dLongitude_cell_center + half_res_x, dLatitude_cell_center - half_res_y),
+                                      (dLongitude_cell_center + half_res_x, dLatitude_cell_center + half_res_y),
+                                      (dLongitude_cell_center - half_res_x, dLatitude_cell_center + half_res_y)]
+
+                            # Fill aCoords_gcs using a loop
+                            for idx, (x, y) in enumerate(coords):
+                                aCoords_gcs[idx, :] = x, y
+
+                            #dealing with missing value
+                            if dValue > dValue_min:
+                                iColor_index = color_indices[iStep, i, j]
+                                # pick color from colormap       
+                                aColor.append(cmap(iColor_index))
+                                aPolygon.append(aCoords_gcs[:, 0:2])
+
+                    # add extent
+                    # Create a PatchCollection with the polygons
+                    aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+                    pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
+                                          facecolor=aColor, linewidths=0.25, 
+                                          transform=cpl.crs.PlateCarree())
+                    ax.add_collection(pPC)
+                    if aExtent_in is None:
+                        if pBoundary_in is None:
+                            marginx = (dLongitude_max - dLongitude_min) / 20
+                            marginy = (dLatitude_max - dLatitude_min) / 20
+                            if dLongitude_min - marginx  < -180 or dLongitude_max + marginx > 180:
+                                marginx = 0                       
+                            if dLatitude_min - marginy < -90 or dLatitude_max + marginy > 90:
+                                marginy = 0                       
+
+                            aExtent = [dLongitude_min - marginx, dLongitude_max +
+                                       marginx, dLatitude_min - marginy, dLatitude_max + marginy]
+                        else:
+
+                            marginx = (pBoundary_box[1] - pBoundary_box[0]) / 20
+                            marginy = (pBoundary_box[3] - pBoundary_box[2]) / 20
+                            aExtent = [pBoundary_box[0] - marginx, pBoundary_box[1] +
+                                       marginx, pBoundary_box[2] - marginy, pBoundary_box[3] + marginy]
+                    else:
+                        aExtent = aExtent_in
+
+                    ax.set_extent(aExtent)
+                    ax.coastlines(color='black', linewidth=1)
+                    ax.set_title(sTitle)
+                    ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])
+
+                    if iFlag_scientific_notation_colorbar == 1:
+                        formatter = OOMFormatter(fformat="%1.1e")
+                        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                                       cmap=cmap,
+                                                       norm=mpl.colors.Normalize(
+                                                           dValue_min, dValue_max),  # vmax and vmin
+                                                       extend=sExtend, format=formatter)
+                    else:
+                        formatter = OOMFormatter(fformat="%1.2f")
+                        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                                       cmap=cmap,
+                                                       norm=mpl.colors.Normalize(
+                                                           dValue_min, dValue_max),  # vmax and vmin
+                                                       extend=sExtend, format=formatter)
+
+                    cb.ax.get_yaxis().set_ticks_position('right')
+                    cb.ax.get_yaxis().labelpad = 5
+                    cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+                    cb.ax.get_yaxis().set_label_position('left')
+                    cb.ax.tick_params(labelsize=iFont_size-2)
+
+                    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
+                                      linewidth=1, color='gray', alpha=0.5, linestyle='--')
+                    gl.xformatter = LONGITUDE_FORMATTER
+                    gl.yformatter = LATITUDE_FORMATTER
+
+                    gl.xlabel_style = {'size': 10, 'color': 'k',
+                                       'rotation': 0, 'ha': 'right'}
+                    gl.ylabel_style = {'size': 10, 'color': 'k',
+                                       'rotation': 90, 'weight': 'normal'}
+
+
+
+                    plt.savefig(sFilename_out, bbox_inches='tight')
+                    plt.close('all')
+                    plt.clf()
+                    print(sFilename_out)
 
         print("Extraction successful!")
     except Exception as e:

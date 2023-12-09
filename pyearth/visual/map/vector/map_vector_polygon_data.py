@@ -229,14 +229,7 @@ def map_vector_polygon_data(iFiletype_in,
                 aCoords_gcs = np.array(aCoords_gcs)
                 aColor.append(cmap(iColor_index))
                 aPolygon.append(aCoords_gcs[:, 0:2])
-                #polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], 
-                #                           closed=True, 
-                #                           linewidth=0.25,
-                #                           alpha=0.8, 
-                #                           edgecolor=cmiColor_index, 
-                #                           facecolor=cmiColor_index,
-                #                           transform=ccrs.PlateCarree())
-                #ax.add_patch(polygon)
+                
 
         else:
             pass
@@ -247,7 +240,7 @@ def map_vector_polygon_data(iFiletype_in,
     aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
     pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
                                       facecolor=aColor, linewidths=0.25, 
-                                      transform=cpl.crs.PlateCarree())
+                                      transform=cpl.crs.Geodetic())
     ax.add_collection(pPC)
 
     if aExtent_in is None:

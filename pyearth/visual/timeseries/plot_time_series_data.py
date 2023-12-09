@@ -2,7 +2,7 @@
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
-
+import matplotlib.pyplot as plt
 
 
 from pyearth.system.define_global_variables import *
