@@ -16,6 +16,7 @@ def map_netcdf_file(sFilename_netcdf_in,
                     sVariable_in,
                     sFolder_output_in,
                     iFlag_monthly_in=None,
+                    iFlag_daily_in=None,
                     iFlag_unstructured_in=None,                    
                     iFlag_scientific_notation_colorbar_in=None,
                     iFont_size_in=None,
@@ -99,6 +100,11 @@ def map_netcdf_file(sFilename_netcdf_in,
         iFlag_monthly = iFlag_monthly_in
     else:
         iFlag_monthly = 0
+
+    if iFlag_daily_in is not None:
+        iFlag_daily = iFlag_daily_in
+    else:
+        iFlag_daily = 0
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -461,12 +467,14 @@ def map_netcdf_file(sFilename_netcdf_in,
                     pass
                 pass
             else:
+                pass
+            if iFlag_daily == 1:
                 # Pre-calculate the color indices
                 color_indices = np.clip(((aData - dValue_min) / (dValue_max - dValue_min) * 255).astype(int), 0, 255)
             
 
                 for iStep in range(0, nTime):
-                    sStep = '{:03d}'.format(iStep)
+                    sStep = '{:03d}'.format(iStep+1)
                     fig = plt.figure(dpi=iDPI)
                     fig.set_figwidth(iSize_x)
                     fig.set_figheight(iSize_y)
