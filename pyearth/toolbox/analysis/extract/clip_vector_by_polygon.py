@@ -1,6 +1,6 @@
 from osgeo import ogr, osr, gdal
 
-def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polugon_in, sFilename_vector_out):
+def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out):
     # Open the input shapefile
     pDataset_source = ogr.Open(sFilename_vector_in)
     if pDataset_source is None:
@@ -8,7 +8,7 @@ def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polugon_in, sFilenam
         return
 
     # Open the clip polygon
-    pDataset_clip = ogr.Open(sFilename_polugon_in)
+    pDataset_clip = ogr.Open(sFilename_polygon_in)
     if pDataset_clip is None:
         print("Error: Could not open the clip polygon.")
         return
@@ -41,8 +41,28 @@ def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polugon_in, sFilenam
         print("Error: Could not create the output shapefile.")
         return
 
+    #get the layer
+    pLayer_in = pDataset_source.GetLayer()
+    #obtain the geotype 
+    iGeomType = pLayer_in.GetGeomType()
+    if iGeomType == ogr.wkbPoint:
+        #create the layer
+        pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_source, geom_type=ogr.wkbPoint)
+    else:
+        if iGeomType == ogr.wkbLineString:
+            #create the layer
+            pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_source, geom_type=ogr.wkbLineString)
+        else:
+            if iGeomType == ogr.wkbPolygon:
+                #create the layer
+                pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_source, geom_type=ogr.wkbPolygon)
+            else:
+                print('Geometry type not supported')
+                return
+            pass
+        pass
     # Create a new layer in the output shapefile
-    pLayer_clipped = pDataset_clipped.CreateLayer("clipped", geom_type=ogr.wkbPolygon)
+    
 
     # Define the clipping operation
   
@@ -61,8 +81,7 @@ def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polugon_in, sFilenam
             if geometry is not None:
                 geometry.Transform(transform)     
                 # Union the geometry of each feature with the merged polygon
-                pPolygon_clip = pPolygon_clip.Union(geometry)
-             
+                pPolygon_clip = pPolygon_clip.Union(geometry)             
   
 
     # Apply the clipping operation to each feature in the input shapefile
