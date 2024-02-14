@@ -28,3 +28,24 @@ def calculate_angle_betwen_vertex(dLongitude1_in, dLatitude1_in,
     c3vec = c3 - b3        
     angle3deg = calculate_angle_between_vectors_degrees(a3vec, c3vec)
     return  angle3deg
+
+
+
+if __name__ == '__main__':
+
+    dLongitude1_in=-149
+    dLatitude1_in= 71
+ 
+    dLongitude2_in=-148.1875
+    dLatitude2_in=70.125
+    
+    dLongitude3_in=-147
+    dLatitude3_in= 70.125
+                          
+    
+
+    dAngle = calculate_angle_betwen_vertex(dLongitude1_in, dLatitude1_in, 
+                                dLongitude2_in, dLatitude2_in, 
+                                dLongitude3_in, dLatitude3_in 
+                               )
+    print(dAngle)

@@ -1,3 +1,4 @@
+import os
 from osgeo import ogr, osr, gdal
 
 def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out):
@@ -12,6 +13,13 @@ def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polygon_in, sFilenam
     if pDataset_clip is None:
         print("Error: Could not open the clip polygon.")
         return
+    
+    #delete the output shapefile file if it exists
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+
+    if os.path.exists(sFilename_vector_out):
+        driver.DeleteDataSource(sFilename_vector_out)
+   
 
     # Get the input layer and clip polygon layer
     pLayer_source = pDataset_source.GetLayer()
@@ -75,13 +83,22 @@ def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polygon_in, sFilenam
     else:
         #merge the clip polygon
         pPolygon_clip = ogr.Geometry(ogr.wkbPolygon)
+
+        if iFlag_transform == 1:
             # Iterate over all features in the layer
-        for feature in pLayer_clip:
-            geometry = feature.GetGeometryRef()                
-            if geometry is not None:
-                geometry.Transform(transform)     
-                # Union the geometry of each feature with the merged polygon
-                pPolygon_clip = pPolygon_clip.Union(geometry)             
+            for feature in pLayer_clip:
+                geometry = feature.GetGeometryRef()                
+                if geometry is not None:
+                    geometry.Transform(transform)     
+                    # Union the geometry of each feature with the merged polygon
+                    pPolygon_clip = pPolygon_clip.Union(geometry)     
+        else:
+            # Iterate over all features in the layer
+            for feature in pLayer_clip:
+                geometry = feature.GetGeometryRef()
+                if geometry is not None:
+                    # Union the geometry of each feature with the merged polygon
+                    pPolygon_clip = pPolygon_clip.Union(geometry)        
   
 
     # Apply the clipping operation to each feature in the input shapefile
@@ -94,10 +111,26 @@ def clip_vector_by_shapefile(sFilename_vector_in, sFilename_polygon_in, sFilenam
 
         # Create a new feature in the output layer with the clipped geometry
         if clipped_geometry is not None and not clipped_geometry.IsEmpty():
+
+            #we only want to keep the clipped geometry that is within the clip polygon
+            
             new_feature = ogr.Feature(pLayer_clipped.GetLayerDefn())
             new_feature.SetGeometry(clipped_geometry)
             pLayer_clipped.CreateFeature(new_feature)
             new_feature = None
+            print('intersected')
+
+        else:
+
+            #check feature that is entirely within the clip polygon
+            if pPolygon_clip.Contains(input_geometry):
+                new_feature = ogr.Feature(pLayer_clipped.GetLayerDefn())
+                new_feature.SetGeometry(input_geometry)
+                pLayer_clipped.CreateFeature(new_feature)
+                new_feature = None
+                print('within')
+        
+
 
     # Close the shapefiles
     pDataset_source = None

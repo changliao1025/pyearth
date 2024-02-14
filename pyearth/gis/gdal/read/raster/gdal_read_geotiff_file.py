@@ -62,7 +62,9 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
             pBand = pDataset.GetRasterBand(1)
 
             # Data type of the values
-            gdal.GetDataTypeName(pBand.DataType)
+            
+            iData_type = pBand.DataType
+            sDate_type = gdal.GetDataTypeName(iData_type)
             # Compute statistics if needed
             if pBand.GetMinimum() is None or pBand.GetMaximum() is None:
                 pBand.ComputeStatistics(0)
@@ -91,6 +93,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         else:   
             pData = {
                 'dataOut': aData_out,
+                'dataType': iData_type, # 'Float32', 'Float64', 'UInt16', 'Int16', 'UInt32', 'Int32', 'Byte', 'UInt32', 'Int32', 'CInt16', 'CInt32', 'CFloat32', 'CFloat64
                 'pixelWidth': dPixelWidth,
                 'pixelHeight': dPixelHeight,
                 'originX': dOriginX,
@@ -162,6 +165,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
             aData_out = np.full( (nband, nrow, ncolumn) , -9999.0, dtype= dt )
             for iBand in range(nband):
                 pBand = pDataset.GetRasterBand( iBand + 1)
+                iData_type = pBand.DataType
                 aData_out[iBand, :, :] = pBand.ReadAsArray(0, 0, ncolumn, nrow)
                 pass
 
@@ -185,6 +189,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
         else:
             pData = {
                 'dataOut': aData_out,
+                'dataType': iData_type,
                 'pixelWidth': dPixelWidth,
                 'pixelHeight': dPixelHeight,
                 'originX': dOriginX,

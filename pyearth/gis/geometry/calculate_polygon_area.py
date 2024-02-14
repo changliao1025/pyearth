@@ -1,4 +1,4 @@
-
+#it is also recommended to use the nvector API to calculate the area of a polygon on the ellipsoid
 import numpy as np
 from pyearth.system.define_global_variables import *
 
@@ -125,6 +125,8 @@ def calculate_polygon_area(aLongitude_in,
         else:
             dArea_m = area * earth_radius**2
         return dArea_m
+
+
 
 
 if __name__ == '__main__':

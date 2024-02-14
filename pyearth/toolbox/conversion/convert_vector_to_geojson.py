@@ -65,25 +65,28 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
         pass
         
     if iFlag_transform == 1:
-        pFeature_in = pLayer_in.GetNextFeature()
-        while pFeature_in:
+        
+        #get the feature count 
+        iFeatureCount = pLayer_in.GetFeatureCount()
+
+        for i in range(iFeatureCount):
+            pFeature_in = pLayer_in.GetFeature(i)    
             pGeometry = pFeature_in.GetGeometryRef()
             pGeometry.Transform(transform)
             pFeatureDefn = pLayer_in.GetLayerDefn()
             pFeature_out = ogr.Feature(pFeatureDefn)
             pFeature_out.SetGeometry(pGeometry)
-            pLayer_out.CreateFeature(pFeature_out)
-            pFeature_in = pLayer_in.GetNextFeature()
+            pLayer_out.CreateFeature(pFeature_out)            
         pass
     else:
-        pFeature_in = pLayer_in.GetNextFeature()
-        while pFeature_in:
+        iFeatureCount = pLayer_in.GetFeatureCount()
+        for i in range(iFeatureCount):
+            pFeature_in = pLayer_in.GetFeature(i)    
             pGeometry = pFeature_in.GetGeometryRef()
             pFeatureDefn = pLayer_in.GetLayerDefn()
             pFeature_out = ogr.Feature(pFeatureDefn)
             pFeature_out.SetGeometry(pGeometry)
-            pLayer_out.CreateFeature(pFeature_out)
-            pFeature_in = pLayer_in.GetNextFeature()
+            pLayer_out.CreateFeature(pFeature_out)            
         pass
 
     pDataset_in = None
