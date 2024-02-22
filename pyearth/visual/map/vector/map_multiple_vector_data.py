@@ -16,21 +16,21 @@ from pyearth.visual.formatter import OOMFormatter
 
 def map_multiple_vector_data(aFiletype_in,
                              aFilename_in,
-                             iFlag_colorbar_in=None,
-                             iFlag_title_in=None,
-                             aFlag_thickness_in=None,
-                             aFlag_color_in=None,
+                             iFlag_colorbar_in = None,
+                             iFlag_title_in = None,
+                             aFlag_thickness_in = None,
+                             aFlag_color_in = None,
                              aFlag_fill_in = None,
                              aVariable_in = None,
                              sFilename_output_in=None,
-                             iFlag_scientific_notation_colorbar_in=None,
+                             iFlag_scientific_notation_colorbar_in = None,
                              iFlag_openstreetmap_in = None,
                              iFont_size_in=None,
                              iFlag_openstreetmap_level_in = None,
                              sColormap_in = None,
                              sTitle_in = None,
                              iDPI_in = None,
-                             dMissing_value_in=None,
+                             dMissing_value_in = None,
                              dData_max_in = None,
                              dData_min_in = None,
                              sExtend_in =None,
@@ -252,7 +252,8 @@ def map_multiple_vector_data(aFiletype_in,
         #Add the OSM image to the map
         ax.add_image(osm_tiles, iFlag_openstreetmap_level)   
         sLicense_info = "© OpenStreetMap contributors, CC-BY-SA"
-        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=10, color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=10, 
+                color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
 
     
@@ -262,7 +263,6 @@ def map_multiple_vector_data(aFiletype_in,
     for i in range(nFile):
         aValue = list()
         sFilename = aFilename_in[i]
-
         iFlag_thickness = aFlag_thickness[i]
         iFlag_color = aFlag_color[i]
         if iFlag_thickness ==1 :
@@ -408,7 +408,7 @@ def map_multiple_vector_data(aFiletype_in,
     #reset extent
     ax.set_extent( aExtent )     
 
-    ax.coastlines(color='black', linewidth=1)
+    ax.coastlines(color='black', linewidth=0.5)
     if iFlag_title==1:
         ax.set_title(sTitle)
     iFlag_label = 0
@@ -461,9 +461,7 @@ def map_multiple_vector_data(aFiletype_in,
     gl.yformatter = LATITUDE_FORMATTER
 
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
-    gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
-    
-
+    gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}  
 
     if iFlag_title==1:
         ax.set_title( sTitle )
@@ -471,6 +469,7 @@ def map_multiple_vector_data(aFiletype_in,
         pass
 
     pDataset = pLayer = pFeature  = None
+
     if sFilename_output_in is None:
         plt.show()
     else:

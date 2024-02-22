@@ -16,6 +16,8 @@ def map_vector_polygon_data(iFiletype_in,
                             sVariable_in=None,
                             sFilename_output_in=None,
                             iFlag_scientific_notation_colorbar_in=None,
+                            iFlag_color_in = None,
+                            iFlag_colorbar_in=None,
                             iFont_size_in=None,
                             sColormap_in=None,
                             sTitle_in=None,
@@ -228,8 +230,7 @@ def map_vector_polygon_data(iFiletype_in,
                 # aCoords_gcs = dummy0.exterior.coords
                 aCoords_gcs = np.array(aCoords_gcs)
                 aColor.append(cmap(iColor_index))
-                aPolygon.append(aCoords_gcs[:, 0:2])
-                
+                aPolygon.append(aCoords_gcs[:, 0:2])                
 
         else:
             pass
@@ -256,17 +257,24 @@ def map_vector_polygon_data(iFiletype_in,
     ax.set_title(sTitle)
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
+        dLocation0 = 0.96
         for i in range(nlegend):
             sText = aLegend_in[i]
-            dLocation = 0.06 + i * 0.04
+            dLocation = dLocation0 - i * 0.06
             ax.text(0.03, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=iFont_size)
+                    color='black', fontsize=iFont_size-2)
 
             pass
+    
+    fig.canvas.draw()
 
-    ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])
+    # Section 2
+    ax_pos = ax.get_position() # get the original position
+    #use this ax to set the colorbar ax position
+    ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+    #ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])   
 
     if iFlag_scientific_notation_colorbar == 1:
         formatter = OOMFormatter(fformat="%1.1e")
@@ -300,6 +308,7 @@ def map_vector_polygon_data(iFiletype_in,
     sDirname = os.path.dirname(sFilename_output_in)
 
     pDataset = pLayer = pFeature = None
+
     if sFilename_output_in is None:
         plt.show()
     else:

@@ -33,7 +33,7 @@ def calculate_angle_betwen_vertex(dLongitude1_in, dLatitude1_in,
 
 if __name__ == '__main__':
 
-    dLongitude1_in=-149
+    dLongitude1_in=-148
     dLatitude1_in= 71
  
     dLongitude2_in=-148.1875

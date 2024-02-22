@@ -16,13 +16,16 @@ def map_vector_polyline_data(iFiletype_in,
                              sFilename_in,
                              sFilename_output_in,
                              iFlag_thickness_in =None,
-                             sField_thickness_in=None,                         
+                             sField_thickness_in=None,    
+                             iFlag_color_in= None,    
                              iFlag_scientific_notation_colorbar_in=None,
+                             iFlag_label_in = None,
                              sColormap_in = None,
                              sTitle_in = None,
                              iDPI_in = None,
                               iSize_x_in = None, 
                             iSize_y_in = None, 
+                            iFont_size_in = None,
                              dMissing_value_in=None,
                              dData_max_in = None,
                              dData_min_in = None,
@@ -74,6 +77,11 @@ def map_vector_polyline_data(iFiletype_in,
     else:
         iSize_y = 8
 
+    if iFont_size_in is not None:
+        iFont_size = iFont_size_in
+    else:
+        iFont_size = 12
+
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
     else:
@@ -88,6 +96,11 @@ def map_vector_polyline_data(iFiletype_in,
         sField_thickness = sField_thickness_in
     else:
         sField_thickness = ''
+
+    if iFlag_color_in is not None:
+        iFlag_color = iFlag_color_in
+    else:
+        iFlag_color = 0
 
 
     if iFiletype_in == 1: #geojson
@@ -256,7 +269,7 @@ def map_vector_polyline_data(iFiletype_in,
             ax.text(0.03, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=10 )
+                    color='black', fontsize=iFont_size-2 )
 
             pass
 

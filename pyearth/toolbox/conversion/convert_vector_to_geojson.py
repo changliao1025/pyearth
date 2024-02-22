@@ -29,6 +29,8 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
 
     pSrs_out = osr.SpatialReference()
     pSrs_out.ImportFromEPSG(4326)    # WGS84 lat/lon
+    wkt2 = pSrs_out.ExportToWkt()
+    print(wkt2)
 
     
     #get the layer
@@ -37,9 +39,12 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
     iGeomType = pLayer_in.GetGeomType()
     #get the spatial reference
     pSrs_in = pLayer_in.GetSpatialRef()
+    wkt1 = pSrs_in.ExportToWkt()
+    print(wkt1)
 
     comparison = pSrs_in.IsSame(pSrs_out)    
-    if(comparison != 1):
+    #if(comparison != 1):
+    if( wkt1 != wkt2):
         iFlag_transform = 1
         transform = osr.CoordinateTransformation(pSrs_in, pSrs_out)
         pass
