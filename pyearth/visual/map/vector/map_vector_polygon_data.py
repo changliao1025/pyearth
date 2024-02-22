@@ -6,36 +6,18 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 import cartopy as cpl
-
-
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
-
-
+from pyearth.visual.formatter import OOMFormatter
 pProjection = cpl.crs.PlateCarree()  # for latlon data only
-
-
-class OOMFormatter(mpl.ticker.ScalarFormatter):
-    def __init__(self, order=0, fformat="%1.1e", offset=True, mathText=True):
-        self.oom = order
-        self.fformat = fformat
-        mpl.ticker.ScalarFormatter.__init__(
-            self, useOffset=offset, useMathText=mathText)
-
-    def _set_order_of_magnitude(self):
-        self.orderOfMagnitude = self.oom
-
-    def _set_format(self, vmin=None, vmax=None):
-        self.format = self.fformat
-        if self._useMathText:
-            self.format = r'$\mathdefault{%s}$' % self.format
-
 
 def map_vector_polygon_data(iFiletype_in,
                             sFilename_in,
                             sVariable_in=None,
                             sFilename_output_in=None,
                             iFlag_scientific_notation_colorbar_in=None,
+                            iFlag_color_in = None,
+                            iFlag_colorbar_in=None,
                             iFont_size_in=None,
                             sColormap_in=None,
                             sTitle_in=None,
@@ -225,11 +207,13 @@ def map_vector_polygon_data(iFiletype_in,
     #use an advanced method for plotting
     aPolygon = list()
     aColor = list()
+    aValue = list()
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
         # get attribute
         dValue = float(pFeature.GetField(sVariable))
+        aValue.append(dValue)
         if dValue != dMissing_value:
             if dValue > dValue_max:
                 dValue = dValue_max
@@ -246,23 +230,18 @@ def map_vector_polygon_data(iFiletype_in,
                 # aCoords_gcs = dummy0.exterior.coords
                 aCoords_gcs = np.array(aCoords_gcs)
                 aColor.append(cmap(iColor_index))
-                aPolygon.append(aCoords_gcs[:, 0:2])
-                #polygon = mpl.patches.Polygon(aCoords_gcs[:, 0:2], 
-                #                           closed=True, 
-                #                           linewidth=0.25,
-                #                           alpha=0.8, 
-                #                           edgecolor=cmiColor_index, 
-                #                           facecolor=cmiColor_index,
-                #                           transform=ccrs.PlateCarree())
-                #ax.add_patch(polygon)
+                aPolygon.append(aCoords_gcs[:, 0:2])                
 
         else:
             pass
     
+
+    aValue = np.array(aValue)
+    print(np.max(aValue))
     aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
     pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
                                       facecolor=aColor, linewidths=0.25, 
-                                      transform=cpl.crs.PlateCarree())
+                                      transform=cpl.crs.Geodetic())
     ax.add_collection(pPC)
 
     if aExtent_in is None:
@@ -278,17 +257,24 @@ def map_vector_polygon_data(iFiletype_in,
     ax.set_title(sTitle)
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
+        dLocation0 = 0.96
         for i in range(nlegend):
             sText = aLegend_in[i]
-            dLocation = 0.06 + i * 0.04
+            dLocation = dLocation0 - i * 0.06
             ax.text(0.03, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=iFont_size)
+                    color='black', fontsize=iFont_size-2)
 
             pass
+    
+    fig.canvas.draw()
 
-    ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])
+    # Section 2
+    ax_pos = ax.get_position() # get the original position
+    #use this ax to set the colorbar ax position
+    ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+    #ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])   
 
     if iFlag_scientific_notation_colorbar == 1:
         formatter = OOMFormatter(fformat="%1.1e")
@@ -322,6 +308,7 @@ def map_vector_polygon_data(iFiletype_in,
     sDirname = os.path.dirname(sFilename_output_in)
 
     pDataset = pLayer = pFeature = None
+
     if sFilename_output_in is None:
         plt.show()
     else:

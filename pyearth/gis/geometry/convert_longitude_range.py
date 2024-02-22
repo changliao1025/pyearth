@@ -1,4 +1,4 @@
-def convert_360_to_180(dLongitude_in):
+def convert_360_to_180(dLongitude_degree_in):
     """
    
     This function is modified from
@@ -6,19 +6,19 @@ def convert_360_to_180(dLongitude_in):
     
 
     Args:
-        dLongitude_in (float): The input longitude range from 0 to 360
+        dLongitude_degree_in (float): The input longitude range from 0 to 360
 
     Returns:
         float: Longitude from -180 to 180
     """
-    a = int(dLongitude_in /180)
-    dLongitude_out = dLongitude_in - a*360.0
+    a = int(dLongitude_degree_in /180)
+    dLongitude_out = dLongitude_degree_in - a*360.0
 
     return dLongitude_out
 
 
 
-def convert_180_to_360(dLongitude_in):
+def convert_180_to_360(dLongitude_degree_in):
     """
    
     This function is modified from
@@ -26,11 +26,11 @@ def convert_180_to_360(dLongitude_in):
     
 
     Args:
-        dLongitude_in (float): The input longitude range from -180 to 180
+        dLongitude_degree_in (float): The input longitude range from -180 to 180
 
     Returns:
         float: Longitude from 0 to 360
     """
-    dLongitude_out = (dLongitude_in + 360.0) % 360.0
+    dLongitude_out = (dLongitude_degree_in + 360.0) % 360.0
 
     return dLongitude_out
