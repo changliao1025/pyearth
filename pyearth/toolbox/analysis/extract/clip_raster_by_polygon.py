@@ -2,9 +2,9 @@ import os, sys
 import numpy as np
 from osgeo import gdal, osr, ogr, gdalconst
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
+from pyearth.toolbox.management.vector.merge_features import merge_features
 
-
-def clip_raster_by_geojson(sFilename_raster_in, sFilename_geojson_in, sFilename_raster_out, sFormat='GTiff'):
+def clip_raster_by_polygon_file(sFilename_raster_in, sFilename_polygon_in, sFilename_raster_out, sFormat='GTiff'):
     """
     Clip a raster by a polygon
     :param sFilename_raster_in: input raster filename
@@ -21,10 +21,10 @@ def clip_raster_by_geojson(sFilename_raster_in, sFilename_geojson_in, sFilename_
         print('The raster file does not exist!')
         return
     
-    if os.path.exists(sFilename_geojson_in):
+    if os.path.exists(sFilename_polygon_in):
         pass
     else:   
-        print('The geojson does not exist!')
+        print('The polygon file does not exist!')
         return
     
     sDriverName = 'GTiff'
@@ -33,7 +33,7 @@ def clip_raster_by_geojson(sFilename_raster_in, sFilename_geojson_in, sFilename_
     pDataset_elevation = gdal.Open(sFilename_raster_in, gdal.GA_ReadOnly)
    
     dummy = gdal_read_geotiff_file(sFilename_raster_in)
-    aDem_in= dummy['dataOut']    
+    aData= dummy['dataOut']    
     eType = dummy['dataType']  
     dPixelWidth = dummy['pixelWidth']                        
     pPixelHeight = dummy['pixelHeight']
@@ -52,11 +52,30 @@ def clip_raster_by_geojson(sFilename_raster_in, sFilename_geojson_in, sFilename_
     dY_bot = dOriginY + nrow * pPixelHeight
 
     #get the spatial reference of the shapefile
-    shapefile_ds = ogr.Open(sFilename_geojson_in)    
+    pDataset_clip = ogr.Open(sFilename_polygon_in)    
+    sExtension = os.path.splitext(sFilename_polygon_in)[1]
     # Get the first layer in the shapefile
-    pLayer_clip = shapefile_ds.GetLayer(0)   
+    pLayer_clip = pDataset_clip.GetLayer(0)   
     # Count the number of features (polygons)
     num_polygons = pLayer_clip.GetFeatureCount()
+    if num_polygons == 0:
+        print('The shapefile does not contain any polygon!')
+        return
+    else:
+        if num_polygons > 1:
+            pDataset_clip = None
+            pLayer_clip = None
+            print('The polygon contains more than one polygon, the program will attempt to merge them as one!')
+            #obtain the file extension
+            sFilename_clip_new = sFilename_polygon_in.replace(sExtension, '_merged' + sExtension)
+            merge_features(sFilename_polygon_in, sFilename_clip_new)
+            sFilename_polygon_in = sFilename_clip_new
+            #open the new file 
+            pDataset_clip = ogr.Open(sFilename_polygon_in)    
+            # Get the first layer in the shapefile
+            pLayer_clip = pDataset_clip.GetLayer(0) 
+            pass
+
     # Get the spatial reference of the layer
     pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
     wkt2 = pSpatial_reference_clip.ExportToWkt()
@@ -64,20 +83,17 @@ def clip_raster_by_geojson(sFilename_raster_in, sFilename_geojson_in, sFilename_
     #comparison = pSpatialRef_target.IsSame(pSpatial_reference_clip)
 
     if( wkt1 != wkt2):
-    #if(comparison != 1):
         iFlag_transform = 1
         transform = osr.CoordinateTransformation(pSpatial_reference_clip, pSpatialRef_target)
         #in this case, we can reproject the shapefile to the same spatial reference as the raster
         #get the folder that contains the shapefile
-        sFolder = os.path.dirname(sFilename_geojson_in)
+        sFolder = os.path.dirname(sFilename_polygon_in)
         #get the name of the shapefile
-        sName = os.path.basename(sFilename_geojson_in)
+        sName = os.path.basename(sFilename_polygon_in)
         #get the name of the shapefile without extension
         sName_no_extension = os.path.splitext(sName)[0]
         #create a new shapefile
-        sFilename_shapefile_out = sFolder + '/' + sName_no_extension + '_transformed.shp'
-        #create a new shapefile
-        
+        sFilename_shapefile_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension
         #create a new shapefile
         pDataset_transform = pDriver_shapefile.CreateDataSource(sFilename_shapefile_out)
         #create a new shapefile layer
