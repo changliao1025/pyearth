@@ -47,7 +47,7 @@ def clip_raster_by_polygon_file(sFilename_raster_in, sFilename_polygon_in, sFile
         pDriver_vector = ogr.GetDriverByName(sExtension_vector)
    
 
-    pDataset_elevation = gdal.Open(sFilename_raster_in, gdal.GA_ReadOnly)   
+    pDataset_data = gdal.Open(sFilename_raster_in, gdal.GA_ReadOnly)   
     dummy = gdal_read_geotiff_file(sFilename_raster_in)
     aData= dummy['dataOut']    
     eType = dummy['dataType']  
@@ -97,6 +97,8 @@ def clip_raster_by_polygon_file(sFilename_raster_in, sFilename_polygon_in, sFile
     print(wkt2)   
 
     if( wkt1 != wkt2):        
+        pDataset_clip = None
+        pLayer_clip = None
         #in this case, we can reproject the shapefile to the same spatial reference as the raster
         #get the folder that contains the shapefile
         sFolder = os.path.dirname(sFilename_polygon_in)
@@ -107,8 +109,12 @@ def clip_raster_by_polygon_file(sFilename_raster_in, sFilename_polygon_in, sFile
         #create a new shapefile
         sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_vector
         reproject_vector(sFilename_polygon_in, sFilename_clip_out, pSpatialRef_target)        
-        #use the new shapefile to clip the raster
+        #use the new shapefile to clip the raster        
         sFilename_clip = sFilename_clip_out
+        pDataset_clip = ogr.Open(sFilename_clip_out)
+        pLayer_clip = pDataset_clip.GetLayer(0) 
+        pFeature_clip = pLayer_clip.GetNextFeature()
+        pPolygon = pFeature_clip.GetGeometryRef() 
 
     else:
         sFilename_clip = sFilename_polygon_in              
@@ -134,7 +140,7 @@ def clip_raster_by_polygon_file(sFilename_raster_in, sFilename_polygon_in, sFile
                 width=iNewWidth,   
                     height=iNewHeigh,      
                         dstSRS=pProjection , format = 'MEM' )
-        pDataset_clip_warped = gdal.Warp('', pDataset_elevation, options=pWrapOption)
+        pDataset_clip_warped = gdal.Warp('', pDataset_data, options=pWrapOption)
 
         #convert the warped dataset to an array
         aData_clip = pDataset_clip_warped.ReadAsArray()
@@ -145,7 +151,7 @@ def clip_raster_by_polygon_file(sFilename_raster_in, sFilename_polygon_in, sFile
         #close the dataset
         pDataset_clip = None
         #close the dataset
-        pDataset_elevation = None
+        pDataset_data = None
         print('The raster has been clipped by the polygon file!')
     
 
