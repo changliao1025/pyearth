@@ -1,7 +1,7 @@
 import os
 from osgeo import osr, ogr
 
-def reproject_vector(sFilename_vector_in, sFilename_vector_out, pSpatial_reference_target):
+def reproject_vector(sFilename_vector_in, sFilename_vector_out, pSpatialRef_target):
 
     pDataset_vector = ogr.Open(sFilename_vector_in)    
     # Get the first layer in the shapefile
@@ -9,7 +9,7 @@ def reproject_vector(sFilename_vector_in, sFilename_vector_out, pSpatial_referen
     pSpatial_reference_vector = pLayer_vector.GetSpatialRef()
     wkt1 = pSpatial_reference_vector.ExportToWkt()        
     
-    wkt2 = pSpatial_reference_target.ExportToWkt()
+    wkt2 = pSpatialRef_target.ExportToWkt()
 
     #get the extension of polygon file  
     sExtension_vector = os.path.splitext(sFilename_vector_in)[1]
@@ -21,11 +21,11 @@ def reproject_vector(sFilename_vector_in, sFilename_vector_out, pSpatial_referen
 
     if (wkt1 != wkt2):
 
-        transform = osr.CoordinateTransformation(pSpatial_reference_vector, pSpatial_reference_target)
+        transform = osr.CoordinateTransformation(pSpatial_reference_vector, pSpatialRef_target)
 
         pDataset_transform = pDriver_vector.CreateDataSource(sFilename_vector_out)
         #create a new shapefile layer
-        pLayer_transform = pDataset_transform.CreateLayer('transform', pSpatial_reference_target, geom_type=ogr.wkbPolygon)
+        pLayer_transform = pDataset_transform.CreateLayer('transform', pSpatialRef_target, geom_type=ogr.wkbPolygon)
         #create a new feature
         pFeature_transform = ogr.Feature(pLayer_transform.GetLayerDefn())
         pFeature_clip = pLayer_vector.GetNextFeature()

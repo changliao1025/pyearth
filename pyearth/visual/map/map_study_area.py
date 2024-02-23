@@ -45,14 +45,14 @@ def plot_study_area(sFilename_dem_in,
     ncolumn = dummy['ncolumn']
     missing_value = dummy['missingValue']
     pProjection = dummy['projection']
-    pSpatial_reference_source = dummy['spatialReference']
+    pSpatialRef_source = dummy['spatialReference']
 
     # set up dem projection
-    dem_proj = cpl.crs.AlbersEqualAre(central_longitude=pSpatial_reference_source.GetProjPar('longitude_of_center'),
-                                   central_latitude=pSpatial_reference_source.GetProjPar(
+    dem_proj = cpl.crs.AlbersEqualAre(central_longitude=pSpatialRef_source.GetProjPar('longitude_of_center'),
+                                   central_latitude=pSpatialRef_source.GetProjPar(
                                        'latitude_of_center'),
-                                   standard_parallels=(pSpatial_reference_source.GetProjPar('standard_parallel_1'),
-                                                       pSpatial_reference_source.GetProjPar('standard_parallel_2')))
+                                   standard_parallels=(pSpatialRef_source.GetProjPar('standard_parallel_1'),
+                                                       pSpatialRef_source.GetProjPar('standard_parallel_2')))
 
     # set up dem plot
     ax_dem = fig.add_axes([0.3, 0.15, 0.6, 0.55], projection=dem_proj)
@@ -64,8 +64,8 @@ def plot_study_area(sFilename_dem_in,
     dLat_max = dOriginY
     dLat_min = dOriginY + nrow * dResolution_y
 
-    pSpatial_reference_target = osr.SpatialReference()
-    pSpatial_reference_target.ImportFromEPSG(4326)
+    pSpatialRef_target = osr.SpatialReference()
+    pSpatialRef_target.ImportFromEPSG(4326)
     aLon = list()
     aLat = list()
     aLon.append(dLon_min)
@@ -73,7 +73,7 @@ def plot_study_area(sFilename_dem_in,
     aLat.append(dLat_min)
     aLat.append(dLat_max)
     aLon, aLat = reproject_coordinates_batch(
-        aLon, aLat, pSpatial_reference_source, pSpatial_reference_target)
+        aLon, aLat, pSpatialRef_source, pSpatialRef_target)
     dLongitude_center = np.mean(aLon)
     dLatitude_center = np.mean(aLat)
     aImage_extent = [dLon_min - dResolution_x, 
@@ -168,14 +168,14 @@ def plot_study_area(sFilename_dem_in,
     # google earth
     ge_proj = cpl.crs.Mercator()  # central_longitude=dLongitude_center)
 
-    pSpatial_reference_source = osr.SpatialReference()
-    pSpatial_reference_source.ImportFromEPSG(4326)
-    pSpatial_reference_target = osr.SpatialReference()
+    pSpatialRef_source = osr.SpatialReference()
+    pSpatialRef_source.ImportFromEPSG(4326)
+    pSpatialRef_target = osr.SpatialReference()
 
     iZoom = 7
-    pSpatial_reference_target.ImportFromWkt(ge_proj.to_wkt())
+    pSpatialRef_target.ImportFromWkt(ge_proj.to_wkt())
     uv_xcenter, uv_ycenter = reproject_coordinates(
-        dLongitude_center, dLatitude_center, pSpatial_reference_source, pSpatial_reference_target)
+        dLongitude_center, dLatitude_center, pSpatialRef_source, pSpatialRef_target)
     xsize_ge = 600
     ysize_ge = 600
     scale = Google_MetersPerPixel(iZoom)

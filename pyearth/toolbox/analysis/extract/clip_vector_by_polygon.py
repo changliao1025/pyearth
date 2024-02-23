@@ -1,5 +1,5 @@
 import os
-from osgeo import ogr, osr, gdal
+from osgeo import ogr
 from pyearth.toolbox.management.vector.reproject import reproject_vector
 from pyearth.toolbox.management.vector.merge_features import merge_features
 
