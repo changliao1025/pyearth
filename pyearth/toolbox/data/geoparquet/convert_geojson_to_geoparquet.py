@@ -25,5 +25,7 @@ if __name__ == '__main__':
     output_geoparquet = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/variable_polygon.parquet'
     input_geojson = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/flow_direction.geojson'
     output_geoparquet = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/flow_direction.parquet'
+    input_geojson = '/compyfs/liao313/04model/pyhexwatershed/amazon/pyhexwatershed20240101012/pyflowline/dggrid.geojson'
+    output_geoparquet = '/compyfs/liao313/04model/pyhexwatershed/amazon/pyhexwatershed20240101012/pyflowline/dggrid.parquet'
    
     convert_geojson_to_geoparquet(input_geojson, output_geoparquet)

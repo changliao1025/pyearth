@@ -19,6 +19,7 @@ def map_vector_polygon_data(iFiletype_in,
                             iFlag_color_in = None,
                             iFlag_colorbar_in=None,
                             iFont_size_in=None,
+                            iFlag_integer_in=None,
                             sColormap_in=None,
                             sTitle_in=None,
                             iDPI_in=None,
@@ -84,6 +85,11 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         iFont_size = 12
 
+    if iFlag_colorbar_in is not None:
+        iFlag_colorbar = iFlag_colorbar_in
+    else:
+        iFlag_colorbar = 0
+
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
     else:
@@ -102,6 +108,11 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         iFlag_data_max = 0
         pass
+
+    if iFlag_integer_in is not None:
+        iFlag_integer = iFlag_integer_in
+    else:
+        iFlag_integer = 0
 
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
@@ -136,6 +147,7 @@ def map_vector_polygon_data(iFiletype_in,
         sFont = "Times New Roman"
 
     plt.rcParams["font.family"] = sFont
+    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     if sVariable_in is not None:
         sVariable = sVariable_in
@@ -162,12 +174,9 @@ def map_vector_polygon_data(iFiletype_in,
         sGeometry_type = pGeometry_in.GetGeometryName()
         dValue = float(pFeature.GetField(sVariable))
         aValue.append(dValue)
-        if sGeometry_type == 'POLYGON':
-            # dummy0 = loads( pGeometry_in.ExportToWkt() )
-            aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-            # aCoords_gcs = dummy0.exterior.coords
+        if sGeometry_type == 'POLYGON':            
+            aCoords_gcs = get_geometry_coordinates(pGeometry_in)            
             aCoords_gcs = np.array(aCoords_gcs)
-
             dLon_max = np.max([dLon_max, np.max(aCoords_gcs[:, 0])])
             dLon_min = np.min([dLon_min, np.min(aCoords_gcs[:, 0])])
             dLat_max = np.max([dLat_max, np.max(aCoords_gcs[:, 1])])
@@ -179,7 +188,6 @@ def map_vector_polygon_data(iFiletype_in,
         dValue_max = dData_max  # np.max(aValue)
         dValue_min = dData_min  # np.min(aValue)
     else:
-
         aValue = aValue[aValue != dMissing_value]
         dValue_max = np.max(aValue)
         dValue_min = np.min(aValue)
@@ -222,12 +230,9 @@ def map_vector_polygon_data(iFiletype_in,
 
             iColor_index = int((dValue - dValue_min) /
                                (dValue_max - dValue_min) * 255)
-            # pick color from colormap
-            #cmiColor_index = cmap(iColor_index)
-            if sGeometry_type == 'POLYGON':
-                # dummy0 = loads( pGeometry_in.ExportToWkt() )
-                aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                # aCoords_gcs = dummy0.exterior.coords
+            # pick color from colormap            
+            if sGeometry_type == 'POLYGON':                
+                aCoords_gcs = get_geometry_coordinates(pGeometry_in)                
                 aCoords_gcs = np.array(aCoords_gcs)
                 aColor.append(cmap(iColor_index))
                 aPolygon.append(aCoords_gcs[:, 0:2])                
@@ -267,35 +272,41 @@ def map_vector_polygon_data(iFiletype_in,
                     color='black', fontsize=iFont_size-2)
 
             pass
-    
-    fig.canvas.draw()
 
-    # Section 2
-    ax_pos = ax.get_position() # get the original position
-    #use this ax to set the colorbar ax position
-    ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
-    #ax_cb = fig.add_axes([0.75, 0.15, 0.02, 0.6])   
+    if iFlag_colorbar == 1:
+        fig.canvas.draw()
+        # Section 2
+        ax_pos = ax.get_position() # get the original position
+        #use this ax to set the colorbar ax position
+        ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])   
+        if iFlag_scientific_notation_colorbar == 1:
+            formatter = OOMFormatter(fformat="%1.1e")
+            cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                           cmap=cmap,
+                                           norm=mpl.colors.Normalize(
+                                               dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+        else:
+            if iFlag_integer ==1:            
+                formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0f}".format(x))
+                cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                           cmap=cmap,
+                                           norm=mpl.colors.Normalize(
+                                               dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+            else:
+                formatter = OOMFormatter(fformat="%1.2f")
+                cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                           cmap=cmap,
+                                           norm=mpl.colors.Normalize(
+                                               dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
 
-    if iFlag_scientific_notation_colorbar == 1:
-        formatter = OOMFormatter(fformat="%1.1e")
-        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                       cmap=cmap,
-                                       norm=mpl.colors.Normalize(
-                                           dValue_min, dValue_max),  # vmax and vmin
-                                       extend=sExtend, format=formatter)
-    else:
-        formatter = OOMFormatter(fformat="%1.2f")
-        cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                       cmap=cmap,
-                                       norm=mpl.colors.Normalize(
-                                           dValue_min, dValue_max),  # vmax and vmin
-                                       extend=sExtend, format=formatter)
-
-    cb.ax.get_yaxis().set_ticks_position('right')
-    cb.ax.get_yaxis().labelpad = 5
-    cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
-    cb.ax.get_yaxis().set_label_position('left')
-    cb.ax.tick_params(labelsize=iFont_size-2)
+        cb.ax.get_yaxis().set_ticks_position('right')
+        cb.ax.get_yaxis().labelpad = 5
+        cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+        cb.ax.get_yaxis().set_label_position('left')
+        cb.ax.tick_params(labelsize=iFont_size-2)
 
     gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')

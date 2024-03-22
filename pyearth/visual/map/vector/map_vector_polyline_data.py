@@ -23,9 +23,9 @@ def map_vector_polyline_data(iFiletype_in,
                              sColormap_in = None,
                              sTitle_in = None,
                              iDPI_in = None,
-                              iSize_x_in = None, 
-                            iSize_y_in = None, 
-                            iFont_size_in = None,
+                             iSize_x_in = None, 
+                             iSize_y_in = None, 
+                             iFont_size_in = None,
                              dMissing_value_in=None,
                              dData_max_in = None,
                              dData_min_in = None,
@@ -154,27 +154,22 @@ def map_vector_polyline_data(iFiletype_in,
     dLon_max = -180
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
-        sGeometry_type = pGeometry_in.GetGeometryName()
-        dField = pFeature.GetField(sField_thickness)
-        if sGeometry_type =='LINESTRING':
-            #dummy0 = loads( pGeometry_in.ExportToWkt() )
-            aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
-            
+        sGeometry_type = pGeometry_in.GetGeometryName()        
+        if sGeometry_type =='LINESTRING':            
+            aCoords_gcs =   get_geometry_coordinates(pGeometry_in)            
             aCoords_gcs= np.array(aCoords_gcs)
             aCoords_gcs = aCoords_gcs[:,0:2]
 
             dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
             dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
             dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
-            
+            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )           
            
                     
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
         pProjection_map = cpl.crs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
-   
    
     fig = plt.figure( dpi=iDPI)
     fig.set_figwidth( iSize_x )
@@ -188,12 +183,12 @@ def map_vector_polyline_data(iFiletype_in,
         aField =list()
         for pFeature in pLayer:
             dField = pFeature.GetField(sField_thickness)
-            aField.append(dField)
-            pass
+            aField.append(dField)           
 
-    aField = np.array(aField)
-    dField_max = np.max(aField)
-    dField_min = np.min(aField)
+        aField = np.array(aField)
+        dField_max = np.max(aField)
+        dField_min = np.min(aField)
+
     iThickness_max = 2.5
     iThickness_min = 0.3
 
@@ -204,7 +199,8 @@ def map_vector_polyline_data(iFiletype_in,
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        dField = pFeature.GetField(sField_thickness)
+        if iFlag_thickness ==1:
+            dField = pFeature.GetField(sField_thickness)
         if sGeometry_type =='LINESTRING':
             aCoords_gcs = get_geometry_coordinates(pGeometry_in)                
             aCoords_gcs = np.array(aCoords_gcs)
@@ -223,10 +219,19 @@ def map_vector_polyline_data(iFiletype_in,
             codes[0] = mpl.path.Path.MOVETO
             path = mpl.path.Path(aCoords_gcs, codes)
             x, y = zip(*path.vertices)
-            iThickness = remap( dField, dField_min, dField_max, iThickness_min, iThickness_max )
+            if iFlag_thickness ==1:
+                iThickness = remap( dField, dField_min, dField_max, iThickness_min, iThickness_max )
+                
 
-            color_index = (dField-dField_min ) /(dField_max - dField_min )
-            rgba = cmap(color_index)
+            else:
+                iThickness = 1.0
+
+            if iFlag_color ==1:
+                color_index = (dField-dField_min ) /(dField_max - dField_min )            
+                rgba = cmap(color_index)
+            else:
+                rgba = 'blue'
+
             if sColormap_in is not None:
                 line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.Geodetic())
             else:

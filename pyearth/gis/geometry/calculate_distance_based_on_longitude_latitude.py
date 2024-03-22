@@ -24,7 +24,7 @@ def calculate_distance_based_on_longitude_latitude(dLongitude_from,
     """
     
     if iFlag_radian is None:# convert decimal degrees to radians
-        dLongitude_radian_from, dLatitude_radian_from, dLongitude_radian_to, dLatitude_radian_to = np.radian([dLongitude_from,
+        dLongitude_radian_from, dLatitude_radian_from, dLongitude_radian_to, dLatitude_radian_to = np.radians([dLongitude_from,
                                                                                                           dLatitude_from,
                                                                                                           dLongitude_to,
                                                                                                           dLatitude_to])
