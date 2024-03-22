@@ -107,6 +107,7 @@ def scatter_plot_multiple_data(aData_x,
         sFont = "Times New Roman"
 
     plt.rcParams["font.family"] = sFont
+    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     if sTitle_in is not None:
         sTitle = sTitle_in

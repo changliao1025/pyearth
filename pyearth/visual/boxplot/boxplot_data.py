@@ -171,10 +171,10 @@ def boxplot_data(aData_in,
             q1_raw = np.percentile(data_raw, 25)
             q3_raw = np.percentile(data_raw, 75)
             qm_raw = np.median(data_raw)
-            qm = qm_raw  # np.log10(qm_raw)
+            #qm = qm_raw  # np.log10(qm_raw)
 
             iqr_raw = q3_raw - q1_raw
-            iqr_log = np.log10(iqr_raw)
+            #iqr_log = np.log10(iqr_raw)
 
             q0_raw = np.percentile(data_raw, 0.35)
             q4_raw = np.percentile(data_raw, 99.65)  # q3_raw + 1.5 * iqr_raw
@@ -226,14 +226,14 @@ def boxplot_data(aData_in,
                             color='black', linestyle='-', linewidth=1)
 
             # whiskers outlier
-            dummy_index = np.where(data_raw < q0_raw)
+            dummy_index = np.where(data_raw < q0_raw)[0]
             for k in range(len(dummy_index)):
                 x0 = [x_mid]
                 y0 = [data_raw[dummy_index[k]]]
                 ax.plot(x0, y0, marker="o", markersize=3,
                         markeredgecolor="black", markerfacecolor="white")
                 pass
-            dummy_index = np.where(data_raw > q4_raw)
+            dummy_index = np.where(data_raw > q4_raw)[0]
             for k in range(len(dummy_index)):
                 x0 = [x_mid]
                 y0 = [data_raw[dummy_index[k]]]
@@ -256,7 +256,7 @@ def boxplot_data(aData_in,
     ax.set_xlim(-1, nData)
     ax.set_ylim(dMin_y, dMax_y)
     ax.grid(which='major', color='grey', linestyle='--', axis='y')
-    ax.set_yscale('log')
+    #ax.set_yscale('log')
 
     ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend, fontsize=12, ncol=ncolumn)

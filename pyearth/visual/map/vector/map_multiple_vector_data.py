@@ -241,7 +241,7 @@ def map_multiple_vector_data(aFiletype_in,
     
     ax.set_global()
     ax.set_extent( aExtent )
-    if iFlag_openstreetmap_in is not None:
+    if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
         if iFlag_openstreetmap_level_in is not None:
             iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
         else:
