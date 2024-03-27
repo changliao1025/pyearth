@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.path as mpath
 import matplotlib.cm as cm
+from matplotlib.collections import PatchCollection
+from matplotlib.collections import LineCollection
+from matplotlib.patches import Polygon
+import cartopy as cpl
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from cartopy.io.img_tiles import OSM
@@ -100,7 +104,7 @@ def map_multiple_vector_data(aFiletype_in,
     #get the extent first
     sFilename_in = aFilename_in[0]
 
-    pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    pDataset = ogr.Open(sFilename_in, gdal.GA_ReadOnly)
     pLayer = pDataset.GetLayer(0)
 
     if iFlag_colorbar_in is not None:
@@ -202,23 +206,28 @@ def map_multiple_vector_data(aFiletype_in,
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        if sGeometry_type =='POLYGON':
-            #dummy0 = loads( pGeometry_in.ExportToWkt() )
-            #aCoords_gcs = dummy0.exterior.coords
-            #aCoords_gcs= np.array(aCoords_gcs)
-            aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-
-            dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
-            dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
-            dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+        if sGeometry_type =='MULTIPOLYGON':   
+            for j in range(pGeometry_in.GetGeometryCount()):  
+                pPolygon = pGeometry_in.GetGeometryRef(j)     
+                aCoords_gcs = get_geometry_coordinates(pPolygon)
+                dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
+                dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
+                dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
+                dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
         else:
-            if sGeometry_type =='LINESTRING':
+            if sGeometry_type =='POLYGON':            
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
                 dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
                 dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
                 dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+            else:
+                if sGeometry_type =='LINESTRING':
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
+                    dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
+                    dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
+                    dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
 
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
@@ -230,8 +239,6 @@ def map_multiple_vector_data(aFiletype_in,
     ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection= pProjection_map  ) #projection=ccrs.PlateCarree()
 
     # Create an OSM image tile source
-    
-
     if aExtent_in is None:
         marginx  = (dLon_max - dLon_min) / 50
         marginy  = (dLat_max - dLat_min) / 50
@@ -256,7 +263,7 @@ def map_multiple_vector_data(aFiletype_in,
                 color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
 
-    
+    minx, miny, maxx, maxy = aExtent 
     #====================================
     #should we allow more than one scale for one variable?
     aValue_all = list()
@@ -265,30 +272,26 @@ def map_multiple_vector_data(aFiletype_in,
         sFilename = aFilename_in[i]
         iFlag_thickness = aFlag_thickness[i]
         iFlag_color = aFlag_color[i]
-        if iFlag_thickness ==1 :
-            sVariable = aVariable_in[i]
-            pDataset = pDriver.Open(sFilename, gdal.GA_ReadOnly)
-            pLayer = pDataset.GetLayer(0)
-
-            for pFeature in pLayer:
-                pGeometry_in = pFeature.GetGeometryRef()
-                sGeometry_type = pGeometry_in.GetGeometryName()
-                dValue = float(pFeature.GetField(sVariable))
-                aValue.append(dValue)
+        sVariable = aVariable_in[i]
+        pDataset = ogr.Open(sFilename, gdal.GA_ReadOnly)
+        pLayer = pDataset.GetLayer(0)
+        #select field value using sqlite        
+        pKwargs = 'SELECT ' + sVariable + ' FROM ' + pLayer.GetName() 
+        if iFlag_thickness ==1 : 
+            pLayer_temp = pDataset.ExecuteSQL(pKwargs)
         else:
             if iFlag_color  == 1:
-                sVariable = aVariable_in[i]
-                pDataset = pDriver.Open(sFilename, gdal.GA_ReadOnly)
-                pLayer = pDataset.GetLayer(0)
-
-                for pFeature in pLayer:
-                    pGeometry_in = pFeature.GetGeometryRef()
-                    sGeometry_type = pGeometry_in.GetGeometryName()
-                    dValue = float(pFeature.GetField(sVariable))
-                    aValue.append(dValue)
-
-
-        aValue_all.append(aValue)
+                pLayer_temp = pDataset.ExecuteSQL(pKwargs)
+        values = []
+        # Iterate over the layer
+        for feature in pLayer_temp:
+            # Get the desired field value
+            value = feature.GetField(sVariable)
+            # Append the value to the list
+            values.append(value)
+        #conver aValue to numpy array
+        aValue = np.array(values)
+        aValue_all.append(aValue)        
 
     iThickness_max = 2.5
     iThickness_min = 0.3
@@ -298,12 +301,18 @@ def map_multiple_vector_data(aFiletype_in,
         iFlag_thickness = aFlag_thickness[i]
         iFlag_color = aFlag_color[i]
         iFlag_fill = aFlag_fill[i]
-        pDataset = pDriver.Open(sFilename, gdal.GA_ReadOnly)
+        pDataset = ogr.Open(sFilename, gdal.GA_ReadOnly)
         pLayer = pDataset.GetLayer(0)
-
         nColor = pLayer.GetFeatureCount()
         aColor = cm.rainbow(np.linspace(0, 1, nColor))
         lID = 0
+        aPoint=list()
+        aPolyline=list()
+        aThickness=list()
+        aPolygon = list()
+        aColor = list() 
+        #use gdal filter to select feature
+        pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
             sGeometry_type = pGeometry_in.GetGeometryName()
@@ -361,21 +370,13 @@ def map_multiple_vector_data(aFiletype_in,
                     sColor = cmap(iColor_index)
             else:
                 sColor = 'black'
-
                 #pick color from colormap
-
-            if sGeometry_type =='POINT':
-                #dummy0 = loads( pGeometry_in.ExportToWkt() )
-                #aCoords_gcs = dummy0.coords
-                #aCoords_gcs= np.array(aCoords_gcs)
+            if sGeometry_type =='POINT':               
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 aCoords_gcs = aCoords_gcs[:,0:2]
                 ax.plot(aCoords_gcs[0], aCoords_gcs[1], 'o', color= sColor, markersize=2, transform=ccrs.Geodetic())                
             else:
-                if sGeometry_type =='LINESTRING':
-                    #dummy0 = loads( pGeometry_in.ExportToWkt() )
-                    #aCoords_gcs = dummy0.coords
-                    #aCoords_gcs= np.array(aCoords_gcs)
+                if sGeometry_type =='LINESTRING':                    
                     aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                     aCoords_gcs = aCoords_gcs[:,0:2]
                     nvertex = len(aCoords_gcs)
@@ -383,26 +384,43 @@ def map_multiple_vector_data(aFiletype_in,
                     codes[0] = mpath.Path.MOVETO
                     path = mpath.Path(aCoords_gcs, codes)
                     x, y = zip(*path.vertices)
-                    line, = ax.plot(x, y, color= sColor, linewidth=iThickness, transform=ccrs.Geodetic())
+                    #line, = ax.plot(x, y, color= sColor, linewidth=iThickness, transform=ccrs.Geodetic())
+                    aThickness.append(iThickness)
+                    aColor.append(sColor)
+                    aPolyline.append(list(zip(x, y)))
                 else:
-                    if sGeometry_type == 'POLYGON': 
-                        #dummy0 = loads( pGeometry_in.ExportToWkt() )
-                        #aCoords_gcs = dummy0.exterior.coords
-                        #aCoords_gcs = np.array(aCoords_gcs)
+                    if sGeometry_type == 'POLYGON':                         
                         aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                        if iFlag_fill == 1:
-                            polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, 
-                                           alpha=0.8, edgecolor = sColor,facecolor= sColor, 
-                                           transform=ccrs.Geodetic() )
-                        else:
-                            polygon = mpatches.Polygon(aCoords_gcs[:,0:2], closed=True, linewidth=0.25, 
-                                           alpha=0.8, edgecolor = sColor,facecolor='none', 
-                                           transform=ccrs.Geodetic() )
-                        ax.add_patch(polygon)
+                        if iFlag_fill == 1:                            
+                            aColor.append(sColor)                            
+                        else:                            
+                            aColor.append('none')
+                        aPolygon.append(aCoords_gcs[:, 0:2])                          
                     else:
+                        if sGeometry_type == 'MULTIPOLYGON':     
+                            for j in range(pGeometry_in.GetGeometryCount()):  
+                                pPolygon = pGeometry_in.GetGeometryRef(j)               
+                                aCoords_gcs = get_geometry_coordinates(pPolygon) 
+                                if iFlag_fill == 1:
+                                    aColor.append(sColor)
+                                else:
+                                    aColor.append('none')
+                                aPolygon.append(aCoords_gcs[:, 0:2])  
                         pass
 
+            
             lID = lID + 1
+        
+        aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+        pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
+                                      facecolor=aColor, linewidths=0.25, 
+                                      transform=cpl.crs.Geodetic())
+        #polyline
+        pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor='none',
+                         facecolor=aColor, linewidths=aThickness, transform=cpl.crs.Geodetic())
+        
+        ax.add_collection(pLC)
+        ax.add_collection(pPC)
 
     
     #reset extent
@@ -412,7 +430,7 @@ def map_multiple_vector_data(aFiletype_in,
     if iFlag_title==1:
         ax.set_title(sTitle)
     iFlag_label = 0
-    if iFlag_label ==1:
+    if iFlag_label == 1:
         sText = 'Manaus'
         dLongitude_label = -60.016667
         dLatitude_label  = -3.1

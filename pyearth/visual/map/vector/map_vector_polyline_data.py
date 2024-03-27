@@ -3,6 +3,7 @@ import numpy as np
 from osgeo import  osr, gdal, ogr
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.collections import LineCollection
 
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -195,6 +196,19 @@ def map_vector_polyline_data(iFiletype_in,
     #switch to collection in next development
     aPolyline = list()
     aColor = list()
+    aThickness = list()
+
+    if aExtent_in is None:
+        marginx  = (dLon_max - dLon_min) / 20
+        marginy  = (dLat_max - dLat_min) / 20
+        aExtent = [dLon_min - marginx , dLon_max + marginx , dLat_min - marginy , dLat_max + marginy]
+    else:
+        aExtent = aExtent_in
+
+    ax.set_extent(aExtent)
+
+    minx, miny, maxx, maxy = aExtent 
+    pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
@@ -221,10 +235,10 @@ def map_vector_polyline_data(iFiletype_in,
             x, y = zip(*path.vertices)
             if iFlag_thickness ==1:
                 iThickness = remap( dField, dField_min, dField_max, iThickness_min, iThickness_max )
-                
-
             else:
                 iThickness = 1.0
+
+            aThickness.append(iThickness)
 
             if iFlag_color ==1:
                 color_index = (dField-dField_min ) /(dField_max - dField_min )            
@@ -233,26 +247,25 @@ def map_vector_polyline_data(iFiletype_in,
                 rgba = 'blue'
 
             if sColormap_in is not None:
-                line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.Geodetic())
+                #line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.Geodetic())
+                aColor.append(rgba)
             else:
                 if n_colors < 10:
-                    line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=cpl.crs.Geodetic())
+                    #line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=cpl.crs.Geodetic())
+                    aColor.append(colours[lID])
                 else:
-                    line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=cpl.crs.Geodetic())
+                    #line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=cpl.crs.Geodetic())
+                    aColor.append('black')
+            
+            aPolyline.append(list(zip(x, y)))
 
             lID = lID + 1
 
-
-
-    if aExtent_in is None:
-        marginx  = (dLon_max - dLon_min) / 20
-        marginy  = (dLat_max - dLat_min) / 20
-        aExtent = [dLon_min - marginx , dLon_max + marginx , dLat_min - marginy , dLat_max + marginy]
-    else:
-        aExtent = aExtent_in
-
+    pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor='none',
+                         facecolor=aColor, linewidths=aThickness, transform=cpl.crs.Geodetic())
+    ax.add_collection(pLC)
+    
     ax.set_extent(aExtent)
-
 
     ax.coastlines(color='black', linewidth=1)
 
