@@ -192,11 +192,13 @@ def plot_study_area(sFilename_dem_in,
 
     sResolution = "{:0d}".format(xsize_ge) + 'x' + "{:0d}".format(ysize_ge)
     sMap_type = "hybrid"
+    #obtain GCP APIs from your system
+    sGoogleMapAPI = ''
     sGoogleMap = "http://maps.googleapis.com/maps/api/staticmap?" + \
         "center=" + sLatitude_center + ',' + sLongitude_center + \
         "&zoom=" + sZoom + "&size=" + sResolution + \
         "&maptype="+sMap_type+"&sensor=false&format=png32" + \
-        "key=AIzaSyCT0NPGHJqRFysOYELOWBdqov6AbphgaFY"
+        "key=" + sGoogleMapAPI
     r = requests.get(sGoogleMap)
     # wb mode is stand for write binary mode
     f = open('google_map.png', 'wb')
