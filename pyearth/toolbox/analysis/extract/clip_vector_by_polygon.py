@@ -31,8 +31,8 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     # Get the input layer and clip polygon layer
     pLayer_source = pDataset_source.GetLayer()    
     #get the spatial reference
-    pSpatialRef_target = pLayer_source.GetSpatialRef()    
-    wkt1 = pSpatialRef_target.ExportToWkt()
+    pSpatial_reference_target = pLayer_source.GetSpatialRef()    
+    pProjection_target = pSpatial_reference_target.ExportToWkt()
 
     # Get the geometry of the clip polygon
     sExtension_clip = os.path.splitext(sFilename_polygon_in)[1]
@@ -59,9 +59,9 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
 
     # Get the spatial reference of the layer
     pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
-    wkt2 = pSpatial_reference_clip.ExportToWkt()
+    pProjection_clip = pSpatial_reference_clip.ExportToWkt()
     
-    if( wkt1 != wkt2):
+    if( pProjection_target != pProjection_clip):
         pDataset_clip = None
         pLayer_clip = None
         sFolder = os.path.dirname(sFilename_polygon_in)
@@ -70,7 +70,7 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
         #get the name of the shapefile without extension
         sName_no_extension = os.path.splitext(sName)[0]
         sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_vector
-        reproject_vector(sFilename_polygon_in, sFilename_clip_out, pSpatialRef_target)                
+        reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)                
         pDataset_clip = ogr.Open(sFilename_clip_out)
         pLayer_clip = pDataset_clip.GetLayer(0) 
     else:
@@ -93,15 +93,15 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     iGeomType = pLayer_in.GetGeomType()
     if iGeomType == ogr.wkbPoint:
         #create the layer
-        pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatialRef_target, geom_type=ogr.wkbPoint)
+        pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbPoint)
     else:
         if iGeomType == ogr.wkbLineString:
             #create the layer
-            pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatialRef_target, geom_type=ogr.wkbLineString)
+            pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbLineString)
         else:
             if iGeomType == ogr.wkbPolygon:
                 #create the layer
-                pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatialRef_target, geom_type=ogr.wkbPolygon)
+                pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbPolygon)
             else:
                 print('Geometry type not supported')
                 return
@@ -135,6 +135,8 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     pDataset_source = None
     pDataset_clip = None
     pDataset_clipped = None
+    pSpatial_reference_clip = None
+    pSpatial_reference_target = None
 
     print("Clipping completed.")
 

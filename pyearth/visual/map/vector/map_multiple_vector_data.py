@@ -1,11 +1,13 @@
 import os
 import numpy as np
 from osgeo import  osr, gdal, ogr
+from matplotlib.colors import ListedColormap
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import matplotlib.path as mpath
 import matplotlib.cm as cm
+from matplotlib.collections import PathCollection
+from matplotlib.path import Path
 from matplotlib.collections import PatchCollection
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Polygon
@@ -17,6 +19,11 @@ from pyearth.toolbox.math.stat.remap import remap
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
 
+#get the current year for openstreetmap copy right label
+import datetime
+iYear_current = datetime.datetime.now().year
+#convert to string
+sYear = str(iYear_current)
 
 def map_multiple_vector_data(aFiletype_in,
                              aFilename_in,
@@ -24,6 +31,7 @@ def map_multiple_vector_data(aFiletype_in,
                              iFlag_title_in = None,
                              aFlag_thickness_in = None,
                              aFlag_color_in = None,
+                             aFlag_discrete_in = None,
                              aFlag_fill_in = None,
                              aVariable_in = None,
                              sFilename_output_in=None,
@@ -34,9 +42,9 @@ def map_multiple_vector_data(aFiletype_in,
                              sColormap_in = None,
                              sTitle_in = None,
                              iDPI_in = None,
-                             dMissing_value_in = None,
-                             dData_max_in = None,
-                             dData_min_in = None,
+                             aMissing_value_in = None,
+                             aData_max_in = None,
+                             aData_min_in = None,
                              sExtend_in =None,
                              sFont_in = None,
                              sUnit_in=None,
@@ -95,6 +103,11 @@ def map_multiple_vector_data(aFiletype_in,
         aFlag_color= np.zeros(nFile, dtype=np.int16)
     else:
         aFlag_color = aFlag_color_in
+    
+    if aFlag_discrete_in is None:
+        aFlag_discrete= np.zeros(nFile, dtype=np.int16)
+    else:
+        aFlag_discrete = aFlag_discrete_in
 
     if aFlag_fill_in is None:
         aFlag_fill= np.zeros(nFile, dtype=np.int16)
@@ -131,25 +144,25 @@ def map_multiple_vector_data(aFiletype_in,
         iFlag_title = 0
         sTitle =  ''       
             
-
-    if dMissing_value_in is not None:
-        dMissing_value = dMissing_value_in
+    
+    if aMissing_value_in is not None:
+        aMissing_value = aMissing_value_in
     else:
-        dMissing_value = -9999
-
-    if dData_min_in is not None:
-        iFlag_data_min = 1
-        dData_min = dData_min_in
+        aMissing_value =  np.full(nFile, -9999)
+    if aData_min_in is not None:        
+        aData_min = aData_min_in
+        aFlag_data_min = np.full(nFile, 1)
     else:
-        iFlag_data_min = 0
-        pass
+        aData_min=np.full(nFile, -9999)
+        aFlag_data_min = np.zeros(nFile, dtype=np.int16)    
 
-    if dData_max_in is not None:
-        iFlag_data_max = 1
-        dData_max = dData_max_in
+    if aData_max_in is not None:
+        aData_max = aData_max_in
+        aFlag_data_max = np.full(nFile, 1)        
     else:
-        iFlag_data_max = 0
-        pass
+        aData_max = np.full(nFile, -9999)
+        aFlag_data_max = np.zeros(nFile, dtype=np.int16)    
+        pass    
 
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
@@ -159,9 +172,7 @@ def map_multiple_vector_data(aFiletype_in,
     if sColormap_in is not None:
         sColormap = sColormap_in
     else:
-        sColormap =  'rainbow'
-
-   
+        sColormap =  'rainbow'   
     
     if iFont_size_in is not None:
         iFont_size = iFont_size_in
@@ -184,6 +195,7 @@ def map_multiple_vector_data(aFiletype_in,
         sFont = "Times New Roman"
 
     plt.rcParams["font.family"] = sFont
+    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     cmap = cm.get_cmap(sColormap)
     fig = plt.figure( dpi = iDPI  )
@@ -192,9 +204,7 @@ def map_multiple_vector_data(aFiletype_in,
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
-
     #we require that the first polygon file defines the extent
-
     pLayer = pDataset.GetLayer(0)
     pSrs = osr.SpatialReference()
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -202,7 +212,6 @@ def map_multiple_vector_data(aFiletype_in,
     dLat_max = -90
     dLon_min = 180
     dLon_max = -180
-
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
@@ -258,8 +267,8 @@ def map_multiple_vector_data(aFiletype_in,
         osm_tiles = OSM()
         #Add the OSM image to the map
         ax.add_image(osm_tiles, iFlag_openstreetmap_level)   
-        sLicense_info = "© OpenStreetMap contributors, CC-BY-SA"
-        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=10, 
+        sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
+        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6, 
                 color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
 
@@ -275,116 +284,128 @@ def map_multiple_vector_data(aFiletype_in,
         sVariable = aVariable_in[i]
         pDataset = ogr.Open(sFilename, gdal.GA_ReadOnly)
         pLayer = pDataset.GetLayer(0)
-        #select field value using sqlite        
-        pKwargs = 'SELECT ' + sVariable + ' FROM ' + pLayer.GetName() 
-        if iFlag_thickness ==1 : 
-            pLayer_temp = pDataset.ExecuteSQL(pKwargs)
-        else:
-            if iFlag_color  == 1:
+        if len(sVariable) > 0:
+            #select field value using sqlite        
+            pKwargs = 'SELECT ' + sVariable + ' FROM ' + pLayer.GetName() 
+            if iFlag_thickness ==1 : 
                 pLayer_temp = pDataset.ExecuteSQL(pKwargs)
-        values = []
-        # Iterate over the layer
-        for feature in pLayer_temp:
-            # Get the desired field value
-            value = feature.GetField(sVariable)
-            # Append the value to the list
-            values.append(value)
-        #conver aValue to numpy array
-        aValue = np.array(values)
-        aValue_all.append(aValue)        
+            else:
+                if iFlag_color  == 1:
+                    pLayer_temp = pDataset.ExecuteSQL(pKwargs)
+            values = []
+            # Iterate over the layer
+            for feature in pLayer_temp:
+                # Get the desired field value
+                value = feature.GetField(sVariable)
+                # Append the value to the list
+                values.append(value)
+            #conver aValue to numpy array
+            aValue = np.array(values)
+            aValue_all.append(aValue)      
+        else:
+            aValue_all.append(aValue)  
 
     iThickness_max = 2.5
     iThickness_min = 0.3
+
+    #set min and max
+    for i in range(nFile):
+        iFlag_data_min = aFlag_data_min[i]
+        iFlag_data_max = aFlag_data_max[i]
+        dMissing_value = aMissing_value[i]
+        aValue = np.array(aValue_all[i])
+        aValue = aValue[aValue != dMissing_value]
+        if len(aValue) == 0:
+            aData_min[i] = 0
+            aData_max[i] = 0
+        else:
+            if iFlag_data_min != 1:                          
+                aData_min[i] = np.min(aValue)    
+            if iFlag_data_max != 1:             
+                aData_max[i] = np.max(aValue)        
 
     for i in range(nFile):
         sFilename = aFilename_in[i]
         iFlag_thickness = aFlag_thickness[i]
         iFlag_color = aFlag_color[i]
+        iFlag_discrete = aFlag_discrete[i]
         iFlag_fill = aFlag_fill[i]
+        dValue_min = aData_min[i]
+        dValue_max = aData_max[i]
+        dMissing_value = aMissing_value[i]
+        sVariable = aVariable_in[i]
+        aValue = np.array(aValue_all[i]) 
         pDataset = ogr.Open(sFilename, gdal.GA_ReadOnly)
         pLayer = pDataset.GetLayer(0)
-        nColor = pLayer.GetFeatureCount()
-        aColor = cm.rainbow(np.linspace(0, 1, nColor))
+        nValue = pLayer.GetFeatureCount()
+        if iFlag_discrete == 1: #discrete
+            aValue = np.array(aValue, dtype=int)
+            #reorder it 
+            aValue = np.unique(aValue)
+            aValue = np.sort(aValue)
+            nValue_discrete = len(aValue)
+            aIndex = np.linspace(0,1,nValue_discrete)
+            prng = np.random.RandomState(1234567890)
+            prng.shuffle(aIndex)          
+            colors = plt.cm.get_cmap(sColormap)(aIndex)
+            aColorMap = ListedColormap(colors)
+            pass
+        else: #continuous
+            aColorMap = plt.cm.get_cmap(sColormap)(np.linspace(0, 1, nValue))
         lID = 0
         aPoint=list()
         aPolyline=list()
         aThickness=list()
         aPolygon = list()
         aColor = list() 
-        #use gdal filter to select feature
         pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
+        
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
             sGeometry_type = pGeometry_in.GetGeometryName()
-
             if iFlag_thickness ==1 :
-                sVariable = aVariable_in[i]
-                aValue = np.array(aValue_all[i])
-                if iFlag_data_min == 1  and iFlag_data_max ==1: #both are provided
-                    aValue = np.clip(aValue, dData_min, dData_max)
-                    dValue_max = dData_max
-                    dValue_min = dData_min
-                else:
-                    aValue = aValue[aValue != dMissing_value]
-                    dValue_max = np.max(aValue)
-                    dValue_min = np.min(aValue)
-                    pass
                 dValue = float(pFeature.GetField(sVariable))
+                if dValue < dValue_min or dValue > dValue_max:
+                    continue
 
-                if dValue != dMissing_value:
-                    if dValue > dValue_max:
-                        dValue = dValue_max
-
-                    if dValue < dValue_min:
-                        dValue = dValue_min
+                dValue = np.clip(dValue, dValue_min, dValue_max)
 
                 iThickness = remap( dValue, dValue_min, dValue_max, iThickness_min, iThickness_max )
             else:
                 iThickness = 0.25
 
-            if iFlag_color ==1:
-                if nColor < 10:
-                    sColor = aColor[lID]
-                else:
-                    sVariable = aVariable_in[i]
-                    aValue = np.array(aValue_all[i])
-                    if iFlag_data_min == 1  and iFlag_data_max ==1: #both are provided
-                        aValue = np.clip(aValue, dData_min, dData_max)
-                        dValue_max = dData_max
-                        dValue_min = dData_min
-                    else:
-                        aValue = aValue[aValue != dMissing_value]
-                        dValue_max = np.max(aValue)
-                        dValue_min = np.min(aValue)
-                        pass
-                    dValue = float(pFeature.GetField(sVariable))
-
-                    if dValue != dMissing_value:
-                        if dValue > dValue_max:
-                            dValue = dValue_max
-
-                        if dValue < dValue_min:
-                            dValue = dValue_min
-
+            if iFlag_color == 1:          
+                dValue = float(pFeature.GetField(sVariable))
+                if iFlag_discrete ==1:          
+                    if dValue < dValue_min or dValue > dValue_max:
+                        continue           
+                    iValue = int(dValue)                       
+                    iColor_index = np.where(aValue == iValue)[0][0] 
+                    sColor = aColorMap(iColor_index)
+                else:    
+                    if dValue < dValue_min or dValue > dValue_max:
+                        continue
+                    
                     iColor_index = int( (dValue - dValue_min) / (dValue_max - dValue_min) * 255 )
-                    sColor = cmap(iColor_index)
+                    sColor = aColorMap[iColor_index]
             else:
                 sColor = 'black'
                 #pick color from colormap
             if sGeometry_type =='POINT':               
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 aCoords_gcs = aCoords_gcs[:,0:2]
-                ax.plot(aCoords_gcs[0], aCoords_gcs[1], 'o', color= sColor, markersize=2, transform=ccrs.Geodetic())                
+                #ax.plot(aCoords_gcs[0], aCoords_gcs[1], 'o', color= sColor, markersize=2, transform=ccrs.Geodetic())   
+                aColor.append(sColor)    
+                aPoint.append(aCoords_gcs)         
             else:
                 if sGeometry_type =='LINESTRING':                    
                     aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                     aCoords_gcs = aCoords_gcs[:,0:2]
                     nvertex = len(aCoords_gcs)
                     codes = np.full(nvertex, mpath.Path.LINETO, dtype=int )
-                    codes[0] = mpath.Path.MOVETO
-                    path = mpath.Path(aCoords_gcs, codes)
-                    x, y = zip(*path.vertices)
-                    #line, = ax.plot(x, y, color= sColor, linewidth=iThickness, transform=ccrs.Geodetic())
+                    codes[0] = mpl.path.Path.MOVETO
+                    path = mpl.path.Path(aCoords_gcs, codes)
+                    x, y = zip(*path.vertices)                    
                     aThickness.append(iThickness)
                     aColor.append(sColor)
                     aPolyline.append(list(zip(x, y)))
@@ -406,29 +427,33 @@ def map_multiple_vector_data(aFiletype_in,
                                 else:
                                     aColor.append('none')
                                 aPolygon.append(aCoords_gcs[:, 0:2])  
-                        pass
-
+                
             
             lID = lID + 1
         
-        aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
-        pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
+        if len(aPoint) > 0:
+            paths = [Path([point]) for point in aPoint]
+            pPC = PathCollection(paths, alpha=0.8, edgecolor=aColor, 
+                                 facecolor=aColor, linewidths=aThickness, transform=cpl.crs.Geodetic())
+            ax.add_collection(pPC)     
+        
+        if len(aPolyline) > 0:
+            #polyline
+            pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor=aColor,
+                         facecolor='none', linewidths=aThickness, transform=cpl.crs.Geodetic())
+            ax.add_collection(pLC)
+
+        if len(aPolygon) > 0:
+            aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+            pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
                                       facecolor=aColor, linewidths=0.25, 
                                       transform=cpl.crs.Geodetic())
-        #polyline
-        pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor='none',
-                         facecolor=aColor, linewidths=aThickness, transform=cpl.crs.Geodetic())
-        
-        ax.add_collection(pLC)
-        ax.add_collection(pPC)
+            ax.add_collection(pPC)
 
     
     #reset extent
     ax.set_extent( aExtent )     
-
-    ax.coastlines(color='black', linewidth=0.5)
-    if iFlag_title==1:
-        ax.set_title(sTitle)
+    ax.coastlines(color='black', linewidth=0.5)    
     iFlag_label = 0
     if iFlag_label == 1:
         sText = 'Manaus'
@@ -450,11 +475,12 @@ def map_multiple_vector_data(aFiletype_in,
                     transform=ax.transAxes,
                     color='black', fontsize=iFont_size)
 
-            pass
-
 
     if iFlag_colorbar ==1:
-        ax_cb= fig.add_axes([0.75, 0.15, 0.02, 0.6])
+        #ax_cb= fig.add_axes([0.75, 0.15, 0.02, 0.6])
+        fig.canvas.draw()        
+        ax_pos = ax.get_position() # get the original position      
+        ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])   
         if iFlag_scientific_notation_colorbar==1:
             formatter = OOMFormatter(fformat= "%1.1e")
             cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
@@ -477,14 +503,10 @@ def map_multiple_vector_data(aFiletype_in,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
-
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}  
-
     if iFlag_title==1:
         ax.set_title( sTitle )
-    else:
-        pass
 
     pDataset = pLayer = pFeature  = None
 

@@ -261,8 +261,8 @@ def map_vector_polyline_data(iFiletype_in,
 
             lID = lID + 1
 
-    pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor='none',
-                         facecolor=aColor, linewidths=aThickness, transform=cpl.crs.Geodetic())
+    pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor=aColor,
+                         facecolor='none', linewidths=aThickness, transform=cpl.crs.Geodetic())
     ax.add_collection(pLC)
     
     ax.set_extent(aExtent)

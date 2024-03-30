@@ -21,7 +21,7 @@ def map_vector_polygon_data(iFiletype_in,
                             iFlag_color_in = None,
                             iFlag_colorbar_in=None,
                             iFont_size_in=None,
-                            iFlag_integer_in=None,
+                            iFlag_discrete_in=None,
                             sColormap_in=None,
                             sTitle_in=None,
                             iDPI_in=None,
@@ -121,10 +121,10 @@ def map_vector_polygon_data(iFiletype_in,
         iFlag_data_max = 0
         pass
 
-    if iFlag_integer_in is not None:
-        iFlag_integer = iFlag_integer_in
+    if iFlag_discrete_in is not None:
+        iFlag_discrete = iFlag_discrete_in
     else:
-        iFlag_integer = 0
+        iFlag_discrete = 0
 
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
@@ -206,7 +206,7 @@ def map_vector_polygon_data(iFiletype_in,
 
 
     aValue = np.array(aValue)
-    if iFlag_integer ==1:  
+    if iFlag_discrete ==1:  
         #convert to integer
         aValue = np.array(aValue, dtype=int)
         #reorder it 
@@ -250,7 +250,7 @@ def map_vector_polygon_data(iFiletype_in,
     aPolygon = list()
     aColor = list() 
 
-    if iFlag_integer ==1:                
+    if iFlag_discrete ==1:                
         aIndex = np.linspace(0,1,nValue)
         prng = np.random.RandomState(1234567890)
         prng.shuffle(aIndex)
@@ -258,9 +258,7 @@ def map_vector_polygon_data(iFiletype_in,
         colors = plt.cm.get_cmap(sColormap)(aIndex)
         cmap = ListedColormap(colors)
     else:
-        cmap = mpl.cm.get_cmap(sColormap)
-
-    
+        cmap = mpl.cm.get_cmap(sColormap)    
 
     if aExtent_in is None:
         marginx = (dLon_max - dLon_min) / 20
@@ -286,7 +284,7 @@ def map_vector_polygon_data(iFiletype_in,
                 dValue = dValue_min
                 continue
 
-            if iFlag_integer ==1:     
+            if iFlag_discrete ==1:     
                 #use unique value method to assign color
                 iValue = int(dValue)
                 #find its index in the aValue array
@@ -309,12 +307,7 @@ def map_vector_polygon_data(iFiletype_in,
                     aColor.append(cmap(iColor_index))
                     aPolygon.append(aCoords_gcs[:, 0:2]) 
                          
-
-        else:
-            pass
-    
-
-   
+       
     aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
     pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None, 
                                       facecolor=aColor, linewidths=0.25, 
@@ -335,7 +328,6 @@ def map_vector_polygon_data(iFiletype_in,
                     transform=ax.transAxes,
                     color='black', fontsize=iFont_size-2)
 
-            pass
 
     if iFlag_colorbar == 1:
         fig.canvas.draw()
@@ -351,7 +343,7 @@ def map_vector_polygon_data(iFiletype_in,
                                                dValue_min, dValue_max),  # vmax and vmin
                                            extend=sExtend, format=formatter)
         else:
-            if iFlag_integer ==1:            
+            if iFlag_discrete ==1:            
                 formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0f}".format(x))
                 cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
                                            cmap=cmap,
