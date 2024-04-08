@@ -16,6 +16,8 @@ def gdal_to_numpy_datatype(gdal_dtype):
         return np.float32
     elif gdal_dtype == gdalconst.GDT_Float64:
         return np.float64
+    elif gdal_dtype == gdalconst.GDT_Int8:
+        return np.int8
     else:
         raise ValueError(f"GDAL data type {gdal_dtype} not recognized")
 
