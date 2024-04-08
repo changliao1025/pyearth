@@ -128,8 +128,7 @@ def resample_raster(sFilename_in, sFilename_out, dResolution_x, dResolution_y,
                                         dstSRS=pSpatialRef_target , format = 'MEM',
                                         resampleAlg=sResampleAlg ) #this resample algorithm may be provided as an input argument
 
-    gdal.Warp(sFilename_out, pDataset_in, options=pWrapOption)
-    pDataset_clip_warped = gdal.Warp('', pDataset_in, options=pWrapOption)
+    pDataset_clip_warped = gdal.Warp('', pDataset_in, options=pWrapOption)#gdal.Warp(sFilename_out, pDataset_in, options=pWrapOption)
 
     #convert the warped dataset to an array
     aData_clip = pDataset_clip_warped.ReadAsArray()
