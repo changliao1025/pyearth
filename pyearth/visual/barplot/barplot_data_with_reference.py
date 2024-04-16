@@ -150,7 +150,7 @@ def barplot_data_with_reference(aData_in,
 
     total_width = 0.6
 
-    leg_artists = []
+    aLegend_artist = []
     aLabel = []
     if ndim == 2:
         width = total_width / (nData)
@@ -180,7 +180,7 @@ def barplot_data_with_reference(aData_in,
                                 color=aColor[i+nData], linestyle='dashed',
                                 marker=aMarker_in[i],
                                 label=aLabel_legend_reference_in[i])
-                leg_artists.append(line)
+                aLegend_artist.append(line)
                 aLabel.append(aLabel_legend_reference_in[i])
 
         for i in range(0, nCat, 1):
@@ -192,7 +192,7 @@ def barplot_data_with_reference(aData_in,
                     if j == 0 and i == 0:
                         rects, = ax.bar(x1, data1, width, label=aLabel_y_in[k], linestyle=aLinestyle_in[k],
                                         color=aColor[k], hatch=aHatch[j], edgecolor="k")
-                        leg_artists.append(rects)
+                        aLegend_artist.append(rects)
                         aLabel.append(aLabel_y_in[k])
 
                     else:
@@ -230,10 +230,10 @@ def barplot_data_with_reference(aData_in,
             # handles.append(
             p = mpl.patches.Rectangle(
                 (0, 0), 2, 2, hatch=aHatch[i], facecolor='w', label=aLabel_z_in[i])  # )
-            leg_artists.append(p)
+            aLegend_artist.append(p)
             aLabel.append(aLabel_z_in[i])
 
-    ax.legend(leg_artists, aLabel,      bbox_to_anchor=aLocation_legend,
+    ax.legend(aLegend_artist, aLabel,      bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend,
               fontsize=14,
               ncol=ncolumn)
