@@ -316,7 +316,7 @@ def boxplot_data_with_reference(aData_in,
         if (iFlag_format_y == 1):
             ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
         else:
-            ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+            ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.1E"))
     else:
         ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
