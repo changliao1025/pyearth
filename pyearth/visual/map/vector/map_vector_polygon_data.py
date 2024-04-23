@@ -9,6 +9,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 import cartopy as cpl
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from pyearth.visual.map.zebra_frame import zebra_frame
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
 pProjection = cpl.crs.PlateCarree()  # for latlon data only
@@ -20,6 +21,7 @@ def map_vector_polygon_data(iFiletype_in,
                             iFlag_scientific_notation_colorbar_in=None,
                             iFlag_color_in = None,
                             iFlag_colorbar_in=None,
+                            iFlag_zebra_in=None,
                             iFont_size_in=None,
                             iFlag_discrete_in=None,
                             sColormap_in=None,
@@ -130,6 +132,11 @@ def map_vector_polygon_data(iFiletype_in,
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
     else:
         iFlag_scientific_notation_colorbar = 0
+    
+    if iFlag_zebra_in is not None:
+        iFlag_zebra = iFlag_zebra_in
+    else:
+        iFlag_zebra = 0
 
     if sColormap_in is not None:
         sColormap = sColormap_in
@@ -268,8 +275,10 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         aExtent = aExtent_in
 
-    minx, miny, maxx, maxy = aExtent 
-    pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
+    print(aExtent)
+
+    minx,  maxx, miny, maxy = aExtent 
+    pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
@@ -279,10 +288,10 @@ def map_vector_polygon_data(iFiletype_in,
         if dValue != dMissing_value:
             if dValue > dValue_max:
                 dValue = dValue_max
-                continue
+                #continue
             if dValue < dValue_min:
                 dValue = dValue_min
-                continue
+                #continue
 
             if iFlag_discrete ==1:     
                 #use unique value method to assign color
@@ -314,7 +323,11 @@ def map_vector_polygon_data(iFiletype_in,
                                       transform=cpl.crs.Geodetic())
     ax.add_collection(pPC)
 
-    ax.set_extent(aExtent)
+    ax.set_extent(aExtent, crs=cpl.crs.PlateCarree())
+
+    ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+    ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
+    ax.set_axis_off()
     ax.coastlines(color='black', linewidth=1)
     ax.set_title(sTitle)
     if aLegend_in is not None:
@@ -328,6 +341,8 @@ def map_vector_polygon_data(iFiletype_in,
                     transform=ax.transAxes,
                     color='black', fontsize=iFont_size-2)
 
+
+    
 
     if iFlag_colorbar == 1:
         fig.canvas.draw()
@@ -359,19 +374,24 @@ def map_vector_polygon_data(iFiletype_in,
                                            extend=sExtend, format=formatter)
 
         cb.ax.get_yaxis().set_ticks_position('right')
-        cb.ax.get_yaxis().labelpad = 5
+        cb.ax.get_yaxis().labelpad = 3
         cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
         cb.ax.get_yaxis().set_label_position('left')
         cb.ax.tick_params(labelsize=iFont_size-2)
 
     gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
-                      linewidth=1, color='gray', alpha=0.5, linestyle='--')
+                      linewidth=1, color='gray', alpha=0.5, linestyle='--',
+                      xlocs=np.arange(minx, maxx, (maxx-minx)/4), ylocs=np.arange(miny, maxy, (maxy-miny)/4))
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
 
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k',
                        'rotation': 90, 'weight': 'normal'}
+
+    if iFlag_zebra ==1:
+        ax.zebra_frame(crs=cpl.crs.PlateCarree(), iFlag_outer_frame_in=1)
+
     sDirname = os.path.dirname(sFilename_output_in)
 
     pDataset = pLayer = pFeature = None
