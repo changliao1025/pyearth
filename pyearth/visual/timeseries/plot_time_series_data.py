@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
@@ -13,7 +12,7 @@ from pyearth.visual.formatter import log_formatter, MathTextSciFormatter
 
 def plot_time_series_data(aTime_all,
                           aData_all,
-                          sFilename_out,
+                          sFilename_out=None,
                           iDPI_in=None,
                           iFlag_log_in=None,
                           iFlag_scientific_notation_in=None,
@@ -186,15 +185,20 @@ def plot_time_series_data(aTime_all,
 
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
+        iFlag_force_limit_y1 = 1
     else:
+        iFlag_force_limit_y1 = 0
         dMax_y = np.nanmax(aData_all[0])
         for i in range(1, nData):
             dummy = np.nanmax(aData_all[i])
             dMax_y = np.max([dMax_y, dummy])
+        
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
+        iFlag_force_limit_y0 = 1
     else:
+        iFlag_force_limit_y0 = 0
         dMin_y = np.nanmin(aData_all[0])
         for i in range(1, nData):
             dummy = np.nanmin(aData_all[i])
@@ -202,13 +206,11 @@ def plot_time_series_data(aTime_all,
 
     if (dMax_y <= dMin_y):
         return
-    else:
-        iFlag_force_limit = 1
-        if iFlag_force_limit == 1:
-            pass
-        else:
+    else:        
+        if iFlag_force_limit_y0 != 1:            
             dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y)
-            dMax_y = dMax_y + 0.25 * (dMax_y-dMin_y)
+        if iFlag_force_limit_y1 != 1:
+            dMax_y = dMax_y + 0.10 * (dMax_y-dMin_y)
 
     if dSpace_y_in is not None:
         iFlag_space_y = 1
@@ -291,7 +293,7 @@ def plot_time_series_data(aTime_all,
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
     else:
-        sLocation_legend = None  # remove the setting so it becomes automatical
+        sLocation_legend = 'best'  # remove the setting so it becomes automatical
 
     if aLocation_legend_in is not None:
         aLocation_legend = aLocation_legend_in
@@ -307,6 +309,7 @@ def plot_time_series_data(aTime_all,
     sMonth_format = mpl.dates.DateFormatter('%Y-%m')
     # start loop for each data
 
+    
     for iax in range(len(ax_all)):
         ax = ax_all[iax]
         ax.tick_params(direction='in', top=True, right=True)
@@ -428,7 +431,7 @@ def plot_time_series_data(aTime_all,
 
             ax.set_xlabel('Year', fontsize=12)
             ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
-                      loc=sLocation_legend, fontsize=10, ncol=ncolumn)
+                      loc=sLocation_legend, fontsize=10, ncol=ncolumn )
             pass
         else:
             if iFlag_log == 1:
@@ -490,6 +493,11 @@ def plot_time_series_data(aTime_all,
 
         # common setting
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
-    plt.close('all')
-    plt.clf()
+    
+    if sFilename_out is not None:
+        plt.savefig(sFilename_out, bbox_inches='tight')
+        plt.close('all')
+        plt.clf()
+    else:
+        plt.show()
+        return

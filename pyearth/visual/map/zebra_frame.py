@@ -3,16 +3,14 @@ from matplotlib.patheffects import Stroke, Normal
 import numpy as np
 import cartopy.mpl.geoaxes
 
-def zebra_frame(self, lw=3, crs=None, zorder=None, iFlag_outer_frame_in = None):
-    
+def zebra_frame(self, lw=3, crs=None, zorder=None, iFlag_outer_frame_in = None):    
     # Alternate black and white line segments
     bws = itertools.cycle(["k", "w"])
-
     self.spines["geo"].set_visible(False)
-
-    left, right, bottom, top = self.get_extent()
+    
     if iFlag_outer_frame_in is not None:
         #get the map spatial reference        
+        left, right, bottom, top = self.get_extent()
         crs_map = self.projection
         xticks = np.arange(left, right+(right-left)/9, (right-left)/8)
         yticks = np.arange(bottom, top+(top-bottom)/9, (top-bottom)/8)
