@@ -24,6 +24,7 @@ def map_vector_polygon_data(iFiletype_in,
                             iFlag_color_in = None,
                             iFlag_colorbar_in=None,
                             iFlag_zebra_in=None,
+                            iFlag_fill_in=None,
                             iFont_size_in=None,
                             iFlag_discrete_in=None,
                             sColormap_in=None,
@@ -105,10 +106,20 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         iFont_size = 12
 
+    if iFlag_color_in is not None:
+        iFlag_color = iFlag_color_in
+    else:
+        iFlag_color = 0
+
     if iFlag_colorbar_in is not None:
         iFlag_colorbar = iFlag_colorbar_in
     else:
         iFlag_colorbar = 0
+
+    if iFlag_fill_in is not None:
+        iFlag_fill = iFlag_fill_in
+    else:
+        iFlag_fill = True
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
@@ -174,11 +185,6 @@ def map_vector_polygon_data(iFiletype_in,
     plt.rcParams["font.family"] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
-    if sVariable_in is not None:
-        sVariable = sVariable_in
-    else:
-        sVariable = 'id'
-
     fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
@@ -190,11 +196,35 @@ def map_vector_polygon_data(iFiletype_in,
     dLon_min = 180
     dLon_max = -180
     aValue = list()
+
+    #get the field in the feature
+    #pFeature = pLayer.GetNextFeature()
+
+    if iFlag_color == 1:
+        pLayerdefn = pLayer.GetLayerDefn()
+        nField = pLayerdefn.GetFieldCount()
+        if nField == 0:
+            iFlag_color = 0
+            iFlag_field = 0
+            iFlag_discrete = 0
+        else:
+            iFlag_field = 1
+            sField0 = pLayerdefn.GetFieldDefn(0).name
+
+        if sVariable_in is not None:
+            sVariable = sVariable_in
+        else:
+            sVariable = sField0
+    else:
+        iFlag_field = 0
+        iFlag_discrete = 0
+
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
-        dValue = float(pFeature.GetField(sVariable))
         sGeometry_type = pGeometry_in.GetGeometryName()
-        aValue.append(dValue)
+        if iFlag_field == 1:
+            dValue = float(pFeature.GetField(sVariable))
+            aValue.append(dValue)
         if sGeometry_type == 'MULTIPOLYGON':
             for i in range(pGeometry_in.GetGeometryCount()):
                 pPolygon = pGeometry_in.GetGeometryRef(i)
@@ -211,39 +241,39 @@ def map_vector_polygon_data(iFiletype_in,
                 dLat_max = np.max([dLat_max, np.max(aCoords_gcs[:, 1])])
                 dLat_min = np.min([dLat_min, np.min(aCoords_gcs[:, 1])])
 
+    if iFlag_field == 1:
+        aValue = np.array(aValue)
+        if iFlag_discrete ==1:
+            #convert to integer
+            aValue = np.array(aValue, dtype=int)
+            #reorder it
+            aValue = np.unique(aValue)
+            aValue = np.sort(aValue)
+            nValue = len(aValue) #get unique values from the aValue
 
-    aValue = np.array(aValue)
-    if iFlag_discrete ==1:
-        #convert to integer
-        aValue = np.array(aValue, dtype=int)
-        #reorder it
-        aValue = np.unique(aValue)
-        aValue = np.sort(aValue)
-        nValue = len(aValue) #get unique values from the aValue
+        if iFlag_data_min == 1:  # min is provided
+            dValue_min = dData_min  # np.min(aValue)
+        else:
+            aValue = aValue[aValue != dMissing_value]
+            dValue_min = np.min(aValue)
 
-    if iFlag_data_min == 1:  # min is provided
-        dValue_min = dData_min  # np.min(aValue)
-    else:
-        aValue = aValue[aValue != dMissing_value]
-        dValue_min = np.min(aValue)
+        if iFlag_data_max == 1:  # max is provided
+            dValue_max = dData_max  # np.max(aValue)
+        else:
+            aValue = aValue[aValue != dMissing_value]
+            dValue_max = np.max(aValue)
 
-    if iFlag_data_max == 1:  # max is provided
-        dValue_max = dData_max  # np.max(aValue)
-    else:
-        aValue = aValue[aValue != dMissing_value]
-        dValue_max = np.max(aValue)
+        aValue = np.clip(aValue, a_min=dValue_min, a_max=dValue_max)
 
-    aValue = np.clip(aValue, a_min=dValue_min, a_max=dValue_max)
+        print(dValue_min, dValue_max)
 
-    print(dValue_min, dValue_max)
-
-    # print(sVariable,dValue_min, dValue_max )
-    if dValue_max == dValue_min:
-        iFlag_same_value = 1
-        return
-    else:
-        iFlag_same_value = 0
-        pass
+        # print(sVariable,dValue_min, dValue_max )
+        if dValue_max == dValue_min:
+            iFlag_same_value = 1
+            return
+        else:
+            iFlag_same_value = 0
+            pass
 
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
@@ -262,7 +292,7 @@ def map_vector_polygon_data(iFiletype_in,
     ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map)
     #ax.set_global()
     #use an advanced method for plotting
-    if iFlag_discrete ==1:
+    if iFlag_discrete == 1:
         aIndex = np.linspace(0,1,nValue)
         prng = np.random.RandomState(1234567890)
         prng.shuffle(aIndex)
@@ -284,55 +314,57 @@ def map_vector_polygon_data(iFiletype_in,
 
     minx,  maxx, miny, maxy = aExtent
     #pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
-    #ax.set_extent(aExtent, crs=pSRS_wgs84)
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
     ax.coastlines(linewidth=0.5, color='k', resolution='10m')
     if iFlag_debug ==1:
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
             sGeometry_type = pGeometry_in.GetGeometryName()
             # get attribute
-            dValue = float(pFeature.GetField(sVariable))
-            if dValue != dMissing_value:
-                if dValue > dValue_max:
-                    dValue = dValue_max
-                    #continue
-                if dValue < dValue_min:
-                    dValue = dValue_min
-                    #continue
-                if iFlag_discrete ==1:
-                    #use unique value method to assign color
-                    iValue = int(dValue)
-                    #find its index in the aValue array
-                    iColor_index = np.where(aValue == iValue)[0][0]
-                    color = pCmap(iColor_index)
-                else:
-                    iColor_index = int((dValue - dValue_min) /
-                                   (dValue_max - dValue_min) * 255)
-                    color = pCmap(iColor_index)
+            if iFlag_field ==1:
+                dValue = float(pFeature.GetField(sVariable))
+                if dValue != dMissing_value:
+                    if dValue > dValue_max:
+                        dValue = dValue_max
+                        #continue
+                    if dValue < dValue_min:
+                        dValue = dValue_min
+                        #continue
+                    if iFlag_discrete ==1:
+                        #use unique value method to assign color
+                        iValue = int(dValue)
+                        #find its index in the aValue array
+                        iColor_index = np.where(aValue == iValue)[0][0]
+                        color = pCmap(iColor_index)
+                    else:
+                        iColor_index = int((dValue - dValue_min) /
+                                       (dValue_max - dValue_min) * 255)
+                        color = pCmap(iColor_index)
+            else:
+                color = 'blue'
 
-                # pick color from colormap
-                if sGeometry_type == 'MULTIPOLYGON':
-                    for i in range(pGeometry_in.GetGeometryCount()):
-                        pPolygon = pGeometry_in.GetGeometryRef(i)
-                        aCoords_gcs = get_geometry_coordinates(pPolygon)
-                        aCoords_gcs = aCoords_gcs[:,0:2]
-                        polygon = mpatches.Polygon(aCoords_gcs,  closed=True, fill=True,
-                            alpha=0.8, edgecolor=None, facecolor=color,
-                            transform= pProjection_data )
-                        ax.add_patch(polygon)
-                        #ax.plot(aCoords_gcs[:, 0], aCoords_gcs[:, 1], color=color,
-                        #        transform=pSRS_wgs84)
-                else:
-                    if sGeometry_type == 'POLYGON':
-                        aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                        aCoords_gcs = aCoords_gcs[:,0:2]
-                        polygon = mpatches.Polygon(aCoords_gcs, closed=True, fill=True,
-                            alpha=0.8, edgecolor=None, facecolor=color,
-                            transform= pProjection_data )
-                        ax.add_patch(polygon)
-                        #draw the polygon directly
-                        #ax.plot(aCoords_gcs[:, 0], aCoords_gcs[:, 1], color=color,
-                        #        transform=pSRS_wgs84)
+            if sGeometry_type == 'MULTIPOLYGON':
+                for i in range(pGeometry_in.GetGeometryCount()):
+                    pPolygon = pGeometry_in.GetGeometryRef(i)
+                    aCoords_gcs = get_geometry_coordinates(pPolygon)
+                    aCoords_gcs = aCoords_gcs[:,0:2]
+                    polygon = mpatches.Polygon(aCoords_gcs,  closed=True, fill=iFlag_fill,
+                        alpha=0.8, edgecolor=None, facecolor=color,
+                        transform= pProjection_data )
+                    ax.add_patch(polygon)
+                    #ax.plot(aCoords_gcs[:, 0], aCoords_gcs[:, 1], color=color,
+                    #        transform=pSRS_wgs84)
+            else:
+                if sGeometry_type == 'POLYGON':
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    aCoords_gcs = aCoords_gcs[:,0:2]
+                    polygon = mpatches.Polygon(aCoords_gcs, closed=True, fill=iFlag_fill,
+                        alpha=0.8, edgecolor=None, facecolor=color,
+                        transform= pProjection_data )
+                    ax.add_patch(polygon)
+                    #draw the polygon directly
+                    #ax.plot(aCoords_gcs[:, 0], aCoords_gcs[:, 1], color=color,
+                    #        transform=pSRS_wgs84)
 
     else:
         aPolygon = list()
@@ -341,52 +373,79 @@ def map_vector_polygon_data(iFiletype_in,
             pGeometry_in = pFeature.GetGeometryRef()
             sGeometry_type = pGeometry_in.GetGeometryName()
             # get attribute
-            dValue = float(pFeature.GetField(sVariable))
-            if dValue != dMissing_value:
-                if dValue > dValue_max:
-                    dValue = dValue_max
-                    #continue
-                if dValue < dValue_min:
-                    dValue = dValue_min
-                    #continue
-                if iFlag_discrete ==1:
-                    #use unique value method to assign color
-                    iValue = int(dValue)
-                    #find its index in the aValue array
-                    iColor_index = np.where(aValue == iValue)[0][0]
-                else:
-                    iColor_index = int((dValue - dValue_min) /
-                                   (dValue_max - dValue_min) * 255)
+            if iFlag_field == 1:
+                dValue = float(pFeature.GetField(sVariable))
+                if dValue != dMissing_value:
+                    if dValue > dValue_max:
+                        dValue = dValue_max
+                        #continue
+                    if dValue < dValue_min:
+                        dValue = dValue_min
+                        #continue
+                    if iFlag_discrete ==1:
+                        #use unique value method to assign color
+                        iValue = int(dValue)
+                        #find its index in the aValue array
+                        iColor_index = np.where(aValue == iValue)[0][0]
+                    else:
+                        iColor_index = int((dValue - dValue_min) /
+                                       (dValue_max - dValue_min) * 255)
+            else:
+                iColor_index = 0
+                pass
 
-                #color = pCmap(iColor_index)
-                # pick color from colormap
-                if sGeometry_type == 'MULTIPOLYGON':
-                    for i in range(pGeometry_in.GetGeometryCount()):
-                        pPolygon = pGeometry_in.GetGeometryRef(i)
-                        aCoords_gcs = get_geometry_coordinates(pPolygon)
-                        aCoords_gcs=aCoords_gcs[:,0:2]
-                        aColor_index.append(iColor_index)
-                        aPolygon.append(aCoords_gcs)
-                else:
-                    if sGeometry_type == 'POLYGON':
-                        aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                        aCoords_gcs=aCoords_gcs[:,0:2]
-                        aColor_index.append(iColor_index)
-                        aPolygon.append(aCoords_gcs)
+            if sGeometry_type == 'MULTIPOLYGON':
+                for i in range(pGeometry_in.GetGeometryCount()):
+                    pPolygon = pGeometry_in.GetGeometryRef(i)
+                    aCoords_gcs = get_geometry_coordinates(pPolygon)
+                    aCoords_gcs=aCoords_gcs[:,0:2]
+                    aColor_index.append(iColor_index)
+                    aPolygon.append(aCoords_gcs)
+            else:
+                if sGeometry_type == 'POLYGON':
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    aCoords_gcs=aCoords_gcs[:,0:2]
+                    aColor_index.append(iColor_index)
+                    aPolygon.append(aCoords_gcs)
 
-        aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+
         aColor_index = np.array(aColor_index)
         #flatten the array as 1D
         aColor_index= aColor_index.flatten()
         aColor= pCmap(aColor_index)
-        pPC = PatchCollection(aPatch, alpha=0.8,
+        if iFlag_field == 1:
+            aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
+            if iFlag_fill == True:
+                pPC = PatchCollection(aPatch, alpha=0.8,
                                       edgecolor=None,
                                       facecolor=aColor,
                                       linewidths=0.25,
                                       transform=pProjection_data)
+            else:
+                pPC = PatchCollection(aPatch, alpha=0.8,
+                                      edgecolor=aColor,
+                                      facecolor='none',
+                                      linewidths=0.25,
+                                      transform=pProjection_data)
+
+        else:
+            sColor = 'blue'
+            aPatch = [Polygon(poly, closed=True, fill=iFlag_fill) for poly in aPolygon]
+            if iFlag_fill == True:
+                pPC = PatchCollection(aPatch, alpha=0.8,
+                                      edgecolor=None,
+                                      facecolor=sColor,
+                                      linewidths=0.25,
+                                      transform=pProjection_data)
+            else:
+                pPC = PatchCollection(aPatch, alpha=0.8,
+                                      edgecolor=sColor,
+                                      facecolor='none',
+                                      linewidths=0.25,
+                                      transform=pProjection_data)
         ax.add_collection(pPC)
 
-    ax.set_extent(aExtent, crs=ccrs.PlateCarree())
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
 
     ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
     ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
