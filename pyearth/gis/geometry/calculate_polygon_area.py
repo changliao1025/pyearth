@@ -3,15 +3,17 @@ import numpy as np
 from pyearth.system.define_global_variables import *
 
 from pyearth.gis.geometry.calculate_spherical_triangle_area import calculate_spherical_triangle_area
+from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
 
 
 def calculate_polygon_area(aLongitude_in,
                            aLatitude_in,
                            iFlag_algorithm=1,
                            iFlag_radian=None,
-                           dRadius_in=None):
+                           dRadius_in=None,
+                           dLine_threshold = 0.1):
     """
-    Computes area of spherical polygon, assuming spherical Earth. 
+    Computes area of spherical polygon, assuming spherical Earth.
     Returns result in ratio of the sphere's area if the radius is specified. Otherwise, in the units of provided radius.
     lats and lons are in degrees.
 
@@ -43,8 +45,23 @@ def calculate_polygon_area(aLongitude_in,
     else:
         aLongitude_radian_in = aLongitude_in
         aLatitude_radian_in = aLatitude_in
-
         pass
+
+    #check whether the polygon is close to line, narrow and thin:
+     # Calculate the lengths of the sides of the polygon
+    aLength = np.zeros(npoint-1)
+    for i in range(npoint-1):
+        dLength = calculate_distance_based_on_longitude_latitude(aLongitude_in[i], aLatitude_in[i], aLongitude_in[i+1], aLatitude_in[i+1])
+        aLength[i] = dLength
+        pass
+
+    dLength_max = np.max(aLength)
+    dlength_rest = np.sum(aLength) - dLength_max
+    # Check if the polygon is close to a line
+    if dLength_max / dlength_rest > (1 - dLine_threshold):
+        print( "The polygon is close to a line" )
+        area = 0.0
+        return area
 
     if iFlag_algorithm == 0:
         # Line integral based on Green's Theorem, assumes spherical Earth
@@ -124,6 +141,7 @@ def calculate_polygon_area(aLongitude_in,
             dArea_m = area * dRadius_in**2
         else:
             dArea_m = area * earth_radius**2
+
         return dArea_m
 
 

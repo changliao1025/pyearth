@@ -1,6 +1,6 @@
 import numpy as np
 def get_geometry_coordinates(geometry):
-    
+
     sGeometry_type = geometry.GetGeometryName()
     if sGeometry_type =='POINT':
         return get_point_coords(geometry)
@@ -8,6 +8,8 @@ def get_geometry_coordinates(geometry):
         return get_linestring_coords(geometry)
     elif sGeometry_type =='POLYGON':
         return get_polygon_exterior_coords(geometry)
+    elif sGeometry_type =='LINEARRING':
+        return get_linearring_coords(geometry)
     else:
         raise ValueError("Unsupported geometry type.")
 
@@ -29,3 +31,10 @@ def get_linestring_coords(linestring_geometry):
 def get_point_coords(point_geometry):
     point = point_geometry.GetPoint()
     return np.array([(point[0], point[1])])
+
+def get_linearring_coords(linearring_geometry):
+    coords = []
+    for i in range(linearring_geometry.GetPointCount()):
+        point = linearring_geometry.GetPoint(i)
+        coords.append((point[0], point[1]))
+    return np.array(coords)
