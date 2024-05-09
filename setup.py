@@ -10,15 +10,15 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.25"
+VERSION = "0.1.26"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
-REQUIRED = [    
-    "numpy", 
-    "gdal",    
+REQUIRED = [
+    "numpy",
+    "gdal",
     "matplotlib",
-    "cartopy", 
+    "cartopy",
 ]
 
 CLASSIFY = [
