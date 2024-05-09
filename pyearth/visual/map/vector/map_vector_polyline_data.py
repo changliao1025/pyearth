@@ -4,8 +4,10 @@ from osgeo import  osr, gdal, ogr
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap
 
 import cartopy as cpl
+import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
@@ -15,18 +17,22 @@ from pyearth.toolbox.math.stat.remap import remap
 
 def map_vector_polyline_data(iFiletype_in,
                              sFilename_in,
-                             sFilename_output_in,
+                             sFilename_output_in=None,
                              iFlag_thickness_in =None,
-                             sField_thickness_in=None,    
-                             iFlag_color_in= None,    
+                             iFlag_color_in= None,
+                             iFlag_colorbar_in=None,
+                             iFlag_zebra_in=None,
                              iFlag_scientific_notation_colorbar_in=None,
                              iFlag_label_in = None,
+                             iFlag_discrete_in=None,
+                             iDPI_in = None,
+                             iSize_x_in = None,
+                             iSize_y_in = None,
+                             iFont_size_in = None,
+                             sField_thickness_in=None,
+                             sField_color_in=None,
                              sColormap_in = None,
                              sTitle_in = None,
-                             iDPI_in = None,
-                             iSize_x_in = None, 
-                             iSize_y_in = None, 
-                             iFont_size_in = None,
                              dMissing_value_in=None,
                              dData_max_in = None,
                              dData_min_in = None,
@@ -35,7 +41,8 @@ def map_vector_polyline_data(iFiletype_in,
                              sUnit_in=None,
                              aLegend_in = None,
                              aExtent_in = None,
-                             pProjection_map_in = None):
+                             pProjection_map_in = None,
+                             pProjection_data_in = None):
     """
     Map a vector polyline data
 
@@ -60,14 +67,15 @@ def map_vector_polyline_data(iFiletype_in,
         pProjection_map_in (_type_, optional): _description_. Defaults to None.
     """
 
-
+    pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
+    pSRS_geodetic = ccrs.Geodetic()
 
     sFilename_out= sFilename_output_in
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
         iDPI = 300
-    
+
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
     else:
@@ -88,6 +96,11 @@ def map_vector_polyline_data(iFiletype_in,
     else:
         iFlag_scientific_notation_colorbar = 0
 
+    if iFlag_discrete_in is not None:
+        iFlag_discrete = iFlag_discrete_in
+    else:
+        iFlag_discrete = 0
+
     if iFlag_thickness_in is not None:
         iFlag_thickness = iFlag_thickness_in
     else:
@@ -102,6 +115,21 @@ def map_vector_polyline_data(iFiletype_in,
         iFlag_color = iFlag_color_in
     else:
         iFlag_color = 0
+
+    if iFlag_colorbar_in is not None:
+        iFlag_colorbar = iFlag_colorbar_in
+    else:
+        iFlag_colorbar = 0
+
+    if sField_color_in is not None:
+        sField_color = sField_color_in
+    else:
+        sField_color = 'id'
+
+    if iFlag_zebra_in is not None:
+        iFlag_zebra = iFlag_zebra_in
+    else:
+        iFlag_zebra = 0
 
 
     if iFiletype_in == 1: #geojson
@@ -135,16 +163,14 @@ def map_vector_polyline_data(iFiletype_in,
         sUnit = sUnit_in
     else:
         sUnit =  ''
-    
+
     if sFont_in is not None:
         sFont = sFont_in
-    else:    
+    else:
         sFont = "Times New Roman"
 
     plt.rcParams["font.family"] = sFont
-    
-    cmap = mpl.cm.get_cmap(sColormap)  
- 
+
     pSrs = osr.SpatialReference()
     pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
 
@@ -153,51 +179,77 @@ def map_vector_polyline_data(iFiletype_in,
     dLat_max = -90
     dLon_min = 180
     dLon_max = -180
+    aValue_color = list()
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
-        sGeometry_type = pGeometry_in.GetGeometryName()        
-        if sGeometry_type =='LINESTRING':            
-            aCoords_gcs =   get_geometry_coordinates(pGeometry_in)            
-            aCoords_gcs= np.array(aCoords_gcs)
-            aCoords_gcs = aCoords_gcs[:,0:2]
-
+        sGeometry_type = pGeometry_in.GetGeometryName()
+        if iFlag_color == 1:
+            dValue = float(pFeature.GetField(sField_color))
+            aValue_color.append(dValue)
+        if sGeometry_type =='LINESTRING':
+            aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
+            #aCoords_gcs = aCoords_gcs[:,0:2]
             dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
             dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
             dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )           
-           
-                    
+            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
-        pProjection_map = cpl.crs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),  central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
-   
+        pProjection_map = cpl.crs.Orthographic(central_longitude =  0.50*(dLon_max+dLon_min),
+                                                central_latitude = 0.50*(dLat_max+dLat_min), globe=None)
+
+    if pProjection_data_in is not None:
+        pProjection_data = pProjection_data_in
+    else:
+        pProjection_data = pSRS_wgs84
+
     fig = plt.figure( dpi=iDPI)
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
     ax = fig.add_axes([0.1, 0.15, 0.75, 0.8] , projection=pProjection_map ) #request.crs
     ax.set_global()
 
-    n_colors = pLayer.GetFeatureCount()
-    colours = mpl.cm.rainbow(np.linspace(0, 1, n_colors))
-    if iFlag_thickness ==1:
-        aField =list()
-        for pFeature in pLayer:
-            dField = pFeature.GetField(sField_thickness)
-            aField.append(dField)           
+    if iFlag_color == 1:
+        if iFlag_discrete ==1:
+            #convert to integer
+            aValue_color = np.array(aValue_color, dtype=int)
+            #reorder it
+            aValue_color = np.unique(aValue_color)
+            aValue_color = np.sort(aValue_color)
+            nValue_color = len(aValue_color) #get unique values from the aValue_color
+            dValue_color_min = np.min(aValue_color)
+            dValue_color_max = np.max(aValue_color)
 
-        aField = np.array(aField)
-        dField_max = np.max(aField)
-        dField_min = np.min(aField)
+            aIndex = np.linspace(0,1,nValue_color)
+            prng = np.random.RandomState(1234567890)
+            prng.shuffle(aIndex)
+            #print(aIndex)
+            colors = mpl.cm.get_cmap(sColormap)(aIndex)
+            pCmap = ListedColormap(colors)
+        else:
+            pass
+    else:
+        pCmap = mpl.cm.get_cmap(sColormap)
+
+
+    if iFlag_thickness ==1:
+        aValue_thickness =list()
+        for pFeature in pLayer:
+            dValue_thickness = pFeature.GetField(sField_thickness)
+            aValue_thickness.append(dValue_thickness)
+
+        aValue_thickness = np.array(aValue_thickness)
+        dValue_thickness_max = np.max(aValue_thickness)
+        dValue_thickness_min = np.min(aValue_thickness)
 
     iThickness_max = 2.5
     iThickness_min = 0.3
-
     #switch to collection in next development
     aPolyline = list()
     aColor = list()
     aThickness = list()
-
     if aExtent_in is None:
         marginx  = (dLon_max - dLon_min) / 20
         marginy  = (dLat_max - dLat_min) / 20
@@ -205,22 +257,22 @@ def map_vector_polyline_data(iFiletype_in,
     else:
         aExtent = aExtent_in
 
-    ax.set_extent(aExtent)
-
-    minx, miny, maxx, maxy = aExtent 
+    print(aExtent)
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    minx, miny, maxx, maxy = aExtent
     pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
         if iFlag_thickness ==1:
-            dField = pFeature.GetField(sField_thickness)
+            dValue_thickness = pFeature.GetField(sField_thickness)
+        if iFlag_color ==1:
+            dValue_color = pFeature.GetField(sField_color)
         if sGeometry_type =='LINESTRING':
-            aCoords_gcs = get_geometry_coordinates(pGeometry_in)                
-            aCoords_gcs = np.array(aCoords_gcs)
+            aCoords_gcs = get_geometry_coordinates(pGeometry_in)
             aCoords_gcs = aCoords_gcs[:,0:2]
-            nvertex = len(aCoords_gcs)        
-
+            nvertex = len(aCoords_gcs)
             if nvertex == 2 :
                 dLon_label = 0.5 * (aCoords_gcs[0][0] + aCoords_gcs[1][0] )
                 dLat_label = 0.5 * (aCoords_gcs[0][1] + aCoords_gcs[1][1] )
@@ -233,41 +285,57 @@ def map_vector_polyline_data(iFiletype_in,
             codes[0] = mpl.path.Path.MOVETO
             path = mpl.path.Path(aCoords_gcs, codes)
             x, y = zip(*path.vertices)
+
             if iFlag_thickness ==1:
-                iThickness = remap( dField, dField_min, dField_max, iThickness_min, iThickness_max )
+                iThickness = remap( dValue_thickness, dValue_thickness_min, dValue_thickness_max, iThickness_min, iThickness_max )
             else:
                 iThickness = 1.0
 
             aThickness.append(iThickness)
 
             if iFlag_color ==1:
-                color_index = (dField-dField_min ) /(dField_max - dField_min )            
-                rgba = cmap(color_index)
-            else:
-                rgba = 'blue'
-
-            if sColormap_in is not None:
-                #line, = ax.plot(x, y, color=rgba,linewidth=iThickness, transform=cpl.crs.Geodetic())
-                aColor.append(rgba)
-            else:
-                if n_colors < 10:
-                    #line, = ax.plot(x, y, color= colours[lID],linewidth=iThickness, transform=cpl.crs.Geodetic())
-                    aColor.append(colours[lID])
+                if iFlag_thickness ==1:
+                    color_index = (dValue_thickness-dValue_thickness_min ) /(dValue_thickness_max - dValue_thickness_min )
+                    color = pCmap(color_index)
                 else:
-                    #line, = ax.plot(x, y, color= 'black',linewidth=iThickness, transform=cpl.crs.Geodetic())
-                    aColor.append('black')
-            
-            aPolyline.append(list(zip(x, y)))
+                    iValue = int(dValue_color)
+                    #find its index in the aValue array
+                    iColor_index = np.where(aValue_color == iValue)[0][0]
+                    color = pCmap(iColor_index)
+            else:
+                color = 'blue'
 
+            aColor.append(color)
+            aPolyline.append(list(zip(x, y)))
             lID = lID + 1
 
     pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor=aColor,
-                         facecolor='none', linewidths=aThickness, transform=cpl.crs.Geodetic())
+                         facecolor='none', linewidths=aThickness, transform=pProjection_data)
     ax.add_collection(pLC)
-    
-    ax.set_extent(aExtent)
+
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
 
     ax.coastlines(color='black', linewidth=1)
+    if iFlag_colorbar == 1:
+        fig.canvas.draw()
+        # Section 2
+        ax_pos = ax.get_position() # get the original position
+        #use this ax to set the colorbar ax position
+        ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+        if iFlag_discrete ==1:
+            formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0d}".format(x))
+            cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                           cmap=pCmap,
+                                           norm=mpl.colors.Normalize(
+                                               dValue_color_min, dValue_color_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+
+
+        cb.ax.get_yaxis().set_ticks_position('right')
+        cb.ax.get_yaxis().labelpad = 3
+        cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+        cb.ax.get_yaxis().set_label_position('left')
+        cb.ax.tick_params(labelsize=iFont_size-2)
 
     gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--')
@@ -277,6 +345,9 @@ def map_vector_polyline_data(iFiletype_in,
     gl.ylocator = mpl.ticker.MaxNLocator(5)
     gl.xlabel_style = {'size': 8, 'color': 'k', 'rotation':0, 'ha':'right'}
     gl.ylabel_style = {'size': 8, 'color': 'k', 'rotation':90,'weight': 'normal'}
+
+    if iFlag_zebra ==1:
+        ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
@@ -300,13 +371,25 @@ def map_vector_polyline_data(iFiletype_in,
             pass
         ax.set_title(sTitle)
 
-    pDataset = pLayer = pFeature  = None   
-    sDirname = os.path.dirname(sFilename_output_in)
+    pDataset = pLayer = pFeature  = None
     if sFilename_output_in is None:
         plt.show()
     else:
-        sFilename_out = os.path.join(sDirname, sFilename_output_in)
-        plt.savefig(sFilename_out, bbox_inches='tight')   
+        #remove it if exists
+        if os.path.exists(sFilename_output_in):
+            os.remove(sFilename_output_in)
+
+        sDirname = os.path.dirname(sFilename_output_in)
+        sFilename = os.path.basename(sFilename_output_in)
+        sFilename_out = os.path.join(sDirname, sFilename)
+        sExtension = os.path.splitext(sFilename)[1]
+        if sExtension == '.png':
+            plt.savefig(sFilename_out, bbox_inches='tight')
+        else:
+            if sExtension == '.pdf':
+                plt.savefig(sFilename_out, bbox_inches='tight')
+            else:
+                plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
         plt.close('all')
         plt.clf()
-    
+

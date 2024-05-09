@@ -1,33 +1,33 @@
 package:
   name: "pyearth"
-  version: "0.1.25"
+  version: "0.1.26"
 
 source:
-  git_rev: 0.1.25
+  git_rev: 0.1.26
   git_url: https://github.com/changliao1025/pyearth.git
 
 requirements:
   build:
     - python
     - setuptools
-  
+
   run:
     - python >=3.8
     - numpy
-    - gdal    
+    - gdal
     - matplotlib-base
     - cartopy
     - requests
-    - netCDF4       
-    - pandas    
-    - scipy    
+    - netCDF4
+    - pandas
+    - scipy
     - statsmodels
-    
+
 build:
   number: 0
   noarch: python
-  script: "{{ PYTHON }} -m pip install . -vv"    
-    
+  script: "{{ PYTHON }} -m pip install . -vv"
+
 
 
 about:

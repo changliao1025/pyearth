@@ -85,7 +85,7 @@ def histogram_plot(aData_all,
         dSpace_x = dSpace_x_in
     else:
         iFlag_space_x = 1
-        dSpace_x = (dMax_x - dMin_x) / 10
+        dSpace_x = (dMax_x - dMin_x) / 20
         pass
 
     if sLocation_legend_in is not None:
@@ -176,10 +176,10 @@ def histogram_plot(aData_all,
             aLabel.append(aLabel_legend[i-1])
     else:
 
-        bad_index = np.where(aData_all < dMin_x_in)
-        aData_all[bad_index] = dMin_x_in
-        bad_index = np.where(aData_all > dMax_x_in)
-        aData_all[bad_index] = dMax_x_in
+        bad_index = np.where(aData_all < dMin_x)
+        aData_all[bad_index] = dMin_x
+        bad_index = np.where(aData_all > dMax_x)
+        aData_all[bad_index] = dMax_x
 
         if iFlag_log == 1:
             if dSpace_x >= 1:
@@ -188,7 +188,7 @@ def histogram_plot(aData_all,
                 pass
 
         aData_all_t = np.transpose(aData_all)
-        N, bins, hisp = ax_histo.hist(aData_all_t, density=True,
+        N, bins, hisp = ax_histo.hist(aData_all_t, int((dMax_x-dMin_x)/dSpace_x), density=True,
                                       color=aColor, label=aLabel_legend)
 
         # add density?
