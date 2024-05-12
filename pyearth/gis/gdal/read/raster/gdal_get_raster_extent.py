@@ -1,5 +1,5 @@
 
-from osgeo import gdal, ogr, osr, gdalconst
+from osgeo import gdal
 def gdal_get_raster_extent(sFilename_in):
     ds = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
     gt = ds.GetGeoTransform()

@@ -76,9 +76,9 @@ def plot_study_area(sFilename_dem_in,
         aLon, aLat, pSpatialRef_source, pSpatialRef_target)
     dLongitude_center = np.mean(aLon)
     dLatitude_center = np.mean(aLat)
-    aImage_extent = [dLon_min - dResolution_x, 
-                     dLon_max + dResolution_x, 
-                     dLat_min + dResolution_y,  
+    aImage_extent = [dLon_min - dResolution_x,
+                     dLon_max + dResolution_x,
+                     dLat_min + dResolution_y,
                      dLat_max - dResolution_y]
 
     aImage_in[np.where(aImage_in == missing_value)] = np.nan
@@ -170,12 +170,13 @@ def plot_study_area(sFilename_dem_in,
 
     pSpatialRef_source = osr.SpatialReference()
     pSpatialRef_source.ImportFromEPSG(4326)
+
     pSpatialRef_target = osr.SpatialReference()
 
     iZoom = 7
     pSpatialRef_target.ImportFromWkt(ge_proj.to_wkt())
     uv_xcenter, uv_ycenter = reproject_coordinates(
-        dLongitude_center, dLatitude_center, pSpatialRef_source, pSpatialRef_target)
+        dLongitude_center, dLatitude_center, pSpatialRef_source.ExportToWkt(), ge_proj.to_wkt())
     xsize_ge = 600
     ysize_ge = 600
     scale = Google_MetersPerPixel(iZoom)
