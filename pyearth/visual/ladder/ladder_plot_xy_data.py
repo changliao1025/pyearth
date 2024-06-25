@@ -7,41 +7,16 @@ import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
-def max_value(inputlist):
-    nlist = len(inputlist)
-    for i in range(nlist):
-        sublist = inputlist[i]
-        sublist = np.array(sublist)
-        dmax = np.max(sublist)
-        if i == 0:
-            dmax_max = dmax
-        else:
-            if dmax > dmax_max:
-                dmax_max = dmax
-
-    return dmax_max
-
-def min_value(inputlist):
-    nlist = len(inputlist)
-    for i in range(nlist):
-        sublist = inputlist[i]
-        sublist = np.array(sublist)
-        dmin = np.min(sublist)
-        if i == 0:
-            dmin_min = dmin
-        else:
-            if dmin < dmin_min:
-                dmin_min = dmin
-
-    return dmin_min
+from pyearth.toolbox.data.list.list_alg import list_max, list_min
 
 
-def ladder_plot_xy_data(aX_all,  
+def ladder_plot_xy_data(aX_all,
                         aY_all,
                         sFilename_out, iDPI_in=None,
                         aFlag_trend_in=None,
                         iReverse_y_in=None,
                         iFlag_scientific_notation_x_in=None,
+                        iFlag_scientific_notation_y_in=None,
                         iSize_x_in=None,
                         iSize_y_in=None,
                         ncolumn_in=None,
@@ -191,21 +166,21 @@ def ladder_plot_xy_data(aX_all,
     if dMax_x_in is not None:
         dMax_x = dMax_x_in
     else:
-        dMax_x = max_value(aX_all)
+        dMax_x = list_max(aX_all)
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
-        dMin_x = min_value(aX_all)
+        dMin_x = list_min(aX_all)
 
     if dMax_y_in is not None:
         dMax_y = dMax_y_in
     else:
-        dummy1 = max_value(aY_all)
+        dummy1 = list_max(aY_all)
         dMax_y = dummy1 * 1.2
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
     else:
-        dMin_y = min_value(aY_all)  # if it has negative value, change here
+        dMin_y = list_min(aY_all)  # if it has negative value, change here
     if (dMax_y <= dMin_y):
         return
 
@@ -256,8 +231,8 @@ def ladder_plot_xy_data(aX_all,
         x1 = aX_all[i-1]
         y1 = aY_all[i-1]
         ax.step(x1, y1,
-                color=aColor[i-1], linestyle=aLinestyle[i -
-                                                        1],   linewidth=aLinewidth[i-1],
+                color=aColor[i-1], linestyle=aLinestyle[i -   1],  
+                  linewidth=aLinewidth[i-1],
                 marker=aMarker[i-1],
                 label=aLabel_legend[i-1])
 

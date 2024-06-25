@@ -9,7 +9,7 @@ def gdal_write_geotiff_file(sFilename_in,
                             dOriginX_in,
                             dOriginY_in,
                             dMissing_value_in,
-                            pSpatial_reference_in,
+                            pProjection_in,
                             datatype=gdal.GDT_Float32):
     """
     Write a Geotiff standard format raster file
@@ -21,7 +21,7 @@ def gdal_write_geotiff_file(sFilename_in,
         dOriginX_in (float): The location of origin x
         dOriginY_in (float): The location of origin y
         dMissing_value_in (float): The missinge value
-        pSpatial_reference_in (osr): The spatial reference
+        pProjection_in (osr): The spatial reference
 
     Returns:
         Tuple: pGeotransform_out, pProjection_out
@@ -56,8 +56,7 @@ def gdal_write_geotiff_file(sFilename_in,
         0,                      # 4
         dPixelHeight_in])
 
-    pProjection = pSpatial_reference_in.ExportToPrettyWkt()
-    pDataset.SetProjection(pProjection)
+    pDataset.SetProjection(pProjection_in)
 
     pBand = pDataset.GetRasterBand(1)
     pBand.WriteArray(aData_in)
@@ -80,7 +79,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
                                           dOriginX_in,
                                           dOriginY_in,
                                           dMissing_value_in,
-                                          pSpatial_reference_in,
+                                          pProjection_in,
                                           datatype=gdal.GDT_Float32):
     """
     Write a multi-band geotiff raster file
@@ -92,7 +91,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
         dOriginX_in (float): The location of origin x
         dOriginY_in (float): The location of origin y
         dMissing_value_in (float): The missinge value
-        pSpatial_reference_in (osr): The spatial reference
+        pProjection_in (osr): The spatial reference
 
     Returns:
         Tuple: pGeotransform_out, pProjection_out
@@ -127,8 +126,8 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
                               0.0,
                               dPixelHeight_in])
 
-    pProjection = pSpatial_reference_in.ExportToPrettyWkt()
-    pDataset.SetProjection(pProjection)
+
+    pDataset.SetProjection(pProjection_in)
 
     # Write raster datasets
     for iBand in range(nband):
