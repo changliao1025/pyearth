@@ -192,7 +192,7 @@ def plot_time_series_data(aTime_all,
         for i in range(1, nData):
             dummy = np.nanmax(aData_all[i])
             dMax_y = np.max([dMax_y, dummy])
-        
+
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
@@ -206,8 +206,8 @@ def plot_time_series_data(aTime_all,
 
     if (dMax_y <= dMin_y):
         return
-    else:        
-        if iFlag_force_limit_y0 != 1:            
+    else:
+        if iFlag_force_limit_y0 != 1:
             dMin_y = dMin_y - 0.10 * (dMax_y-dMin_y)
         if iFlag_force_limit_y1 != 1:
             dMax_y = dMax_y + 0.10 * (dMax_y-dMin_y)
@@ -248,12 +248,12 @@ def plot_time_series_data(aTime_all,
 
     left, width = 0.1, 0.8
     bottom, height = 0.1, 0.5
-    dY_mini = 0.60
-    dX_mini = 0.15
+    dX_mini = 0.60
+    dY_mini = 0.20
     width_mini = 0.28
-    heigh_mini = 0.40
+    heigh_mini = 0.30
     rect_full = [left, bottom, width, height]
-    rect_mini = [dY_mini, dX_mini, width_mini, heigh_mini]
+    rect_mini = [dX_mini, dY_mini, width_mini, heigh_mini]
 
     ax_full = plt.axes(rect_full)
     if iFlag_miniplot == 1:
@@ -309,7 +309,7 @@ def plot_time_series_data(aTime_all,
     sMonth_format = mpl.dates.DateFormatter('%Y-%m')
     # start loop for each data
 
-    
+
     for iax in range(len(ax_all)):
         ax = ax_all[iax]
         ax.tick_params(direction='in', top=True, right=True)
@@ -493,7 +493,7 @@ def plot_time_series_data(aTime_all,
 
         # common setting
 
-    
+
     if sFilename_out is not None:
         plt.savefig(sFilename_out, bbox_inches='tight')
         plt.close('all')

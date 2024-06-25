@@ -9,6 +9,7 @@ from matplotlib.patches import Polygon
 import matplotlib.patches as mpatches
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from cartopy.io.img_tiles import OSM
 from pyearth.visual.map.zebra_frame import zebra_frame
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
@@ -16,6 +17,11 @@ from pyearth.visual.formatter import OOMFormatter
 #osr.UseExceptions()
 #use agg and backend
 #mpl.use('agg')
+#get the current year for openstreetmap copy right label
+import datetime
+iYear_current = datetime.datetime.now().year
+#convert to string
+sYear = str(iYear_current)
 def map_vector_polygon_data(iFiletype_in,
                             sFilename_in,
                             sVariable_in=None,
@@ -27,6 +33,9 @@ def map_vector_polygon_data(iFiletype_in,
                             iFlag_fill_in=None,
                             iFont_size_in=None,
                             iFlag_discrete_in=None,
+                            iFlag_filter_in = None,
+                            iFlag_openstreetmap_in = None,
+                            iFlag_openstreetmap_level_in = None,
                             sColormap_in=None,
                             sTitle_in=None,
                             iDPI_in=None,
@@ -66,6 +75,8 @@ def map_vector_polygon_data(iFiletype_in,
     """
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
     pSRS_geodetic = ccrs.Geodetic()
+
+
 
     if iFiletype_in == 1:  # geojson
         pDriver = ogr.GetDriverByName('GeoJSON')
@@ -145,6 +156,11 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         iFlag_discrete = 0
 
+    if iFlag_filter_in is not None:
+        iFlag_filter = iFlag_filter_in
+    else:
+        iFlag_filter = 0
+
     if iFlag_scientific_notation_colorbar_in is not None:
         iFlag_scientific_notation_colorbar = iFlag_scientific_notation_colorbar_in
     else:
@@ -189,8 +205,6 @@ def map_vector_polygon_data(iFiletype_in,
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
 
-    pSrs = osr.SpatialReference()
-    pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
     dLat_min = 90
     dLat_max = -90
     dLon_min = 180
@@ -219,7 +233,10 @@ def map_vector_polygon_data(iFiletype_in,
         iFlag_field = 0
         iFlag_discrete = 0
 
+    nFeature = pLayer.GetFeatureCount()
     for pFeature in pLayer:
+    #for j in range(nFeature):
+        #pFeature = pLayer.GetFeature(j)
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
         if iFlag_field == 1:
@@ -286,7 +303,7 @@ def map_vector_polygon_data(iFiletype_in,
     else:
         pProjection_data = pSRS_wgs84
 
-        #pProjection_map = pSRS_wgs84
+
     #pProjection_map._threshold /= 1.0E6
 
     ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map)
@@ -305,17 +322,54 @@ def map_vector_polygon_data(iFiletype_in,
     if aExtent_in is None:
         marginx = (dLon_max - dLon_min) / 20
         marginy = (dLat_max - dLat_min) / 20
-        aExtent = [dLon_min - marginx, dLon_max + marginx,
-                   dLat_min - marginy, dLat_max + marginy]
+        if (dLat_max + marginy)> 90:
+            dLat_max = 90
+        else:
+            dLat_max = dLat_max + marginy
+        if (dLat_min - marginy) < -90:
+            dLat_min = -90
+        else:
+            dLat_min = dLat_min - marginy
+        if (dLon_max + marginx) > 180:
+            dLon_max = 180
+        else:
+            dLon_max = dLon_max + marginx
+        if (dLon_min - marginx) < -180:
+            dLon_min = -180
+        else:
+            dLon_min = dLon_min - marginx
+        aExtent = [dLon_min, dLon_max, dLat_min, dLat_max]
+        #aExtent = [dLon_min - marginx, dLon_max + marginx,
+        #           dLat_min - marginy, dLat_max + marginy]
     else:
         aExtent = aExtent_in
 
     print(aExtent)
 
     minx,  maxx, miny, maxy = aExtent
-    #pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
+    if iFlag_filter == 1:
+        pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
     ax.set_extent(aExtent, crs = pSRS_wgs84)
     ax.coastlines(linewidth=0.5, color='k', resolution='10m')
+    if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
+        if iFlag_openstreetmap_level_in is not None:
+            iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+        else:
+            iFlag_openstreetmap_level = 9
+            pass
+
+        osm_tiles = OSM()
+        #Add the OSM image to the map
+        ax.add_image(osm_tiles, iFlag_openstreetmap_level)
+        sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
+        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+
+        #we also need to set transparency for the image to be added
+        dAlpha = 0.5
+    else:
+        dAlpha = 1.0
+
     if iFlag_debug ==1:
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
@@ -390,6 +444,9 @@ def map_vector_polygon_data(iFiletype_in,
                     else:
                         iColor_index = int((dValue - dValue_min) /
                                        (dValue_max - dValue_min) * 255)
+                else:
+                    iColor_index = 0
+                    pass
             else:
                 iColor_index = 0
                 pass
@@ -416,13 +473,13 @@ def map_vector_polygon_data(iFiletype_in,
         if iFlag_field == 1:
             aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
             if iFlag_fill == True:
-                pPC = PatchCollection(aPatch, alpha=0.8,
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor=None,
                                       facecolor=aColor,
                                       linewidths=0.25,
                                       transform=pProjection_data)
             else:
-                pPC = PatchCollection(aPatch, alpha=0.8,
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor=aColor,
                                       facecolor='none',
                                       linewidths=0.25,
@@ -432,24 +489,26 @@ def map_vector_polygon_data(iFiletype_in,
             sColor = 'blue'
             aPatch = [Polygon(poly, closed=True, fill=iFlag_fill) for poly in aPolygon]
             if iFlag_fill == True:
-                pPC = PatchCollection(aPatch, alpha=0.8,
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor=None,
                                       facecolor=sColor,
                                       linewidths=0.25,
                                       transform=pProjection_data)
             else:
-                pPC = PatchCollection(aPatch, alpha=0.8,
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor=sColor,
                                       facecolor='none',
                                       linewidths=0.25,
                                       transform=pProjection_data)
         ax.add_collection(pPC)
 
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
 
-    ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
-    ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
-    ax.set_axis_off()
+
+    if iFlag_zebra == 1:
+        ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+        ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
+        ax.set_axis_off()
+
     ax.set_title(sTitle)
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
@@ -462,6 +521,7 @@ def map_vector_polygon_data(iFiletype_in,
                     transform=ax.transAxes,
                     color='black', fontsize=iFont_size-2)
 
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
     if iFlag_colorbar == 1:
         fig.canvas.draw()
         # Section 2
@@ -497,20 +557,29 @@ def map_vector_polygon_data(iFiletype_in,
         cb.ax.get_yaxis().set_label_position('left')
         cb.ax.tick_params(labelsize=iFont_size-2)
 
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--',
-                      xlocs=np.arange(minx, maxx, (maxx-minx)/4), ylocs=np.arange(miny, maxy, (maxy-miny)/4))
+                      xlocs=np.arange(minx, maxx+(maxx-minx)/9, (maxx-minx)/8),
+                      ylocs=np.arange(miny, maxy+(maxy-miny)/9, (maxy-miny)/8))
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
+    gl.xlocator = mpl.ticker.MaxNLocator(4)
+    gl.ylocator = mpl.ticker.MaxNLocator(4)
 
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k',
                        'rotation': 90, 'weight': 'normal'}
 
+
+
     if iFlag_zebra ==1:
+        ax.set_axis_off()
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
     pDataset = pLayer = pFeature = None
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
+
     if sFilename_output_in is None:
         plt.show()
     else:

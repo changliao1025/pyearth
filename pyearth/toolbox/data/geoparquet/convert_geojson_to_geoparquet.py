@@ -1,31 +1,39 @@
 import os
 from osgeo import ogr, gdal
 
-def convert_geojson_to_geoparquet(input_geojson, output_geoparquet):
-    driver = ogr.GetDriverByName('Parquet')
-    #check if the driver is available
-    if driver is None:
-        print('Parquet driver not available.')
+def convert_geojson_to_geoparquet(sFilename_geojson_in, sFilename_geoparqiet_out = None, sLayername_in = 'layer'):
+    pDrive_parquet = ogr.GetDriverByName('Parquet')
+    #check if the pDrive_parquet is available
+    if pDrive_parquet is None:
+        print('Parquet pDrive_parquet not available.')
         print("GDAL version:", gdal.__version__)
-        return 
-    
-    driver2 = ogr.GetDriverByName('GeoJSON')
-    in_dataset = driver2.Open(input_geojson, 0)
-    in_layer = in_dataset.GetLayer()
+        return
 
-    if os.path.exists(output_geoparquet):
-        os.remove(output_geoparquet)
+    pDrive_geojson = ogr.GetDriverByName('GeoJSON')
+    pDateset_in = pDrive_geojson.Open(sFilename_geojson_in, 0)
+    if pDateset_in is None:
+        print(f"Failed to open file: {sFilename_geojson_in}")
+        return
 
-    out_dataset = driver.CreateDataSource(output_geoparquet)
-    out_layer = out_dataset.CopyLayer(in_layer, 'flow')
-    in_dataset = out_dataset = None
+    pLayer_in = pDateset_in.GetLayer()
+
+    if sFilename_geoparqiet_out is None:
+        sFilename_geoparqiet_out = sFilename_geojson_in.replace('.geojson', '.parquet')
+
+    if os.path.exists(sFilename_geoparqiet_out):
+        os.remove(sFilename_geoparqiet_out)
+
+    pDataset_out = pDrive_parquet.CreateDataSource(sFilename_geoparqiet_out)
+    pLayer_out = pDataset_out.CopyLayer(pLayer_in, sLayername_in)
+    pDateset_in = pDataset_out = None
+    pLayer_in = pLayer_out = None
 
 if __name__ == '__main__':
-    input_geojson = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/variable_polygon.geojson'
-    output_geoparquet = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/variable_polygon.parquet'
-    input_geojson = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/flow_direction.geojson'
-    output_geoparquet = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/flow_direction.parquet'
-    input_geojson = '/compyfs/liao313/04model/pyhexwatershed/amazon/pyhexwatershed20240101012/pyflowline/dggrid.geojson'
-    output_geoparquet = '/compyfs/liao313/04model/pyhexwatershed/amazon/pyhexwatershed20240101012/pyflowline/dggrid.parquet'
-   
-    convert_geojson_to_geoparquet(input_geojson, output_geoparquet)
+    sFilename_geojson_in = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/variable_polygon.geojson'
+    sFilename_geoparqiet_out = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/variable_polygon.parquet'
+    sFilename_geojson_in = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/flow_direction.geojson'
+    sFilename_geoparqiet_out = '/compyfs/liao313/04model/pyhexwatershed/k34/pyhexwatershed20231001003/hexwatershed/00000001/flow_direction.parquet'
+    sFilename_geojson_in = '/compyfs/liao313/04model/pyhexwatershed/amazon/pyhexwatershed20240101012/pyflowline/dggrid.geojson'
+    sFilename_geoparqiet_out = '/compyfs/liao313/04model/pyhexwatershed/amazon/pyhexwatershed20240101012/pyflowline/dggrid.parquet'
+
+    convert_geojson_to_geoparquet(sFilename_geojson_in, sFilename_geoparqiet_out)

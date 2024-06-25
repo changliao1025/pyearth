@@ -1,14 +1,15 @@
+import os
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-
+import copy
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
+from pyearth.toolbox.data.list.list_alg import list_max, list_min
 
-
-def histogram_plot(aData_all,
-                   sFilename_out,
+def histogram_plot(aData_all_in,
+                   sFilename_output_in = None,
                    iSize_x_in=None,
                    iSize_y_in=None,
                    ncolumn_in=None,
@@ -22,6 +23,7 @@ def histogram_plot(aData_all,
                    sLabel_x_in=None,
                    sLabel_y_in=None,
                    sFormat_x_in=None,
+                   sFont_in=None,
                    aLocation_legend_in=None,
                    sLocation_legend_in=None,
                    sTitle_in=None,
@@ -36,10 +38,14 @@ def histogram_plot(aData_all,
         raise ImportError(
             "The package 'scipy' is required for this function to run.") from e
 
-    aData_all = np.array(aData_all)
-    pShape = aData_all.shape
+    #make a deep copy of the input
 
-    nData = pShape[0]
+    aData_all = copy.deepcopy(aData_all_in)
+
+    nData = len(aData_all)
+    #aData_all = np.array(aData_all)
+    #pShape = aData_all.shape
+    #nData = pShape[0]
 
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
@@ -73,12 +79,12 @@ def histogram_plot(aData_all,
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
     else:
-        dMin_x = np.min(aData_all)
+        dMin_x = list_min(aData_all)
 
     if dMax_x_in is not None:
         dMax_x = dMax_x_in
     else:
-        dMax_x = np.max(aData_all)
+        dMax_x = list_max(aData_all)
 
     if dSpace_x_in is not None:
         iFlag_space_x = 0
@@ -118,6 +124,14 @@ def histogram_plot(aData_all,
     else:
         aLabel_legend = np.full(nData, '')
 
+    if sFont_in is not None:
+        sFont = sFont_in
+    else:
+        sFont = "Times New Roman"
+
+    plt.rcParams["font.family"] = sFont
+    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
+
     if aColor_in is not None:
         aColor = aColor_in
     else:
@@ -150,56 +164,36 @@ def histogram_plot(aData_all,
     aLegend_artist = []
     aLabel = []
 
-    iFlag_method = 2
-    if iFlag_method == 1:  # this method possible won't work for multi-case
-        for i in np.arange(1, nData+1):
-            aData = aData_all[i-1]
-            bad_index = np.where(aData < dMin_x_in)
-            aData[bad_index] = dMin_x_in
-            bad_index = np.where(aData > dMax_x_in)
-            aData[bad_index] = dMax_x_in
 
-            if iFlag_log == 1:
-                if dSpace_x >= 1:
-                    dSpace_x = int(dSpace_x)
-                else:
-                    pass
-
-            if i == 0:
-                N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),
-                                              color=aColor[i-1],  label=aLabel_legend[i-1])
-            else:
-                N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),
-                                              color=aColor[i-1],  label=aLabel_legend[i-1], alpha=.5)
-
-            aLegend_artist.append(hisp)
-            aLabel.append(aLabel_legend[i-1])
-    else:
-
-        bad_index = np.where(aData_all < dMin_x)
-        aData_all[bad_index] = dMin_x
-        bad_index = np.where(aData_all > dMax_x)
-        aData_all[bad_index] = dMax_x
-
+    for i in np.arange(0, nData):
+        aData = aData_all[i]
+        bad_index = np.where(aData < dMin_x)
+        aData[bad_index] = dMin_x
+        bad_index = np.where(aData > dMax_x)
+        aData[bad_index] = dMax_x
         if iFlag_log == 1:
             if dSpace_x >= 1:
                 dSpace_x = int(dSpace_x)
             else:
                 pass
+        if i == 0:
+            N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),
+                                          color=aColor[i],  label=aLabel_legend[i])
+        else:
+            N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),
+                                          color=aColor[i],  label=aLabel_legend[i], alpha=.5)
+        aLegend_artist.append(hisp)
+        aLabel.append(aLabel_legend[i-1])
 
-        aData_all_t = np.transpose(aData_all)
-        N, bins, hisp = ax_histo.hist(aData_all_t, int((dMax_x-dMin_x)/dSpace_x), density=True,
-                                      color=aColor, label=aLabel_legend)
-
-        # add density?
-        for i in np.arange(1, nData+1):
-            aData = aData_all[i-1]
-            density = scipy.stats.gaussian_kde(aData)
-            good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
-            aData = aData[good_index]
-            xx = np.linspace(dMin_x, dMax_x, 1000)
-            yy = density(xx)
-            ax_histo.plot(xx, yy, color=aColor[i-1], linestyle='--')
+    # add density?
+    for i in np.arange(1, nData+1):
+        aData = aData_all[i-1]
+        density = scipy.stats.gaussian_kde(aData)
+        good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
+        aData = aData[good_index]
+        xx = np.linspace(dMin_x, dMax_x, 1000)
+        yy = density(xx)
+        ax_histo.plot(xx, yy, color=aColor[i-1], linestyle='--')
 
     ax_histo.set_xlabel(sLabel_x, fontsize=13)
     ax_histo.set_ylabel(sLabel_y, fontsize=13)
@@ -239,15 +233,30 @@ def histogram_plot(aData_all,
     if iFlag_grid == 1:
         ax_histo.grid(which='major', color='white', linestyle='-', axis='y')
 
-    if iFlag_method == 1:
-        ax_histo.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
+
+    ax_histo.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
                         loc=sLocation_legend, fontsize=12)
-    else:
-        ax_histo.legend(bbox_to_anchor=aLocation_legend,
-                        loc=sLocation_legend, fontsize=12)
+
 
     ax_histo.set_title(sTitle)
-    plt.savefig(sFilename_out, bbox_inches='tight')
 
-    plt.close('all')
-    plt.clf()
+    if sFilename_output_in is None:
+        plt.show()
+    else:
+        #remove it if exists
+        if os.path.exists(sFilename_output_in):
+            os.remove(sFilename_output_in)
+
+        sDirname = os.path.dirname(sFilename_output_in)
+        sFilename = os.path.basename(sFilename_output_in)
+        sFilename_out = os.path.join(sDirname, sFilename)
+        sExtension = os.path.splitext(sFilename)[1]
+        if sExtension == '.png':
+            plt.savefig(sFilename_out, bbox_inches='tight')
+        else:
+            if sExtension == '.pdf':
+                plt.savefig(sFilename_out, bbox_inches='tight')
+            else:
+                plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
+        plt.close('all')
+        plt.clf()

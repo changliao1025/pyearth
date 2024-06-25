@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from pyearth.toolbox.data.list.list_alg import list_max, list_min
 from pyearth.visual.scatter.scatter_lowess import scatter_lowess
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 
@@ -59,7 +60,7 @@ def scatter_plot_multiple_data(aData_x,
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
-        iDPI = 300
+        iDPI = 150
 
     if iFlag_miniplot_in is not None:
         iFlag_miniplot = iFlag_miniplot_in
@@ -138,22 +139,26 @@ def scatter_plot_multiple_data(aData_x,
     else:
         ax_scatter_all = [ax_scatter_full]
 
-    for i in range(nData):
-        du = np.array(aData_x[i])
-        dv = np.array(aData_y[i])
-        du = du.flatten()
-        dv = dv.flatten()
-        if (i == 0):
-            dummyx = du
-            dummyy = dv
-        else:
-            dummyx = np.concatenate([dummyx, du])
-            dummyy = np.concatenate([dummyy, dv])
+    #for i in range(nData):
+    #    du = np.array(aData_x[i])
+    #    dv = np.array(aData_y[i])
+    #    du = du.flatten()
+    #    dv = dv.flatten()
+    #    if (i == 0):
+    #        dummyx = du
+    #        dummyy = dv
+    #    else:
+    #        dummyx = np.concatenate([dummyx, du])
+    #        dummyy = np.concatenate([dummyy, dv])
+    #x_min = np.min([dummyx, dummyy])
+    #x_max = np.max([dummyx, dummyy])
+    #y_min = np.min([dummyx, dummyy])
+    #y_max = np.max([dummyx, dummyy])
 
-    x_min = np.min([dummyx, dummyy])
-    x_max = np.max([dummyx, dummyy])
-    y_min = np.min([dummyx, dummyy])
-    y_max = np.max([dummyx, dummyy])
+    x_min = list_min(aData_x)
+    x_max = list_max(aData_x)
+    y_min = list_min(aData_y)
+    y_max = list_max(aData_y)
 
     if aColor_in is None:
         # need a better solution here
@@ -293,10 +298,10 @@ def scatter_plot_multiple_data(aData_x,
 
             ax_scatter.tick_params(axis='y', pad=8)
             ax_scatter.set_xlim(dMin_x, dMax_x * 1.05)
-            ax_scatter.set_ylim(dMin_x, dMax_x * 1.05)
+            ax_scatter.set_ylim(dMin_y, dMax_y * 1.05)
         else:
             ax_scatter.set_xlim(dMin_x, dMax_x * 0.1)
-            ax_scatter.set_ylim(dMin_x, dMax_x * 0.1)
+            ax_scatter.set_ylim(dMin_y, dMax_y * 0.1)
             pass
 
         ax_scatter.xaxis.set_major_locator(
@@ -379,7 +384,8 @@ def scatter_plot_multiple_data(aData_x,
 
         if iax == 0:
             for i in range(nData):
-                x = aData_x[i].flatten()
+                dummy= np.array(aData_x[i])
+                x = dummy.flatten()
                 # treatment for nan data
                 a = np.where(~np.isnan(x))
                 x = x[a]
@@ -396,7 +402,8 @@ def scatter_plot_multiple_data(aData_x,
                 yy = density(xx)
 
                 # y margin
-                y = aData_y[i].flatten()
+                dummy= np.array(aData_x[i])
+                y = dummy.flatten()
                 a = np.where(~np.isnan(y))
                 y = y[a]
 
