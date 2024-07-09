@@ -159,7 +159,7 @@ def polygon_difference_cython(sFilename_base,
                                dBuffer_threshold_in = -0.0001):
 
     if iFlag_cython is not None:
-        from pyearth.external.tinyr import tinyr
+        import tinyr
     else:
         print('cython is not installed')
         return
@@ -475,7 +475,7 @@ def polygon_difference_cython_channel(sFilename_base,
                                dBuffer_threshold_in = -0.0001):
 
     if iFlag_cython is not None:
-        from pyearth.external.tinyr import tinyr
+        import tinyr
     else:
         print('cython is not installed')
         return

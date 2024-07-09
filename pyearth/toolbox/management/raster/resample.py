@@ -3,20 +3,23 @@ import numpy as np
 from osgeo import gdal, osr, gdalconst
 
 from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
-from pyearth.gis.gdal.read.raster.gdal_get_raster_spatial_reference import gdal_get_raster_spatial_ref_wkt
+from pyearth.gis.gdal.read.raster.gdal_get_raster_spatial_reference import gdal_get_raster_spatial_reference_wkt
 from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 gdal.UseExceptions()
 #set default spatial reference
-pSpatialRef_default = osr.SpatialReference()
-pSpatialRef_default.ImportFromEPSG(4326)  # WGS84
-sProjection_default = pSpatialRef_default.ExportToWkt()
-pSpatialRef_default = None
+
 
 def resample_raster(sFilename_in, sFilename_out, dResolution_x, dResolution_y,
                      pProjection_target_in = None, iData_type = gdalconst.GDT_Int16,
                      sResampleAlg = 'MODE', dMissing_value_source= 255, dMissing_value_target = -9999):
 
+    pSpatialRef_default = osr.SpatialReference()
+    pSpatialRef_default.ImportFromEPSG(4326)  # WGS84
+    sProjection_default = pSpatialRef_default.ExportToWkt()
+    pSpatialRef_default = None
     #check if the input raster exists
+
+
     if not os.path.exists(sFilename_in):
         print('Error: the input raster does not exist')
         return
@@ -24,7 +27,7 @@ def resample_raster(sFilename_in, sFilename_out, dResolution_x, dResolution_y,
     pDriver_tiff = gdal.GetDriverByName('GTiff')
 
     #get the spatial from the input raster
-    pProjection_source = gdal_get_raster_spatial_ref_wkt(sFilename_in)
+    pProjection_source = gdal_get_raster_spatial_reference_wkt(sFilename_in)
 
     #check whether it is wgs84 or not using project string
     pSpatialRef_source = osr.SpatialReference()

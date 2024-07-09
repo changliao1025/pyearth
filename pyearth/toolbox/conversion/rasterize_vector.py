@@ -2,8 +2,8 @@ import os
 import numpy as np
 from osgeo import gdal, ogr, osr
 
-def rasterize_vector(sFilename_vector_in, sFilename_raster_out, 
-                     dResolution_x, dResolution_y, 
+def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
+                     dResolution_x, dResolution_y,
                      iFlag_boundary_only_in = None,
                      iFlag_use_field_value_in=None,
                      sAttribute_name_in=None,
@@ -11,7 +11,7 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
                      dField_value_in=None,
                      dFill_value_in=None,
                      iDataType_out=None,
-                     dMin_x_in =None, dMax_x_in=None, dMin_y_in=None, dMax_y_in=None, 
+                     dMin_x_in =None, dMax_x_in=None, dMin_y_in=None, dMax_y_in=None,
                      nRow_in=None, nColumn_in=None,
                      pProjection_target_in = None ):
     """
@@ -31,21 +31,21 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
     except RuntimeError as e:
         print("Error: Could not open %s." % str(sFilename_vector_in))
         return None
-    
+
     # Create a new vector layer for the boundary
     pDatasource_boundary = ogr.GetDriverByName('Memory').CreateDataSource('out')
-    
+
     if os.path.exists(sFilename_raster_out):
         os.remove(sFilename_raster_out)
-    
-    if sAttribute_name_in is not None:        
+
+    if sAttribute_name_in is not None:
         sAttribute_name = sAttribute_name_in
 
     if iFlag_use_field_value_in is None:
         iFlag_use_field_value = 0
     else:
         iFlag_use_field_value = 1
-    
+
     if dField_value_in is None:
         dField_value = 1
     else:
@@ -55,23 +55,23 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
         iFlag_boundary_only = 1
     else:
         iFlag_boundary_only = iFlag_boundary_only_in
-    
+
     if dFill_value_in is None:
         dFill_value = 1
     else:
         dFill_value = dFill_value_in
-    
+
     pLayer_vector = pDatasource_vector.GetLayer()
     pSpatialRef_source = pLayer_vector.GetSpatialRef()
     pProjection_source = pSpatialRef_source.ExportToWkt()
     if pProjection_target_in is None:
         pProjection_target = pProjection_source
     else:
-        pProjection_target = pProjection_target_in  
-    
+        pProjection_target = pProjection_target_in
+
     pSpatialRef_target = osr.SpatialReference()
     pSpatialRef_target.ImportFromWkt(pProjection_target)
-    
+
     if iDataType_out is None:
         iDataType = gdal.GDT_Float32 #gdal.GDT_Int16
     else:
@@ -80,7 +80,7 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
     if dMissing_value_in is None:
         dMissing_value = -9999
     else:
-        dMissing_value = dMissing_value_in    
+        dMissing_value = dMissing_value_in
 
     if dMin_x_in is None or dMax_x_in is None or dMin_y_in is None or dMax_y_in is None:
         # read extent
@@ -89,7 +89,7 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
         dMin_x = dMin_x_in
         dMax_x = dMax_x_in
         dMin_y = dMin_y_in
-        dMax_y = dMax_y_in       
+        dMax_y = dMax_y_in
 
     #check the geometry type is polygon or not
     pFeature = pLayer_vector.GetNextFeature()
@@ -100,12 +100,12 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
         if pGeometry.GetGeometryName() == 'MULTIPOLYGON':
             print('This is multipolygon')
         else:
-            iFlag_boundary_only = 1    
-     
+            iFlag_boundary_only = 1
+
     if nRow_in is not None:
         nrow = nRow_in
     else:
-        nrow = int((dMax_y - dMin_y) / dResolution_y)    
+        nrow = int((dMax_y - dMin_y) / dResolution_y)
     if nColumn_in is not None:
         ncolumn = nColumn_in
     else:
@@ -117,9 +117,11 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
 
     #get raster drive
     pRaster_Driver = gdal.GetDriverByName('GTiff')
-    pDatasource_raster = pRaster_Driver.Create(sFilename_raster_out, ncolumn, nrow, 1, eType=iDataType)
+    options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
+    pDatasource_raster = pRaster_Driver.Create(sFilename_raster_out, ncolumn, nrow, 1, eType=iDataType, options= options)
+
     pDatasource_raster.SetGeoTransform((dMin_x, dResolution_x, 0, dMax_y, 0, -dResolution_y))
-    band = pDatasource_raster.GetRasterBand(1)    
+    band = pDatasource_raster.GetRasterBand(1)
     band.Fill(dMissing_value)
     band.SetNoDataValue(dMissing_value)
 
@@ -129,26 +131,26 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
     if iFlag_use_field_value == 1:
         if iFlag_boundary_only == 0:
             pLayer_boundary = pDatasource_boundary.CreateLayer('boundary', srs=pSpatialRef_source)
-            geometry = pFeature.GetGeometryRef()        
-            pFeature_boundary = ogr.Feature(pLayer_boundary.GetLayerDefn()) 
+            geometry = pFeature.GetGeometryRef()
+            pFeature_boundary = ogr.Feature(pLayer_boundary.GetLayerDefn())
             pFeature_boundary.SetGeometry(geometry.Boundary())
             pLayer_boundary.CreateFeature(pFeature_boundary)
             gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_vector, None, None, burn_values=[dField_value],
-                    options=["ALL_TOUCHED=TRUE"])                
+                    options=["ALL_TOUCHED=TRUE"])
             gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_boundary, None, None,
                 options=["ALL_TOUCHED=TRUE"])
         else:
-            gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_vector, None, None, 
+            gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_vector, None, None,
                     options=["ALL_TOUCHED=TRUE", "ATTRIBUTE=" + sAttribute_name])
-    else: #use user provided value for field, 
+    else: #use user provided value for field,
         if iFlag_boundary_only == 0: #fill the polygon with a different value
             pLayer_boundary = pDatasource_boundary.CreateLayer('boundary', srs=pSpatialRef_source)
-            geometry = pFeature.GetGeometryRef()        
-            pFeature_boundary = ogr.Feature(pLayer_boundary.GetLayerDefn()) 
+            geometry = pFeature.GetGeometryRef()
+            pFeature_boundary = ogr.Feature(pLayer_boundary.GetLayerDefn())
             pFeature_boundary.SetGeometry(geometry.Boundary())
             pLayer_boundary.CreateFeature(pFeature_boundary)
             gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_vector, None, None, burn_values=[dFill_value],
-                    options=["ALL_TOUCHED=TRUE"])                
+                    options=["ALL_TOUCHED=TRUE"])
             gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_boundary, None, None, burn_values=[dField_value],
                 options=["ALL_TOUCHED=TRUE"])
         else:

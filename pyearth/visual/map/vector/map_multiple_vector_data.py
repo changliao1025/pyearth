@@ -29,6 +29,7 @@ def map_multiple_vector_data(aFiletype_in,
                              aFilename_in,
                              iFlag_colorbar_in = None,
                              iFlag_title_in = None,
+                             iFlag_zebra_in=None,
                              aFlag_thickness_in = None,
                              aFlag_color_in = None,
                              aFlag_discrete_in = None,
@@ -75,6 +76,11 @@ def map_multiple_vector_data(aFiletype_in,
         sUnit_in (_type_, optional): _description_. Defaults to None.
         aLegend_in (_type_, optional): _description_. Defaults to None.
     """
+
+    if iFlag_zebra_in is not None:
+        iFlag_zebra = iFlag_zebra_in
+    else:
+        iFlag_zebra = 0
 
     #check vector type first
     if aFiletype_in is None:
@@ -207,7 +213,7 @@ def map_multiple_vector_data(aFiletype_in,
     plt.rcParams["font.family"] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
-    cmap = cm.get_cmap(sColormap)
+    cmap = plt.colormaps[sColormap]
     fig = plt.figure( dpi = iDPI  )
     iSize_x= 8
     iSize_y= 8
@@ -216,8 +222,6 @@ def map_multiple_vector_data(aFiletype_in,
 
     #we require that the first polygon file defines the extent
     pLayer = pDataset.GetLayer(0)
-    pSrs = osr.SpatialReference()
-    pSrs.ImportFromEPSG(4326)    # WGS84 lat/lon
     dLat_min = 90
     dLat_max = -90
     dLon_min = 180
@@ -229,24 +233,24 @@ def map_multiple_vector_data(aFiletype_in,
             for j in range(pGeometry_in.GetGeometryCount()):
                 pPolygon = pGeometry_in.GetGeometryRef(j)
                 aCoords_gcs = get_geometry_coordinates(pPolygon)
-                dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
-                dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
-                dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-                dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+                dLon_max = float(np.max( [dLon_max, np.max(aCoords_gcs[:,0])] ))
+                dLon_min = float(np.min( [dLon_min, np.min(aCoords_gcs[:,0])] ))
+                dLat_max = float(np.max( [dLat_max, np.max(aCoords_gcs[:,1])] ))
+                dLat_min = float(np.min( [dLat_min, np.min(aCoords_gcs[:,1])] ))
         else:
             if sGeometry_type =='POLYGON':
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
-                dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
-                dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-                dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+                dLon_max = float(np.max( [dLon_max, np.max(aCoords_gcs[:,0])] ))
+                dLon_min = float(np.min( [dLon_min, np.min(aCoords_gcs[:,0])] ))
+                dLat_max = float(np.max( [dLat_max, np.max(aCoords_gcs[:,1])] ))
+                dLat_min = float(np.min( [dLat_min, np.min(aCoords_gcs[:,1])] ))
             else:
                 if sGeometry_type =='LINESTRING':
                     aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                    dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
-                    dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
-                    dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-                    dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+                    dLon_max = float(np.max( [dLon_max, np.max(aCoords_gcs[:,0])] ))
+                    dLon_min = float(np.min( [dLon_min, np.min(aCoords_gcs[:,0])] ))
+                    dLat_max = float(np.max( [dLat_max, np.max(aCoords_gcs[:,1])] ))
+                    dLat_min = float(np.min( [dLat_min, np.min(aCoords_gcs[:,1])] ))
 
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
@@ -365,11 +369,11 @@ def map_multiple_vector_data(aFiletype_in,
             aIndex = np.linspace(0,1,nValue_discrete)
             prng = np.random.RandomState(1234567890)
             prng.shuffle(aIndex)
-            colors = plt.cm.get_cmap(sColormap)(aIndex)
+            colors = plt.colormaps[sColormap](aIndex)
             aColorMap = ListedColormap(colors)
             pass
         else: #continuous
-            aColorMap = plt.cm.get_cmap(sColormap)(np.linspace(0, 1, nValue))
+            aColorMap = plt.colormaps[sColormap](np.linspace(0, 1, nValue))
         lID = 0
         aPoint=list()
         aPolyline=list()
@@ -467,6 +471,10 @@ def map_multiple_vector_data(aFiletype_in,
                                       transform=pProjection_data)
             ax.add_collection(pPC)
 
+    if iFlag_zebra == 1:
+        ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+        ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
+        ax.set_axis_off()
 
     #reset extent
     ax.set_extent(aExtent, crs = pSRS_wgs84)
@@ -522,10 +530,16 @@ def map_multiple_vector_data(aFiletype_in,
     gl.yformatter = LATITUDE_FORMATTER
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
+
+    if iFlag_zebra ==1:
+        ax.set_axis_off()
+        ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
+
     if iFlag_title==1:
         ax.set_title( sTitle )
 
     pDataset = pLayer = pFeature  = None
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
 
     if sFilename_output_in is None:
         plt.show()

@@ -260,10 +260,10 @@ def map_vector_polyline_data(iFiletype_in,
         if sGeometry_type =='LINESTRING':
             aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
             #aCoords_gcs = aCoords_gcs[:,0:2]
-            dLon_max = np.max( [dLon_max, np.max(aCoords_gcs[:,0])] )
-            dLon_min = np.min( [dLon_min, np.min(aCoords_gcs[:,0])] )
-            dLat_max = np.max( [dLat_max, np.max(aCoords_gcs[:,1])] )
-            dLat_min = np.min( [dLat_min, np.min(aCoords_gcs[:,1])] )
+            dLon_max = float(np.max( [dLon_max, np.max(aCoords_gcs[:,0])] ))
+            dLon_min = float(np.min( [dLon_min, np.min(aCoords_gcs[:,0])] ))
+            dLat_max = float(np.max( [dLat_max, np.max(aCoords_gcs[:,1])] ))
+            dLat_min = float(np.min( [dLat_min, np.min(aCoords_gcs[:,1])] ))
 
     if iFlag_field == 1:
         aValue_field = np.array(aValue_field)
@@ -320,10 +320,10 @@ def map_vector_polyline_data(iFiletype_in,
         prng = np.random.RandomState(1234567890)
         prng.shuffle(aIndex)
         #print(aIndex)
-        colors = mpl.cm.get_cmap(sColormap)(aIndex)
+        colors = plt.colormaps[sColormap](aIndex)
         pCmap = ListedColormap(colors)
     else:
-        pCmap = mpl.cm.get_cmap(sColormap)
+        pCmap = plt.colormaps[sColormap]
 
     if iFlag_thickness ==1:
         aValue_thickness =list()
