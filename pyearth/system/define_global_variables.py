@@ -1,10 +1,11 @@
 """
-this module will be used to define all the global variables 
+this module will be used to define all the global variables
 """
 
-import platform  
+import os, platform
 from pathlib import Path
 import getpass
+from pyearth.system.python.retrieve_python_environment import retrieve_python_environment
 sPlatform_os = platform.system()
 
 sUsername = getpass.getuser()
@@ -14,18 +15,18 @@ sWorkspace_home = str(Path.home())
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
     sMachine ='None'
-       
-    sWorkspace_scratch = 'C:'    
+
+    sWorkspace_scratch = 'C:'
 else:  #linux or unix
-    slash = '/'    
-   
+    slash = '/'
+
     if (sPlatform_os == 'Linux'):
-        sWorkspace_scratch =  sWorkspace_home + slash + 'scratch'            
-        
+        sWorkspace_scratch =  sWorkspace_home + slash + 'scratch'
+
     else:
         if (sPlatform_os == 'Darwin'):
             sMachine ='mac'
-            sWorkspace_scratch =  sWorkspace_home + slash + 'scratch'  
+            sWorkspace_scratch =  sWorkspace_home + slash + 'scratch'
         else:
             pass
 
@@ -60,5 +61,10 @@ feet2meter = 0.3048
 inch2mm = 25.4
 cms2cmd = 24 * 3600
 
-
 earth_radius = 6378137.0
+
+sConda_env_path , sConda_env_name = retrieve_python_environment()
+os.environ['LD_LIBRARY_PATH'] = f"{sConda_env_path}/lib:${{LD_LIBRARY_PATH}}"
+os.environ['PROJ_LIB'] = sConda_env_path + '/share/proj'
+
+

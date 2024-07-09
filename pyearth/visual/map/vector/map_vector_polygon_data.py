@@ -76,8 +76,6 @@ def map_vector_polygon_data(iFiletype_in,
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
     pSRS_geodetic = ccrs.Geodetic()
 
-
-
     if iFiletype_in == 1:  # geojson
         pDriver = ogr.GetDriverByName('GeoJSON')
     else:
@@ -95,6 +93,10 @@ def map_vector_polygon_data(iFiletype_in,
         return
 
     pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
+    if pDataset is None:
+        print('Dataset not available')
+        return
+
     pLayer = pDataset.GetLayer(0)
 
     if iDPI_in is not None:
@@ -246,17 +248,17 @@ def map_vector_polygon_data(iFiletype_in,
             for i in range(pGeometry_in.GetGeometryCount()):
                 pPolygon = pGeometry_in.GetGeometryRef(i)
                 aCoords_gcs = get_geometry_coordinates(pPolygon)
-                dLon_max = np.max([dLon_max, np.max(aCoords_gcs[:, 0])])
-                dLon_min = np.min([dLon_min, np.min(aCoords_gcs[:, 0])])
-                dLat_max = np.max([dLat_max, np.max(aCoords_gcs[:, 1])])
-                dLat_min = np.min([dLat_min, np.min(aCoords_gcs[:, 1])])
+                dLon_max = float(np.max([dLon_max, np.max(aCoords_gcs[:, 0])]))
+                dLon_min = float(np.min([dLon_min, np.min(aCoords_gcs[:, 0])]))
+                dLat_max = float(np.max([dLat_max, np.max(aCoords_gcs[:, 1])]))
+                dLat_min = float(np.min([dLat_min, np.min(aCoords_gcs[:, 1])]))
         else:
             if sGeometry_type == 'POLYGON':
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                dLon_max = np.max([dLon_max, np.max(aCoords_gcs[:, 0])])
-                dLon_min = np.min([dLon_min, np.min(aCoords_gcs[:, 0])])
-                dLat_max = np.max([dLat_max, np.max(aCoords_gcs[:, 1])])
-                dLat_min = np.min([dLat_min, np.min(aCoords_gcs[:, 1])])
+                dLon_max = float(np.max([dLon_max, np.max(aCoords_gcs[:, 0])]))
+                dLon_min = float(np.min([dLon_min, np.min(aCoords_gcs[:, 0])]))
+                dLat_max = float(np.max([dLat_max, np.max(aCoords_gcs[:, 1])]))
+                dLat_min = float(np.min([dLat_min, np.min(aCoords_gcs[:, 1])]))
 
     if iFlag_field == 1:
         aValue = np.array(aValue)
@@ -314,10 +316,10 @@ def map_vector_polygon_data(iFiletype_in,
         prng = np.random.RandomState(1234567890)
         prng.shuffle(aIndex)
         #print(aIndex)
-        colors = mpl.cm.get_cmap(sColormap)(aIndex)
+        colors = plt.colormaps[sColormap](aIndex)
         pCmap = ListedColormap(colors)
     else:
-        pCmap = mpl.cm.get_cmap(sColormap)
+        pCmap = plt.colormaps[sColormap]
 
     if aExtent_in is None:
         marginx = (dLon_max - dLon_min) / 20
@@ -474,7 +476,7 @@ def map_vector_polygon_data(iFiletype_in,
             aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
             if iFlag_fill == True:
                 pPC = PatchCollection(aPatch, alpha=dAlpha,
-                                      edgecolor=None,
+                                      edgecolor='none',
                                       facecolor=aColor,
                                       linewidths=0.25,
                                       transform=pProjection_data)

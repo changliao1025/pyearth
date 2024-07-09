@@ -32,7 +32,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         print("Couldn't open this file: " + sFilename_in)
         sys.exit("Try again!")
     else:
-        dMissing_value = -9999.0
+        #dMissing_value = -9999.0 #we will not assign a default missing value
         pProjection = pDataset.GetProjection()
         pDataset.GetMetadata()
         ncolumn = pDataset.RasterXSize
@@ -44,7 +44,6 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
         dPixelWidth = pGeotransform[1]
         dPixelHeight = pGeotransform[5]
         #we will use one of them to keep the consistency
-        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
 
         if iFlag_metadata_only ==1:
             pass
@@ -80,8 +79,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
                 'ncolumn': ncolumn,
                 #'missingValue': dMissing_value,
                 'geotransform': pGeotransform,
-                'projection': pProjection,
-                'spatialReference': pSpatial_reference
+                'projection': pProjection
             }
             return pData
 
@@ -97,8 +95,7 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
                 'ncolumn': ncolumn,
                 'missingValue': dMissing_value,
                 'geotransform': pGeotransform,
-                'projection': pProjection,
-                'spatialReference': pSpatial_reference
+                'projection': pProjection
             }
             return pData
 
@@ -152,7 +149,6 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
         dt = type(dummy_data)
         #there is a chance that GDAL datetype is not compatiable with numpy datatype.
         dMissing_value = pBand.GetNoDataValue()
-        pSpatial_reference = osr.SpatialReference(wkt=pProjection)
 
         if iFlag_metadata_only ==1:
             pass
@@ -177,8 +173,7 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
                 'ncolumn': ncolumn,
                 #'missingValue': dMissing_value,
                 'geotransform': pGeotransform,
-                'projection': pProjection,
-                'spatialReference': pSpatial_reference
+                'projection': pProjection
             }
             return pData
         else:
@@ -193,7 +188,6 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
                 'ncolumn': ncolumn,
                 'missingValue': dMissing_value,
                 'geotransform': pGeotransform,
-                'projection': pProjection,
-                'spatialReference': pSpatial_reference
+                'projection': pProjection
             }
             return pData

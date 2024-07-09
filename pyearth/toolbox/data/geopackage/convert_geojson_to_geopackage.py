@@ -1,7 +1,9 @@
 import os
 from osgeo import ogr, gdal
 
-def convert_geojson_to_geopackage(sFilename_geojson_in, sFilename_geopackage_out = None, sLayername_in = 'layer'):
+def convert_geojson_to_geopackage(sFilename_geojson_in,
+                                  sFilename_geopackage_out = None,
+                                  sLayername_in = 'layer'):
     pDriver_gpkg = ogr.GetDriverByName('GPKG')
     #check if the pDriver_gpkg is available
     if pDriver_gpkg is None:
