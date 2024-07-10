@@ -124,7 +124,7 @@ def resample_raster(sFilename_in, sFilename_out, dResolution_x, dResolution_y,
     pDataset_clip = pDriver_tiff.Create(sFilename_out, iNewWidth, iNewHeigh, 1, iData_type) #this data type may be provided as an input argument
     pDataset_clip.SetGeoTransform( newGeoTransform )
     pDataset_clip.SetProjection( pProjection_target)
-
+    pDataset_clip.GetRasterBand(1).SetNoDataValue(dMissing_value_target)
     pWrapOption = gdal.WarpOptions( cropToCutline=False, #could be true if vector file is provided
                                 width=iNewWidth,
                                     height=iNewHeigh,
@@ -137,10 +137,11 @@ def resample_raster(sFilename_in, sFilename_out, dResolution_x, dResolution_y,
     aData_clip = pDataset_clip_warped.ReadAsArray()
     #change the gdal data type to numpy data type
     iData_type_numpy = gdal_to_numpy_datatype(iData_type)
-
     aData_clip = aData_clip.astype(iData_type_numpy)
     aData_clip[aData_clip == dMissing_value_source] = dMissing_value_target
     pDataset_clip.GetRasterBand(1).WriteArray(aData_clip)
+    pDataset_clip.GetRasterBand(1).FlushCache()  # Corrected method name to FlushCache()
+    pDataset_clip.FlushCache()
     pDataset_clip = None
     pSpatialRef_source = None
     pSpatialRef_target = None
