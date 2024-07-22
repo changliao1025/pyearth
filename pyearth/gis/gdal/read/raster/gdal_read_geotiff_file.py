@@ -23,8 +23,6 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
 
     if pDriver is None:
         print ("%s pDriver not available.\n" % sDriverName)
-    else:
-        print  ("%s pDriver IS available.\n" % sDriverName)
 
     pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
 
