@@ -120,13 +120,17 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
     options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
     pDatasource_raster = pRaster_Driver.Create(sFilename_raster_out, ncolumn, nrow, 1, eType=iDataType, options= options)
 
+    if pDatasource_raster is None:
+        print('Error: Could not create raster file.')
+        return
+
     pDatasource_raster.SetGeoTransform((dMin_x, dResolution_x, 0, dMax_y, 0, -dResolution_y))
     band = pDatasource_raster.GetRasterBand(1)
     band.Fill(dMissing_value)
     band.SetNoDataValue(dMissing_value)
 
     # get spatial reference system and assign to raster
-    pDatasource_raster.SetProjection(pSpatialRef_target.ExportToWkt())
+    pDatasource_raster.SetProjection(pProjection_target)
 
     if iFlag_use_field_value == 1:
         if iFlag_boundary_only == 0:
@@ -163,5 +167,5 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
     pDatasource_raster = None
     pSpatialRef_source = None
     pSpatialRef_target = None
-
+    print('Rasterization completed successfully.')
     return
