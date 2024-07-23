@@ -25,7 +25,7 @@ iYear_current = datetime.datetime.now().year
 #convert to string
 sYear = str(iYear_current)
 
-def map_multiple_vector_data(aFiletype_in,
+def map_multiple_vector_files(aFiletype_in,
                              aFilename_in,
                              iFlag_colorbar_in = None,
                              iFlag_title_in = None,

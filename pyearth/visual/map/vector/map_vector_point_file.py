@@ -12,7 +12,7 @@ from pyearth.visual.formatter import OOMFormatter
 pProjection = cpl.crs.PlateCarree()
 
 
-def map_vector_point_data(iFiletype_in,
+def map_vector_point_file(iFiletype_in,
                           sFilename_in,
                           aImage_extent,
                           sFilename_output_in,

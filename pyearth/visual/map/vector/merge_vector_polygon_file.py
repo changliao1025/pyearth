@@ -2,7 +2,7 @@ import os
 import numpy as np
 from osgeo import osr, gdal, ogr
 
-def merge_vector_polygon_data(iFiletype_in,
+def merge_vector_polygon_file(iFiletype_in,
                               aFilename_in,
                               aVariable_in,
                               sFilename_out,

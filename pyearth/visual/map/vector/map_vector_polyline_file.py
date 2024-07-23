@@ -15,7 +15,7 @@ from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinat
 from pyearth.toolbox.math.stat.remap import remap
 from pyearth.visual.map.zebra_frame import zebra_frame
 
-def map_vector_polyline_data(iFiletype_in,
+def map_vector_polyline_file(iFiletype_in,
                              sFilename_in,
                              sVariable_in=None,
                              sFilename_output_in=None,

@@ -22,7 +22,7 @@ import datetime
 iYear_current = datetime.datetime.now().year
 #convert to string
 sYear = str(iYear_current)
-def map_vector_polygon_data(iFiletype_in,
+def map_vector_polygon_file(iFiletype_in,
                             sFilename_in,
                             sVariable_in=None,
                             sFilename_output_in=None,
