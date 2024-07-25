@@ -7,11 +7,13 @@ import cartopy as cpl
 from osgeo import osr, gdal, ogr
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from pyearth.system.define_global_variables import *
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.visual.formatter import log_formatter
 from pyearth.visual.formatter import OOMFormatter
+from pyearth.visual.map.zebra_frame import zebra_frame
 
-pProjection = cpl.crs.PlateCarree()
+pProjection_default = cpl.crs.PlateCarree()
 
 def map_raster_file(sFilename_in,
                     sFilename_output_in=None,
@@ -30,6 +32,7 @@ def map_raster_file(sFilename_in,
                     sUnit_in=None,
                     aExtent_in=None,
                     pProjection_map_in=None,
+                    pProjection_data_in=None,
                     aLabel_legend_in=None):
 
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
@@ -53,6 +56,7 @@ def map_raster_file(sFilename_in,
     aImage_extent = [dXmin, dXmax, dYmin, dYmax]
     #get the data of the first layer
     aImage_in = pBand.ReadAsArray()
+    dNoData = pBand.GetNoDataValue()
 
     aImage_in = np.array(aImage_in)
 
@@ -84,7 +88,10 @@ def map_raster_file(sFilename_in,
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
     else:
-        dMissing_value = np.nanmin(aImage_in)
+        if dNoData is not None:
+            dMissing_value = dNoData
+        else:
+            dMissing_value = np.nanmin(aImage_in)
 
     dummy_index = np.where(aImage_in == dMissing_value)
     aImage_in[dummy_index] = np.nan
@@ -93,7 +100,7 @@ def map_raster_file(sFilename_in,
         dData_max = dData_max_in
     else:
         dData_max = np.nanmax(aImage_in)
-        print(dData_max)
+        #print(dData_max)
 
     if dData_min_in is not None:
         dData_min = dData_min_in
@@ -147,10 +154,28 @@ def map_raster_file(sFilename_in,
     # fig.set_figwidth( iSize_x )
     # fig.set_figheight( iSize_y )
 
+    pSpatial_refernce = osr.SpatialReference(pProjection)
+    sCode = pSpatial_refernce.GetAttrValue('AUTHORITY', 1)
+
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
-        pProjection_map = pProjection
+        #use the raster projection to set the map projection
+        if pSpatial_refernce.IsProjected():
+            pProjection_map = ccrs.epsg(sCode)
+        else:
+            pProjection_map = pSRS_wgs84
+        pass
+
+    if pProjection_data_in is not None:
+        pProjection_data = pProjection_data_in
+    else:
+        if pSpatial_refernce.IsProjected():
+            pProjection_data = ccrs.epsg(sCode)
+        else:
+            pProjection_data = pSRS_wgs84
+
+
 
     if aExtent_in is None:
         aExtent = aImage_extent
@@ -165,16 +190,16 @@ def map_raster_file(sFilename_in,
     ax.set_ymargin(0.10)
 
     rasterplot = ax.imshow(aImage_in, origin='upper',
-                           extent=aExtent,
+                           extent=aImage_extent,
                            cmap=cmap,
-                           transform=pProjection)
+                           transform=pProjection_data)
 
     if iFlag_contour == 1:
         aPercentiles_in = np.arange(33, 67, 33)
         levels = cgpercentiles(
             aImage_in, aPercentiles_in, missing_value_in=-9999)
         contourplot = ax.contour(aImage_in, levels, colors='k', origin='upper',
-                                 extent=aExtent, transform=pProjection, linewidths=0.5)
+                                 extent=aExtent, transform=pProjection_data, linewidths=0.5)
 
         if iFlag_scientific_notation_colorbar == 1:
             ax.clabel(contourplot, contourplot.levels,
@@ -216,7 +241,13 @@ def map_raster_file(sFilename_in,
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k',
                        'rotation': 90, 'weight': 'normal'}
-    ax_cb = fig.add_axes([0.75, 0.1, 0.02, 0.7])
+
+    fig.canvas.draw()
+    # Section 2
+    ax_pos = ax.get_position() # get the original position
+    #use this ax to set the colorbar ax position
+    ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+    #ax_cb = fig.add_axes([0.75, 0.1, 0.02, 0.7])
 
     rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
 
@@ -230,8 +261,9 @@ def map_raster_file(sFilename_in,
                           extend=sExtend, format=formatter)
 
     cb.ax.get_yaxis().set_ticks_position('right')
-    cb.ax.get_yaxis().labelpad = 10
-    cb.ax.set_ylabel(sUnit, rotation=270)
+    cb.ax.get_yaxis().labelpad = 3
+    cb.ax.set_ylabel(sUnit, rotation=90)
+    cb.ax.get_yaxis().set_label_position('left')
     cb.ax.tick_params(labelsize=6)
     minx,  maxx, miny, maxy = aExtent
     if iFlag_zebra == 1:
