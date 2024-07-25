@@ -94,7 +94,8 @@ def map_raster_file(sFilename_in,
             dMissing_value = np.nanmin(aImage_in)
 
     dummy_index = np.where(aImage_in == dMissing_value)
-    aImage_in[dummy_index] = np.nan
+    if len(dummy_index[0]) > 0:
+        aImage_in[dummy_index] = np.nan
 
     if dData_max_in is not None:
         dData_max = dData_max_in
