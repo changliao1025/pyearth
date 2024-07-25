@@ -19,11 +19,10 @@ def map_raster_file(sFilename_in,
                     sFilename_output_in=None,
                     iFlag_scientific_notation_colorbar_in=None,
                     iFlag_contour_in=None,
-                    iFlag_colorbar_in=1,
                     sColormap_in=None,
                     sTitle_in=None,
                     iDPI_in=None,
-                    iFlag_zebra_in=None,
+                     iFlag_zebra_in=None,
                     dMissing_value_in=None,
                     dData_max_in=None,
                     dData_min_in=None,
@@ -177,6 +176,8 @@ def map_raster_file(sFilename_in,
         else:
             pProjection_data = pSRS_wgs84
 
+
+
     if aExtent_in is None:
         aExtent = aImage_extent
     else:
@@ -242,29 +243,29 @@ def map_raster_file(sFilename_in,
     gl.ylabel_style = {'size': 10, 'color': 'k',
                        'rotation': 90, 'weight': 'normal'}
 
+    fig.canvas.draw()
+    # Section 2
+    ax_pos = ax.get_position() # get the original position
+    #use this ax to set the colorbar ax position
+    ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+    #ax_cb = fig.add_axes([0.75, 0.1, 0.02, 0.7])
+
     rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
 
-    if iFlag_colorbar_in == 1:
-        fig.canvas.draw()
-        # Section 2
-        ax_pos = ax.get_position() # get the original position
-        #use this ax to set the colorbar ax position
-        ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
-        #ax_cb = fig.add_axes([0.75, 0.1, 0.02, 0.7])
-        if iFlag_scientific_notation_colorbar == 1:
-            formatter = OOMFormatter(fformat="%1.1e")
-            cb = plt.colorbar(rasterplot, cax=ax_cb,
-                              extend=sExtend, format=formatter)
-        else:
-            formatter = OOMFormatter(fformat="%1.1f")
-            cb = plt.colorbar(rasterplot, cax=ax_cb,
-                              extend=sExtend, format=formatter)
+    if iFlag_scientific_notation_colorbar == 1:
+        formatter = OOMFormatter(fformat="%1.1e")
+        cb = plt.colorbar(rasterplot, cax=ax_cb,
+                          extend=sExtend, format=formatter)
+    else:
+        formatter = OOMFormatter(fformat="%1.1f")
+        cb = plt.colorbar(rasterplot, cax=ax_cb,
+                          extend=sExtend, format=formatter)
 
-        cb.ax.get_yaxis().set_ticks_position('right')
-        cb.ax.get_yaxis().labelpad = 3
-        cb.ax.set_ylabel(sUnit, rotation=90)
-        cb.ax.get_yaxis().set_label_position('left')
-        cb.ax.tick_params(labelsize=6)
+    cb.ax.get_yaxis().set_ticks_position('right')
+    cb.ax.get_yaxis().labelpad = 3
+    cb.ax.set_ylabel(sUnit, rotation=90)
+    cb.ax.get_yaxis().set_label_position('left')
+    cb.ax.tick_params(labelsize=6)
     minx,  maxx, miny, maxy = aExtent
     if iFlag_zebra == 1:
         ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
@@ -273,6 +274,7 @@ def map_raster_file(sFilename_in,
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
     ax.set_extent(aExtent, crs = pSRS_wgs84)
+
 
     # .show()
 
