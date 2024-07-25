@@ -296,3 +296,6 @@ def map_raster_file(sFilename_in,
                 plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
         plt.close('all')
         plt.clf()
+
+    print('Finish plotting raster map')
+    return
