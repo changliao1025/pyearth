@@ -39,6 +39,10 @@ def map_raster_file(sFilename_in,
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
     pSRS_geodetic = ccrs.Geodetic()
 
+    if os.path.exists(sFilename_in) == False:
+        print('Error: file does not exist', sFilename_in)
+        return
+
     #ask gdal to open the raster file
     pDataset = gdal.Open(sFilename_in)
     #get the number of bands
@@ -141,7 +145,8 @@ def map_raster_file(sFilename_in,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     cmap = mpl.cm.get_cmap(sColormap)
@@ -297,5 +302,5 @@ def map_raster_file(sFilename_in,
         plt.close('all')
         plt.clf()
 
-    print('Finish plotting raster map')
+        print('Finish plotting raster map', sFilename_output_in)
     return
