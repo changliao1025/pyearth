@@ -11,7 +11,7 @@ import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
-
+from pyearth.visual.formatter import OOMFormatter
 from pyearth.toolbox.math.stat.remap import remap
 from pyearth.visual.map.zebra_frame import zebra_frame
 
@@ -81,6 +81,10 @@ def map_vector_polyline_file(iFiletype_in,
             pDriver = ogr.GetDriverByName('Esri Shapefile')
         else:
             pDriver = ogr.GetDriverByName('Parquet')
+
+    if os.path.exists(sFilename_in) is False:
+        print('file does not exist')
+        return
 
     pDataset = pDriver.Open(sFilename_in, gdal.GA_ReadOnly)
     pLayer = pDataset.GetLayer(0)
@@ -417,9 +421,24 @@ def map_vector_polyline_file(iFiletype_in,
         ax_pos = ax.get_position() # get the original position
         #use this ax to set the colorbar ax position
         ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
-        if iFlag_discrete ==1:
-            formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0d}".format(x))
+        if iFlag_scientific_notation_colorbar == 1:
+            formatter = OOMFormatter(fformat="%1.1e")
             cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                           cmap=pCmap,
+                                           norm=mpl.colors.Normalize(
+                                               dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+        else:
+            if iFlag_discrete ==1:
+                formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0f}".format(x))
+                cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                           cmap=pCmap,
+                                           norm=mpl.colors.Normalize(
+                                               dValue_min, dValue_max),  # vmax and vmin
+                                           extend=sExtend, format=formatter)
+            else:
+                formatter = OOMFormatter(fformat="%1.2f")
+                cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
                                            cmap=pCmap,
                                            norm=mpl.colors.Normalize(
                                                dValue_min, dValue_max),  # vmax and vmin

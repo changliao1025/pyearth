@@ -30,6 +30,7 @@ def map_multiple_vector_files(aFiletype_in,
                              iFlag_colorbar_in = None,
                              iFlag_title_in = None,
                              iFlag_zebra_in=None,
+                             iFlag_filter_in = None,
                              aFlag_thickness_in = None,
                              aFlag_color_in = None,
                              aFlag_discrete_in = None,
@@ -133,6 +134,12 @@ def map_multiple_vector_files(aFiletype_in,
         iFlag_colorbar = iFlag_colorbar_in
     else:
         iFlag_colorbar = 0
+
+    if iFlag_filter_in is not None:
+        iFlag_filter = iFlag_filter_in
+    else:
+        iFlag_filter = 0
+
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
@@ -293,6 +300,8 @@ def map_multiple_vector_files(aFiletype_in,
 
 
     minx, miny, maxx, maxy = aExtent
+
+
     #====================================
     #should we allow more than one scale for one variable?
     aValue_all = list()
@@ -380,7 +389,9 @@ def map_multiple_vector_files(aFiletype_in,
         aThickness=list()
         aPolygon = list()
         aColor = list()
-        pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
+
+        if iFlag_filter == 1:
+            pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
 
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
