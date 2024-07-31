@@ -1,40 +1,44 @@
 import os
+import datetime
+from collections import defaultdict
 import numpy as np
 from osgeo import  osr, gdal, ogr
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import cartopy as cpl
-import cartopy.crs as ccrs
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from matplotlib.colors import ListedColormap
 from matplotlib.collections import PathCollection
 from matplotlib.path import Path
-from pyearth.toolbox.data.cgpercentiles import cgpercentiles
-from pyearth.visual.formatter import OOMFormatter
-from pyearth.toolbox.math.stat.remap import remap
-from pyearth.visual.map.zebra_frame import zebra_frame
+import cartopy as cpl
+import cartopy.crs as ccrs
+from cartopy.io.img_tiles import OSM
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.system.define_global_variables import *
-pProjection = cpl.crs.PlateCarree()
+from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+from pyearth.toolbox.data.cgpercentiles import cgpercentiles
+from pyearth.toolbox.math.stat.remap import remap
+from pyearth.visual.formatter import OOMFormatter
+from pyearth.visual.map.zebra_frame import zebra_frame
+
+
+iYear_current = datetime.datetime.now().year
+sYear = str(iYear_current)
 
 
 def map_vector_point_file(iFiletype_in,
                             sFilename_in,
-                            sVariable_in=None,
                             sFilename_output_in=None,
                             iFlag_scientific_notation_colorbar_in=None,
-                            iFlag_thickness_in =None,
                             iFlag_color_in = None,
                             iFlag_colorbar_in=None,
                             iFlag_zebra_in=None,
-                            iFlag_fill_in=None,
+                            iFlag_size_in=None,
                             iFont_size_in=None,
                             iFlag_discrete_in=None,
                             iFlag_filter_in = None,
                             iFlag_openstreetmap_in = None,
                             iFlag_openstreetmap_level_in = None,
                             sColormap_in=None,
-                            sField_thickness_in = None,
+                            sField_size_in = None,
                             sField_color_in=None,
                             sTitle_in=None,
                             iDPI_in=None,
@@ -44,13 +48,13 @@ def map_vector_point_file(iFiletype_in,
                             dData_max_in=None,
                             dData_min_in=None,
                             sExtend_in=None,
+                            sLocation_legend_in=None,
                             sFont_in=None,
                             sUnit_in=None,
                             aLegend_in=None,
                             aExtent_in=None,
                             pProjection_map_in=None,
-                            pProjection_data_in = None,
-                            iFlag_debug = 0):
+                            pProjection_data_in = None):
 
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
     pSRS_geodetic = ccrs.Geodetic()
@@ -87,10 +91,15 @@ def map_vector_point_file(iFiletype_in,
     else:
         iSize_y = 8
 
-    if iFlag_thickness_in is not None:
-        iFlag_thickness = iFlag_thickness_in
+    if iFlag_size_in is not None:
+        iFlag_size = iFlag_size_in
     else:
-        iFlag_thickness = 0
+        iFlag_size = 0
+
+    if iFlag_discrete_in is not None:
+        iFlag_discrete = iFlag_discrete_in
+    else:
+        iFlag_discrete = 0
 
     if iFlag_colorbar_in is not None:
         iFlag_colorbar = iFlag_colorbar_in
@@ -122,34 +131,11 @@ def map_vector_point_file(iFiletype_in,
     else:
         iFlag_scientific_notation_colorbar = 0
 
-    iFlag_discrete = 0
-    if iFlag_color == 1:
-        pLayerdefn = pLayer.GetLayerDefn()
-        nField = pLayerdefn.GetFieldCount()
-        if nField == 0:
-            iFlag_color = 0
-            iFlag_field = 0
-            iFlag_discrete = 0
-        else:
-            iFlag_field = 1
-            sField0 = pLayerdefn.GetFieldDefn(0).name
-
-        if sVariable_in is not None:
-            sVariable = sVariable_in
-        else:
-            sVariable = sField0
-    else:
-        iFlag_field = 0
-        iFlag_discrete = 0
-
-    nFeature = pLayer.GetFeatureCount()
 
     if dMissing_value_in is not None:
         dMissing_value = dMissing_value_in
     else:
         dMissing_value = -9999
-
-
 
     if dData_min_in is not None:
         iFlag_data_min = 1
@@ -170,11 +156,6 @@ def map_vector_point_file(iFiletype_in,
     else:
         sColormap = 'rainbow'
 
-    if sField_thickness_in is not None:
-        sField_thickness = sField_thickness_in
-    else:
-        sField_thickness = ''
-
     if sTitle_in is not None:
         sTitle = sTitle_in
         iFlag_title = 1
@@ -187,34 +168,41 @@ def map_vector_point_file(iFiletype_in,
     else:
         sExtend = 'max'
 
-    if sField_color_in is not None:
-        sField_color = sField_color_in
+    if sLocation_legend_in is not None:
+        sLocation_legend = sLocation_legend_in
     else:
-        sField_color = 'id'
+        sLocation_legend = 'best'
 
     if sUnit_in is not None:
         sUnit = sUnit_in
     else:
         sUnit = ''
 
-
-    fig = plt.figure(dpi=iDPI)
-    # fig.set_figwidth( iSize_x )
-    # fig.set_figheight( iSize_y )
-    ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection)
-
-    # set a margin around the data
-    ax.set_xmargin(0.05)
-    ax.set_ymargin(0.10)
-
     if sFont_in is not None:
         sFont = sFont_in
     else:
         sFont = "Times New Roman"
 
+    if iFlag_color == 1:
+        #check color field
+        if sField_color_in  is not None:
+            sField_color = sField_color_in
+        else:
+            print('Color field is not provided')
+            return
 
-    plt.rcParams["font.family"] = sFont
+    if iFlag_size == 1:
+        if sField_size_in is not None:
+            sField_size = sField_size_in
+        else:
+            print('Size field is not provided')
+            return
+
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
+
+
     fig = plt.figure( dpi=iDPI)
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
@@ -224,36 +212,24 @@ def map_vector_point_file(iFiletype_in,
     dLat_max = -90
     dLon_min = 180
     dLon_max = -180
-    aValue_field = list()
-
-    if iFlag_color == 1:
-        pLayerdefn = pLayer.GetLayerDefn()
-        nField = pLayerdefn.GetFieldCount()
-        if nField == 0:
-            iFlag_color = 0
-            iFlag_field = 0
-            iFlag_discrete = 0
-        else:
-            iFlag_field = 1
-            sField0 = pLayerdefn.GetFieldDefn(0).name
-
-        if sVariable_in is not None:
-            sVariable = sVariable_in
-        else:
-            sVariable = sField0
-    else:
-        iFlag_field = 0
-        iFlag_discrete = 0
-
+    aValue_field_color = list()
     nFeature = pLayer.GetFeatureCount()
+    aValue_field_color = list()
+    aValue_field_size = list()
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        if iFlag_field == 1:
+        if iFlag_color == 1:
             field_value = pFeature.GetField(sField_color)
-            dValue = float(pFeature.GetField(sField_color))
-            aValue_field.append(dValue)
+            dValue = float(field_value)
+            aValue_field_color.append(dValue)
+
+        if iFlag_size == 1:
+            field_value = pFeature.GetField(sField_size)
+            dValue = float(field_value)
+            aValue_field_size.append(dValue)
+
         if sGeometry_type =='POINT':
             aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
             #aCoords_gcs = aCoords_gcs[:,0:2]
@@ -262,39 +238,37 @@ def map_vector_point_file(iFiletype_in,
             dLat_max = float(np.max( [dLat_max, np.max(aCoords_gcs[:,1])] ))
             dLat_min = float(np.min( [dLat_min, np.min(aCoords_gcs[:,1])] ))
 
-    if iFlag_field == 1:
-        aValue_field = np.array(aValue_field)
+    if iFlag_color == 1:
+        aValue_field_color = np.array(aValue_field_color)
         if iFlag_discrete ==1:
             #convert to integer
-            aValue_field = np.array(aValue_field, dtype=int)
+            aValue_field_color = np.array(aValue_field_color, dtype=int)
             #reorder it
-            aValue_field = np.unique(aValue_field)
-            aValue_field = np.sort(aValue_field)
-            nValue_field = len(aValue_field) #get unique values from the aValue_field
+            aValue_field_color = np.unique(aValue_field_color)
+            aValue_field_color = np.sort(aValue_field_color)
+            nValue_field = len(aValue_field_color) #get unique values from the aValue_field_color
 
         if iFlag_data_min == 1:  # min is provided
-            dValue_min = dData_min  # np.min(aValue_field)
+            dValue_min = dData_min  # np.min(aValue_field_color)
         else:
-            aValue_field = aValue_field[aValue_field != dMissing_value]
-            dValue_min = np.min(aValue_field)
+            aValue_field_color = aValue_field_color[aValue_field_color != dMissing_value]
+            dValue_min = np.min(aValue_field_color)
 
         if iFlag_data_max == 1:  # max is provided
-            dValue_max = dData_max  # np.max(aValue_field)
+            dValue_max = dData_max  # np.max(aValue_field_color)
         else:
-            aValue_field = aValue_field[aValue_field != dMissing_value]
-            dValue_max = np.max(aValue_field)
+            aValue_field_color = aValue_field_color[aValue_field_color != dMissing_value]
+            dValue_max = np.max(aValue_field_color)
 
-        aValue_field = np.clip(aValue_field, a_min=dValue_min, a_max=dValue_max)
-
+        aValue_field_color = np.clip(aValue_field_color, a_min=dValue_min, a_max=dValue_max)
         print(dValue_min, dValue_max)
-
-        # print(sVariable,dValue_min, dValue_max )
         if dValue_max == dValue_min:
-            iFlag_same_value = 1
             return
-        else:
-            iFlag_same_value = 0
-            pass
+
+    if iFlag_size == 1:
+        aValue_field_size = np.array(aValue_field_size)
+        dValue_size_max = np.max(aValue_field_size)
+        dValue_size_min = np.min(aValue_field_size)
 
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
@@ -309,38 +283,40 @@ def map_vector_point_file(iFiletype_in,
 
     ax = fig.add_axes([0.1, 0.15, 0.75, 0.8] , projection=pProjection_map ) #request.crs
     ax.set_global()
-
+    ax.coastlines(color='black', linewidth=1,resolution='10m')
 
     if iFlag_discrete ==1:
         aIndex = np.linspace(0,1,nValue_field)
         prng = np.random.RandomState(1234567890)
         prng.shuffle(aIndex)
-        #print(aIndex)
         colors = plt.colormaps[sColormap](aIndex)
         pCmap = ListedColormap(colors)
     else:
         pCmap = plt.colormaps[sColormap]
 
-    if iFlag_thickness ==1:
-        aValue_thickness =list()
-        for pFeature in pLayer:
-            dValue_thickness = pFeature.GetField(sField_thickness)
-            aValue_thickness.append(dValue_thickness)
+    iSize_max = 50.0
+    iSize_min = 10.0
 
-        aValue_thickness = np.array(aValue_thickness)
-        dValue_thickness_max = np.max(aValue_thickness)
-        dValue_thickness_min = np.min(aValue_thickness)
-
-    iThickness_max = 2.5
-    iThickness_min = 0.3
-    #switch to collection in next development
-    aPoint = list()
-    aColor = list()
-    aThickness = list()
     if aExtent_in is None:
-        marginx  = (dLon_max - dLon_min) / 20
-        marginy  = (dLat_max - dLat_min) / 20
-        aExtent = [dLon_min - marginx , dLon_max + marginx , dLat_min - marginy , dLat_max + marginy]
+        marginx = (dLon_max - dLon_min) / 20
+        marginy = (dLat_max - dLat_min) / 20
+        if (dLat_max + marginy)> 90:
+            dLat_max = 90
+        else:
+            dLat_max = dLat_max + marginy
+        if (dLat_min - marginy) < -90:
+            dLat_min = -90
+        else:
+            dLat_min = dLat_min - marginy
+        if (dLon_max + marginx) > 180:
+            dLon_max = 180
+        else:
+            dLon_max = dLon_max + marginx
+        if (dLon_min - marginx) < -180:
+            dLon_min = -180
+        else:
+            dLon_min = dLon_min - marginx
+        aExtent = [dLon_min, dLon_max, dLat_min, dLat_max]
     else:
         aExtent = aExtent_in
 
@@ -349,68 +325,153 @@ def map_vector_point_file(iFiletype_in,
     minx, miny, maxx, maxy = aExtent
     if iFlag_filter == 1:
         pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
-    paths = []
+
+    if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
+        if iFlag_openstreetmap_level_in is not None:
+            iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+        else:
+            iFlag_openstreetmap_level = 9
+            pass
+
+        osm_tiles = OSM()
+        #Add the OSM image to the map
+        ax.add_image(osm_tiles, iFlag_openstreetmap_level, alpha=0.5)
+        sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
+        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+
+        #we also need to set transparency for the image to be added
+        dAlpha = 0.9
+    else:
+        dAlpha = 1.0
+
+    aPoint_x = list()
+    aPoint_y = list()
+    aColor = list()
+    aSize = list()
+    aMarker = list()
+
+    iFlag_special = 1
+
+    aMarker_label = {
+    'o': 'Unstructured better',
+    '^': 'Structured better',
+    }
+
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        if iFlag_thickness ==1:
-            dValue_thickness = pFeature.GetField(sField_thickness)
         if iFlag_color ==1:
             dValue_color = pFeature.GetField(sField_color)
+            if iFlag_special == 1:
+                dValue_color2 = pFeature.GetField('nse1') #special for case study
+        if iFlag_size ==1:
+            dValue_thickness = pFeature.GetField(sField_size)
+            if iFlag_special == 1:
+                dValue_thickness1 = pFeature.GetField('nse1')
+
         if sGeometry_type =='POINT':
             aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-            aCoords_gcs = aCoords_gcs[:,0:2]
-            nvertex = len(aCoords_gcs)
-            if nvertex == 2 :
-                dLon_label = 0.5 * (aCoords_gcs[0][0] + aCoords_gcs[1][0] )
-                dLat_label = 0.5 * (aCoords_gcs[0][1] + aCoords_gcs[1][1] )
+            aPoint_x.append(aCoords_gcs[0,0])
+            aPoint_y.append(aCoords_gcs[0,1])
+
+            if iFlag_color ==1:
+                if iFlag_special == 1:
+                    iValue = dValue_color2 - dValue_color
+                    if iValue > 0:
+                        iColor_index =  (dValue_color2-dValue_min ) /(dValue_max - dValue_min )
+                        iMarker = 'o'
+                    else:
+                        iColor_index =   (dValue_color-dValue_min ) /(dValue_max - dValue_min )
+                        iMarker = '^'
+                    color = pCmap(iColor_index)
+                else:
+                    if iFlag_discrete ==1:
+                        iValue = dValue_color
+                        iColor_index = np.where(aValue_field_color == iValue)[0][0]
+                        color = pCmap(iColor_index)
+                    else:
+                        color_index = (dValue_thickness-dValue_size_min ) /(dValue_size_max - dValue_size_min )
+                        color = pCmap(color_index)
+
             else:
-                lIndex_mid = int(nvertex/2)
-                dLon_label = aCoords_gcs[lIndex_mid][0]
-                dLat_label = aCoords_gcs[lIndex_mid][1]
-
-            codes = np.full(nvertex, mpl.path.Path.LINETO, dtype=int )
-            codes[0] = mpl.path.Path.MOVETO
-            path = mpl.path.Path(aCoords_gcs, codes)
-            paths.append(path)
-            x, y = zip(*path.vertices)
-
-            if iFlag_thickness ==1:
-                iThickness = remap( dValue_thickness, dValue_thickness_min, dValue_thickness_max, iThickness_min, iThickness_max )
+                color = 'blue'
+            aColor.append(color)
+            if iFlag_size ==1:
+                if iFlag_special == 1:
+                    iValue = dValue_color2 - dValue_color
+                    if iValue > 0:
+                        iThickness = remap( dValue_thickness1, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
+                    else:
+                        iThickness = remap( dValue_thickness, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
+                else:
+                    iThickness = remap( dValue_thickness, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
             else:
                 iThickness = 1.0
 
-            aThickness.append(iThickness)
-
-            if iFlag_color ==1:
-                if iFlag_thickness ==1:
-                    color_index = (dValue_thickness-dValue_thickness_min ) /(dValue_thickness_max - dValue_thickness_min )
-                    color = pCmap(color_index)
-                else:
-                    iValue = dValue_color
-                    
-                    #find its index in the aValue_field array
-                    iColor_index = np.where(aValue_field == iValue)[0][0]
-                    color = pCmap(iColor_index)
-            else:
-                color = 'blue'
-
-            aColor.append(color)
-            aPoint.append(list(zip(x, y)))
+            aSize.append(iThickness)
+            aMarker.append(iMarker)
             lID = lID + 1
 
-    #paths = [Path([point]) for point in aPoint]
-    pPC = PathCollection(paths, alpha=0.8, edgecolor=aColor,
-                                 facecolor=aColor, transform=pProjection_data)
-    ax.add_collection(pPC)
+    #pPC = PathCollection(aPoint, alpha=dAlpha, edgecolor=aColor,
+    #                             facecolor=aColor, transform=pProjection_data)
+    #ax.add_collection(pPC)
+    marker_groups = defaultdict(lambda: {'x': [], 'y': [], 'color': [], 'size': []})
+    for x, y, color, size, marker in zip(aPoint_x, aPoint_y, aColor, aSize, aMarker):
+        marker_groups[marker]['x'].append(x)
+        marker_groups[marker]['y'].append(y)
+        marker_groups[marker]['color'].append(color)
+        marker_groups[marker]['size'].append(size)
+    for marker, group in marker_groups.items():
+        ax.scatter(group['x'], group['y'], c=group['color'], s=group['size'], alpha=dAlpha, transform=pProjection_data, marker=marker)
+
+    #scatter = ax.scatter(aPoint_x, aPoint_y, c=aColor, s=aSize, alpha=dAlpha, transform=pProjection_data, marker=aMarker)
+
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    #gridline
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
+                      linewidth=1, color='gray', alpha=0.5, linestyle='--',
+                      xlocs=np.arange(minx, maxx+(maxx-minx)/9, (maxx-minx)/8),
+                      ylocs=np.arange(miny, maxy+(maxy-miny)/9, (maxy-miny)/8))
+
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+    gl.xlocator = mpl.ticker.MaxNLocator(4)
+    gl.ylocator = mpl.ticker.MaxNLocator(4)
+    gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
+    gl.ylabel_style = {'size': 10, 'color': 'k',
+                       'rotation': 90, 'weight': 'normal'}
 
     if iFlag_zebra ==1:
         ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
         ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
         ax.set_axis_off()
 
-    ax.coastlines(color='black', linewidth=1,resolution='10m')
-    ax.set_title(sTitle)
+    if iFlag_title is None:
+        ax.set_title( sTitle )
+    else:
+        if iFlag_title==1:
+            ax.set_title( sTitle )
+        else:
+            pass
+        ax.set_title(sTitle)
+    if aLegend_in is not None:
+        nlegend = len(aLegend_in)
+        dLocation0 = 0.96
+        for i in range(nlegend):
+            sText = aLegend_in[i]
+            dLocation = dLocation0 - i * 0.06
+            ax.text(0.03, dLocation, sText,
+                    verticalalignment='top', horizontalalignment='left',
+                    transform=ax.transAxes,
+                    color='black', fontsize=iFont_size-2 )
+    else:
+        # Create proxy artists for the legend
+        unique_markers = list(marker_groups.keys())
+        proxy_artists = [plt.Line2D([0], [0], marker=marker, color='w', markerfacecolor='k', markersize=10) for marker in unique_markers]
+        labels = [aMarker_label.get(marker, marker) for marker in unique_markers]
+        # Add legend to the plot
+        ax.legend(proxy_artists, labels, loc=sLocation_legend, fontsize=iFont_size-2)
 
     if iFlag_colorbar == 1:
         fig.canvas.draw()
@@ -447,62 +508,13 @@ def map_vector_point_file(iFiletype_in,
         cb.ax.get_yaxis().set_label_position('left')
         cb.ax.tick_params(labelsize=iFont_size-2)
 
-    if aLegend_in is not None:
-        nlegend = len(aLegend_in)
-        for i in range(nlegend):
-            sText = aLegend_in[i]
-            dLocation = 0.06 + i * 0.04
-            ax.text(0.03, dLocation, sText,
-                    verticalalignment='top', horizontalalignment='left',
-                    transform=ax.transAxes,
-                    color='black', fontsize=6)
-
-            pass
-
-
-
-    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
-                      linewidth=1, color='gray', alpha=0.5, linestyle='--',
-                      xlocs=np.arange(minx, maxx+(maxx-minx)/9, (maxx-minx)/8),
-                      ylocs=np.arange(miny, maxy+(maxy-miny)/9, (maxy-miny)/8))
-    gl.xformatter = LONGITUDE_FORMATTER
-    gl.yformatter = LATITUDE_FORMATTER
-    gl.xlocator = mpl.ticker.MaxNLocator(4)
-    gl.ylocator = mpl.ticker.MaxNLocator(4)
-    gl.xlabel_style = {'size': 8, 'color': 'k', 'rotation':0, 'ha':'right'}
-    gl.ylabel_style = {'size': 8, 'color': 'k', 'rotation':90,'weight': 'normal'}
-
 
     if iFlag_zebra ==1:
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
-    if aLegend_in is not None:
-        nlegend = len(aLegend_in)
-        dLocation0 = 0.96
-        for i in range(nlegend):
-            sText = aLegend_in[i]
-            dLocation = dLocation0 - i * 0.06
-            ax.text(0.03, dLocation, sText,
-                    verticalalignment='top', horizontalalignment='left',
-                    transform=ax.transAxes,
-                    color='black', fontsize=iFont_size-2 )
-
-            pass
-
-    if iFlag_title is None:
-        ax.set_title( sTitle )
-    else:
-        if iFlag_title==1:
-            ax.set_title( sTitle )
-        else:
-            pass
-        ax.set_title(sTitle)
-
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
     pDataset = pLayer = pFeature  = None
 
-
-
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
     if sFilename_output_in is None:
         plt.show()
     else:
@@ -523,3 +535,5 @@ def map_vector_point_file(iFiletype_in,
                 plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
         plt.close('all')
         plt.clf()
+
+    print('Finished plotting point map')

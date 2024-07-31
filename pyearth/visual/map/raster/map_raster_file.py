@@ -146,7 +146,7 @@ def map_raster_file(sFilename_in,
         sFont = "Times New Roman"
 
     plt.rcParams['font.family'] = 'DeJavu Serif'
-    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['font.serif'] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     cmap = mpl.cm.get_cmap(sColormap)

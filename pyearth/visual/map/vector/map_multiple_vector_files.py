@@ -1,4 +1,5 @@
 import os
+import datetime
 import numpy as np
 from osgeo import  osr, gdal, ogr
 from matplotlib.colors import ListedColormap
@@ -20,9 +21,8 @@ from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinat
 from pyearth.visual.formatter import OOMFormatter
 
 #get the current year for openstreetmap copy right label
-import datetime
+
 iYear_current = datetime.datetime.now().year
-#convert to string
 sYear = str(iYear_current)
 
 def map_multiple_vector_files(aFiletype_in,
@@ -44,6 +44,8 @@ def map_multiple_vector_files(aFiletype_in,
                              sColormap_in = None,
                              sTitle_in = None,
                              iDPI_in = None,
+                             iSize_x_in = None,
+                             iSize_y_in = None,
                              aMissing_value_in = None,
                              aData_max_in = None,
                              aData_min_in = None,
@@ -145,6 +147,16 @@ def map_multiple_vector_files(aFiletype_in,
     else:
         iDPI = 300
 
+    if iSize_x_in is not None:
+        iSize_x = iSize_x_in
+    else:
+        iSize_x = 8
+
+    if iSize_y_in is not None:
+        iSize_y = iSize_y_in
+    else:
+        iSize_y = 8
+
     if iFlag_title_in is not None:
         iFlag_title = iFlag_title_in
         if iFlag_title == 1:
@@ -217,13 +229,12 @@ def map_multiple_vector_files(aFiletype_in,
     else:
         aVariable = aVariable_in
 
-    plt.rcParams["font.family"] = sFont
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     cmap = plt.colormaps[sColormap]
     fig = plt.figure( dpi = iDPI  )
-    iSize_x= 8
-    iSize_y= 8
     fig.set_figwidth( iSize_x )
     fig.set_figheight( iSize_y )
 
@@ -272,18 +283,36 @@ def map_multiple_vector_files(aFiletype_in,
         pProjection_data = pSRS_wgs84
 
     ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection= pProjection_map  ) #projection=ccrs.PlateCarree()
-
+    ax.set_global()
+    ax.coastlines(color='black', linewidth=1,resolution='10m')
     # Create an OSM image tile source
     if aExtent_in is None:
-        marginx  = (dLon_max - dLon_min) / 20
-        marginy  = (dLat_max - dLat_min) / 20
-        aExtent = [dLon_min - marginx , dLon_max + marginx , dLat_min -marginy , dLat_max + marginy]
+        marginx = (dLon_max - dLon_min) / 20
+        marginy = (dLat_max - dLat_min) / 20
+        if (dLat_max + marginy)> 90:
+            dLat_max = 90
+        else:
+            dLat_max = dLat_max + marginy
+        if (dLat_min - marginy) < -90:
+            dLat_min = -90
+        else:
+            dLat_min = dLat_min - marginy
+        if (dLon_max + marginx) > 180:
+            dLon_max = 180
+        else:
+            dLon_max = dLon_max + marginx
+        if (dLon_min - marginx) < -180:
+            dLon_min = -180
+        else:
+            dLon_min = dLon_min - marginx
+        aExtent = [dLon_min, dLon_max, dLat_min, dLat_max]
     else:
         aExtent = aExtent_in
 
-    ax.set_global()
     print(aExtent)
     ax.set_extent(aExtent, crs = pSRS_wgs84)
+    minx, miny, maxx, maxy = aExtent
+
     if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
         if iFlag_openstreetmap_level_in is not None:
             iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
@@ -298,8 +327,6 @@ def map_multiple_vector_files(aFiletype_in,
         ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
                 color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
-
-    minx, miny, maxx, maxy = aExtent
 
 
     #====================================
@@ -482,6 +509,19 @@ def map_multiple_vector_files(aFiletype_in,
                                       transform=pProjection_data)
             ax.add_collection(pPC)
 
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
+                      linewidth=1, color='gray', alpha=0.5, linestyle='--',
+                      xlocs=np.arange(minx, maxx+(maxx-minx)/9, (maxx-minx)/8),
+                      ylocs=np.arange(miny, maxy+(maxy-miny)/9, (maxy-miny)/8))
+
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+    gl.xlocator = mpl.ticker.MaxNLocator(4)
+    gl.ylocator = mpl.ticker.MaxNLocator(4)
+    gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
+    gl.ylabel_style = {'size': 10, 'color': 'k',
+                       'rotation': 90, 'weight': 'normal'}
+
     if iFlag_zebra == 1:
         ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
         ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
@@ -489,15 +529,25 @@ def map_multiple_vector_files(aFiletype_in,
 
     #reset extent
     ax.set_extent(aExtent, crs = pSRS_wgs84)
-    ax.coastlines(color='black', linewidth=0.5)
-    iFlag_label = 0
-    if iFlag_label == 1:
-        sText = 'Manaus'
-        dLongitude_label = -60.016667
-        dLatitude_label  = -3.1
-        ax.text(dLongitude_label, dLatitude_label, sText,
-                verticalalignment='center', horizontalalignment='center',
-                color='black', fontsize=iFont_size,transform=pProjection_data)
+
+    #iFlag_label = 0
+    #if iFlag_label == 1:
+    #    sText = 'Manaus'
+    #    dLongitude_label = -60.016667
+    #    dLatitude_label  = -3.1
+    #    ax.text(dLongitude_label, dLatitude_label, sText,
+    #            verticalalignment='center', horizontalalignment='center',
+    #            color='black', fontsize=iFont_size,transform=pProjection_data)
+
+
+    if iFlag_title is None:
+        ax.set_title( sTitle )
+    else:
+        if iFlag_title==1:
+            ax.set_title( sTitle )
+        else:
+            pass
+        ax.set_title(sTitle)
 
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
@@ -535,22 +585,12 @@ def map_multiple_vector_files(aFiletype_in,
         cb.ax.set_ylabel(sUnit, rotation=270)
         cb.ax.tick_params(labelsize=6)
 
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                      linewidth=1, color='gray', alpha=0.5, linestyle='--')
-    gl.xformatter = LONGITUDE_FORMATTER
-    gl.yformatter = LATITUDE_FORMATTER
-    gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation':0, 'ha':'right'}
-    gl.ylabel_style = {'size': 10, 'color': 'k', 'rotation':90,'weight': 'normal'}
-
     if iFlag_zebra ==1:
         ax.set_axis_off()
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
-    if iFlag_title==1:
-        ax.set_title( sTitle )
-
-    pDataset = pLayer = pFeature  = None
     ax.set_extent(aExtent, crs = pSRS_wgs84)
+    pDataset = pLayer = pFeature  = None
 
     if sFilename_output_in is None:
         plt.show()
