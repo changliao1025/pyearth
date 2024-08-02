@@ -455,6 +455,7 @@ def map_vector_point_file(iFiletype_in,
         else:
             pass
         ax.set_title(sTitle)
+        
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
         dLocation0 = 0.96

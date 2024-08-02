@@ -187,12 +187,15 @@ def map_raster_file(sFilename_in,
     else:
         aExtent = aExtent_in
 
+    minx,  maxx, miny, maxy = aExtent
 
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection_map)
 
     # set a margin around the data
-    ax.set_xmargin(0.05)
-    ax.set_ymargin(0.10)
+    #ax.set_xmargin(0.05)
+    #ax.set_ymargin(0.10)
+    ax.set_global()
+    ax.coastlines(color='black', linewidth=1,resolution='10m')
 
     rasterplot = ax.imshow(aImage_in, origin='upper',
                            extent=aImage_extent,
@@ -213,8 +216,27 @@ def map_raster_file(sFilename_in,
             ax.clabel(contourplot, contourplot.levels,
                       inline=True, fmt=sFormat_contour, fontsize=7)
 
-    ax.coastlines(color='black', linewidth=1)
-    ax.set_title(sTitle)
+    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    #gridline
+    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
+                      linewidth=1, color='gray', alpha=0.5, linestyle='--',
+                      xlocs=np.arange(minx, maxx+(maxx-minx)/9, (maxx-minx)/8),
+                      ylocs=np.arange(miny, maxy+(maxy-miny)/9, (maxy-miny)/8))
+
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+    gl.xlocator = mpl.ticker.MaxNLocator(4)
+    gl.ylocator = mpl.ticker.MaxNLocator(4)
+    gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
+    gl.ylabel_style = {'size': 10, 'color': 'k',
+                       'rotation': 90, 'weight': 'normal'}
+
+    rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
+
+    if iFlag_zebra == 1:
+        ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+        ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
+        ax.set_axis_off()
 
     if aLabel_legend_in is not None:
         # plot the first on the top
@@ -236,18 +258,15 @@ def map_raster_file(sFilename_in,
 
             pass
 
-    ax.set_extent(aExtent)
+    if iFlag_title is None:
+        ax.set_title( sTitle )
+    else:
+        if iFlag_title==1:
+            ax.set_title( sTitle )
+        else:
+            pass
+        ax.set_title(sTitle)
 
-    gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
-                      linewidth=1, color='gray', alpha=0.5, linestyle='--')
-    gl.xformatter = LONGITUDE_FORMATTER
-    gl.yformatter = LATITUDE_FORMATTER
-
-    gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
-    gl.ylabel_style = {'size': 10, 'color': 'k',
-                       'rotation': 90, 'weight': 'normal'}
-
-    rasterplot.set_clim(vmin=dData_min, vmax=dData_max)
 
     if iFlag_colorbar_in == 1:
         fig.canvas.draw()
@@ -270,16 +289,12 @@ def map_raster_file(sFilename_in,
         cb.ax.set_ylabel(sUnit, rotation=90)
         cb.ax.get_yaxis().set_label_position('left')
         cb.ax.tick_params(labelsize=6)
-    minx,  maxx, miny, maxy = aExtent
-    if iFlag_zebra == 1:
-        ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
-        ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
-        ax.set_axis_off()
+
+
+    if iFlag_zebra ==1:
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
     ax.set_extent(aExtent, crs = pSRS_wgs84)
-
-    # .show()
 
     if sFilename_output_in is None:
         plt.show()
