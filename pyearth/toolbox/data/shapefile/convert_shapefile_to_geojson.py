@@ -27,6 +27,6 @@ def convert_shapefile_to_geojson(sFilename_shapefile_in, sFilename_geojson_out =
     pLayer_out = pDataset_out.CopyLayer(pLayer_in, sLayername_in)
     pDataset_in = pDataset_out = None
     pLayer_in = pLayer_out = None
-
+    print(f'Conversion completed successfully. GeoJSON file saved as {sFilename_geojson_out}')
     return
 

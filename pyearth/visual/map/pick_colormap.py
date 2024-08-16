@@ -19,6 +19,7 @@ def pick_colormap_hydrology(sVariable_in):
       'channel width': 'YlGnBu',
       'channel depth': 'Blues',
       'flood fraction': 'Blues',
+      'nse': 'Spectral',
   }
 
   return colormap_dict.get(sVariable_in.lower(), 'viridis')
