@@ -113,6 +113,9 @@ def map_raster_data(aImage_in,
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.10)
 
+    #skip nan using masked array
+    aImage_in = np.ma.masked_invalid(aImage_in)
+
     rasterplot = ax.imshow(aImage_in, origin='upper',
                            extent=aImage_extent,
                            cmap=cmap,
