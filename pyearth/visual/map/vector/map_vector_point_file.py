@@ -59,6 +59,9 @@ def map_vector_point_file(iFiletype_in,
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
     pSRS_geodetic = ccrs.Geodetic()
 
+    iCount0 = 0
+    iCount1 = 0
+
     if iFiletype_in == 1:  # geojson
         pDriver = ogr.GetDriverByName('GeoJSON')
     else:
@@ -354,8 +357,9 @@ def map_vector_point_file(iFiletype_in,
     iFlag_special = 1
 
     aMarker_label = {
-    'o': 'Unstructured better',
-    '^': 'Structured better',
+    'o': 'MPAS mesh-based better',
+    '^': 'DRT mesh-based better',
+    's': 'The same',
     }
 
     for pFeature in pLayer:
@@ -378,12 +382,20 @@ def map_vector_point_file(iFiletype_in,
             if iFlag_color ==1:
                 if iFlag_special == 1:
                     iValue = dValue_color2 - dValue_color
-                    if iValue > 0:
+                    if dValue_color2 ==  dValue_color :
                         iColor_index =  (dValue_color2-dValue_min ) /(dValue_max - dValue_min )
-                        iMarker = 'o'
+                        iMarker = 's'
+                        #color = 'white'
                     else:
-                        iColor_index =   (dValue_color-dValue_min ) /(dValue_max - dValue_min )
-                        iMarker = '^'
+                        if iValue > 0:
+                            iCount1 = iCount1 + 1
+                            iColor_index =  (dValue_color2-dValue_min ) /(dValue_max - dValue_min )
+                            iMarker = 'o'
+                        else:
+                            iCount0 = iCount0 + 1
+                            iColor_index =   (dValue_color-dValue_min ) /(dValue_max - dValue_min )
+                            iMarker = '^'
+
                     color = pCmap(iColor_index)
                 else:
                     if iFlag_discrete ==1:
@@ -412,6 +424,8 @@ def map_vector_point_file(iFiletype_in,
             aSize.append(iThickness)
             aMarker.append(iMarker)
             lID = lID + 1
+
+    print(iCount0, iCount1)
 
     #pPC = PathCollection(aPoint, alpha=dAlpha, edgecolor=aColor,
     #                             facecolor=aColor, transform=pProjection_data)
@@ -455,7 +469,7 @@ def map_vector_point_file(iFiletype_in,
         else:
             pass
         ax.set_title(sTitle)
-        
+
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
         dLocation0 = 0.96
@@ -469,6 +483,8 @@ def map_vector_point_file(iFiletype_in,
     else:
         # Create proxy artists for the legend
         unique_markers = list(marker_groups.keys())
+        #reorder them and put square on the last
+        unique_markers = [marker for marker in unique_markers if marker != 's'] + ['s']
         proxy_artists = [plt.Line2D([0], [0], marker=marker, color='w', markerfacecolor='k', markersize=10) for marker in unique_markers]
         labels = [aMarker_label.get(marker, marker) for marker in unique_markers]
         # Add legend to the plot

@@ -133,7 +133,9 @@ def plot_time_series_data(aTime_all,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams["font.family"] = sFont
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = sFont
+    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
     if aMarker_in is not None:
         aMarker = aMarker_in
@@ -498,6 +500,8 @@ def plot_time_series_data(aTime_all,
         plt.savefig(sFilename_out, bbox_inches='tight')
         plt.close('all')
         plt.clf()
+        print("The figure is saved to {0}".format(sFilename_out))
+        return
     else:
         plt.show()
         return
