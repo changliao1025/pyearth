@@ -8,11 +8,11 @@ def filter_vector_by_attribute(sFilename_input, sFilename_output, sAttribute_nam
     pDataSource_in = pDriver_parquet.Open(sFilename_input, 0)
     if pDataSource_in is None:
         print("Could not open input file")
-        return    
-    
+        return
+
     if os.path.exists(sFilename_output):
         os.remove(sFilename_output)
-    
+
     pLayer_in = pDataSource_in.GetLayer()
     #get spatial reference
     pSpatialRef = pLayer_in.GetSpatialRef()
@@ -37,3 +37,4 @@ def filter_vector_by_attribute(sFilename_input, sFilename_output, sAttribute_nam
 
     # Close the data sources
     pDataSource_in = pDataSource_out = None
+    print('filter_vector_by_attribute is done', sFilename_output)
