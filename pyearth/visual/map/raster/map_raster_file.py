@@ -20,6 +20,7 @@ def map_raster_file(sFilename_in,
                     iFlag_scientific_notation_colorbar_in=None,
                     iFlag_contour_in=None,
                     iFlag_colorbar_in=1,
+                    iFlag_coastlines_in=1,
                     sColormap_in=None,
                     sTitle_in=None,
                     iDPI_in=None,
@@ -195,7 +196,8 @@ def map_raster_file(sFilename_in,
     #ax.set_xmargin(0.05)
     #ax.set_ymargin(0.10)
     ax.set_global()
-    ax.coastlines(color='black', linewidth=1,resolution='10m')
+    if iFlag_coastlines_in is not None:
+        ax.coastlines(color='black', linewidth=1,resolution='10m')
 
     rasterplot = ax.imshow(aImage_in, origin='upper',
                            extent=aImage_extent,
