@@ -2,7 +2,7 @@ import os
 import numpy as np
 from osgeo import osr, gdal, ogr
 
-def merge_vector_polygon_file(iFiletype_in,
+def merge_vector_polygon_files(iFiletype_in,
                               aFilename_in,
                               aVariable_in,
                               sFilename_out,
@@ -73,7 +73,7 @@ def merge_vector_polygon_file(iFiletype_in,
         dValue = np.sum(aValue)
 
         pFeature_out.SetGeometry(pGeometry_out)
-        pFeature_out.SetField('cellid', lID)
+        pFeature_out.SetField('id', lID)
         pFeature_out.SetField(sVar, float(dValue))
         pLayer_out.CreateFeature(pFeature_out)
         lID = lID + 1

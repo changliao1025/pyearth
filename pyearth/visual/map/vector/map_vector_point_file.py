@@ -1,5 +1,6 @@
 import os
 import datetime
+import textwrap
 from collections import defaultdict
 import numpy as np
 from osgeo import  osr, gdal, ogr
@@ -340,7 +341,9 @@ def map_vector_point_file(iFiletype_in,
         #Add the OSM image to the map
         ax.add_image(osm_tiles, iFlag_openstreetmap_level, alpha=0.5)
         sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
-        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+
+        sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=60))
+        ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
                 color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
         #we also need to set transparency for the image to be added
@@ -461,14 +464,9 @@ def map_vector_point_file(iFiletype_in,
         ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
         ax.set_axis_off()
 
-    if iFlag_title is None:
-        ax.set_title( sTitle )
-    else:
-        if iFlag_title==1:
-            ax.set_title( sTitle )
-        else:
-            pass
-        ax.set_title(sTitle)
+    if  iFlag_title == 1:
+        sTitle_wrapped = "\n".join(textwrap.wrap(sTitle, width=50))
+        ax.set_title( sTitle_wrapped )
 
     if aLegend_in is not None:
         nlegend = len(aLegend_in)

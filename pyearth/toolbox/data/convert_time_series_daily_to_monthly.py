@@ -77,11 +77,18 @@ def convert_time_series_daily_to_monthly(aData_daily_in,
                     lJulian = julian.to_jd(dummy2, fmt='jd')
                     # lJulian=gcal2jd(iYear, iMonth, iDay)
                     dummy_index = int(lJulian-lJulian_start)
-                    dummy = dummy + aData_daily[dummy_index]
-                    count = count + 1
+                    dummy3 = aData_daily[dummy_index]
+                    if np.isnan(dummy3):
+                        pass
+                    else:
+                        dummy = dummy + dummy3
+                        count = count + 1
                     pass
 
-                aData_monthly_out.append(dummy/count)
+                if count == 0:
+                    aData_monthly_out.append(np.nan)
+                else:
+                    aData_monthly_out.append(dummy/count)
 
                 pass
             else:
