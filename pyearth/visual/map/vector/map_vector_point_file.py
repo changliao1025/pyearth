@@ -2,6 +2,7 @@ import os
 import datetime
 import textwrap
 from collections import defaultdict
+from urllib.error import URLError
 import numpy as np
 from osgeo import  osr, gdal, ogr
 import matplotlib as mpl
@@ -19,7 +20,7 @@ from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.toolbox.math.stat.remap import remap
 from pyearth.visual.formatter import OOMFormatter
 from pyearth.visual.map.zebra_frame import zebra_frame
-
+from pyearth.visual.map.stadiastamen import StadiaStamen
 
 iYear_current = datetime.datetime.now().year
 sYear = str(iYear_current)
@@ -38,6 +39,7 @@ def map_vector_point_file(iFiletype_in,
                             iFlag_filter_in = None,
                             iFlag_openstreetmap_in = None,
                             iFlag_openstreetmap_level_in = None,
+                            iFlag_terrain_image_in = None,
                             sColormap_in=None,
                             sField_size_in = None,
                             sField_color_in=None,
@@ -330,52 +332,66 @@ def map_vector_point_file(iFiletype_in,
     if iFlag_filter == 1:
         pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
 
-    if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
-        if iFlag_openstreetmap_level_in is not None:
-            iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+    try:
+        dAlpha = 1.0
+        if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
+            from cartopy.io.img_tiles import OSM
+            if iFlag_openstreetmap_level_in is not None:
+                iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+            else:
+                iFlag_openstreetmap_level = 9
+                pass
+
+            osm_tiles = OSM()
+            #Add the OSM image to the map
+            ax.add_image(osm_tiles, iFlag_openstreetmap_level) #, alpha=0.5
+            sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
+            sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=60))
+            ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                    color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+
+            #we also need to set transparency for the image to be added
+            dAlpha = 0.9
         else:
-            iFlag_openstreetmap_level = 9
             pass
 
-        osm_tiles = OSM()
-        #Add the OSM image to the map
-        ax.add_image(osm_tiles, iFlag_openstreetmap_level, alpha=0.5)
-        sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
+        if iFlag_terrain_image_in is not None and iFlag_terrain_image_in == 1:
+            if iFlag_openstreetmap_level_in is not None:
+                iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+            else:
+                iFlag_openstreetmap_level = 8
+                pass
 
-        sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=60))
-        ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
-                color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+            #satellite_tiles = cimgt.Stamen('terrain-background')
+            stamen_terrain = StadiaStamen("terrain-background")
+            ax.add_image(stamen_terrain, iFlag_openstreetmap_level) #, alpha=0.5
+            #add the license information
+            sLicense_info = "© Stamen Design, under a Creative Commons Attribution (CC BY 3.0) license."
+            ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                    color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
-        #we also need to set transparency for the image to be added
-        dAlpha = 0.9
-    else:
+            dAlpha = 0.9
+        else:
+            pass
+    except URLError as e:
+        print('No internet connection')
         dAlpha = 1.0
 
     aPoint_x = list()
     aPoint_y = list()
     aColor = list()
     aSize = list()
-    aMarker = list()
 
-    iFlag_special = 1
-
-    aMarker_label = {
-    'o': 'MPAS mesh-based better',
-    '^': 'DRT mesh-based better',
-    's': 'The same',
-    }
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
+
         if iFlag_color ==1:
             dValue_color = pFeature.GetField(sField_color)
-            if iFlag_special == 1:
-                dValue_color2 = pFeature.GetField('nse1') #special for case study
+
         if iFlag_size ==1:
             dValue_thickness = pFeature.GetField(sField_size)
-            if iFlag_special == 1:
-                dValue_thickness1 = pFeature.GetField('nse1')
 
         if sGeometry_type =='POINT':
             aCoords_gcs = get_geometry_coordinates(pGeometry_in)
@@ -383,66 +399,27 @@ def map_vector_point_file(iFiletype_in,
             aPoint_y.append(aCoords_gcs[0,1])
 
             if iFlag_color ==1:
-                if iFlag_special == 1:
-                    iValue = dValue_color2 - dValue_color
-                    if dValue_color2 ==  dValue_color :
-                        iColor_index =  (dValue_color2-dValue_min ) /(dValue_max - dValue_min )
-                        iMarker = 's'
-                        #color = 'white'
-                    else:
-                        if iValue > 0:
-                            iCount1 = iCount1 + 1
-                            iColor_index =  (dValue_color2-dValue_min ) /(dValue_max - dValue_min )
-                            iMarker = 'o'
-                        else:
-                            iCount0 = iCount0 + 1
-                            iColor_index =   (dValue_color-dValue_min ) /(dValue_max - dValue_min )
-                            iMarker = '^'
-
+                if iFlag_discrete ==1:
+                    iValue = dValue_color
+                    iColor_index = np.where(aValue_field_color == iValue)[0][0]
                     color = pCmap(iColor_index)
                 else:
-                    if iFlag_discrete ==1:
-                        iValue = dValue_color
-                        iColor_index = np.where(aValue_field_color == iValue)[0][0]
-                        color = pCmap(iColor_index)
-                    else:
-                        color_index = (dValue_thickness-dValue_size_min ) /(dValue_size_max - dValue_size_min )
-                        color = pCmap(color_index)
+                    color_index = (dValue_thickness-dValue_size_min ) /(dValue_size_max - dValue_size_min )
+                    color = pCmap(color_index)
 
             else:
                 color = 'blue'
             aColor.append(color)
             if iFlag_size ==1:
-                if iFlag_special == 1:
-                    iValue = dValue_color2 - dValue_color
-                    if iValue > 0:
-                        iThickness = remap( dValue_thickness1, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
-                    else:
-                        iThickness = remap( dValue_thickness, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
-                else:
-                    iThickness = remap( dValue_thickness, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
+                iThickness = remap( dValue_thickness, dValue_size_min, dValue_size_max, iSize_min, iSize_max )
             else:
                 iThickness = 1.0
 
             aSize.append(iThickness)
-            aMarker.append(iMarker)
             lID = lID + 1
 
-    print(iCount0, iCount1)
 
-    #pPC = PathCollection(aPoint, alpha=dAlpha, edgecolor=aColor,
-    #                             facecolor=aColor, transform=pProjection_data)
-    #ax.add_collection(pPC)
-    marker_groups = defaultdict(lambda: {'x': [], 'y': [], 'color': [], 'size': []})
-    for x, y, color, size, marker in zip(aPoint_x, aPoint_y, aColor, aSize, aMarker):
-        marker_groups[marker]['x'].append(x)
-        marker_groups[marker]['y'].append(y)
-        marker_groups[marker]['color'].append(color)
-        marker_groups[marker]['size'].append(size)
-    for marker, group in marker_groups.items():
-        ax.scatter(group['x'], group['y'], c=group['color'], s=group['size'], alpha=dAlpha, transform=pProjection_data, marker=marker)
-
-    #scatter = ax.scatter(aPoint_x, aPoint_y, c=aColor, s=aSize, alpha=dAlpha, transform=pProjection_data, marker=aMarker)
+    scatter = ax.scatter(aPoint_x, aPoint_y, c=aColor, s=aSize, alpha=dAlpha, transform=pProjection_data)
 
     ax.set_extent(aExtent, crs = pSRS_wgs84)
     #gridline
@@ -480,13 +457,7 @@ def map_vector_point_file(iFiletype_in,
                     color='black', fontsize=iFont_size-2 )
     else:
         # Create proxy artists for the legend
-        unique_markers = list(marker_groups.keys())
-        #reorder them and put square on the last
-        unique_markers = [marker for marker in unique_markers if marker != 's'] + ['s']
-        proxy_artists = [plt.Line2D([0], [0], marker=marker, color='w', markerfacecolor='k', markersize=10) for marker in unique_markers]
-        labels = [aMarker_label.get(marker, marker) for marker in unique_markers]
-        # Add legend to the plot
-        ax.legend(proxy_artists, labels, loc=sLocation_legend, fontsize=iFont_size-2)
+        pass
 
     if iFlag_colorbar == 1:
         fig.canvas.draw()

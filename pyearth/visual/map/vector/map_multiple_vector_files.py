@@ -322,7 +322,7 @@ def map_multiple_vector_files(aFiletype_in,
 
         osm_tiles = OSM()
         #Add the OSM image to the map
-        ax.add_image(osm_tiles, iFlag_openstreetmap_level)
+        ax.add_image(osm_tiles, iFlag_openstreetmap_level, alpha=0.7)
         sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
         ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
                 color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))

@@ -445,10 +445,10 @@ def map_vector_polyline_file(iFiletype_in,
         for i in range(nlegend):
             sText = aLegend_in[i]
             dLocation = dLocation0 - i * 0.06
-            ax.text(0.03, dLocation, sText,
+            ax.text(0.05, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=iFont_size-2 )
+                    color='black', fontsize=iFont_size + 2)
 
     if iFlag_zebra ==1:
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)

@@ -1,7 +1,9 @@
 import os
 import datetime
+import textwrap
 import numpy as np
 from osgeo import osr, gdal, ogr
+from urllib.error import URLError
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -10,12 +12,12 @@ from matplotlib.patches import Polygon
 import matplotlib.patches as mpatches
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from cartopy.io.img_tiles import OSM
+
 from pyearth.system.define_global_variables import *
 from pyearth.visual.map.zebra_frame import zebra_frame
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
-
+from pyearth.visual.map.stadiastamen import StadiaStamen
 #osr.UseExceptions()
 #use agg and backend
 #mpl.use('agg')
@@ -36,6 +38,7 @@ def map_vector_polygon_file(iFiletype_in,
                             iFlag_filter_in = None,
                             iFlag_openstreetmap_in = None,
                             iFlag_openstreetmap_level_in = None,
+                            iFlag_terrain_image_in = None,
                             sColormap_in=None,
                             sTitle_in=None,
                             iDPI_in=None,
@@ -349,23 +352,49 @@ def map_vector_polygon_file(iFiletype_in,
         pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
     ax.set_extent(aExtent, crs = pSRS_wgs84)
     ax.coastlines(linewidth=0.5, color='k', resolution='10m')
-    if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
-        if iFlag_openstreetmap_level_in is not None:
-            iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+    try:
+        dAlpha = 1.0
+        if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
+            from cartopy.io.img_tiles import OSM
+            if iFlag_openstreetmap_level_in is not None:
+                iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+            else:
+                iFlag_openstreetmap_level = 9
+                pass
+
+            osm_tiles = OSM()
+            #Add the OSM image to the map
+            ax.add_image(osm_tiles, iFlag_openstreetmap_level) #, alpha=0.5
+            sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
+            sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=60))
+            ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                    color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+
+            #we also need to set transparency for the image to be added
+            dAlpha = 0.5
         else:
-            iFlag_openstreetmap_level = 9
             pass
 
-        osm_tiles = OSM()
-        #Add the OSM image to the map
-        ax.add_image(osm_tiles, iFlag_openstreetmap_level)
-        sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
-        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
-                color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+        if iFlag_terrain_image_in is not None and iFlag_terrain_image_in == 1:
+            if iFlag_openstreetmap_level_in is not None:
+                iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+            else:
+                iFlag_openstreetmap_level = 8
+                pass
 
-        #we also need to set transparency for the image to be added
-        dAlpha = 0.5
-    else:
+            #satellite_tiles = cimgt.Stamen('terrain-background')
+            stamen_terrain = StadiaStamen("terrain-background")
+            ax.add_image(stamen_terrain, iFlag_openstreetmap_level) #, alpha=0.5
+            #add the license information
+            sLicense_info = "© Stamen Design, under a Creative Commons Attribution (CC BY 3.0) license."
+            ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                    color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+
+            dAlpha = 0.5
+        else:
+            pass
+    except URLError as e:
+        print('No internet connection')
         dAlpha = 1.0
 
     aPolygon = list()
@@ -460,6 +489,7 @@ def map_vector_polygon_file(iFiletype_in,
 
     if iFlag_zebra == 1:
         ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+        dummy = (maxy-miny)/10
         ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
         ax.set_axis_off()
 
@@ -478,14 +508,15 @@ def map_vector_polygon_file(iFiletype_in,
         for i in range(nlegend):
             sText = aLegend_in[i]
             dLocation = dLocation0 - i * 0.06
-            ax.text(0.03, dLocation, sText,
+            ax.text(0.05, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=iFont_size-2)
+                    color='black', fontsize=iFont_size + 2)
 
 
     if iFlag_zebra ==1:
-        ax.set_axis_off()
+        #ax.set_axis_off()
+        ax.set_extent(aExtent, crs = pSRS_wgs84)
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
     ax.set_extent(aExtent, crs = pSRS_wgs84)
