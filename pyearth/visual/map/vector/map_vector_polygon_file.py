@@ -17,7 +17,7 @@ from pyearth.system.define_global_variables import *
 from pyearth.visual.map.zebra_frame import zebra_frame
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
-from pyearth.visual.map.stadiastamen import StadiaStamen
+from pyearth.visual.map.map_servers import StadiaStamen
 #osr.UseExceptions()
 #use agg and backend
 #mpl.use('agg')

@@ -344,7 +344,7 @@ def map_vector_polyline_file(iFiletype_in,
 
     print(aExtent)
     ax.set_extent(aExtent, crs = pSRS_wgs84)
-    minx, miny, maxx, maxy = aExtent
+    minx,  maxx, miny, maxy = aExtent
     if iFlag_filter == 1:
         pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
 
@@ -511,4 +511,5 @@ def map_vector_polyline_file(iFiletype_in,
                 plt.savefig(sFilename_out, bbox_inches='tight', format='ps')
         plt.close('all')
         plt.clf()
+        print(sFilename_output_in)
 

@@ -20,7 +20,7 @@ from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.toolbox.math.stat.remap import remap
 from pyearth.visual.formatter import OOMFormatter
 from pyearth.visual.map.zebra_frame import zebra_frame
-from pyearth.visual.map.stadiastamen import StadiaStamen
+from pyearth.visual.map.map_servers import StadiaStamen
 
 iYear_current = datetime.datetime.now().year
 sYear = str(iYear_current)
@@ -328,7 +328,7 @@ def map_vector_point_file(iFiletype_in,
 
     print(aExtent)
     ax.set_extent(aExtent, crs = pSRS_wgs84)
-    minx, miny, maxx, maxy = aExtent
+    minx, maxx, miny,  maxy = aExtent
     if iFlag_filter == 1:
         pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
 
@@ -404,7 +404,7 @@ def map_vector_point_file(iFiletype_in,
                     iColor_index = np.where(aValue_field_color == iValue)[0][0]
                     color = pCmap(iColor_index)
                 else:
-                    color_index = (dValue_thickness-dValue_size_min ) /(dValue_size_max - dValue_size_min )
+                    color_index = (dValue_color-dValue_min ) /(dValue_max - dValue_min )
                     color = pCmap(color_index)
 
             else:

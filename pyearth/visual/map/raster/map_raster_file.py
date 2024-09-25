@@ -3,6 +3,7 @@ import numpy as np
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+plt.ion()
 import cartopy as cpl
 from osgeo import osr, gdal, ogr
 import cartopy.crs as ccrs
@@ -12,6 +13,7 @@ from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.visual.formatter import log_formatter
 from pyearth.visual.formatter import OOMFormatter
 from pyearth.visual.map.zebra_frame import zebra_frame
+from pyearth.gis.spatialref.reproject_coodinates import reproject_coordinates_batch
 
 pProjection_default = cpl.crs.PlateCarree()
 
@@ -19,8 +21,8 @@ def map_raster_file(sFilename_in,
                     sFilename_output_in=None,
                     iFlag_scientific_notation_colorbar_in=None,
                     iFlag_contour_in=None,
-                    iFlag_colorbar_in=1,
-                    iFlag_coastlines_in=1,
+                    iFlag_colorbar_in=None,
+                    iFlag_coastlines_in=None,
                     sColormap_in=None,
                     sTitle_in=None,
                     iDPI_in=None,
@@ -38,6 +40,11 @@ def map_raster_file(sFilename_in,
                     aLabel_legend_in=None):
 
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
+    pSrs = osr.SpatialReference()
+    # Initialize it with EPSG code for WGS84
+    pSrs.ImportFromEPSG(4326)
+    # Export to WKT
+    pProjection_wgs84 = pSrs.ExportToWkt()
     pSRS_geodetic = ccrs.Geodetic()
 
     if os.path.exists(sFilename_in) == False:
@@ -64,7 +71,7 @@ def map_raster_file(sFilename_in,
     aImage_in = pBand.ReadAsArray()
     dNoData = pBand.GetNoDataValue()
 
-    aImage_in = np.array(aImage_in)
+    aImage_in = np.array(aImage_in).astype(float)
 
     pShape = aImage_in.shape
     nrow, ncolumn = aImage_in.shape
@@ -150,7 +157,8 @@ def map_raster_file(sFilename_in,
     plt.rcParams['font.serif'] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
 
-    cmap = mpl.cm.get_cmap(sColormap)
+    #cmap = mpl.cm.get_cmap(sColormap)
+    cmap = plt.colormaps[sColormap]
 
     dummy_index = np.where(aImage_in > dData_max)
     aImage_in[dummy_index] = dData_max
@@ -165,16 +173,6 @@ def map_raster_file(sFilename_in,
     pSpatial_refernce = osr.SpatialReference(pProjection)
     sCode = pSpatial_refernce.GetAttrValue('AUTHORITY', 1)
 
-    if pProjection_map_in is not None:
-        pProjection_map = pProjection_map_in
-    else:
-        #use the raster projection to set the map projection
-        if pSpatial_refernce.IsProjected():
-            pProjection_map = ccrs.epsg(sCode)
-        else:
-            pProjection_map = pSRS_wgs84
-        pass
-
     if pProjection_data_in is not None:
         pProjection_data = pProjection_data_in
     else:
@@ -184,11 +182,25 @@ def map_raster_file(sFilename_in,
             pProjection_data = pSRS_wgs84
 
     if aExtent_in is None:
-        aExtent = aImage_extent
+        #check projection
+        if pSpatial_refernce.IsProjected():
+            #conver the extent to wgs84
+            aX_new, aY_new = reproject_coordinates_batch([aImage_extent[0], aImage_extent[1]], [aImage_extent[2], aImage_extent[3]],
+                                                         pSpatial_refernce.ExportToWkt(), pProjection_target_in=pProjection_wgs84)
+            aExtent_map = [aX_new[0], aX_new[1], aY_new[0], aY_new[1]]
+        else:
+            aExtent_map = aImage_extent
     else:
-        aExtent = aExtent_in
+        aExtent_map = aExtent_in
 
-    minx,  maxx, miny, maxy = aExtent
+    print(aExtent_map)
+    minx, maxx, miny, maxy = aExtent_map #these are in wgs84 projection
+
+    if pProjection_map_in is not None:
+        pProjection_map = pProjection_map_in
+    else:
+        pProjection_map = cpl.crs.Orthographic(central_longitude =  0.50*(maxx+minx),
+                                                central_latitude = 0.50*(miny+maxy), globe=None)
 
     ax = fig.add_axes([0.1, 0.1, 0.63, 0.7], projection=pProjection_map)
 
@@ -199,17 +211,20 @@ def map_raster_file(sFilename_in,
     if iFlag_coastlines_in is not None:
         ax.coastlines(color='black', linewidth=1,resolution='10m')
 
+    print(aImage_extent)
+    ax.set_extent(aExtent_map, crs = pSRS_wgs84)
     rasterplot = ax.imshow(aImage_in, origin='upper',
                            extent=aImage_extent,
-                           cmap=cmap,
-                           transform=pProjection_data)
+                           cmap=cmap,transform=ccrs.PlateCarree())
 
+
+    print('test')
     if iFlag_contour == 1:
         aPercentiles_in = np.arange(33, 67, 33)
         levels = cgpercentiles(
             aImage_in, aPercentiles_in, missing_value_in=-9999)
         contourplot = ax.contour(aImage_in, levels, colors='k', origin='upper',
-                                 extent=aExtent, transform=pProjection_data, linewidths=0.5)
+                                 extent=aExtent_map, transform=pProjection_data, linewidths=0.5)
 
         if iFlag_scientific_notation_colorbar == 1:
             ax.clabel(contourplot, contourplot.levels,
@@ -218,7 +233,7 @@ def map_raster_file(sFilename_in,
             ax.clabel(contourplot, contourplot.levels,
                       inline=True, fmt=sFormat_contour, fontsize=7)
 
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    ax.set_extent(aExtent_map, crs = pSRS_wgs84)
     #gridline
     gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--',
@@ -296,10 +311,11 @@ def map_raster_file(sFilename_in,
     if iFlag_zebra ==1:
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    ax.set_extent(aExtent_map, crs = pSRS_wgs84)
 
     if sFilename_output_in is None:
         plt.show()
+        print('Finished plotting')
     else:
         #remove it if exists
         if os.path.exists(sFilename_output_in):
@@ -320,4 +336,6 @@ def map_raster_file(sFilename_in,
         plt.clf()
 
         print('Finish plotting raster map', sFilename_output_in)
+
+
     return

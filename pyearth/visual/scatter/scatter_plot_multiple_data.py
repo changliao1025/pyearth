@@ -100,7 +100,7 @@ def scatter_plot_multiple_data(aData_x,
     if aLabel_legend_in is not None:
         aLabel_legend = aLabel_legend_in
     else:
-        aLabel_legend = ''
+        aLabel_legend = np.full(nData, '')
 
     if sFont_in is not None:
         sFont = sFont_in
@@ -181,7 +181,7 @@ def scatter_plot_multiple_data(aData_x,
         aColor = aColor_in
 
     if aMarker_in is None:
-        pass
+        aMarker = ['o', '^', 's']
     else:
         aMarker = aMarker_in
 
@@ -234,6 +234,8 @@ def scatter_plot_multiple_data(aData_x,
             pass
 
         for i in range(nData):
+            #set the alpha value so that the top layer is transparent
+            dAlpha= 1.0 - i / float(nData)
             x = aData_x[i]
             y = aData_y[i]
 
@@ -247,7 +249,7 @@ def scatter_plot_multiple_data(aData_x,
             y = y[a]
 
             sc = ax_scatter.scatter(
-                x, y, s=aSize[i], alpha=0.5, color=aColor[i], marker=aMarker[i])
+                x, y, s=aSize[i], color=aColor[i], marker=aMarker[i], alpha=dAlpha, edgecolors='black')
             if iax == 0:
                 aLegend_artist.append(sc)
                 slope, intercept, r_value, p_value, std_err = stats.linregress(

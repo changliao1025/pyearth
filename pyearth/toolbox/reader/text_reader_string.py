@@ -49,16 +49,8 @@ def text_reader_string(sFilename_in,
     ifs = open(sFilename_in, "r", errors='ignore')
     if iSkipline_in is not None:
         nrow_out = nrow_out - iSkipline_in
-        iFlag_check_column = 0
         for i in range(iSkipline_in):
             sLine = ifs.readline()
-            if iFlag_check_column ==0:
-                ncolumn_out = len(sLine.split(','))
-                iFlag_check_column = 1
-                iFlag_column = 1
-            else:
-                pass
-
     else:
         pass
     if iFlag_remove_quota is not None:
