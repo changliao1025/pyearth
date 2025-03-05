@@ -3,7 +3,7 @@ from osgeo import ogr
 from pyearth.toolbox.management.vector.reproject import reproject_vector
 from pyearth.toolbox.management.vector.merge_features import merge_features
 
-def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out):
+def exclude_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out):
     # Open the input shapefile
     pDataset_source = ogr.Open(sFilename_vector_in)
     if pDataset_source is None:
@@ -17,12 +17,16 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
         return
 
      #get the extension of polygon file
-    sExtension_vector = os.path.splitext(sFilename_vector_in)[1]
+    sExtension_source = os.path.splitext(sFilename_vector_in)[1]
     #get the driver for the extension
-    if sExtension_vector == '.geojson':
-        pDriver_vector = ogr.GetDriverByName('GeoJSON')
+    if sExtension_source == '.geojson':
+        pDriver_source = ogr.GetDriverByName('GeoJSON')
     else:
-        pDriver_vector = ogr.GetDriverByName(sExtension_vector)
+        pDriver_source = ogr.GetDriverByName('ESRI Shapefile')
+
+    if pDriver_source is None:
+        print('The driver is not available')
+        return
 
     #delete the output file if it exists
     if os.path.exists(sFilename_vector_out):
@@ -33,11 +37,14 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     #get the spatial reference
     pSpatial_reference_target = pLayer_source.GetSpatialRef()
     pProjection_target = pSpatial_reference_target.ExportToWkt()
+    print(pProjection_target)
 
     # Get the geometry of the clip polygon
     sExtension_clip = os.path.splitext(sFilename_polygon_in)[1]
     pLayer_clip = pDataset_clip.GetLayer()
     pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
+    pProjection_clip = pSpatial_reference_clip.ExportToWkt()
+    print(pProjection_clip)
     #check the number the clip polygon
     nPolygon = pLayer_clip.GetFeatureCount()
     if nPolygon == 0:
@@ -55,11 +62,11 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
             #open the new file
             pDataset_clip = ogr.Open(sFilename_polygon_in)
             pLayer_clip = pDataset_clip.GetLayer(0)
+            # Get the spatial reference of the layer
+            pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
+            pProjection_clip = pSpatial_reference_clip.ExportToWkt()
+        else:
             pass
-
-    # Get the spatial reference of the layer
-    pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
-    pProjection_clip = pSpatial_reference_clip.ExportToWkt()
 
     if( pProjection_target != pProjection_clip):
         pDataset_clip = None
@@ -69,21 +76,19 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
         sName = os.path.basename(sFilename_polygon_in)
         #get the name of the shapefile without extension
         sName_no_extension = os.path.splitext(sName)[0]
-        sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_vector
+        sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_clip
         reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)
         pDataset_clip = ogr.Open(sFilename_clip_out)
         pLayer_clip = pDataset_clip.GetLayer(0)
 
     #the the extent rectangle of the clip polygon
     pEnvelope = pLayer_clip.GetExtent()
-    minx, maxx, miny,  maxy = pEnvelope
-    pLayer_source.SetSpatialFilterRect(minx, miny, maxx, maxy)
-
+    pLayer_clip.ResetReading()
     pFeature_clip = pLayer_clip.GetNextFeature()
     pPolygon_clip = pFeature_clip.GetGeometryRef()
 
     # Create a new output
-    pDataset_clipped = pDriver_vector.CreateDataSource(sFilename_vector_out )
+    pDataset_clipped = pDriver_source.CreateDataSource(sFilename_vector_out )
     if pDataset_clipped is None:
         print("Error: Could not create the output shapefile.")
         return
@@ -113,9 +118,6 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
             pass
         pass
 
-
-
-
     # Get the feature definition of the source layer
     pFeatureDefn_source = pLayer_source.GetLayerDefn()
 
@@ -125,20 +127,13 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
         pLayer_clipped.CreateField(pFieldDefn_source)
 
     # Apply the clipping operation to each pFeature in the input shapefile
-
     for pFeature in pLayer_source:
         # Get the geometry of the input pFeature
         pGeometry_source = pFeature.GetGeometryRef()
-
         #check pFeature that is entirely within the clip polygon
         if pPolygon_clip.Contains(pGeometry_source):
-            pFeature_clipped = ogr.Feature(pLayer_clipped.GetLayerDefn())
-            pFeature_clipped.SetGeometry(pGeometry_source)
-            # Copy attributes
-            for i in range(0, pFeature.GetFieldCount()):
-                pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
-
-            pLayer_clipped.CreateFeature(pFeature_clipped)
+            #if it is within, we definitely do not want to keep it
+            pass
         else:
             # Perform the clipping operation
             sGeometry_source = pGeometry_source.GetGeometryType()
@@ -152,12 +147,12 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
                     iFlag_ok = 1
                     break
             if iFlag_ok == 1:
-                pGeometry_clip = pGeometry_source.Intersection(pPolygon_clip)
+                pGeometry_clip = pGeometry_source.Difference(pPolygon_clip)
                 # Create a new pFeature in the output layer with the clipped geometry
                 if pGeometry_clip is not None and not pGeometry_clip.IsEmpty():
                     iGeomType_intersect = pGeometry_clip.GetGeometryType()
                     if iGeomType_intersect == iGeomType:
-                        #we only want to keep the clipped geometry that is within the clip polygon
+                        #we only want to keep the clipped geometry that is outside the clip polygon
                         pFeature_clipped = ogr.Feature(pLayer_clipped.GetLayerDefn())
                         pFeature_clipped.SetGeometry(pGeometry_clip)
                         for i in range(0, pFeature.GetFieldCount()):
@@ -169,6 +164,14 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
                         print('Intersect type:', sGeomType)
                         continue
             else:
+                #we actually want to keep the pFeature because it is entirely outside the clip polygon
+                pFeature_clipped = ogr.Feature(pLayer_clipped.GetLayerDefn())
+                pFeature_clipped.SetGeometry(pGeometry_source)
+                # Copy attributes
+                for i in range(0, pFeature.GetFieldCount()):
+                    pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
+
+                pLayer_clipped.CreateFeature(pFeature_clipped)
                 continue
 
     # Close the shapefiles
@@ -179,4 +182,3 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     pSpatial_reference_target = None
 
     print("Clipping completed.")
-

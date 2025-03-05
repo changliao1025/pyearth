@@ -245,7 +245,7 @@ def polygon_difference_cython(sFilename_base,
                 pGeometrytype_intersect = pGeometry_intersect.GetGeometryName()
                 iCount = pGeometry_intersect.GetGeometryCount()
                 if pGeometrytype_intersect == 'POLYGON':
-                    aCoords_gcs = get_geometry_coordinates(pGeometry_intersect)
+                    aCoords_gcs = (pGeometry_intersect)
                     dArea = calculate_polygon_area(aCoords_gcs[:,0], aCoords_gcs[:,1])
                     if dArea > dArea_threshold_in:
                         pFeatureOut.SetGeometry(pGeometry_intersect)

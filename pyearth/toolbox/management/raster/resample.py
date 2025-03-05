@@ -60,81 +60,24 @@ def resample_raster(sFilename_in, sFilename_out, dResolution_x, dResolution_y,
     pSpatialRef_target.ImportFromWkt(pProjection_target)
     #use the same approach gire to define the extent
     #get the extent of raster geotiff file
-
     pDataset_in = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
-
-    if iFlag_wgs84_source == 1:       #from wgs84
-        dLon_min, dLon_max, dLat_min, dLat_max = gdal_get_raster_extent(sFilename_in)
-        if iFlag_wgs84_target == 1: #to wgs84
-            #if the target is wgs84, we can use the same approach
-            nleft  = np.floor(  (dLon_min - (-180)) /(dResolution_x)  )
-            nright = np.ceil(  (dLon_max - (-180)) /(dResolution_x)  )
-            ntop  = np.floor(  (90 - dLat_max) /(dResolution_y)  )
-            nbot = np.ceil(  (90 - dLat_min) /(dResolution_y)  )
-            nrow = int(nbot-ntop)
-            ncolumn = int(nright - nleft)
-
-            dMin_x = -180 + nleft*dResolution_x
-            dMax_y = 90 - ntop*dResolution_y
-        else: #to something else
-            #if the target is not wgs84, we need to reproject the extent
-            pTransform = osr.CoordinateTransformation(pSpatialRef_source, pSpatialRef_target)
-            dX_min, dY_min, _ = pTransform.TransformPoint(dLon_min, dLat_min)
-            dX_max, dY_max, _ = pTransform.TransformPoint(dLon_max, dLat_max)
-            nrow = int((dY_max - dY_min)/dResolution_y)
-            ncolumn = int((dX_max - dX_min)/dResolution_x)
-            dMin_x = dX_min
-            dMax_y = dY_max
-    else:
-        #if it is not wgs84, it has a projection already
-        #get the extent of raster geotiff file
-        dX_min, dX_max, dY_min, dY_max = gdal_get_raster_extent(sFilename_in)
-        #if the projection is not the same, we need to reproject the extent
-        if iFlag_wgs84_target == 1: #to wgs84
-            pTransform = osr.CoordinateTransformation(pSpatialRef_source, pSpatialRef_target)
-            dLon_min, dLat_min, _ = pTransform.TransformPoint(dX_min, dY_min)
-            dLon_max, dLat_max, _ = pTransform.TransformPoint(dX_max, dY_max)
-            nleft  = np.floor(  (dLon_min - (-180)) /(dResolution_x)  )
-            nright = np.ceil(  (dLon_max - (-180)) /(dResolution_x)  )
-            ntop  = np.floor(  (90 - dLat_max) /(dResolution_y)  )
-            nbot = np.ceil(  (90 - dLat_min) /(dResolution_y)  )
-            nrow = int(nbot-ntop)
-            ncolumn = int(nright - nleft)
-            dMin_x = -180 + nleft*dResolution_x
-            dMax_y = 90 - ntop*dResolution_y
-        else: #to something else, but could be the same or different
-            if pProjection_source == pProjection_target:
-                nrow = int((dY_max - dY_min)/dResolution_y)
-                ncolumn = int((dX_max - dX_min)/dResolution_x)
-                dMin_x = dX_min
-                dMax_y = dY_max
-            else: #not the same
-                pTransform = osr.CoordinateTransformation(pSpatialRef_source, pSpatialRef_target)
-                dX_min, dY_min, _ = pTransform.TransformPoint(dX_min, dY_min)
-                dX_max, dY_max, _ = pTransform.TransformPoint(dX_max, dY_max)
-                nrow = int((dY_max - dY_min)/dResolution_y)
-                ncolumn = int((dX_max - dX_min)/dResolution_x)
-                dMin_x = dX_min
-                dMax_y = dY_max
-
-    iNewWidth = ncolumn
-    iNewHeigh = nrow
-
-    newGeoTransform = (dMin_x, dResolution_x, 0, dMax_y, 0, -dResolution_y)
-    pDataset_clip = pDriver_tiff.Create(sFilename_out, iNewWidth, iNewHeigh, 1, iData_type) #this data type may be provided as an input argument
-    pDataset_clip.SetGeoTransform( newGeoTransform )
-    pDataset_clip.SetProjection( pProjection_target)
-    pDataset_clip.GetRasterBand(1).SetNoDataValue(dMissing_value_target)
+    options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
     pWrapOption = gdal.WarpOptions( cropToCutline=False, #could be true if vector file is provided
-                                width=iNewWidth,
-                                    height=iNewHeigh,
+                                     xRes=dResolution_x,
+                                     yRes=dResolution_y,
                                         dstSRS=pSpatialRef_target , format = 'MEM',
                                         resampleAlg=sResampleAlg ) #this resample algorithm may be provided as an input argument
 
     pDataset_clip_warped = gdal.Warp('', pDataset_in, options=pWrapOption)#gdal.Warp(sFilename_out, pDataset_in, options=pWrapOption)
-
+    newGeoTransform = pDataset_clip_warped.GetGeoTransform()
     #convert the warped dataset to an array
     aData_clip = pDataset_clip_warped.ReadAsArray()
+    iNewWidth = aData_clip.shape[1]
+    iNewHeigh = aData_clip.shape[0]
+    pDataset_clip = pDriver_tiff.Create(sFilename_out, iNewWidth, iNewHeigh, 1, iData_type, options= options) #this data type may be provided as an input argument
+    pDataset_clip.SetGeoTransform( newGeoTransform )
+    pDataset_clip.SetProjection( pProjection_target)
+    pDataset_clip.GetRasterBand(1).SetNoDataValue(dMissing_value_target)
     #change the gdal data type to numpy data type
     iData_type_numpy = gdal_to_numpy_datatype(iData_type)
     aData_clip = aData_clip.astype(iData_type_numpy)

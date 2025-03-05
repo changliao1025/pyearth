@@ -1,6 +1,6 @@
 import numpy as np
 from osgeo import ogr
-def retrieve_field_value(sFilename_vector_in, sField_name_in, dMissing_value = None):
+def get_field_value(sFilename_vector_in, sField_name_in, dMissing_value = None):
     # Open the vector file
     ds = ogr.Open(sFilename_vector_in)
     if ds is None:

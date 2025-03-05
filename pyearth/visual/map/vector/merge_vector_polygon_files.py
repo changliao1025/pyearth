@@ -4,9 +4,9 @@ from osgeo import osr, gdal, ogr
 
 def merge_vector_polygon_files(iFiletype_in,
                               aFilename_in,
-                              aVariable_in,
                               sFilename_out,
-                              sVariable_out,
+                              aVariable_in=None,
+                              sVariable_out=None,
                               dMissing_value_in=None,
                               dData_max_in=None,
                               dData_min_in=None,
@@ -17,7 +17,11 @@ def merge_vector_polygon_files(iFiletype_in,
     Args:
 
     """
-    sVar = sVariable_out[0:4].lower()
+    if aVariable_in is not None:
+
+        sVar = sVariable_out[0:4].lower()
+
+
 
     if iFiletype_in == 1:  # geojson
         pDriver = ogr.GetDriverByName('GeoJSON')
@@ -49,13 +53,15 @@ def merge_vector_polygon_files(iFiletype_in,
     # long type for high resolution
     pLayer_out.CreateField(ogr.FieldDefn('id', ogr.OFTInteger64))
     # long type for high resolution
-    pLayer_out.CreateField(ogr.FieldDefn(sVar, ogr.OFTReal))
+    if aVariable_in is not None:
+        pLayer_out.CreateField(ogr.FieldDefn(sVar, ogr.OFTReal))
     pLayerDefn = pLayer_out.GetLayerDefn()
     pFeature_out = ogr.Feature(pLayerDefn)
 
     lID = 1
     for iFeature in range(nFeature):
-        aValue = list()
+        if aVariable_in is not None:
+            aValue = list()
         for iData in range(nDataset):
             pLayer = aDataset[iData].GetLayer(0)
             pFeature = pLayer.GetFeature(iFeature)
@@ -63,18 +69,22 @@ def merge_vector_polygon_files(iFiletype_in,
                 pGeometry_in = pFeature.GetGeometryRef()
                 pGeometry_out = pGeometry_in.Clone()
 
-            sVar_dummy = aVariable_in[iData].lower()
-            sVar_dummy = sVar_dummy[0:4]
-            dValue = float(pFeature.GetField(sVar_dummy))
-            aValue.append(dValue)
+            if aVariable_in is not None:
+                sVar_dummy = aVariable_in[iData].lower()
+                sVar_dummy = sVar_dummy[0:4]
+                dValue = float(pFeature.GetField(sVar_dummy))
+                aValue.append(dValue)
 
-        aValue = np.array(aValue)
-        # take the sum
-        dValue = np.sum(aValue)
+        if aVariable_in is not None:
+            aValue = np.array(aValue)
+            # take the sum
+            dValue = np.sum(aValue)
 
         pFeature_out.SetGeometry(pGeometry_out)
         pFeature_out.SetField('id', lID)
-        pFeature_out.SetField(sVar, float(dValue))
+        if aVariable_in is not None:
+            pFeature_out.SetField(sVar, float(dValue))
+            
         pLayer_out.CreateFeature(pFeature_out)
         lID = lID + 1
 

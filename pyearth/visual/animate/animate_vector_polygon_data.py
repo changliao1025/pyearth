@@ -25,7 +25,7 @@ def animate_vector_polygon_data(
     aExtent_in=None,
     sTitle_in = None,
     pProjection_map_in=None):
-    
+
     if iFigwidth_in is None:
         iFigwidth_in = iFigwidth_default
 
@@ -38,10 +38,10 @@ def animate_vector_polygon_data(
     dLat_min = 90
     dLat_max = -90
     dLon_min = 180
-    dLon_max = -180    
-       
+    dLon_max = -180
+
     aCell_animation = list()
-    aData = list()     
+    aData = list()
     aData_raw = list()
     aLongitude = list()
     aLatitude = list()
@@ -55,7 +55,7 @@ def animate_vector_polygon_data(
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
         sGeometry_type = pGeometry_in.GetGeometryName()
-        if sGeometry_type == "POLYGON":            
+        if sGeometry_type == "POLYGON":
             aCoords_gcs = get_geometry_coordinates(pGeometry_in)
             dLon_max = np.max([dLon_max, np.max(aCoords_gcs[:, 0])])
             dLon_min = np.min([dLon_min, np.min(aCoords_gcs[:, 0])])
@@ -75,7 +75,7 @@ def animate_vector_polygon_data(
     fig.set_figwidth(iFigwidth_in)
     fig.set_figheight(iFigheight_in)
     ax = fig.add_axes([0.1, 0.1, 0.65, 0.8], projection=pProjection_map)
-    ax.set_global()    
+    ax.set_global()
     marginx = (dLon_max - dLon_min) / 20
     marginy = (dLat_max - dLat_min) / 20
     if aExtent_in is None:
@@ -118,7 +118,7 @@ def animate_vector_polygon_data(
             color="black",
             fontsize=9,
         )
-    cmap_reversed = cmap.reversed()   
+    cmap_reversed = cmap.reversed()
 
     #get dataset
     with open(sFilename_animation_json_in) as json_file:
@@ -126,7 +126,7 @@ def animate_vector_polygon_data(
         ncell_animation = len(aCell_animation)
 
     for i in range(ncell_animation):
-        pCell_animation = aCell_animation[i]        
+        pCell_animation = aCell_animation[i]
         aData.append( float(pCell_animation["dElevation"]))
         aData_raw.append(float(pCell_animation["dElevation_raw"]))
         aLongitude.append(float(pCell_animation["dLongitude_center_degree"]))
@@ -186,16 +186,16 @@ def animate_vector_polygon_data(
 
     #calculate ahead
     aColor_index = (aData - dData_min) / (dData_max - dData_min)
-    
-    def animate(i):    
-        # get the time step global id and updated elevation     
+
+    def animate(i):
+        # get the time step global id and updated elevation
         dlon = aLongitude[i]
         dlat = aLatitude[i]
         dummy0 = aData_raw[i]
-        dummy = aData[i]  
+        dummy = aData[i]
         aVertex = aAVertex[i]
         aLocation = np.array([[vertex["dLongitude_degree"], vertex["dLatitude_degree"]] for vertex in aVertex])
-       
+
         rgb = cmap_reversed( aColor_index[i] )
         polygon = mpatches.Polygon(
             aLocation,
@@ -205,7 +205,7 @@ def animate_vector_polygon_data(
             transform=ccrs.Geodetic(),
         )
         pArtist0 = ax.add_patch(polygon)
-        if iFlag_type_in == 1: #??
+        if iFlag_type_in == 1: #full
             dLon_min_zoom = dLon_min
             dLon_max_zoom = dLon_max
             dLat_min_zoom = dLat_min
@@ -218,7 +218,7 @@ def animate_vector_polygon_data(
 
         x = (dlon - dLon_min_zoom) / (dLon_max_zoom - dLon_min_zoom)
         y = (dlat - dLat_min_zoom) / (dLat_max_zoom - dLat_min_zoom)
-    
+
         if dummy0 > dummy:
             y1 = y + 0.05
             y2 = y - 0.05
@@ -245,7 +245,7 @@ def animate_vector_polygon_data(
 
         return pArtist0, pArtist1, pArtist2
 
-    #remove if already exist  
+    #remove if already exist
     #check output file extension
     if os.path.exists(sFilename_animation_out):
         os.remove(sFilename_animation_out)
@@ -253,14 +253,14 @@ def animate_vector_polygon_data(
         plt.rcParams[
             "animation.convert_path"
         ] = "/share/apps/ImageMagick/7.1.0-52/bin/convert"
-        writer = 'imagemagick'        
+        writer = 'imagemagick'
         anim = animation.FuncAnimation(fig, animate, frames=ncell_animation, interval=400, blit=False)
         anim.save(sFilename_animation_out, writer= writer)
 
-    else: #use video instead      
+    else: #use video instead
         plt.rcParams[
             "animation.ffmpeg_path"
-        ] = '/people/liao313/.conda/envs/hexwatershed/bin/ffmpeg' #'/share/apps/ffmpeg/6.1.1/bin/ffmpeg            
+        ] = '/people/liao313/.conda/envs/pyflowline/bin/ffmpeg' #'/share/apps/ffmpeg/6.1.1/bin/ffmpeg
         #Writer = animation.writers['ffmpeg']
         #writer = Writer(fps=5, metadata=dict(artist='Chang Liao'), bitrate=-1)
         writer=animation.FFMpegWriter(fps=5, metadata=dict(artist='Chang Liao'), bitrate=-1)

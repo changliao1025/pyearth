@@ -15,7 +15,7 @@ def remap( x, oMin, oMax, nMin, nMax ):
     if not oldMin == oMin:
         reverseInput = True
     #check reversed output range
-    reverseOutput = False   
+    reverseOutput = False
     newMin = np.min( np.array([nMin, nMax]) )
     newMax = np.max( np.array([nMin, nMax]) )
     if not newMin == nMin :
@@ -26,4 +26,4 @@ def remap( x, oMin, oMax, nMin, nMax ):
     result = portion + newMin
     if reverseOutput:
         result = newMax - portion
-    return result
+    return float(result)

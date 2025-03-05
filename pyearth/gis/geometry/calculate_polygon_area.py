@@ -1,4 +1,5 @@
 #it is also recommended to use the nvector API to calculate the area of a polygon on the ellipsoid
+import math
 import numpy as np
 from pyearth.system.define_global_variables import *
 
@@ -6,12 +7,20 @@ from pyearth.gis.geometry.calculate_spherical_triangle_area import calculate_sph
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
 
 
+def haversine(x):
+    """
+    Haversine function: hav(x) = (1 - cos(x)) / 2
+    :param x: Angle in radians
+    :return: Returns the value of the Haversine function
+    """
+    return (1.0 - math.cos(x)) / 2.0
+
 def calculate_polygon_area(aLongitude_in,
                            aLatitude_in,
                            iFlag_algorithm=1,
                            iFlag_radian=None,
                            dRadius_in=None,
-                           dLine_threshold = 0.1):
+                           dLine_threshold = None):
     """
     Computes area of spherical polygon, assuming spherical Earth.
     Returns result in ratio of the sphere's area if the radius is specified. Otherwise, in the units of provided radius.
@@ -38,6 +47,8 @@ def calculate_polygon_area(aLongitude_in,
         aLatitude_in = np.append(aLatitude_in, aLatitude_in[0])
         aLongitude_in = np.append(aLongitude_in, aLongitude_in[0])
 
+    npoint = len(aLongitude_in)
+
     if iFlag_radian is None:  # degree_based
         aLongitude_radian_in = np.deg2rad(aLongitude_in)
         aLatitude_radian_in = np.deg2rad(aLatitude_in)
@@ -47,8 +58,10 @@ def calculate_polygon_area(aLongitude_in,
         aLatitude_radian_in = aLatitude_in
         pass
 
+
+
     #check whether the polygon is close to line, narrow and thin:
-     # Calculate the lengths of the sides of the polygon
+    # Calculate the lengths of the sides of the polygon
     aLength = np.zeros(npoint-1)
     for i in range(npoint-1):
         dLength = calculate_distance_based_on_longitude_latitude(aLongitude_in[i], aLatitude_in[i], aLongitude_in[i+1], aLatitude_in[i+1])
@@ -58,10 +71,13 @@ def calculate_polygon_area(aLongitude_in,
     dLength_max = np.max(aLength)
     dlength_rest = np.sum(aLength) - dLength_max
     # Check if the polygon is close to a line
-    if dLength_max / dlength_rest > (1 - dLine_threshold):
-        print( "The polygon is close to a line" )
-        area = 0.0
-        return area
+    if dLine_threshold is not None:
+        if (dLength_max / dlength_rest) > (1 - dLine_threshold):
+            print( "The polygon is close to a line" )
+            area = 0.0
+            return area
+        else:
+            pass
 
     if iFlag_algorithm == 0:
         # Line integral based on Green's Theorem, assumes spherical Earth
@@ -122,7 +138,6 @@ def calculate_polygon_area(aLongitude_in,
                                                                iFlag_radian=1)
 
             aArea[i-1] = dArea_triangle
-
             pass
 
         area = np.sum(aArea)
@@ -131,10 +146,16 @@ def calculate_polygon_area(aLongitude_in,
     elif iFlag_algorithm == 2:
         # https://trs.jpl.nasa.gov/handle/2014/41271
         # TODO
+        if dRadius_in is not None:
+            dRadius = dRadius_in
+        else:
+            dRadius = earth_radius
+        dArea_m = spherical_polygon_area(aLatitude_radian_in, aLongitude_radian_in, dRadius)
+        return float(dArea_m)
         pass
 
     if iFlag_radian is not None:
-        return area
+        return float(area)
     else:
         #6371229.0 or something else
         if dRadius_in is not None:
@@ -142,10 +163,55 @@ def calculate_polygon_area(aLongitude_in,
         else:
             dArea_m = area * earth_radius**2
 
-        return dArea_m
+        return float(dArea_m)
 
 
+def spherical_polygon_area(lat, lon, r):
+    """
+    Compute the Area of a Spherical Polygon
+    :param lat: List of latitudes of all vertices (in radians)
+    :param lon: List of longitudes of all vertices (in radians)
+    :param r: Spherical radius
+    :return: Returns the area of a spherical polygon
+    """
+    lam1 = lam2 = beta1 = beta2 = cosB1 = cosB2 = 0
+    hav = 0
+    sum = 0
 
+    for j in range(len(lat)):
+        k = j + 1
+        if j == 0:
+            lam1 = lon[j]
+            beta1 = lat[j]
+            lam2 = lon[j + 1]
+            beta2 = lat[j + 1]
+            cosB1 = math.cos(beta1)
+            cosB2 = math.cos(beta2)
+        else:
+            k = (j + 1) % len(lat)
+            lam1 = lam2
+            beta1 = beta2
+            lam2 = lon[k]
+            beta2 = lat[k]
+            cosB1 = cosB2
+            cosB2 = math.cos(beta2)
+
+        if lam1 != lam2:
+            hav = haversine(beta2 - beta1) + cosB1 * cosB2 * haversine(lam2 - lam1)
+            a = 2 * math.asin(math.sqrt(hav))
+            b = math.pi / 2 - beta2
+            c = math.pi / 2 - beta1
+            s = 0.5 * (a + b + c)
+            t = math.tan(s / 2) * math.tan((s - a) / 2) * math.tan((s - b) / 2) * math.tan((s - c) / 2)
+
+            excess = abs(4 * math.atan(math.sqrt(abs(t))))
+
+            if lam2 < lam1:
+                excess = -excess
+
+            sum += excess
+
+    return abs(sum) * r * r
 
 if __name__ == '__main__':
     # test the polygon area calculation

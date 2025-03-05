@@ -3,19 +3,19 @@ from datetime import datetime
 
 from pyearth.toolbox.date.day_in_month import day_in_month
 
-def retrieve_nwis_discharge(sSite, 
-                            iYear_start, 
-                            iMonth_start, 
-                            iDay_start,  
-                            iYear_end, 
-                            iMonth_end, 
+def get_nwis_discharge(sSite, 
+                            iYear_start,
+                            iMonth_start,
+                            iDay_start,
+                            iYear_end,
+                            iMonth_end,
                             iDay_end):
     try:
         import requests
     except ImportError as e:
         raise ImportError(
             "The package 'requests' is required for this function to run.") from e
-    
+
     nwis_dv_url = 'https://waterservices.usgs.gov/nwis/dv/'
 
     aDate= list()
@@ -29,7 +29,7 @@ def retrieve_nwis_discharge(sSite,
     for iYear in range(iYear_start,iYear_end+1):
         for iMonth in range(1,13):
             iDay_end = day_in_month(iYear,iMonth)
-            for iDay in range(1,iDay_end+1):            
+            for iDay in range(1,iDay_end+1):
                 aDate.append(datetime(iYear,iMonth,iDay))
     nDay = len(aDate)
     aDate = np.array(aDate)
@@ -52,11 +52,11 @@ def retrieve_nwis_discharge(sSite,
     # Check if request was successful
     if response.status_code == 200:
         # Parse JSON response
-        data = response.json()    
+        data = response.json()
         # Extract streamflow values
         time_series = data['value']['timeSeries'][0]['values'][0]['value']
         unit = data['value']['timeSeries'][0]['variable']['unit']['unitCode']
-        print("Unit of measurement:", unit)    
+        print("Unit of measurement:", unit)
         # Iterate over streamflow values
         for value in time_series:
             date = value['dateTime']
@@ -68,7 +68,7 @@ def retrieve_nwis_discharge(sSite,
             iDay = int(date_string[8:10])
             datetime_object = datetime(iYear,iMonth,iDay)
             index = np.where( aDate == datetime_object)
-            aDischarge[index] = value['value']  
+            aDischarge[index] = value['value']
     else:
         print('Error:', response.status_code)
 

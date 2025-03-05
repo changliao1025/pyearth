@@ -13,7 +13,7 @@ from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.visual.formatter import log_formatter
 from pyearth.visual.formatter import OOMFormatter
 from pyearth.visual.map.zebra_frame import zebra_frame
-from pyearth.gis.spatialref.reproject_coodinates import reproject_coordinates_batch
+from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates_batch
 
 pProjection_default = cpl.crs.PlateCarree()
 

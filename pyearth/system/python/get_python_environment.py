@@ -1,7 +1,6 @@
 import sys
-
 # Get the path to the Python interpreter
-def retrieve_python_environment():
+def get_python_environment():
     sPath_python = sys.executable
     components = sPath_python.split('/')
     # Find the index of 'envs' in the components

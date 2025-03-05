@@ -9,7 +9,7 @@ import cartopy as cpl
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
-from pyearth.gis.spatialref.reproject_coodinates import reproject_coordinates, reproject_coordinates_batch
+from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates, reproject_coordinates_batch
 from pyearth.gis.location.Google_MetersPerPixel import Google_MetersPerPixel
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 

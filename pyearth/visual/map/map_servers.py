@@ -5,7 +5,7 @@ from io import BytesIO
 import math
 from osgeo import osr
 import cartopy.io.img_tiles as cimgt
-from pyearth.gis.spatialref.conversion_between_degree_and_meter import degree_to_meter
+from pyearth.gis.spatialref.convert_between_degree_and_meter import degree_to_meter
 
 def lonlat_to_tile(lon, lat, zoom):
     """
@@ -86,9 +86,21 @@ def fetch_esri_terrain_tile(z, x, y):
     if response.status_code == 200:
         img = Image.open(BytesIO(response.content))
         #print tile image size
-        print("terrain tile size:",img.size)
+        print("esri terrain tile size:",img.size)
         #save the image as a png file using x, y, z
         #img.save(os.path.join(sWorkspace_png, f'{x}_{y}_{z}.png'))
+        return img
+    else:
+        raise Exception(f"Failed to fetch tile: {response.status_code}")
+
+def fetch_esri_relif_tile(z, x, y):
+    import requests
+    from PIL import Image
+    url = f"https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}.jpg"
+    response = requests.get(url)
+    if response.status_code == 200:
+        img = Image.open(BytesIO(response.content))
+        print("esri relief tile size:",img.size)
         return img
     else:
         raise Exception(f"Failed to fetch tile: {response.status_code}")
@@ -100,7 +112,7 @@ def fetch_esri_hydro_tile(z, x, y):
     response = requests.get(url)
     if response.status_code == 200:
         img = Image.open(BytesIO(response.content)).convert('RGBA')  # Convert to RGBA mode
-        print("hydro tile size:",img.size)
+        print("esri hydro tile size:",img.size)
         datas = img.getdata()
         new_data = []
         for item in datas:
@@ -135,7 +147,7 @@ def Stadia_terrain_images(aExtent, zoom_level):
     return img_array
 
 def Esri_terrain_images(aExtent, zoom_level):
-    minx, maxx, miny,  maxy = aExtent
+    minx, maxx, miny, maxy = aExtent
     x_min, y_min, x_max, y_max = extent_to_tile_indices(minx, miny, maxx, maxy, zoom_level)
     tile_size = 256
     tiles = []
@@ -149,6 +161,24 @@ def Esri_terrain_images(aExtent, zoom_level):
     # Combine the tiles into a single image
     combined_img = combine_tiles(tiles, tile_size)
 
+    # Convert the image to a NumPy array
+    img_array = np.array(combined_img)
+    return img_array
+
+def Esri_relief_images(aExtent, zoom_level):
+    minx, maxx, miny, maxy = aExtent
+    x_min, y_min, x_max, y_max = extent_to_tile_indices(minx, miny, maxx, maxy, zoom_level)
+    tile_size = 256
+    tiles = []
+    for y in range(y_min, y_max + 1):
+        row = []
+        for x in range(x_min, x_max + 1):
+            tile = fetch_esri_relif_tile(zoom_level, x, y)
+            row.append(tile)
+        tiles.append(row)
+
+    # Combine the tiles into a single image
+    combined_img = combine_tiles(tiles, tile_size)
     # Convert the image to a NumPy array
     img_array = np.array(combined_img)
     return img_array
