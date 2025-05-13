@@ -50,7 +50,7 @@ def text_reader_string(sFilename_in,
     if iSkipline_in is not None:
         nrow_out = nrow_out - iSkipline_in
         for i in range(iSkipline_in):
-            ifs.readline()
+            sLine = ifs.readline()
     else:
         pass
     if iFlag_remove_quota is not None:
@@ -74,7 +74,7 @@ def text_reader_string(sFilename_in,
             for iRow in range(nrow_out):
                 sLine = (ifs.readline()).rstrip()
                 if iFlag_iFlag_remove_quota == 1:
-                    sLine.replace('"', '')
+                    sLine = sLine.replace('"', '')
                 else:
                     pass
                 aDummy = sLine.split(cDelimiter_in)
@@ -89,6 +89,10 @@ def text_reader_string(sFilename_in,
                     pass
         else:
             sLine = (ifs.readline()).rstrip()
+            if iFlag_iFlag_remove_quota == 1:
+                sLine = sLine.replace('"', '')
+            else:
+                pass
             dummy = sLine.split(cDelimiter_in)
             ncolumn_out = len(dummy)
             # check ncolumn_in count
@@ -100,7 +104,7 @@ def text_reader_string(sFilename_in,
             for iRow in range(1, nrow_out):
                 sLine = (ifs.readline()).rstrip()
                 if iFlag_iFlag_remove_quota == 1:
-                    sLine.replace('"', '')
+                    sLine = sLine.replace('"', '')
                 else:
                     pass
                 aDummy = sLine.split(cDelimiter_in)
@@ -142,7 +146,7 @@ def text_reader_string(sFilename_in,
                 sLine = sLine.replace('"', '')
             else:
                 pass
-            
+
             aData_out[0] = dummy
             for iRow in range(1, nrow_out):
                 dummy1 = ifs.readline()

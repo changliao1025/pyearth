@@ -38,6 +38,7 @@ def ladder_plot_xy_data(aX_all,
                         sLocation_legend_in=None,
                         sFormat_x_in=None,
                         sFormat_y_in=None,
+                        sFont_in=None,
                         sTitle_in=None):
     """
     Plot a X-Y data
@@ -209,6 +210,15 @@ def ladder_plot_xy_data(aX_all,
         iFlag_replace_xtick = 0
         pass
 
+    if sFont_in is not None:
+        sFont = sFont_in
+    else:
+        sFont = "Times New Roman"
+
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = sFont
+    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
+
     fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
@@ -231,10 +241,11 @@ def ladder_plot_xy_data(aX_all,
         x1 = aX_all[i-1]
         y1 = aY_all[i-1]
         ax.step(x1, y1,
-                color=aColor[i-1], linestyle=aLinestyle[i -   1],  
+                color=aColor[i-1], linestyle=aLinestyle[i -   1],
                   linewidth=aLinewidth[i-1],
                 marker=aMarker[i-1],
                 label=aLabel_legend[i-1])
+
 
         # calculate linear regression
         iFlag_trend = aFlag_trend[i-1]
@@ -293,13 +304,15 @@ def ladder_plot_xy_data(aX_all,
         ax.set_ylim(dMin_y, dMax_y)
         pass
 
-    if iFlag_scientific_notation_x == 1:
-        formatter = mpl.ticker.ScalarFormatter(useMathText=True)
-        formatter.set_scientific(True)
-        formatter.set_powerlimits((-1, 1))  # you might need to change here
-        ax.xaxis.set_major_formatter(formatter)
-    else:
-        pass
+    #if iFlag_scientific_notation_x == 1:
+    #    formatter = mpl.ticker.ScalarFormatter(useMathText=True)
+    #    formatter.set_scientific(True)
+    #    formatter.set_powerlimits((-1, 1))  # you might need to change here
+    #    ax.xaxis.set_major_formatter(formatter)
+    #else:
+    #    pass
+
+
 
     if iFlag_label == 1:
         aText = []
@@ -323,7 +336,7 @@ def ladder_plot_xy_data(aX_all,
 
     ax.legend(bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend,
-              fontsize=8,
+              fontsize=12,
               ncol=ncolumn)
 
     plt.savefig(sFilename_out, bbox_inches='tight')

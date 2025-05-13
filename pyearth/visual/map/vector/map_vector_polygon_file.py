@@ -1,27 +1,65 @@
 import os
 import datetime
+import textwrap
 import numpy as np
 from osgeo import osr, gdal, ogr
+from urllib.error import URLError
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.collections import PatchCollection
-from matplotlib.patches import Polygon
-import matplotlib.patches as mpatches
+from matplotlib.patches import Polygon as mpolygon
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from cartopy.io.img_tiles import OSM
+from pyproj import Geod
+import shapely.geometry as sgeom
+from shapely.geometry import Polygon as spolygon
 from pyearth.system.define_global_variables import *
 from pyearth.visual.map.zebra_frame import zebra_frame
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
+from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
 from pyearth.visual.formatter import OOMFormatter
+from pyearth.visual.map.map_servers import calculate_zoom_level, calculate_scale_denominator
+from pyearth.visual.map.map_servers import StadiaStamen, EsriTerrain, EsriRelief, EsriHydro
+from pyearth.visual.map.map_servers import Stadia_terrain_images, Esri_terrain_images, Esri_relief_images, Esri_hydro_images
 
-#osr.UseExceptions()
-#use agg and backend
-#mpl.use('agg')
+osr.UseExceptions()
+
 #get the current year for openstreetmap copy right label
 iYear_current = datetime.datetime.now().year
 sYear = str(iYear_current)
+def simplify_coordinates(aCoords_gcs, min_distance=1.0):
+    """
+    Simplify a set of geographic coordinates by retaining points that are at least
+    a specified minimum distance apart.
+
+    Args:
+        aCoords_gcs (numpy.ndarray): Array of geographic coordinates (longitude, latitude).
+        min_distance (float): Minimum distance (in the same units as the input coordinates)
+                              between consecutive points to retain.
+
+    Returns:
+        numpy.ndarray: Simplified array of geographic coordinates.
+    """
+    # Initialize list for simplified coordinates
+    aCoords_gcs_simplified = []
+
+    # Iterate through points and calculate distances
+    nPoint = len(aCoords_gcs)
+    for i in range(nPoint - 1):
+        dLon, dLat = aCoords_gcs[i]
+        dLon1, dLat1 = aCoords_gcs[i + 1]
+        dDistance = calculate_distance_based_on_longitude_latitude(dLon, dLat, dLon1, dLat1)
+        if dDistance >= min_distance:
+            aCoords_gcs_simplified.append((dLon1, dLat1))
+
+    # Close the ring by appending the first point
+    if aCoords_gcs_simplified:
+        aCoords_gcs_simplified.append(aCoords_gcs_simplified[0])
+
+    # Convert to numpy array
+    return np.array(aCoords_gcs_simplified)
 
 def map_vector_polygon_file(iFiletype_in,
                             sFilename_in,
@@ -35,7 +73,12 @@ def map_vector_polygon_file(iFiletype_in,
                             iFlag_discrete_in=None,
                             iFlag_filter_in = None,
                             iFlag_openstreetmap_in = None,
-                            iFlag_openstreetmap_level_in = None,
+                            iFlag_terrain_image_in = None,
+                            iFlag_relief_image_in = None,
+                            iFlag_esri_hydro_image_in = None,
+                            iFlag_debug_in = None,
+                            iBasemap_zoom_level_in = None,
+                            sColor_in = None,
                             sColormap_in=None,
                             sTitle_in=None,
                             iDPI_in=None,
@@ -44,7 +87,7 @@ def map_vector_polygon_file(iFiletype_in,
                             dMissing_value_in=None,
                             dData_max_in=None,
                             dData_min_in=None,
-                            sField_color_in =  None,
+                            sField_color_in = None,
                             sExtend_in=None,
                             sFont_in=None,
                             sUnit_in=None,
@@ -98,7 +141,6 @@ def map_vector_polygon_file(iFiletype_in,
         return
 
     pLayer = pDataset.GetLayer(0)
-
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
@@ -128,6 +170,9 @@ def map_vector_polygon_file(iFiletype_in,
         iFlag_colorbar = iFlag_colorbar_in
     else:
         iFlag_colorbar = 0
+
+    if iFlag_colorbar ==1:
+        iFlag_color = 1
 
     if iFlag_fill_in is not None:
         iFlag_fill = iFlag_fill_in
@@ -199,6 +244,9 @@ def map_vector_polygon_file(iFiletype_in,
     else:
         sFont = "Times New Roman"
 
+    if sFilename_output_in is None:
+        plt.ion()
+
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = sFont
     plt.rcParams["mathtext.fontset"] = 'dejavuserif'
@@ -213,7 +261,6 @@ def map_vector_polygon_file(iFiletype_in,
     dLon_max = -180
     aValue = list()
 
-
     if iFlag_color == 1:
         #check color field
         if sField_color_in  is not None:
@@ -221,28 +268,8 @@ def map_vector_polygon_file(iFiletype_in,
         else:
             print('Color field is not provided')
             return
-        #pLayerdefn = pLayer.GetLayerDefn()
-        #nField = pLayerdefn.GetFieldCount()
-        #if nField == 0:
-        #    iFlag_color = 0
-        #    iFlag_field = 0
-        #    iFlag_discrete = 0
-        #else:
-        #    iFlag_field = 1
-        #    sField0 = pLayerdefn.GetFieldDefn(0).name
-
-        #if sVariable_in is not None:
-        #    sVariable = sVariable_in
-        #else:
-        #    sVariable = sField0
-    #else:
-    #    iFlag_field = 0
-    #    iFlag_discrete = 0
 
     nFeature = pLayer.GetFeatureCount()
-
-    #for j in range(nFeature):
-        #pFeature = pLayer.GetFeature(j)
 
     for pFeature in pLayer:
         pGeometry_in = pFeature.GetGeometryRef()
@@ -297,17 +324,22 @@ def map_vector_polygon_file(iFiletype_in,
     if pProjection_map_in is not None:
         pProjection_map = pProjection_map_in
     else:
-        pProjection_map = ccrs.Orthographic(central_longitude=0.50*(
-            dLon_max+dLon_min),  central_latitude=0.50*(dLat_max+dLat_min), globe=None)
+        dLon_mean = 0.50 * (dLon_max + dLon_min)
+        dLat_mean = 0.50 * (dLat_max + dLat_min)
+        pProjection_map = ccrs.Orthographic(central_longitude=dLon_mean, central_latitude=dLat_mean)
+        print(dLon_mean, dLat_mean)
 
     if pProjection_data_in is not None:
         pProjection_data = pProjection_data_in
     else:
         pProjection_data = pSRS_wgs84
 
+    pProjection_map._threshold /= 1.0E6
 
-    #pProjection_map._threshold /= 1.0E6
     ax = fig.add_axes([0.08, 0.1, 0.62, 0.7], projection=pProjection_map)
+    plot_width_inch = fig.get_size_inches()[0] * fig.dpi
+    char_width_inch = 0.1 * fig.dpi
+    cwidth = int(plot_width_inch / char_width_inch)
 
     if iFlag_discrete == 1:
         aIndex = np.linspace(0,1,nValue)
@@ -343,107 +375,248 @@ def map_vector_polygon_file(iFiletype_in,
         aExtent = aExtent_in
 
     print(aExtent)
-    minx,  maxx, miny, maxy = aExtent
+    minx, maxx, miny, maxy = aExtent
     ax.set_extent(aExtent, crs = pSRS_wgs84)
     if iFlag_filter == 1:
         pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
     ax.set_extent(aExtent, crs = pSRS_wgs84)
     ax.coastlines(linewidth=0.5, color='k', resolution='10m')
-    if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
-        if iFlag_openstreetmap_level_in is not None:
-            iFlag_openstreetmap_level = iFlag_openstreetmap_level_in
+    try:
+        dAlpha = 1.0
+        #only one of the base map can be used
+        if iBasemap_zoom_level_in is not None:
+            iBasemap_zoom_level = iBasemap_zoom_level_in
         else:
-            iFlag_openstreetmap_level = 9
+            image_size = [1000, 1000]
+            scale_denominator = calculate_scale_denominator(aExtent, image_size)
+            pSrc = osr.SpatialReference()
+            pSrc.ImportFromEPSG(3857) # mercator
+            pProjection = pSrc.ExportToWkt()
+            iBasemap_zoom_level = calculate_zoom_level(scale_denominator, pProjection, dpi=int(iDPI/2))
+            #print('Basemap zoom level: ',iBasemap_zoom_level)
             pass
+        if iFlag_openstreetmap_in is not None and iFlag_openstreetmap_in == 1:
+            from cartopy.io.img_tiles import OSM
+            osm_tiles = OSM()
+            #Add the OSM image to the map
+            ax.add_image(osm_tiles, iBasemap_zoom_level) #, alpha=0.5
+            sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
 
-        osm_tiles = OSM()
-        #Add the OSM image to the map
-        ax.add_image(osm_tiles, iFlag_openstreetmap_level)
-        sLicense_info = "© OpenStreetMap contributors "+ sYear + "." + " Distributed under the Open Data Commons Open Database License (ODbL) v1.0."
-        ax.text(0.5, 0.05, sLicense_info, transform=ax.transAxes, ha='center', va='center', fontsize=6,
-                color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+            sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=cwidth))
+            ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                    color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
-        #we also need to set transparency for the image to be added
-        dAlpha = 0.5
-    else:
+            #we also need to set transparency for the image to be added
+            dAlpha = 0.5
+        else:
+            if iFlag_terrain_image_in is not None and iFlag_terrain_image_in == 1:
+                stamen_terrain = StadiaStamen()
+                ll_target_domain = sgeom.box(minx, miny, maxx, maxy)
+                multi_poly = stamen_terrain.crs.project_geometry(ll_target_domain, ccrs.PlateCarree())
+                target_domain = multi_poly.geoms[0]
+                _, aExtent_terrain, _ = stamen_terrain.image_for_domain(target_domain, iBasemap_zoom_level)
+                img_stadia_terrain = Stadia_terrain_images(aExtent, iBasemap_zoom_level)
+                ax.imshow(img_stadia_terrain,  extent=aExtent_terrain, transform=stamen_terrain.crs)
+                #add the license information
+                sLicense_info = "© Stamen Design, under a Creative Commons Attribution (CC BY 3.0) license."
+                sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=cwidth))
+                ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                        color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+                dAlpha = 0.8
+            else:
+                if iFlag_esri_hydro_image_in is not None and iFlag_esri_hydro_image_in == 1:
+                    if iFlag_relief_image_in is not None:
+                        esri_terrain = EsriRelief()
+                    else:
+                        esri_terrain = EsriTerrain()
+                    esri_hydro = EsriHydro()
+                    ll_target_domain = sgeom.box(minx, miny, maxx, maxy)
+                    multi_poly = esri_hydro.crs.project_geometry(ll_target_domain, ccrs.PlateCarree())
+                    target_domain = multi_poly.geoms[0]
+                    _, aExtent_terrain, _ = esri_terrain.image_for_domain(target_domain, iBasemap_zoom_level)
+                    _, aExtent_hydro, _ = esri_hydro.image_for_domain(target_domain, iBasemap_zoom_level)
+                    if iFlag_relief_image_in is not None:
+                        img_esri_terrain = Esri_relief_images(aExtent, iBasemap_zoom_level)
+                    else:
+                        img_esri_terrain  = Esri_terrain_images(aExtent, iBasemap_zoom_level)
+                    img_eari_hydro  = Esri_hydro_images(aExtent, iBasemap_zoom_level)
+                    ax.imshow(img_esri_terrain,  extent=aExtent_terrain, transform=esri_terrain.crs)
+                    ax.imshow(img_eari_hydro,  extent=aExtent_hydro, transform=esri_hydro.crs)
+                    #add the license information
+                    sLicense_info = "© Esri Hydro Reference Overlay"
+                    sLicense_info_wrapped = "\n".join(textwrap.wrap(sLicense_info, width=60))
+                    ax.text(0.5, 0.05, sLicense_info_wrapped, transform=ax.transAxes, ha='center', va='center', fontsize=6,
+                            color='gray', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+                    dAlpha = 0.8
+                else:
+                    pass
+
+    except URLError as e:
+        print('No internet connection')
         dAlpha = 1.0
 
     aPolygon = list()
     aColor_index=list()
-    for pFeature in pLayer:
-        pGeometry_in = pFeature.GetGeometryRef()
-        sGeometry_type = pGeometry_in.GetGeometryName()
-        # get attribute
-        if iFlag_color == 1:
-            dValue = float(pFeature.GetField(sField_color))
-            if dValue != dMissing_value:
-                if dValue > dValue_max:
-                    dValue = dValue_max
-                    #continue
-                if dValue < dValue_min:
-                    dValue = dValue_min
-                    #continue
-                if iFlag_discrete ==1:
-                    #use unique value method to assign color
-                    iValue = int(dValue) #this maight cause issue if the date is not using integer
-                    iColor_index = np.where(aValue == iValue)[0][0]
+    aEdgecolor = list()
+    #aFacecolor = list()
+    if iFlag_debug_in is not None:
+        for pFeature in pLayer:
+            pGeometry_in = pFeature.GetGeometryRef()
+            sGeometry_type = pGeometry_in.GetGeometryName()
+            # get attribute
+            if iFlag_color == 1:
+                dValue = float(pFeature.GetField(sField_color))
+                if dValue != dMissing_value:
+                    if dValue > dValue_max:
+                        dValue = dValue_max
+                        #continue
+                    if dValue < dValue_min:
+                        dValue = dValue_min
+                        #continue
+                    if iFlag_discrete ==1:
+                        #use unique value method to assign color
+                        iValue = int(dValue) #this maight cause issue if the date is not using integer
+                        iColor_index = np.where(aValue == iValue)[0][0]
+                    else:
+                        iColor_index = int((dValue - dValue_min) /
+                                       (dValue_max - dValue_min) * 255)
                 else:
-                    iColor_index = int((dValue - dValue_min) /
-                                   (dValue_max - dValue_min) * 255)
+                    iColor_index = 0
+                    pass
             else:
                 iColor_index = 0
                 pass
-        else:
-            iColor_index = 0
-            pass
-        if sGeometry_type == 'MULTIPOLYGON':
-            for i in range(pGeometry_in.GetGeometryCount()):
-                pPolygon = pGeometry_in.GetGeometryRef(i)
-                aCoords_gcs = get_geometry_coordinates(pPolygon)
-                aCoords_gcs=aCoords_gcs[:,0:2]
-                aColor_index.append(iColor_index)
-                aPolygon.append(aCoords_gcs)
-        else:
-            if sGeometry_type == 'POLYGON':
-                aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                aCoords_gcs=aCoords_gcs[:,0:2]
-                aColor_index.append(iColor_index)
-                aPolygon.append(aCoords_gcs)
-
-    aColor_index = np.array(aColor_index)
-    #flatten the array as 1D
-    aColor_index= aColor_index.flatten()
-    aColor= pCmap(aColor_index)
-    if iFlag_color == 1:
-        aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
-        if iFlag_fill == True:
-            pPC = PatchCollection(aPatch, alpha=dAlpha,
-                                  edgecolor='none',
-                                  facecolor=aColor,
-                                  linewidths=0.25,
-                                  transform=pProjection_data)
-        else:
-            pPC = PatchCollection(aPatch, alpha=dAlpha,
-                                  edgecolor=aColor,
-                                  facecolor='none',
-                                  linewidths=0.25,
-                                  transform=pProjection_data)
+            if sGeometry_type == 'MULTIPOLYGON':
+                for i in range(pGeometry_in.GetGeometryCount()):
+                    pPolygon = pGeometry_in.GetGeometryRef(i)
+                    aCoords_gcs = get_geometry_coordinates(pPolygon)
+                    aCoords_gcs=aCoords_gcs[:,0:2]
+                    aColor_index.append(iColor_index)
+                    aEdgecolor.append('none')
+                    #manually plot the polygon
+                    mPolygon = mpolygon(aCoords_gcs, closed=True, edgecolor='blue', facecolor='red',
+                                      alpha=dAlpha,  transform=pProjection_data)
+                    # Add the polygon to the map
+                    ax.add_patch(mPolygon)
+            else:
+                if sGeometry_type == 'POLYGON':
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    aCoords_gcs = aCoords_gcs[:,0:2]
+                    dArea = calculate_polygon_area(aCoords_gcs[:,0], aCoords_gcs[:,1])
+                    if dArea > 1.0:
+                        # Initialize lists for simplified coordinates
+                        aCoords_gcs_simplified = simplify_coordinates(aCoords_gcs, min_distance=1.0)
+                        if aCoords_gcs_simplified.shape[0] < 4:
+                            continue
+                        pPolygon = spolygon(aCoords_gcs_simplified)
+                        if pPolygon.is_valid == False:
+                            print('Polygon is not valid')
+                            continue
+                        else:
+                            pGeometry_new = ogr.CreateGeometryFromWkt(pPolygon.wkt)
+                            #define the projection
+                            if pGeometry_new.IsValid() == False:
+                                print('Polygon is not valid')
+                                continue
+                            else:
+                                aCoords_gcs_new = get_geometry_coordinates(pGeometry_new)
+                                if iFlag_fill == 1:
+                                    mPolygon = mpolygon(aCoords_gcs_new, closed=True, edgecolor='blue', facecolor='red',
+                                              alpha=dAlpha, transform=pProjection_data)
+                                else:
+                                    mPolygon = mpolygon(aCoords_gcs_new, closed=True, edgecolor='blue', facecolor='none',
+                                              alpha=dAlpha, transform=pProjection_data)
+                                ax.add_patch(mPolygon)
+                                #ax.add_geometries([pPolygon], crs=pProjection_data, facecolor='red', edgecolor='blue', alpha=dAlpha)
+                    else:
+                        pass
+                else:
+                    print('Geometry type not supported')
     else:
-        sColor = 'blue'
-        aPatch = [Polygon(poly, closed=True, fill=iFlag_fill) for poly in aPolygon]
-        if iFlag_fill == True:
-            pPC = PatchCollection(aPatch, alpha=dAlpha,
-                                  edgecolor=None,
-                                  facecolor=sColor,
-                                  linewidths=0.25,
-                                  transform=pProjection_data)
+        for pFeature in pLayer:
+            pGeometry_in = pFeature.GetGeometryRef()
+            sGeometry_type = pGeometry_in.GetGeometryName()
+            # get attribute
+            if iFlag_color == 1:
+                dValue = float(pFeature.GetField(sField_color))
+                if dValue != dMissing_value:
+                    if dValue > dValue_max:
+                        dValue = dValue_max
+                        #continue
+                    if dValue < dValue_min:
+                        dValue = dValue_min
+                        #continue
+                    if iFlag_discrete ==1:
+                        #use unique value method to assign color
+                        iValue = int(dValue) #this maight cause issue if the date is not using integer
+                        iColor_index = np.where(aValue == iValue)[0][0]
+                    else:
+                        iColor_index = int((dValue - dValue_min) /
+                                       (dValue_max - dValue_min) * 255)
+                else:
+                    iColor_index = 0
+                    pass
+            else:
+                iColor_index = 0
+                pass
+            if sGeometry_type == 'MULTIPOLYGON':
+                for i in range(pGeometry_in.GetGeometryCount()):
+                    pPolygon = pGeometry_in.GetGeometryRef(i)
+                    aCoords_gcs = get_geometry_coordinates(pPolygon)
+                    aCoords_gcs=aCoords_gcs[:,0:2]
+                    aColor_index.append(iColor_index)
+                    aPolygon.append(aCoords_gcs)
+                    aEdgecolor.append('none')
+
+            else:
+                if sGeometry_type == 'POLYGON':
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    aCoords_gcs=aCoords_gcs[:,0:2]
+                    aColor_index.append(iColor_index)
+                    aPolygon.append(aCoords_gcs)
+                    aEdgecolor.append('none')
+                else:
+                    print('Geometry type not supported')
+
+        aColor_index = np.array(aColor_index)
+        #flatten the array as 1D
+        aColor_index= aColor_index.flatten()
+        aColor= pCmap(aColor_index)
+        if iFlag_color == 1:
+            if iFlag_fill == True:
+                aPatch = [mpolygon(poly, closed=True) for poly in aPolygon]
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
+                                      edgecolor=aColor,
+                                      facecolor=aColor,
+                                      transform=pProjection_data)
+            else:
+                aPatch = [mpolygon(poly, closed=True) for poly in aPolygon]
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
+                                      edgecolor=aColor,
+                                      facecolor='none',
+                                      linewidths=0.25,
+                                      transform=pProjection_data)
         else:
-            pPC = PatchCollection(aPatch, alpha=dAlpha,
-                                  edgecolor=sColor,
-                                  facecolor='none',
-                                  linewidths=0.25,
-                                  transform=pProjection_data)
-    ax.add_collection(pPC)
+            if sColor_in is not None:
+                sColor = sColor_in
+            else:
+                sColor = 'blue'
+            if iFlag_fill == True:
+                aPatch = [mpolygon(poly, closed=True, fill=iFlag_fill) for poly in aPolygon]
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
+                                      edgecolor='none',
+                                      facecolor=sColor,
+                                      linewidths=0.25,
+                                      transform=pProjection_data)
+            else:
+                aPatch = [mpolygon(poly, closed=True, fill=iFlag_fill) for poly in aPolygon]
+                pPC = PatchCollection(aPatch, alpha=dAlpha,
+                                      edgecolor=sColor,
+                                      facecolor='none',
+                                      linewidths=0.25,
+                                      transform=pProjection_data)
+
+        ax.add_collection(pPC)
 
     ax.set_extent(aExtent, crs = pSRS_wgs84)
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
@@ -460,9 +633,11 @@ def map_vector_polygon_file(iFiletype_in,
 
     if iFlag_zebra == 1:
         ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+        dummy = (maxy-miny)/10
         ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
         ax.set_axis_off()
 
+    sTitle = "\n".join(textwrap.wrap(sTitle, width=cwidth))
     if iFlag_title is None:
         ax.set_title( sTitle )
     else:
@@ -470,7 +645,6 @@ def map_vector_polygon_file(iFiletype_in,
             ax.set_title( sTitle )
         else:
             pass
-        ax.set_title(sTitle)
 
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
@@ -478,14 +652,15 @@ def map_vector_polygon_file(iFiletype_in,
         for i in range(nlegend):
             sText = aLegend_in[i]
             dLocation = dLocation0 - i * 0.06
-            ax.text(0.03, dLocation, sText,
+            ax.text(0.05, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=iFont_size-2)
+                    color='black', fontsize=iFont_size + 2)
 
 
     if iFlag_zebra ==1:
-        ax.set_axis_off()
+        #ax.set_axis_off()
+        ax.set_extent(aExtent, crs = pSRS_wgs84)
         ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
 
     ax.set_extent(aExtent, crs = pSRS_wgs84)
@@ -529,7 +704,8 @@ def map_vector_polygon_file(iFiletype_in,
 
 
     if sFilename_output_in is None:
-        plt.show()
+        plt.show(block=True)
+        print('Finished plotting interactive map')
     else:
         if os.path.exists(sFilename_output_in):
             os.remove(sFilename_output_in)
@@ -548,3 +724,4 @@ def map_vector_polygon_file(iFiletype_in,
 
         plt.close('all')
         plt.clf()
+        print('The plot is saved to: ', sFilename_out)

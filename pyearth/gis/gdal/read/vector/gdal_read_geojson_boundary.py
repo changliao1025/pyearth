@@ -26,8 +26,10 @@ def gdal_read_geojson_boundary(sFilename_boundary_in):
         else:
             if(pGeometrytype_boundary == 'MULTIPOLYGON'):
                 nLine = pGeometry_mesh.GetGeometryCount()
+                pBoundary_ogr = ogr.Geometry(ogr.wkbMultiPolygon)  # Create an empty MultiPolygon
                 for i in range(nLine):
-                    pBoundary_ogr = pGeometry_mesh.GetGeometryRef(i)
+                    pSubGeometry = pGeometry_mesh.GetGeometryRef(i)
+                    pBoundary_ogr.AddGeometry(pSubGeometry)
 
     pBoundary_wkt = pBoundary_ogr.ExportToWkt()
     aExtent = pBoundary_ogr.GetEnvelope()

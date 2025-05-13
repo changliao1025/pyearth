@@ -1,21 +1,16 @@
 """
 this module will be used to define all the global variables
 """
-
 import os, platform
 from pathlib import Path
 import getpass
-from pyearth.system.python.retrieve_python_environment import retrieve_python_environment
+from pyearth.system.python.get_python_environment import get_python_environment
 sPlatform_os = platform.system()
-
 sUsername = getpass.getuser()
-
 sWorkspace_home = str(Path.home())
-
 if sPlatform_os == 'Windows':  #windows
     slash = '\\'
     sMachine ='None'
-
     sWorkspace_scratch = 'C:'
 else:  #linux or unix
     slash = '/'
@@ -63,8 +58,8 @@ cms2cmd = 24 * 3600
 
 earth_radius = 6378137.0
 
-sConda_env_path , sConda_env_name = retrieve_python_environment()
-os.environ['LD_LIBRARY_PATH'] = f"{sConda_env_path}/lib:${{LD_LIBRARY_PATH}}"
+sConda_env_path, sConda_env_name = get_python_environment()
 os.environ['PROJ_LIB'] = sConda_env_path + '/share/proj'
+
 
 

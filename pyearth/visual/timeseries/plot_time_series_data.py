@@ -1,8 +1,11 @@
 
 from datetime import datetime
+import matplotlib.dates as mdates
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.patches import FancyArrowPatch
 
 from pyearth.system.define_global_variables import *
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
@@ -32,6 +35,7 @@ def plot_time_series_data(aTime_all,
                           aLinestyle_in=None,
                           sLabel_y_in=None,
                           aLabel_legend_in=None,
+                          aLocation_miniplot_in = None,
                           aLocation_legend_in=None,
                           sDate_type_in=None,
                           sFormat_y_in=None,
@@ -241,6 +245,23 @@ def plot_time_series_data(aTime_all,
         dMax_mini_x = dMax_x - (dMax_x-dMin_x) * 0.1
         dMin_mini_y = dMin_y + (dMax_y-dMin_y) * 0.1
         dMax_mini_y = dMin_y + (dMax_y-dMin_y) * 0.4
+
+        #add a rectangle to the mini plot
+        # Convert datetime values to numerical format
+        dMin_mini_x_num = mdates.date2num(dMin_mini_x)
+        dMax_mini_x_num = mdates.date2num(dMax_mini_x)
+
+        # Add a rectangle to the main plot
+        rect = patches.Rectangle(
+        (dMin_mini_x_num, dMin_mini_y),  # Bottom-left corner (x, y)
+        dMax_mini_x_num - dMin_mini_x_num,  # Width
+        dMax_mini_y - dMin_mini_y,  # Height
+        linewidth=2,  # Border thickness
+        edgecolor='black',  # Border color
+        facecolor='none',  # Transparent fill
+        linestyle='--'  # Dashed border
+        )
+
     else:
         iFlag_miniplot = 0
 
@@ -249,19 +270,28 @@ def plot_time_series_data(aTime_all,
     fig.set_figheight(iSize_y)
 
     left, width = 0.1, 0.8
-    bottom, height = 0.1, 0.5
-    dX_mini = 0.60
-    dY_mini = 0.20
-    width_mini = 0.28
-    heigh_mini = 0.30
-    rect_full = [left, bottom, width, height]
-    rect_mini = [dX_mini, dY_mini, width_mini, heigh_mini]
 
-    ax_full = plt.axes(rect_full)
     if iFlag_miniplot == 1:
+        bottom, height = 0.55, 0.45
+        if aLocation_miniplot_in is not None:
+            rect_mini = aLocation_miniplot_in
+        else:
+            dX_mini = left #0.60
+            dY_mini = 0.0 #0.20
+            width_mini = width #0.28
+            heigh_mini = height # 0.30
+            rect_mini = [dX_mini, dY_mini, width_mini, heigh_mini]
+            pass
+
+        rect_full = [left, bottom, width, height]
+        ax_full = plt.axes(rect_full)
         ax_mini = plt.axes(rect_mini)
         ax_all = [ax_full, ax_mini]
+
     else:
+        bottom, height = 0.1, 0.5
+        rect_full = [left, bottom, width, height]
+        ax_full = plt.axes(rect_full)
         ax_all = [ax_full]
 
     if nYear <= 3:
@@ -362,6 +392,11 @@ def plot_time_series_data(aTime_all,
                 ax.xaxis.set_major_locator(pYear)
                 ax.xaxis.set_minor_locator(pMonth)
                 ax.xaxis.set_major_formatter(sMonth_format)
+                #set tick for each month
+                ax.xaxis.set_minor_formatter(mpl.dates.DateFormatter('%m'))
+                #also set the label for tick
+                # Convert tick positions to datetime before formatting
+                ax.set_xticklabels([mpl.dates.num2date(x).strftime('%Y-%m') for x in ax.get_xticks()])
             else:
                 ax.xaxis.set_major_locator(pYear)
                 ax.xaxis.set_minor_locator(pMonth)
@@ -435,6 +470,23 @@ def plot_time_series_data(aTime_all,
             ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
                       loc=sLocation_legend, fontsize=10, ncol=ncolumn )
             pass
+            if iFlag_miniplot == 1:
+                rect_bottom_left = ax.transData.transform((dMin_mini_x_num, dMin_mini_y))
+                rect_top_right = ax.transData.transform((dMax_mini_x_num, dMax_mini_y))
+                # Convert display coordinates to figure coordinates (normalized [0, 1] space)
+                rect_bottom_left_fig = fig.transFigure.inverted().transform(rect_bottom_left)
+                rect_top_right_fig = fig.transFigure.inverted().transform(rect_top_right)
+                # Extract normalized coordinates
+                dMin_mini_x_fig, dMin_mini_y_fig = rect_bottom_left_fig
+                dMax_mini_x_fig, dMax_mini_y_fig = rect_top_right_fig
+
+                #add a label at upper left corner
+                sLabel_info_in= '(a)'
+                ax.text(0.05, 0.9, sLabel_info_in,
+                    verticalalignment='center', horizontalalignment='left',
+                    transform=ax.transAxes,
+                    color='black', fontsize=13)
+
         else:
             if iFlag_log == 1:
                 aLabel_y = list()
@@ -486,14 +538,45 @@ def plot_time_series_data(aTime_all,
             ax.xaxis.set_minor_locator(pMonth_min)
             ax.xaxis.set_major_formatter(sYear_format)
             ax.set_xlim(dMin_mini_x, dMax_mini_x)
-
             if (iReverse_y == 1):
                 ax.set_ylim(dMax_mini_y, dMin_mini_y)
             else:
                 ax.set_ylim(dMin_mini_y, dMax_mini_y)
-            pass
 
-        # common setting
+            bbox_mini = ax.get_position()
+            left_x_mini = bbox_mini.x0   # Center x of the miniplot
+            right_x_mini = bbox_mini.x0 + bbox_mini.width   # Center x of the miniplot
+            top_y_mini = bbox_mini.y0 + bbox_mini.height   # Center y of the miniplot
+            sLabel_info_in= '(b)'
+            ax.text(0.05, 0.9, sLabel_info_in,
+                    verticalalignment='center', horizontalalignment='left',
+                    transform=ax.transAxes,
+                    color='black', fontsize=13)
+
+    if iFlag_miniplot == 1:
+        # Define the arrows pointing to the miniplot
+        arrow_left = FancyArrowPatch(
+            (dMin_mini_x_fig, dMin_mini_y_fig),  # Start point (bottom-left corner of the rectangle)
+            (left_x_mini, top_y_mini),  # End point (center of the miniplot)
+            arrowstyle="->",  # Arrow style
+            color="black",  # Arrow color
+            mutation_scale=15,  # Scale of the arrow
+            linewidth=1.5,  # Arrow thickness
+            clip_on=False,
+            transform=fig.transFigure )
+        arrow_right = FancyArrowPatch(
+            (dMax_mini_x_fig, dMin_mini_y_fig),  # Start point (bottom-right corner of the rectangle)
+            (right_x_mini, top_y_mini),  # End point (center of the miniplot)
+            arrowstyle="->",  # Arrow style
+            color="black",  # Arrow color
+            mutation_scale=15,  # Scale of the arrow
+            linewidth=1.5,  # Arrow thickness
+            clip_on=False,
+            transform=fig.transFigure  )
+        ax = ax_all[0]
+        ax.add_patch(rect)
+        ax.add_patch(arrow_left)
+        ax.add_patch(arrow_right)
 
 
     if sFilename_out is not None:

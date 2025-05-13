@@ -1,9 +1,10 @@
 from osgeo import  osr
-def get_utm_spatial_reference_wkt(dLongitude_in):
+from pyearth.gis.spatialref.convert_wgs_to_utm import get_utm_epsg_code
+def get_utm_spatial_reference_wkt(dLongitude_in: float, dLatitude_in: float) -> str:
+    dLongitude_in = float(dLongitude_in)
+    dLatitude_in = float(dLatitude_in)
     if -180 <= dLongitude_in <= 180:
-        zone = int((dLongitude_in + 180) / 6) + 1
-        hemisphere = 'N' if dLongitude_in >= 0 else 'S'
-        epsg_code = 32600 + zone if hemisphere == 'N' else 32700 + zone
+        epsg_code = get_utm_epsg_code(dLongitude_in, dLatitude_in)
         utm_sr = osr.SpatialReference()
         utm_sr.ImportFromEPSG(epsg_code)
         utm_projection = utm_sr.ExportToWkt()

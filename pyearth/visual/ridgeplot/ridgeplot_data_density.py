@@ -98,7 +98,7 @@ def ridgeplot_data_density(aDict,
     axgr = AxesGrid(fig, 111,
                     nrows_ncols=(nData, 1),
                     axes_pad=-0.1,
-                    label_mode='')  # note the empty label_mode
+                    label_mode='L')  # note the empty label_mode
 
     if dMin_x_in is None:
         for i in range(nData):

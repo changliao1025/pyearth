@@ -37,6 +37,6 @@ def day_of_year(iYear_in, iMonth_in, iDay_in):
     dummy1 = datetime.datetime(iYear_in, iMonth_in, iDay_in)
     lJulian_end = julian.to_jd(dummy1, fmt='jd')
 
-    dayofyear = int (lJulian_end[1] - lJulian_start[1] ) + 1
+    dayofyear = int (lJulian_end - lJulian_start ) + 1
 
     return dayofyear
