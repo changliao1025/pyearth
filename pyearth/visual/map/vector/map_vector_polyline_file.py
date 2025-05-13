@@ -313,6 +313,7 @@ def map_vector_polyline_file(iFiletype_in,
 
 
     ax = fig.add_axes([0.1, 0.15, 0.75, 0.8] , projection=pProjection_map ) #request.crs
+
     ax.set_global()
     ax.coastlines(color='black', linewidth=1,resolution='10m')
 

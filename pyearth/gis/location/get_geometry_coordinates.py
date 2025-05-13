@@ -1,5 +1,24 @@
 import numpy as np
 from osgeo import ogr
+def check_ccw(coords):
+    """
+    Determines if a polygon's coordinates are in counter-clockwise (CCW) order.
+
+    Args:
+        coords: A numpy array of shape (n, 2) representing the polygon's coordinates
+                in (longitude, latitude) format.
+
+    Returns:
+        bool: True if the coordinates are CCW, False if they are CW.
+    """
+    # Shoelace formula to calculate the signed area
+    x = coords[:, 0]  # Longitude
+    y = coords[:, 1]  # Latitude
+    signed_area = np.sum(x[:-1] * y[1:] - x[1:] * y[:-1]) + (x[-1] * y[0] - x[0] * y[-1])
+
+    # If the signed area is positive, the coordinates are CCW
+    return signed_area > 0
+
 def get_geometry_coordinates(geometry):
 
     sGeometry_type = geometry.GetGeometryName()
@@ -24,7 +43,14 @@ def get_polygon_exterior_coords(polygon_geometry):
     for i in range(npoints):
         point = ring.GetPoint(i)
         exterior_coords.append((point[0], point[1]))
-    return np.array(exterior_coords)
+    # Convert to numpy array
+    coords_array = np.array(exterior_coords)
+    # Check if the coordinates are CCW
+    if not check_ccw(coords_array):
+        # Reverse the order if not CCW
+        coords_array = coords_array[::-1]
+
+    return coords_array
 
 def get_multipolygon_exterior_coords(polygon_geometry):
     aExterior_coords = list()

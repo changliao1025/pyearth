@@ -71,7 +71,7 @@ def animate_vector_polygon_data(
             globe=None,
         )
 
-    fig = plt.figure(dpi=150)
+    fig = plt.figure(dpi=100)
     fig.set_figwidth(iFigwidth_in)
     fig.set_figheight(iFigheight_in)
     ax = fig.add_axes([0.1, 0.1, 0.65, 0.8], projection=pProjection_map)
@@ -186,62 +186,67 @@ def animate_vector_polygon_data(
 
     #calculate ahead
     aColor_index = (aData - dData_min) / (dData_max - dData_min)
+    aColors = [cmap_reversed(aColor_index[i]) for i in range(ncell_animation)]
+
+    # Precompute polygon locations
+    # Precompute polygon locations and add them to the axes
+    aPolygon = [
+        mpatches.Polygon(
+        np.array([[vertex["dLongitude_degree"], vertex["dLatitude_degree"]] for vertex in aVertex]),
+        closed=True,
+        transform=ccrs.Geodetic(),
+        facecolor='none',  # Initially invisible
+        edgecolor="none",  # Optional: no border
+        )
+        for aVertex in aAVertex
+    ]
+
+    # Add polygons to the axes
+    for polygon in aPolygon:
+        ax.add_patch(polygon)
+
+    # Initialize artists
+    pArtist0 = ax.add_patch(aPolygon[0])
+    pArtist1 = ax.text(
+        0.0, 0.0, "", verticalalignment="center", horizontalalignment="right", transform=ax.transAxes, fontsize=12
+    )
+    pArtist2 = ax.text(
+        0.0, 0.0, "", verticalalignment="center", horizontalalignment="left", transform=ax.transAxes, fontsize=12
+    )
 
     def animate(i):
-        # get the time step global id and updated elevation
-        dlon = aLongitude[i]
-        dlat = aLatitude[i]
-        dummy0 = aData_raw[i]
-        dummy = aData[i]
-        aVertex = aAVertex[i]
-        aLocation = np.array([[vertex["dLongitude_degree"], vertex["dLatitude_degree"]] for vertex in aVertex])
+        rgb = aColors[i]
+        aPolygon[i].set_facecolor(rgb)
+        pArtist0.set_xy(aPolygon[i].get_xy())
+        #if iFlag_type_in == 1: #full
+        #    dLon_min_zoom = dLon_min
+        #    dLon_max_zoom = dLon_max
+        #    dLat_min_zoom = dLat_min
+        #    dLat_max_zoom = dLat_max
+        #else:
+        #    dLon_min_zoom = dlon - marginx * 2
+        #    dLon_max_zoom = dlon + marginx * 2
+        #    dLat_min_zoom = dlat - marginy * 2
+        #    dLat_max_zoom = dlat + marginy * 2
+        #x = (dlon - dLon_min_zoom) / (dLon_max_zoom - dLon_min_zoom)
+        #y = (dlat - dLat_min_zoom) / (dLat_max_zoom - dLat_min_zoom)
+        x = (aLongitude[i] - dLon_min) / (dLon_max - dLon_min)
+        y = (aLatitude[i] - dLat_min) / (dLat_max - dLat_min)
+        dummy0, dummy = aData_raw[i], aData[i]
+        y1, y2 = (y + 0.05, y - 0.05) if dummy0 > dummy else (y - 0.05, y + 0.05)
 
-        rgb = cmap_reversed( aColor_index[i] )
-        polygon = mpatches.Polygon(
-            aLocation,
-            closed=True,
-            facecolor=rgb,
-            edgecolor="none",
-            transform=ccrs.Geodetic(),
-        )
-        pArtist0 = ax.add_patch(polygon)
-        if iFlag_type_in == 1: #full
-            dLon_min_zoom = dLon_min
-            dLon_max_zoom = dLon_max
-            dLat_min_zoom = dLat_min
-            dLat_max_zoom = dLat_max
-        else:
-            dLon_min_zoom = dlon - marginx * 2
-            dLon_max_zoom = dlon + marginx * 2
-            dLat_min_zoom = dlat - marginy * 2
-            dLat_max_zoom = dlat + marginy * 2
-
-        x = (dlon - dLon_min_zoom) / (dLon_max_zoom - dLon_min_zoom)
-        y = (dlat - dLat_min_zoom) / (dLat_max_zoom - dLat_min_zoom)
-
-        if dummy0 > dummy:
-            y1 = y + 0.05
-            y2 = y - 0.05
-        else:
-            y1 = y - 0.05
-            y2 = y + 0.05
-
-        sText1 = "Before: " + "{:0.2f}".format(dummy0) + "m"
-        pArtist1.set_x(x)
-        pArtist1.set_y(y1)
-        pArtist1.set_text(sText1)
-        sText2 = "After: " + "{:0.2f}".format(dummy) + "m"
-        pArtist2.set_x(x)
-        pArtist2.set_y(y2)
-        pArtist2.set_text(sText2)
-        if iFlag_type_in == 2:
-            aExtent_zoom = [
-                dlon - marginx * 2,
-                dlon + marginx * 2,
-                dlat - marginy * 2,
-                dlat + marginy * 2,
-            ]
-            ax.set_extent(aExtent_zoom)
+        #if iFlag_type_in == 2:
+        #    aExtent_zoom = [
+        #        dlon - marginx * 2,
+        #        dlon + marginx * 2,
+        #        dlat - marginy * 2,
+        #        dlat + marginy * 2,
+        #    ]
+        #    ax.set_extent(aExtent_zoom)
+        pArtist1.set_position((x, y1))
+        pArtist1.set_text(f"Before: {dummy0:.2f}m")
+        pArtist2.set_position((x, y2))
+        pArtist2.set_text(f"After: {dummy:.2f}m")
 
         return pArtist0, pArtist1, pArtist2
 

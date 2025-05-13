@@ -46,6 +46,9 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
         return
     #get the geometry type
     iGeomType = pGeometry.GetGeometryType()
+    #get geometry type name
+    sGeomType = ogr.GeometryTypeToName(iGeomType)
+    print('Geometry type: ' + sGeomType)
     #check whether it is a multi-geometry
     if iGeomType == ogr.wkbMultiPoint or iGeomType == ogr.wkbMultiLineString or iGeomType == ogr.wkbMultiPolygon:
         #get the number of geometries
@@ -101,7 +104,7 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
                             print('Geometry type not supported')
                 else:
                     print('Geometry type not supported')
-                    
+
             pFeature = pLayer_in.GetNextFeature()
 
     # Create a new feature in the output layer

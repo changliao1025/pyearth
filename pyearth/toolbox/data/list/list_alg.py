@@ -4,7 +4,7 @@ def list_max(pList):
     for i in range(nlist):
         sublist = pList[i]
         sublist = np.array(sublist)
-        dmax = np.max(sublist)
+        dmax = np.nanmax(sublist)
         if i == 0:
             dmax_max = dmax
         else:
@@ -18,7 +18,7 @@ def list_min(pList):
     for i in range(nlist):
         sublist = pList[i]
         sublist = np.array(sublist)
-        dmin = np.min(sublist)
+        dmin = np.nanmin(sublist)
         if i == 0:
             dmin_min = dmin
         else:

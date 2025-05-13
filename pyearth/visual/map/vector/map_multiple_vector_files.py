@@ -14,6 +14,7 @@ from matplotlib.path import Path
 from matplotlib.collections import PatchCollection
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Polygon
+import shapely.geometry as sgeom
 import cartopy as cpl
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -31,12 +32,13 @@ sYear = str(iYear_current)
 
 def map_multiple_vector_files(aFiletype_in,
                              aFilename_in,
-                             iFlag_colorbar_in = None,
                              iFlag_title_in = None,
                              iFlag_zebra_in=None,
                              iFlag_filter_in = None,
+                             iFlag_arrow_in = None,
                              aFlag_thickness_in = None,
                              aFlag_color_in = None,
+                             aFlag_colorbar_in = None,
                              aFlag_discrete_in = None,
                              aFlag_fill_in = None,
                              aVariable_in = None,
@@ -140,10 +142,10 @@ def map_multiple_vector_files(aFiletype_in,
     pDataset = ogr.Open(sFilename_in, gdal.GA_ReadOnly)
     pLayer = pDataset.GetLayer(0)
 
-    if iFlag_colorbar_in is not None:
-        iFlag_colorbar = iFlag_colorbar_in
+    if aFlag_colorbar_in is not None:
+        aFlag_colorbar = aFlag_colorbar_in
     else:
-        iFlag_colorbar = 0
+        aFlag_colorbar = np.zeros(nFile, dtype=np.int16)
 
     if iFlag_filter_in is not None:
         iFlag_filter = iFlag_filter_in
@@ -175,6 +177,7 @@ def map_multiple_vector_files(aFiletype_in,
 
         else:
             iFlag_title=0
+            sTitle =  ''
 
     else:
         iFlag_title = 0
@@ -450,6 +453,7 @@ def map_multiple_vector_files(aFiletype_in,
     for i in range(nFile):
         sFilename = aFilename_in[i]
         iFlag_thickness = aFlag_thickness[i]
+        iFlag_colorbar = aFlag_colorbar[i]
         iFlag_color = aFlag_color[i]
         iFlag_discrete = aFlag_discrete[i]
         iFlag_fill = aFlag_fill[i]
@@ -470,11 +474,12 @@ def map_multiple_vector_files(aFiletype_in,
             aIndex = np.linspace(0,1,nValue_discrete)
             prng = np.random.RandomState(1234567890)
             prng.shuffle(aIndex)
+
             colors = plt.colormaps[sColormap](aIndex)
-            aColorMap = ListedColormap(colors)
+            pCmap = ListedColormap(colors)
             pass
         else: #continuous
-            aColorMap = plt.colormaps[sColormap](np.linspace(0, 1, nValue))
+            pCmap = plt.colormaps[sColormap]
         lID = 0
         #aPoint=list()
         aPoint_x=list()
@@ -484,10 +489,22 @@ def map_multiple_vector_files(aFiletype_in,
         aPolyline=list()
         aThickness=list()
         aPolygon = list()
-        aColor = list()
+        #aColor = list()
+        aColor_index=list()
+        aEdgecolor = list()
+        aArrow=list()
 
         if iFlag_filter == 1:
             pLayer.SetSpatialFilterRect(minx, maxx, miny, maxy)
+
+        if aColor_in is not None:
+            sColor = aColor_in[i]
+            if sColor is None:
+                iFlag_valid_color =0
+            else:
+                iFlag_valid_color =1
+        else:
+            iFlag_valid_color = 0
 
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
@@ -506,9 +523,7 @@ def map_multiple_vector_files(aFiletype_in,
                 else:
                     iThickness = 0.25
 
-            if aColor_in is not None:
-                sColor = aColor_in[i]
-            else:
+            if iFlag_valid_color != 1:
                 if iFlag_color == 1:
                     dValue = float(pFeature.GetField(sVariable))
                     if iFlag_discrete ==1:
@@ -516,20 +531,21 @@ def map_multiple_vector_files(aFiletype_in,
                             continue
                         iValue = int(dValue)
                         iColor_index = np.where(aValue == iValue)[0][0]
-                        sColor = aColorMap(iColor_index)
                     else:
                         if dValue < dValue_min or dValue > dValue_max:
                             continue
 
                         iColor_index = int( (dValue - dValue_min) / (dValue_max - dValue_min) * 255 )
-                        sColor = aColorMap[iColor_index]
                 else:
                     sColor = 'black'
+                    iColor_index = 0
+                    iFlag_valid_color = 1
 
             if sGeometry_type =='POINT':
                 aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                 aCoords_gcs = aCoords_gcs[:,0:2]
-                aColor.append(sColor)
+                aColor_index.append(iColor_index)
+                #aColor.append(sColor)
                 aPoint_x.append(aCoords_gcs[0,0])
                 aPoint_y.append(aCoords_gcs[0,1])
                 aSize.append(iThickness)
@@ -544,47 +560,110 @@ def map_multiple_vector_files(aFiletype_in,
                     path = mpl.path.Path(aCoords_gcs, codes)
                     x, y = zip(*path.vertices)
                     aThickness.append(iThickness)
-                    aColor.append(sColor)
+                    if iFlag_valid_color !=1:
+                        aColor_index.append(iColor_index)
+                    #aColor.append(sColor)
                     aPolyline.append(list(zip(x, y)))
+
+                    if iFlag_arrow_in == 1:
+                        #add arrow
+                        #arrowstyle = mpl.patches.ArrowStyle.Simple(head_length=0.2, head_width=0.2, tail_width=0.1)
+                        pArrow = mpl.patches.FancyArrowPatch(
+                            (x[-2], y[-2]),  # Start of the arrow (second-to-last point)
+                            (x[-1], y[-1]),  # End of the arrow (last point)
+                            arrowstyle='-|>',  # Arrow style
+                            mutation_scale=5,  # Scale of the arrow
+                            linewidth=0,  # Line thickness
+                            color=sColor,  # Arrow color
+                            transform=pProjection_data
+                        )
+                        aArrow.append(pArrow)
+                        #ax.add_patch(pArrow)
+                    else:
+                        pass
                 else:
                     if sGeometry_type == 'POLYGON':
                         aCoords_gcs = get_geometry_coordinates(pGeometry_in)
-                        aColor.append(sColor)
+                        #aColor.append(sColor)
+                        if iFlag_valid_color !=1:
+                            aColor_index.append(iColor_index)
                         aPolygon.append(aCoords_gcs[:, 0:2])
                     else:
                         if sGeometry_type == 'MULTIPOLYGON':
                             for j in range(pGeometry_in.GetGeometryCount()):
                                 pPolygon = pGeometry_in.GetGeometryRef(j)
                                 aCoords_gcs = get_geometry_coordinates(pPolygon)
-                                aColor.append(sColor)
+                                #aColor.append(sColor)
+                                aColor_index.append(iColor_index)
                                 aPolygon.append(aCoords_gcs[:, 0:2])
 
 
             lID = lID + 1
 
+
+        if iFlag_valid_color == 1:
+            aColor = sColor
+        else:
+            aColor_index = np.array(aColor_index)
+            #flatten the array as 1D
+            aColor_index= aColor_index.flatten()
+            aColor= pCmap(aColor_index)
+
         if len(aPolygon) > 0:
             aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
             if iFlag_fill == 1:
-                pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=None,
+                pPC = PatchCollection(aPatch,  alpha=dAlpha, edgecolor=aColor,
                                       facecolor=aColor, linewidths=0.25,
                                       transform=pProjection_data)
             else:
-                pPC = PatchCollection(aPatch, cmap=cmap, alpha=0.8, edgecolor=aColor,
+                pPC = PatchCollection(aPatch,  alpha=dAlpha, edgecolor=aColor,
                                       facecolor='none', linewidths=0.25,
                                       transform=pProjection_data)
             ax.add_collection(pPC)
 
         if len(aPolyline) > 0:
             #polyline
-            pLC = LineCollection(aPolyline,  alpha=0.8, edgecolor=aColor,
+            pLC = LineCollection(aPolyline,  alpha=dAlpha, edgecolor=aColor,
                          facecolor='none', linewidths=aThickness, transform=pProjection_data)
             ax.add_collection(pLC)
+            if iFlag_arrow_in ==1:
+                for i in range(len(aArrow)):
+                    #arrow = aArrow[i]
+                    #path = arrow.get_path()
+                    #pathpatch = mpl.patches.PathPatch(path)
+                    #ax.add_artist(pathpatch)
+                    ax.add_patch(aArrow[i])
 
         if len(aPoint_x) > 0:
             for i in range(len(aPoint_x)):
                 ax.scatter(aPoint_x[i], aPoint_y[i], c=aColor[i],
                                  s=aSize[i], marker=aMarker[i],
                                    alpha=dAlpha, transform=pProjection_data)
+
+        if iFlag_colorbar == 1:
+            #ax_cb= fig.add_axes([0.75, 0.15, 0.02, 0.6])
+            fig.canvas.draw()
+            ax_pos = ax.get_position() # get the original position
+            ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+            if iFlag_scientific_notation_colorbar==1:
+                formatter = OOMFormatter(fformat= "%1.1e")
+                cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                               cmap=cmap,
+                                               norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
+                                               extend=sExtend, format=formatter)
+            else:
+                formatter = OOMFormatter(fformat= "%1.2f")
+                cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                                               cmap=cmap,
+                                               norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
+                                               extend=sExtend, format=formatter)
+
+            cb.ax.get_yaxis().set_ticks_position('right')
+            cb.ax.get_yaxis().labelpad = 3
+            cb.ax.set_ylabel(sUnit, rotation=90, fontsize=iFont_size-2)
+            cb.ax.get_yaxis().set_label_position('left')
+            cb.ax.tick_params(labelsize=iFont_size-2)
+
 
     gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--',
@@ -629,28 +708,6 @@ def map_multiple_vector_files(aFiletype_in,
                     color='black', fontsize=iFont_size)
 
 
-    if iFlag_colorbar ==1:
-        #ax_cb= fig.add_axes([0.75, 0.15, 0.02, 0.6])
-        fig.canvas.draw()
-        ax_pos = ax.get_position() # get the original position
-        ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
-        if iFlag_scientific_notation_colorbar==1:
-            formatter = OOMFormatter(fformat= "%1.1e")
-            cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                           cmap=cmap,
-                                           norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
-                                           extend=sExtend, format=formatter)
-        else:
-            formatter = OOMFormatter(fformat= "%1.1f")
-            cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                           cmap=cmap,
-                                           norm=mpl.colors.Normalize(dValue_min, dValue_max),  # vmax and vmin
-                                           extend=sExtend, format=formatter)
-
-        cb.ax.get_yaxis().set_ticks_position('right')
-        cb.ax.get_yaxis().labelpad = 10
-        cb.ax.set_ylabel(sUnit, rotation=270)
-        cb.ax.tick_params(labelsize=6)
 
     if iFlag_zebra ==1:
         ax.set_axis_off()
@@ -677,3 +734,4 @@ def map_multiple_vector_files(aFiletype_in,
         #clean cache
         plt.close('all')
         plt.clf()
+        print('The plot is saved as ', sFilename_out)

@@ -1,9 +1,13 @@
 import os
 from osgeo import ogr
+from pyearth.system.define_global_variables import *
 from pyearth.toolbox.management.vector.reproject import reproject_vector
 from pyearth.toolbox.management.vector.merge_features import merge_features
 
-def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out ):
+def clip_vector_by_polygon_file(sFilename_vector_in,
+                                 sFilename_polygon_in,
+                                 sFilename_vector_out,
+                                  iFlag_endorheic = 0):
     # Open the input shapefile
     #check file existence
     if os.path.exists(sFilename_vector_in) == False:
@@ -25,11 +29,23 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     sExtension_vector = os.path.splitext(sFilename_polygon_in)[1]
     #get the driver for the extension
     if sExtension_vector == '.geojson':
-        pDriver_vector = ogr.GetDriverByName('GeoJSON')
+        pDriver_vector_in = ogr.GetDriverByName('GeoJSON')
     else:
-        pDriver_vector = ogr.GetDriverByName('ESRI Shapefile')
+        pDriver_vector_in = ogr.GetDriverByName('ESRI Shapefile')
 
-    if pDriver_vector is None:
+    if pDriver_vector_in is None:
+        print('The driver is not available')
+        return
+
+    #get the extension of polygon file
+    sExtension_vector = os.path.splitext(sFilename_vector_out)[1]
+    #get the driver for the extension
+    if sExtension_vector == '.geojson':
+        pDriver_vector_out = ogr.GetDriverByName('GeoJSON')
+    else:
+        pDriver_vector_out = ogr.GetDriverByName('ESRI Shapefile')
+
+    if pDriver_vector_out is None:
         print('The driver is not available')
         return
 
@@ -59,17 +75,22 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
         if nPolygon > 1:
             pDataset_clip = None
             pLayer_clip = None
-            print('The polygon contains more than one polygon, the program will attempt to merge them as one!')
-            #obtain the file extension
-            sFilename_clip_new = sFilename_polygon_in.replace(sExtension_clip, '_merged' + sExtension_clip)
-            merge_features(sFilename_polygon_in, sFilename_clip_new)
-            sFilename_polygon_in = sFilename_clip_new
-            #open the new file
-            pDataset_clip = ogr.Open(sFilename_polygon_in)
-            pLayer_clip = pDataset_clip.GetLayer(0)
-            # Get the spatial reference of the layer
-            pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
-            pProjection_clip = pSpatial_reference_clip.ExportToWkt()
+            #if one polygon contain another polygon, we only need the outer polygon
+            # should we assume the outer polygon is the first one?
+            if iFlag_endorheic == 1:
+                pass
+            else:
+                print('The polygon contains more than one polygon, the program will attempt to merge them as one!')
+                #obtain the file extension
+                sFilename_clip_new = sFilename_polygon_in.replace(sExtension_clip, '_merged' + sExtension_clip)
+                merge_features(sFilename_polygon_in, sFilename_clip_new)
+                sFilename_polygon_in = sFilename_clip_new
+                #open the new file
+                pDataset_clip = ogr.Open(sFilename_polygon_in)
+                pLayer_clip = pDataset_clip.GetLayer(0)
+                # Get the spatial reference of the layer
+                pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
+                pProjection_clip = pSpatial_reference_clip.ExportToWkt()
         else:
             pass
 
@@ -96,7 +117,7 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
     pPolygon_clip = pFeature_clip.GetGeometryRef()
 
     # Create a new output
-    pDataset_clipped = pDriver_vector.CreateDataSource(sFilename_vector_out )
+    pDataset_clipped = pDriver_vector_out.CreateDataSource(sFilename_vector_out )
     if pDataset_clipped is None:
         print("Error: Could not create the output shapefile.")
         return
@@ -177,7 +198,9 @@ def clip_vector_by_polygon_file(sFilename_vector_in, sFilename_polygon_in, sFile
                     continue
                 else:
                     iGeomType_intersect = pGeometry_intersect.GetGeometryType()
-                    print(f"Intersection geometry type: {iGeomType_intersect}")
+                    sGeomType_intersect = ogr.GeometryTypeToName(iGeomType_intersect)
+                    #print(f"Intersection geometry type: {iGeomType_intersect}")
+                    print(f"Intersection geometry type: {sGeomType_intersect}")
 
                     # Create a new pFeature in the output layer with the clipped geometry
                     #we only want to keep the clipped geometry that is within the clip polygon
@@ -216,6 +239,17 @@ def clip_vector_by_polygon_files(sFilename_vector_in, aFilename_polygon_in, sFil
         print("Error: Could not open the clip polygon.")
         return
 
+    sExtension_vector = os.path.splitext(sFilename_vector_out)[1]
+    #get the driver for the extension
+    if sExtension_vector == '.geojson':
+        pDriver_vector_out = ogr.GetDriverByName('GeoJSON')
+    else:
+        pDriver_vector_out = ogr.GetDriverByName('ESRI Shapefile')
+
+    if pDriver_vector_out is None:
+        print('The driver is not available')
+        return
+
     # Get the input layer and clip polygon layer
     pLayer_source = pDataset_source.GetLayer()
     #get the spatial reference
@@ -224,7 +258,7 @@ def clip_vector_by_polygon_files(sFilename_vector_in, aFilename_polygon_in, sFil
     print(pProjection_target)
 
     # Create a new output
-    pDataset_clipped = pDriver_vector.CreateDataSource(sFilename_vector_out )
+    pDataset_clipped = pDriver_vector_out.CreateDataSource(sFilename_vector_out )
     if pDataset_clipped is None:
         print("Error: Could not create the output shapefile.")
         return
@@ -286,11 +320,11 @@ def clip_vector_by_polygon_files(sFilename_vector_in, aFilename_polygon_in, sFil
         sExtension_vector = os.path.splitext(sFilename_vector_in)[1]
         #get the driver for the extension
         if sExtension_vector == '.geojson':
-            pDriver_vector = ogr.GetDriverByName('GeoJSON')
+            pDriver_vector_in = ogr.GetDriverByName('GeoJSON')
         else:
-            pDriver_vector = ogr.GetDriverByName('ESRI Shapefile')
+            pDriver_vector_in = ogr.GetDriverByName('ESRI Shapefile')
 
-        if pDriver_vector is None:
+        if pDriver_vector_in is None:
             print('The driver is not available')
             return
 

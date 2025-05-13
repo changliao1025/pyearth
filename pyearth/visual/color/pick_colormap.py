@@ -12,6 +12,8 @@ def pick_colormap_terrain(sVariable_in):
   colormap_dict = {
       'elevation': 'terrain',
       'lucc': 'tab20',
+      'slope': 'terrain',
+      'drainage_area': 'Spectral_r',
   }
 
   return colormap_dict.get(sVariable_in.lower(), 'viridis')
