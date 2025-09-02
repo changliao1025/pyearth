@@ -166,8 +166,8 @@ def exclude_vector_by_polygon_files(sFilename_vector_in, aFilename_polygon_in, s
             print("Error: Could not open the clip polygon.")
             return
         pLayer_clip = pDataset_clip.GetLayer()
-        # Get the geometry of the clip polygon
-        pFeature_clip = pLayer_clip.GetFeature(0)
+        # Get the geometry of the clip polygon using next feature
+        pFeature_clip = pLayer_clip.GetNextFeature()
         pGeometry_merge = pFeature_clip.GetGeometryRef()
 
     #use the merged polygon as the clip polygon

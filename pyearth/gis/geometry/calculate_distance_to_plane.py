@@ -2,7 +2,7 @@ import math
 import numpy as np
 from pyearth.gis.location.convert_longitude_latitude_to_sphere_3d import convert_longitude_latitude_to_sphere_3d
 
-def calculate_distance_to_plane_new(dLongitude1_in, dLatitude1_in,
+def calculate_distance_to_plane(dLongitude1_in, dLatitude1_in,
                                 dLongitude2_in, dLatitude2_in,
                                 dLongitude3_in, dLatitude3_in,
                                 iFlag_radian = None):

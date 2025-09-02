@@ -19,6 +19,7 @@ import cartopy as cpl
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from pyearth.toolbox.math.stat.remap import remap
+from pyearth.visual.map.zebra_frame import zebra_frame
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
 from pyearth.visual.map.map_servers import calculate_zoom_level, calculate_scale_denominator
@@ -474,7 +475,6 @@ def map_multiple_vector_files(aFiletype_in,
             aIndex = np.linspace(0,1,nValue_discrete)
             prng = np.random.RandomState(1234567890)
             prng.shuffle(aIndex)
-
             colors = plt.colormaps[sColormap](aIndex)
             pCmap = ListedColormap(colors)
             pass
@@ -505,6 +505,8 @@ def map_multiple_vector_files(aFiletype_in,
                 iFlag_valid_color =1
         else:
             iFlag_valid_color = 0
+
+
 
         for pFeature in pLayer:
             pGeometry_in = pFeature.GetGeometryRef()
@@ -588,6 +590,7 @@ def map_multiple_vector_files(aFiletype_in,
                         if iFlag_valid_color !=1:
                             aColor_index.append(iColor_index)
                         aPolygon.append(aCoords_gcs[:, 0:2])
+                        aThickness.append(iThickness)
                     else:
                         if sGeometry_type == 'MULTIPOLYGON':
                             for j in range(pGeometry_in.GetGeometryCount()):
@@ -596,6 +599,7 @@ def map_multiple_vector_files(aFiletype_in,
                                 #aColor.append(sColor)
                                 aColor_index.append(iColor_index)
                                 aPolygon.append(aCoords_gcs[:, 0:2])
+                                aThickness.append(iThickness)
 
 
             lID = lID + 1
@@ -613,11 +617,11 @@ def map_multiple_vector_files(aFiletype_in,
             aPatch = [Polygon(poly, closed=True) for poly in aPolygon]
             if iFlag_fill == 1:
                 pPC = PatchCollection(aPatch,  alpha=dAlpha, edgecolor=aColor,
-                                      facecolor=aColor, linewidths=0.25,
+                                      facecolor=aColor, linewidths=aThickness,
                                       transform=pProjection_data)
             else:
                 pPC = PatchCollection(aPatch,  alpha=dAlpha, edgecolor=aColor,
-                                      facecolor='none', linewidths=0.25,
+                                      facecolor='none', linewidths=aThickness,
                                       transform=pProjection_data)
             ax.add_collection(pPC)
 

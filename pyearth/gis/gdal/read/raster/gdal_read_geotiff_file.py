@@ -59,7 +59,11 @@ def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
             sDate_type = gdal.GetDataTypeName(iData_type)
             # Compute statistics if needed
             if pBand.GetMinimum() is None or pBand.GetMaximum() is None:
-                pBand.ComputeStatistics(0)
+                try:
+                    pBand.ComputeStatistics(0)
+                except RuntimeError:
+                    print("Failed to compute statistics")
+                    sys.exit(1)
 
             dMissing_value = pBand.GetNoDataValue()
             aData_out = pBand.ReadAsArray(0, 0, ncolumn, nrow)

@@ -8,7 +8,7 @@ from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.geometry.douglas_peucker_geodetic import douglas_peucker_geodetic
 from pyearth.gis.geometry.visvalingam_whyatt_geodetic import  visvalingam_whyatt_geodetic
 
-def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_in, dSimplify_tolerance = None):
+def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_in):
     """
     This function is used to remove small polygons from a vector file
     :param sFilename_vector_in: input vector file
@@ -70,12 +70,6 @@ def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_i
             dAreakm = dArea/1.0E6
 
             if dAreakm > dThreshold:
-                #get mean longitude and latitude
-                dLongitude_mean = np.mean(aCoords_gcs[:,0])
-                dLatitude_mean = np.mean(aCoords_gcs[:,1])
-                #pProjection_utm = get_utm_spatial_reference_wkt(dLongitude_mean, dLatitude_mean)
-                #pSrs_utm = osr.SpatialReference()
-                #pSrs_utm.ImportFromWkt(pProjection_utm)
                 pGeometry_partial = ogr.Geometry(ogr.wkbPolygon)
                 pRing = ogr.Geometry(ogr.wkbLinearRing)
                 for aCoord in aCoords_gcs:
@@ -83,21 +77,6 @@ def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_i
                 pRing.CloseRings()
                 pGeometry_partial.AddGeometry(pRing)
                 pGeometry_partial.AssignSpatialReference(pSrs)
-
-                # Simplify the geometry if tolerance is provided
-                if dSimplify_tolerance is not None:
-                    #aCoords_gcs_simplified = douglas_peucker_geodetic(aCoords_gcs, dSimplify_tolerance)
-                    aCoords_gcs_simplified = visvalingam_whyatt_geodetic(aCoords_gcs, dSimplify_tolerance)
-                    aCoords_gcs_simplified = np.array(aCoords_gcs_simplified)
-                    pGeometry_partial = None
-                    pGeometry_partial = ogr.Geometry(ogr.wkbPolygon)
-                    pRing = ogr.Geometry(ogr.wkbLinearRing)
-                    for aCoord in aCoords_gcs_simplified:
-                        pRing.AddPoint(aCoord[0], aCoord[1])
-                    pRing.CloseRings()
-                    pGeometry_partial.AddGeometry(pRing)
-                    pGeometry_partial.AssignSpatialReference(pSrs)
-
                 pFeature_out = ogr.Feature(pLayerDefn_out)
                 pFeature_out.SetGeometry(pGeometry_partial)
                 pFeature_out.SetField('id', lID)
@@ -110,7 +89,6 @@ def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_i
 
                 pLayer_out.CreateFeature(pFeature_out)
                 pFeature_out = None
-
                 lID = lID + 1
 
         pFeature_in = pLayer_in.GetNextFeature()
@@ -118,5 +96,4 @@ def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_i
     pDataSource_in.Destroy()
     pDataSource_out.Destroy()
     print('The small polygons have been removed!')
-
     return

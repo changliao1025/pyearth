@@ -262,7 +262,7 @@ def calculate_scale_denominator(domain_boundary, image_size, dpi=96):
     srs = osr.SpatialReference()
     srs.ImportFromEPSG(4326)
     dLatitude_mean = (min_y + max_y) / 2.0
-    meters_per_dgree = degree_to_meter(dLatitude_mean, 1.0) #meter per degree
+    meters_per_dgree = degree_to_meter(1.0, dLatitude_mean) #meter per degree
     meters_to_inches = 39.3701
     image_width_in_inches = image_size[0] / dpi
     image_height_in_inches = image_size[1] / dpi

@@ -14,8 +14,12 @@ def histogram_plot(aData_all_in,
                    iSize_y_in=None,
                    ncolumn_in=None,
                    iFlag_scientific_notation_in=None,
+                   iFlag_normalize_in=None, # <-- New parameter for normalization
                    iFlag_log_in=None,
+                   iFlag_density_in=None,
+                   sHisttype_in=None, # <-- New parameter for histtype
                    aColor_in=None,
+                   aPlot_order_in=None,
                    iDPI_in=None,
                    dMin_x_in=None,
                    dMax_x_in=None,
@@ -65,6 +69,16 @@ def histogram_plot(aData_all_in,
     else:
         iFlag_scientific_notation = 0
 
+    if iFlag_normalize_in is not None: # <-- Initialize iFlag_normalize
+        iFlag_normalize = iFlag_normalize_in
+    else:
+        iFlag_normalize = 0 # Default to False (no normalization)
+
+    if iFlag_density_in is not None:
+        iFlag_density = iFlag_density_in
+    else:
+        iFlag_density = 0
+
     if iFlag_log_in is not None:
         iFlag_log = iFlag_log_in
     else:
@@ -75,6 +89,11 @@ def histogram_plot(aData_all_in,
         sFormat_x = sFormat_x_in
     else:
         iFlag_format_x = 0
+
+    if sHisttype_in is not None: # <-- Initialize sHisttype
+        sHisttype = sHisttype_in
+    else:
+        sHisttype = 'bar'
 
     if dMin_x_in is not None:
         dMin_x = dMin_x_in
@@ -109,10 +128,13 @@ def histogram_plot(aData_all_in,
     else:
         sLabel_x = ''
 
-    if sLabel_y_in is not None:
+    if sLabel_y_in is not None: # <-- Adjust default y-label based on normalization
         sLabel_y = sLabel_y_in
     else:
-        sLabel_y = ''
+        if iFlag_normalize == 1:
+            sLabel_y = 'Density'
+        else:
+            sLabel_y = 'Frequency' # Or 'Counts'
 
     if sTitle_in is not None:
         sTitle = sTitle_in
@@ -149,6 +171,18 @@ def histogram_plot(aData_all_in,
             else:
                 aColor = ['lightblue']
 
+    if aPlot_order_in is None:
+        aPlot_order = np.arange(nData)
+    else:
+        # Validate aPlot_order_in
+        if not (isinstance(aPlot_order_in, (list, np.ndarray)) and
+                len(aPlot_order_in) == nData and
+                all(isinstance(idx, (int, np.integer)) for idx in aPlot_order_in) and
+                sorted(list(set(aPlot_order_in))) == list(np.arange(nData))):
+            raise ValueError(f"aPlot_order_in must be a list or array of unique indices from 0 to {nData-1}, "
+                             f"representing a permutation of datasets. Got: {aPlot_order_in}")
+        aPlot_order = np.array(aPlot_order_in)
+
     fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
@@ -163,37 +197,83 @@ def histogram_plot(aData_all_in,
 
     aLegend_artist = []
     aLabel = []
+    start_alpha = 1.0
+    end_alpha = 0.3 if nData > 1 else 1.0
+    legend_patch_containers = [None] * nData
+
+    if dSpace_x <= 0:
+        if dMax_x == dMin_x :
+            num_bins = 1
+        else: # dSpace_x is invalid, but range is valid
+            num_bins = 20 # Fallback if dSpace_x is bad (original implies 20 if dSpace_x_in is None)
+    else:
+        calculated_bins = (dMax_x - dMin_x) / dSpace_x
+        num_bins = max(1, int(calculated_bins))
 
 
-    for i in np.arange(0, nData):
-        aData = aData_all[i]
-        bad_index = np.where(aData < dMin_x)
-        aData[bad_index] = dMin_x
-        bad_index = np.where(aData > dMax_x)
-        aData[bad_index] = dMax_x
-        if iFlag_log == 1:
-            if dSpace_x >= 1:
-                dSpace_x = int(dSpace_x)
-            else:
-                pass
-        if i == 0:
-            N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),
-                                          color=aColor[i],  label=aLabel_legend[i])
+
+    # Main histogram plotting loop, following plot_order
+    for plot_sequence_idx, original_idx in enumerate(aPlot_order):
+        # Make a copy of the data for this histogram to allow clipping without affecting aData_all
+        aData_for_hist = copy.deepcopy(aData_all[original_idx])
+
+        # Clip data for histogram display range
+        aData_for_hist[aData_for_hist < dMin_x] = dMin_x
+        aData_for_hist[aData_for_hist > dMax_x] = dMax_x
+
+        # Calculate current alpha based on plotting sequence
+        current_alpha = start_alpha
+        if nData > 1:
+            progression = plot_sequence_idx / (nData - 1)
+            current_alpha = start_alpha - progression * (start_alpha - end_alpha)
+            # Clamp alpha to be within [end_alpha, start_alpha]
+            current_alpha = max(end_alpha, min(start_alpha, current_alpha))
+
+        if iFlag_normalize == 1: # <-- Check normalization flag
+            N, bins, hisp_patches = ax_histo.hist(aData_for_hist, bins=num_bins,
+                                                  color=aColor[original_idx],
+                                                  label=aLabel_legend[original_idx],
+                                                  alpha=current_alpha,
+                                                  density=True,
+                                                  histtype=sHisttype) # Normalize to density
         else:
-            N, bins, hisp = ax_histo.hist(aData, int((dMax_x-dMin_x)/dSpace_x),
-                                          color=aColor[i],  label=aLabel_legend[i], alpha=.5)
-        aLegend_artist.append(hisp)
-        aLabel.append(aLabel_legend[i-1])
+            N, bins, hisp_patches = ax_histo.hist(aData_for_hist, bins=num_bins,
+                                                  color=aColor[original_idx],
+                                                  label=aLabel_legend[original_idx],
+                                                  alpha=current_alpha,
+                                                  histtype=sHisttype) # Original call (frequency)
+        legend_patch_containers[original_idx] = hisp_patches
 
     # add density?
-    for i in np.arange(1, nData+1):
-        aData = aData_all[i-1]
-        density = scipy.stats.gaussian_kde(aData)
-        good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
-        aData = aData[good_index]
-        xx = np.linspace(dMin_x, dMax_x, 1000)
-        yy = density(xx)
-        ax_histo.plot(xx, yy, color=aColor[i-1], linestyle='--')
+    # The density plot loop should also respect aPlot_order for consistent layering
+    # and use original unclipped data for KDE fitting.
+    # Assuming aPlot_order is correctly used here as well (from previous discussions)
+    if iFlag_density == 1:
+        for plot_sequence_idx_density, original_idx_density in enumerate(aPlot_order):
+            aData_kde = aData_all[original_idx_density] # Use original, unclipped data for KDE
+    
+            # Add a check for empty or single-value data to prevent KDE errors
+            if len(aData_kde) == 0 or (len(aData_kde) > 0 and np.all(aData_kde == aData_kde[0])):
+                # print(f"Skipping KDE for dataset {original_idx_density} due to insufficient data or no variance.")
+                continue # Skip to the next dataset for KDE
+            
+            try:
+                density = scipy.stats.gaussian_kde(aData_kde)
+                xx = np.linspace(dMin_x, dMax_x, 1000)
+                yy = density(xx)
+                # Determine alpha for density plot (e.g., fixed, or match histogram layer)
+                density_plot_alpha = 0.7 # Example: fixed alpha for density lines
+                # If you want density alpha to match histogram alpha:
+                # density_plot_alpha = start_alpha
+                # if nData > 1:
+                #     progression_density = plot_sequence_idx_density / (nData - 1)
+                #     density_plot_alpha = start_alpha - progression_density * (start_alpha - end_alpha)
+                #     density_plot_alpha = max(end_alpha, min(start_alpha, density_plot_alpha))
+    
+                ax_histo.plot(xx, yy, color=aColor[original_idx_density], linestyle='--', alpha=density_plot_alpha)
+            except Exception as e:
+                # print(f"Could not compute KDE for dataset {original_idx_density}: {e}")
+                pass
 
     ax_histo.set_xlabel(sLabel_x, fontsize=13)
     ax_histo.set_ylabel(sLabel_y, fontsize=13)
@@ -234,8 +314,19 @@ def histogram_plot(aData_all_in,
         ax_histo.grid(which='major', color='white', linestyle='-', axis='y')
 
 
-    ax_histo.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
-                        loc=sLocation_legend, fontsize=12)
+    #ax_histo.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
+    #                    loc=sLocation_legend, fontsize=12)
+
+    final_legend_artists = []
+    final_legend_labels = []
+    for idx in range(nData): # Iterate in original data order
+        if legend_patch_containers[idx] is not None: # Check if this dataset was plotted
+            final_legend_artists.append(legend_patch_containers[idx])
+            final_legend_labels.append(aLabel_legend[idx])
+
+    if final_legend_artists: # Only show legend if there are items
+        ax_histo.legend(final_legend_artists, final_legend_labels, bbox_to_anchor=aLocation_legend,
+                            loc=sLocation_legend, fontsize=12)
 
 
     ax_histo.set_title(sTitle)

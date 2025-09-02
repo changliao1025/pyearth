@@ -42,6 +42,7 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
     pFeature = pLayer_in.GetNextFeature()
     #get the geometry
     pGeometry = pFeature.GetGeometryRef()
+    #should we conver to 2d ?
     #get geometry type
     iGeomType = pGeometry.GetGeometryType()
     #get the spatial reference
@@ -64,6 +65,10 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
         iFlag_transform = 0
         pass
 
+    #convert geometry type to name
+    sGeomType = ogr.GeometryTypeToName(iGeomType)
+    print(f'Input geometry type: {sGeomType}')
+
     if iGeomType == ogr.wkbPoint:
         #create the layer
         pLayer_out = pDataset_out.CreateLayer('layer', pSrs_out, geom_type=ogr.wkbPoint)
@@ -76,8 +81,15 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
                 #create the layer
                 pLayer_out = pDataset_out.CreateLayer('layer', pSrs_out, geom_type=ogr.wkbPolygon)
             else:
-                print('Geometry type not supported')
-                return
+                if iGeomType == ogr.wkbMultiPolygon:
+                    #create the layer
+                    pLayer_out = pDataset_out.CreateLayer('layer', pSrs_out, geom_type=ogr.wkbMultiPolygon)
+                else:
+                    print(f'Unsupported geometry type: {sGeomType}')
+                    pDataset_in = None
+                    pLayer_out = pFeature_out = None
+                    pDataset_out = None
+                    return
             pass
         pass
 
@@ -96,7 +108,6 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
         #for i in range(iFeatureCount):
         pFeature_in = pLayer_in.GetNextFeature()
         while pFeature_in:
-            #pFeature_in = pLayer_in.GetFeature(i)
             pGeometry = pFeature_in.GetGeometryRef()
             pGeometry.Transform(transform)
             pFeature_out = ogr.Feature(pFeatureDefn)
@@ -115,7 +126,6 @@ def convert_vector_to_geojson(sFilename_vector_in, sFilename_geojson_out):
         #for i in range(iFeatureCount):
         pFeature_in = pLayer_in.GetNextFeature()
         while pFeature_in:
-            #pFeature_in = pLayer_in.GetFeature(i)
             pGeometry = pFeature_in.GetGeometryRef()
             pFeature_out.SetGeometry(pGeometry)
             #copy the attributes

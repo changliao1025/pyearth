@@ -18,10 +18,7 @@ def merge_vector_polygon_files(iFiletype_in,
 
     """
     if aVariable_in is not None:
-
         sVar = sVariable_out[0:4].lower()
-
-
 
     if iFiletype_in == 1:  # geojson
         pDriver = ogr.GetDriverByName('GeoJSON')
@@ -64,7 +61,7 @@ def merge_vector_polygon_files(iFiletype_in,
             aValue = list()
         for iData in range(nDataset):
             pLayer = aDataset[iData].GetLayer(0)
-            pFeature = pLayer.GetFeature(iFeature)
+            pFeature = pLayer.GetFeature(iFeature) #be careful with the index since it may not have the id
             if iData == 0:  # use the first data as geometry
                 pGeometry_in = pFeature.GetGeometryRef()
                 pGeometry_out = pGeometry_in.Clone()
@@ -84,7 +81,7 @@ def merge_vector_polygon_files(iFiletype_in,
         pFeature_out.SetField('id', lID)
         if aVariable_in is not None:
             pFeature_out.SetField(sVar, float(dValue))
-            
+
         pLayer_out.CreateFeature(pFeature_out)
         lID = lID + 1
 

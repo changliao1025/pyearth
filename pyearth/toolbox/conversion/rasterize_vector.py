@@ -108,7 +108,7 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
 
         else:
             if pGeometry.GetGeometryName() == 'POLYGON':
-                print('This is single polygon feature')
+                print('This is single polygon feature!')
                 #iFlag_boundary_only = 0  #we can set the insdie of polygon to a different value
                 pass
             else:
@@ -174,8 +174,6 @@ def rasterize_vector(sFilename_vector_in, sFilename_raster_out,
             pLayer_boundary = pDatasource_boundary.CreateLayer('boundary', srs=pSpatialRef_source)
             # Loop through each feature in the vector layer
             nFeatureCount = pLayer_vector.GetFeatureCount()
-            #for i in range(nFeatureCount):
-                #pFeature = pLayer_vector.GetFeature(i)
             for pFeature in pLayer_vector:
                 geometry = pFeature.GetGeometryRef()
                 pFeature_boundary = ogr.Feature(pLayer_boundary.GetLayerDefn())

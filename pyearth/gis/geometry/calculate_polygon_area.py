@@ -1,6 +1,7 @@
 #it is also recommended to use the nvector API to calculate the area of a polygon on the ellipsoid
 import math
 import numpy as np
+from osgeo import ogr
 from pyearth.system.define_global_variables import *
 
 from pyearth.gis.geometry.calculate_spherical_triangle_area import calculate_spherical_triangle_area
@@ -17,7 +18,7 @@ def haversine(x):
 
 def calculate_polygon_area(aLongitude_in,
                            aLatitude_in,
-                           iFlag_algorithm=1,
+                           iFlag_algorithm=2,
                            iFlag_radian=None,
                            dRadius_in=None,
                            dLine_threshold = None):
@@ -164,6 +165,55 @@ def calculate_polygon_area(aLongitude_in,
             dArea_m = area * earth_radius**2
 
         return float(dArea_m)
+
+def calculate_polygon_file_area(sFilename_polygon_in):
+    from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+    """
+    Calculate the area of a polygon from a file
+    :param sFilename_polygon_in: The filename of the polygon file
+    :return: The area of the polygon
+    """
+    pDriver = ogr.GetDriverByName('GeoJSON')
+    pDataSource = pDriver.Open(sFilename_polygon_in, 0)
+    if pDataSource is None:
+        print('Could not open file %s' % sFilename_polygon_in)
+        return
+    pLayer = pDataSource.GetLayer()
+    dArea = 0.0
+
+    pFeature = pLayer.GetNextFeature()
+    while pFeature:
+        pGeometry = pFeature.GetGeometryRef()
+        #get geometry type name
+        sGeometryType = pGeometry.GetGeometryName()
+        if pGeometry is None:
+            #print('No geometry found in feature')
+            pFeature = pLayer.GetNextFeature()
+            continue
+        if pGeometry.IsEmpty():
+            #print('Polygon is empty')
+            pFeature = pLayer.GetNextFeature()
+            continue
+        if sGeometryType == 'POLYGON':
+            aCoords_gcs = get_geometry_coordinates(pGeometry)
+            dArea += calculate_polygon_area(aCoords_gcs[:, 0],
+                                       aCoords_gcs[:, 1] )
+        else:
+            if sGeometryType == 'MULTIPOLYGON':
+                for i in range(pGeometry.GetGeometryCount()):
+                    pGeometry_temp = pGeometry.GetGeometryRef(i)
+                    aCoords_gcs = get_geometry_coordinates(pGeometry_temp)
+                    dArea += calculate_polygon_area(aCoords_gcs[:, 0],
+                                               aCoords_gcs[:, 1] )
+            else:
+                print('Geometry type %s not supported' % sGeometryType)
+                pFeature = pLayer.GetNextFeature()
+                continue
+
+        pFeature = pLayer.GetNextFeature()
+
+    pDataSource = None
+    return dArea
 
 
 def spherical_polygon_area(lat, lon, r):

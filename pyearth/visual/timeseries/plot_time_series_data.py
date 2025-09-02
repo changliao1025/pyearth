@@ -8,6 +8,7 @@ import matplotlib.patches as patches
 from matplotlib.patches import FancyArrowPatch
 
 from pyearth.system.define_global_variables import *
+from pyearth.toolbox.data.list.list_alg import list_max, list_min
 from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
 from pyearth.visual.color.choose_n_color import polylinear_gradient, rand_hex_color
 from pyearth.visual.formatter import log_formatter, MathTextSciFormatter
@@ -75,12 +76,12 @@ def plot_time_series_data(aTime_all,
         sTitle_in (_type_, optional): _description_. Defaults to None.
     """
 
-    aTime_all = np.array(aTime_all)
+    #aTime_all = np.array(aTime_all)
     # each list is a data series, but length may be different
-    aData_all = np.array(aData_all)
-    pShape = aData_all.shape
+    #aData_all = np.array(aData_all)
+    #pShape = aData_all.shape
 
-    nData = pShape[0]
+    nData = len(aData_all)
 
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -194,21 +195,18 @@ def plot_time_series_data(aTime_all,
         iFlag_force_limit_y1 = 1
     else:
         iFlag_force_limit_y1 = 0
-        dMax_y = np.nanmax(aData_all[0])
-        for i in range(1, nData):
-            dummy = np.nanmax(aData_all[i])
-            dMax_y = np.max([dMax_y, dummy])
-
+        dMax_y = list_max(aData_all)
 
     if dMin_y_in is not None:
         dMin_y = dMin_y_in
         iFlag_force_limit_y0 = 1
     else:
         iFlag_force_limit_y0 = 0
-        dMin_y = np.nanmin(aData_all[0])
-        for i in range(1, nData):
-            dummy = np.nanmin(aData_all[i])
-            dMin_y = np.min([dMin_y, dummy])
+        dMin_y = list_min(aData_all)
+
+    if np.isnan(dMax_y) and np.isnan(dMin_y):
+        print("No data found, please check the input data")
+        return
 
     if (dMax_y <= dMin_y):
         return
@@ -467,8 +465,14 @@ def plot_time_series_data(aTime_all,
             ax.set_ylabel(sLabel_y, fontsize=12)
 
             ax.set_xlabel('Year', fontsize=12)
-            ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
+            if len(aLegend_artist) < 10:
+                ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
                       loc=sLocation_legend, fontsize=10, ncol=ncolumn )
+            else:
+                ncolumn = int(len(aLegend_artist) / 10) + 1
+                ax.legend(aLegend_artist, aLabel, bbox_to_anchor=aLocation_legend,
+                      loc=sLocation_legend, fontsize=10, ncol=ncolumn )
+
             pass
             if iFlag_miniplot == 1:
                 rect_bottom_left = ax.transData.transform((dMin_mini_x_num, dMin_mini_y))

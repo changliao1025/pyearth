@@ -4,9 +4,12 @@ import numpy as np
 from osgeo import ogr, osr, gdal
 from pyearth.toolbox.conversion.rasterize_vector import rasterize_vector
 
-def convert_vector_to_global_raster(sFilename_vector_in, sFilename_tif_out,
-                                       dResolution_x_in, dResolution_y_in,
-                                       iFlag_boundary_only_in = 0, dFill_value_in = 2 ):
+def convert_vector_to_global_raster(sFilename_vector_in,
+                                    sFilename_tif_out,
+                                       dResolution_x_in,
+                                       dResolution_y_in,
+                                       iFlag_boundary_only_in = 0,
+                                         dFill_value_in = 2 ):
 
     #get the folder that contains the output file
     sFolder = os.path.dirname(sFilename_tif_out)
@@ -54,12 +57,16 @@ def convert_vector_to_global_raster(sFilename_vector_in, sFilename_tif_out,
     nrow = int(nbot-ntop)
     ncolumn = int(nright - nleft)
 
-    rasterize_vector(sFilename_vector_in, sFilename_tif_out,
-                      dResolution_x_in, dResolution_y_in,
+    rasterize_vector(sFilename_vector_in,
+                      sFilename_tif_out,
+                      dResolution_x_in,
+                      dResolution_y_in,
                          dMissing_value_in=0,
                          iDataType_out = gdal.GDT_Byte ,
-                         dMin_x_in = dMin_x, dMax_x_in = dMax_x, dMin_y_in = dMin_y, dMax_y_in = dMax_y,
-                         nRow_in=nrow, nColumn_in=ncolumn,
+                         dMin_x_in = dMin_x, dMax_x_in = dMax_x,
+                           dMin_y_in = dMin_y, dMax_y_in = dMax_y,
+                         nRow_in=nrow,
+                         nColumn_in=ncolumn,
                              iFlag_boundary_only_in = iFlag_boundary_only_in,
                              dFill_value_in = dFill_value_in )
     return

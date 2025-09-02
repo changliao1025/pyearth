@@ -10,7 +10,8 @@ def gdal_write_geotiff_file(sFilename_in,
                             dOriginY_in,
                             dMissing_value_in,
                             pProjection_in,
-                            datatype=gdal.GDT_Float32):
+                            datatype=gdal.GDT_Float32,
+                            compression='LZW'):
     """
     Write a Geotiff standard format raster file
 
@@ -41,12 +42,23 @@ def gdal_write_geotiff_file(sFilename_in,
     nrow, ncolumn = aData_in.shape
     nband = 1
 
+    # Create creation options for compression
+    creation_options = []
+    if compression:
+        creation_options.extend(['COMPRESS=' + compression, 'PREDICTOR=2'])
+        # Add BIGTIFF option for large files
+        creation_options.append('BIGTIFF=IF_SAFER')
+        # Add tiling for better access performance
+        creation_options.extend(['TILED=YES', 'BLOCKXSIZE=256', 'BLOCKYSIZE=256'])
+
+
     pDataset = pDriver.Create(
         sFilename_in,
         ncolumn,
         nrow,
         nband,
-        datatype)
+        datatype,
+        options=creation_options)
 
     pDataset.SetGeoTransform([
         dOriginX_in,    # 0

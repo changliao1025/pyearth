@@ -215,10 +215,10 @@ def map_raster_file(sFilename_in,
     ax.set_extent(aExtent_map, crs = pSRS_wgs84)
     rasterplot = ax.imshow(aImage_in, origin='upper',
                            extent=aImage_extent,
-                           cmap=cmap,transform=ccrs.PlateCarree())
+                           cmap=cmap, transform=ccrs.PlateCarree())
 
 
-    print('test')
+
     if iFlag_contour == 1:
         aPercentiles_in = np.arange(33, 67, 33)
         levels = cgpercentiles(

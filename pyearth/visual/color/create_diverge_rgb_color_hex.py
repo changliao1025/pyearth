@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors  # Add this import
 def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in=None):
     """
     choose diverge color from: https://colorbrewer2.org/
@@ -78,6 +80,13 @@ def create_diverge_rgb_color_hex(ncolor, iFlag_reverse_in=None):
                               '#3288bd',
                               '#5e4fa2']
             else:
+                #automatically generate the colors using number of colors
+                cmap = plt.get_cmap('RdBu', ncolor)
+                colors_hex = [cmap(i) for i in range(cmap.N)]
+                colors_hex = [mcolors.rgb2hex(c) for c in colors_hex]  # Fixed line
+                colors_hex = [c.replace('#', '') for c in colors_hex]
+                colors_hex = ['#' + c for c in colors_hex]
+
                 pass
 
         # add the reverse feature

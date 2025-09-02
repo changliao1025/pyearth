@@ -37,10 +37,10 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
     iGeomType = pLayer_in.GetGeomType()
     #obtain the geotype of first geometry
     pLayer_in.ResetReading()
-
     # Obtain the first feature
-    pFeature = pLayer_in.GetNextFeature()
-    pGeometry = pFeature.GetGeometryRef()
+    pFeature_first = pLayer_in.GetNextFeature()
+    pGeometry = pFeature_first.GetGeometryRef()
+    pGeometry.FlattenTo2D()
     if pGeometry is None:
         print('Geometry not found')
         return
@@ -49,6 +49,7 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
     #get geometry type name
     sGeomType = ogr.GeometryTypeToName(iGeomType)
     print('Geometry type: ' + sGeomType)
+    pGeometry_merge = pGeometry.Clone()
     #check whether it is a multi-geometry
     if iGeomType == ogr.wkbMultiPoint or iGeomType == ogr.wkbMultiLineString or iGeomType == ogr.wkbMultiPolygon:
         #get the number of geometries
@@ -56,21 +57,17 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
         #get the first geometry
         pGeometry_single = pGeometry.GetGeometryRef(0)
         iGeomType = pGeometry_single.GetGeometryType()
-
     if iGeomType == ogr.wkbPoint:
         #create the layer
         pLayer_out = pDataset_out.CreateLayer('layer', pSpatial_reference, geom_type=ogr.wkbPoint)
-        pGeometry_merge = ogr.Geometry(ogr.wkbPoint)
     else:
         if iGeomType == ogr.wkbLineString:
             #create the layer
             pLayer_out = pDataset_out.CreateLayer('layer', pSpatial_reference, geom_type=ogr.wkbLineString)
-            pGeometry_merge = ogr.Geometry(ogr.wkbLineString)
         else:
             if iGeomType == ogr.wkbPolygon:
                 #create the layer
                 pLayer_out = pDataset_out.CreateLayer('layer', pSpatial_reference, geom_type=ogr.wkbPolygon)
-                pGeometry_merge = ogr.Geometry(ogr.wkbPolygon)
             else:
                 print('Geometry type not supported')
                 return
@@ -78,11 +75,31 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
         pass
     # Create a new layer in the output shapefile
 
+    # Copy field definitions from input layer to output layer
+    pLayerDefn_in = pLayer_in.GetLayerDefn()
+    for i in range(pLayerDefn_in.GetFieldCount()):
+        pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
+        result = pLayer_out.CreateField(pFieldDefn)
+        if result != ogr.OGRERR_NONE:
+            print(f"Failed to create field {pFieldDefn.GetName()}, error code: {result}")
+        else:
+            # Field was created successfully
+            pass
+
+    # Store first feature's attributes
+    first_feature_attributes = {}
+    for i in range(pLayerDefn_in.GetFieldCount()):
+        field_name = pLayerDefn_in.GetFieldDefn(i).GetName()
+        field_value = pFeature_first.GetField(i)
+        first_feature_attributes[field_name] = field_value
+
     # Loop through the input features and merge them into the output layer
     pLayer_in.ResetReading()  # Reset reading to start from the first feature again
     pFeature = pLayer_in.GetNextFeature()
+    pFeature = pLayer_in.GetNextFeature()  # Get first feature again
     while pFeature:
         pGeometry = pFeature.GetGeometryRef()
+        pGeometry.FlattenTo2D()
         if pGeometry is not None:
             #check geotype again
             iGeomType_new = pGeometry.GetGeometryType()
@@ -110,6 +127,10 @@ def merge_features(sFilename_in, sFilename_out, sFormat='GeoJSON'):
     # Create a new feature in the output layer
     pFeature_out = ogr.Feature(pLayer_out.GetLayerDefn())
     pFeature_out.SetGeometry(pGeometry_merge)
+    # Set all attributes from the first feature
+    for field_name, field_value in first_feature_attributes.items():
+        pFeature_out.SetField(field_name, field_value)
+
     pLayer_out.CreateFeature(pFeature_out)
 
     #close the dataset

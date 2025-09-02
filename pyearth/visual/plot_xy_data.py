@@ -20,11 +20,13 @@ def plot_xy_data(aX_all,
                  dMin_x_in=None,
                  dMax_y_in=None,
                  dMin_y_in=None,
+                 dSpace_x_in=None,
                  dSpace_y_in=None,
                  aMarker_in=None,
                  aColor_in=None,
                  aLinestyle_in=None,
                  aLabel_point_in=None,
+                 aLabel_tag_in=None,
                  aTick_label_x_in=None,
                  aLocation_legend_in=None,
                  sLabel_x_in=None,
@@ -169,6 +171,13 @@ def plot_xy_data(aX_all,
     if (dMax_y <= dMin_y):
         return
 
+    if dSpace_x_in is not None:
+        iFlag_space_x = 1
+        dSpace_x = dSpace_x_in
+    else:
+        iFlag_space_x = 0
+        pass
+
     if dSpace_y_in is not None:
         iFlag_space_y = 1
         dSpace_y = dSpace_y_in
@@ -205,7 +214,6 @@ def plot_xy_data(aX_all,
 
     # start loop for each data
     for i in np.arange(1, nData+1):
-
         x1 = aX_all[i-1]
         y1 = aY_all[i-1]
         ax.plot(x1, y1,
@@ -256,6 +264,12 @@ def plot_xy_data(aX_all,
     if (iFlag_format_y == 1):
         ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
+    if (iFlag_space_x == 0):
+        ax.xaxis.set_major_locator(mpl.ticker.AutoLocator())
+        ax.xaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
+    else:
+        ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace_x))
+
     if (iFlag_space_y == 0):
         ax.yaxis.set_major_locator(mpl.ticker.AutoLocator())
         ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
@@ -284,6 +298,26 @@ def plot_xy_data(aX_all,
 
         pass
 
+    if aLabel_tag_in is not None:
+        # plot the first on the top
+        sText = aLabel_tag_in[0]
+        dLocation = 0.96
+        ax.text(0.03, dLocation, sText,
+                verticalalignment='top', horizontalalignment='left',
+                transform=ax.transAxes,
+                color='black', fontsize=12)
+        # plot the remaining on the bottom
+        nlegend = len(aLabel_tag_in)
+        for i in range(1, nlegend, 1):
+            sText = aLabel_tag_in[i]
+            dLocation = 0.96 - i * 0.05 - 0.03
+            ax.text(0.03, dLocation, sText,
+                    verticalalignment='top', horizontalalignment='left',
+                    transform=ax.transAxes,
+                    color='black', fontsize=12)
+
+            pass
+
     if iFlag_replace_xtick == 1:
         ax.set_xticks(aX_all[0])
         ax.set_xticklabels(xtick_labels, fontsize=8)
@@ -291,7 +325,7 @@ def plot_xy_data(aX_all,
 
     ax.legend(bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend,
-              fontsize=8,
+              fontsize=12,
               ncol=ncolumn)
 
     plt.savefig(sFilename_out, bbox_inches='tight')

@@ -54,12 +54,13 @@ def clip_raster_by_polygon_file(sFilename_raster_in,
     else:
         pDriver_vector = ogr.GetDriverByName(sExtension_vector)
 
-    pDataset_data = gdal.Open(sFilename_raster_in, gdal.GA_ReadOnly)
+    #pDataset_data = gdal.Open(sFilename_raster_in, gdal.GA_ReadOnly)
+
     dummy = gdal_read_geotiff_file(sFilename_raster_in)
     aData= dummy['dataOut']
     eType = dummy['dataType']
     dPixelWidth = dummy['pixelWidth']
-    pPixelHeight = dummy['pixelHeight']
+    dPixelHeight = dummy['pixelHeight']
     dOriginX = dummy['originX']
     dOriginY = dummy['originY']
     nrow = dummy['nrow']
@@ -78,7 +79,7 @@ def clip_raster_by_polygon_file(sFilename_raster_in,
     dX_left=dOriginX
     dX_right = dOriginX + ncolumn * dPixelWidth
     dY_top = dOriginY
-    dY_bot = dOriginY + nrow * pPixelHeight
+    dY_bot = dOriginY + nrow * dPixelHeight
 
     #get the spatial reference of the shapefile
     pDataset_clip = ogr.Open(sFilename_polygon_in)
@@ -108,42 +109,53 @@ def clip_raster_by_polygon_file(sFilename_raster_in,
     pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
     pProjection_clip = pSpatial_reference_clip.ExportToWkt()
     print(pProjection_clip)
+    pLayer_clip.ResetReading()
+    pFeature_clip = pLayer_clip.GetNextFeature()
+    pPolygon = pFeature_clip.GetGeometryRef()
 
-    if( pProjection_target != pProjection_clip):
-        pDataset_clip = None
-        pLayer_clip = None
+    if(pProjection_target != pProjection_clip):
+        #pDataset_clip = None
+        #pLayer_clip = None
         #in this case, we can reproject the shapefile to the same spatial reference as the raster
         #get the folder that contains the shapefile
-        sFolder = os.path.dirname(sFilename_polygon_in)
+        #sFolder = os.path.dirname(sFilename_polygon_in)
         #get the name of the shapefile
-        sName = os.path.basename(sFilename_polygon_in)
+        #sName = os.path.basename(sFilename_polygon_in)
         #get the name of the shapefile without extension
-        sName_no_extension = os.path.splitext(sName)[0]
+        #sName_no_extension = os.path.splitext(sName)[0]
         #create a new shapefile
-        sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_vector
-        reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)
+        #sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_vector
+        #reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)
         #use the new shapefile to clip the raster
-        sFilename_clip = sFilename_clip_out
-        pDataset_clip = ogr.Open(sFilename_clip_out)
-        pLayer_clip = pDataset_clip.GetLayer(0)
-        pLayer_clip.ResetReading()
-        pFeature_clip = pLayer_clip.GetNextFeature()
-        pPolygon = pFeature_clip.GetGeometryRef()
-
+        #sFilename_clip = sFilename_clip_out
+        #pDataset_clip = ogr.Open(sFilename_clip_out)
+        #pLayer_clip = pDataset_clip.GetLayer(0)
+        #pLayer_clip.ResetReading()
+        #pFeature_clip = pLayer_clip.GetNextFeature()
+        #pPolygon = pFeature_clip.GetGeometryRef()
+        pSRS_source = pSpatial_reference_clip
+        pSRS_target = pSpatial_reference_target
+        # Create the coordinate transformation
+        pCoordinateTransform = osr.CoordinateTransformation(pSRS_source, pSRS_target)
+        # Clone the polygon and transform it in-place
+        pPolygon_transformed = pPolygon.Clone()
+        pPolygon_transformed.Transform(pCoordinateTransform)
+        # Use the transformed polygon for clipping
+        pPolygon = pPolygon_transformed
+        pass
     else:
-        sFilename_clip = sFilename_polygon_in
+        #sFilename_clip = sFilename_polygon_in
         #read the first polygon
-        pLayer_clip.ResetReading()
-        pFeature_clip = pLayer_clip.GetNextFeature()
-        pPolygon = pFeature_clip.GetGeometryRef()
         #get the envelope of the polygon
-        iFlag_transform = 0
+        #iFlag_transform = 0
+        pass
 
     #use the gdal warp function to clip the raster
     minX, maxX, minY, maxY = pPolygon.GetEnvelope()
     #iNewWidth = int( (maxX - minX) / abs(dPixelWidth)  )
     #iNewHeigh = int( (maxY - minY) / abs(dPixelWidth) )
     #newGeoTransform = (minX, dPixelWidth, 0,  maxY, 0, -dPixelWidth)
+    pPolygonWKT = pPolygon.ExportToWkt()
 
     if minX > dX_right or maxX < dX_left or minY > dY_top or maxY < dY_bot:
         #this polygon is out of bound
@@ -159,21 +171,23 @@ def clip_raster_by_polygon_file(sFilename_raster_in,
         #                dstSRS=pSpatial_reference_target , format = 'MEM' )
         if iFlag_use_raster_extent == 1:
             pWrapOption = gdal.WarpOptions( cropToCutline=False,
-                                           cutlineDSName = sFilename_clip ,
-                                     xRes=dPixelWidth,
-                                     yRes=abs(pPixelHeight),
-                                     outputBounds=aRaster_extent,
-                                        dstSRS=pSpatial_reference_target , format = 'MEM',
+                                           #cutlineDSName = sFilename_clip ,
+                                           cutlineWKT=pPolygonWKT,
+                                        xRes=dPixelWidth,
+                                        yRes=abs(dPixelHeight),
+                                        outputBounds=aRaster_extent,
+                                        dstSRS=pSpatial_reference_target, format = 'MEM',
                                         resampleAlg='near',
                                          dstNodata=dMissing_value,
                                          outputType=eType_out)
         else:
             pWrapOption = gdal.WarpOptions( cropToCutline=True,
-                                           cutlineDSName = sFilename_clip ,
-                                     xRes=dPixelWidth,
-                                     yRes=abs(pPixelHeight),
-                                        dstSRS=pSpatial_reference_target , format = 'GTiff',
-                                        resampleAlg='near',
+                                           #cutlineDSName = sFilename_clip ,
+                                           cutlineWKT=pPolygonWKT,
+                                           xRes=dPixelWidth,
+                                           yRes=abs(dPixelHeight),
+                                           dstSRS=pSpatial_reference_target, format = 'MEM',
+                                           resampleAlg='near',
                                          dstNodata=dMissing_value ,
                                          outputType=eType_out ) #this resample algorithm may be provided as an input argument
 
@@ -203,7 +217,7 @@ def clip_raster_by_polygon_file(sFilename_raster_in,
         #close the dataset
         pDataset_clip = None
         #close the dataset
-        pDataset_data = None
+        #pDataset_data = None
         print('The raster has been clipped by the polygon file!')
 
     pSpatial_reference_target = None

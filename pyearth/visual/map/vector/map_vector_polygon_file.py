@@ -76,6 +76,7 @@ def map_vector_polygon_file(iFiletype_in,
                             iFlag_terrain_image_in = None,
                             iFlag_relief_image_in = None,
                             iFlag_esri_hydro_image_in = None,
+                            iFlag_buffer_in = None,
                             iFlag_debug_in = None,
                             iBasemap_zoom_level_in = None,
                             sColor_in = None,
@@ -87,12 +88,16 @@ def map_vector_polygon_file(iFiletype_in,
                             dMissing_value_in=None,
                             dData_max_in=None,
                             dData_min_in=None,
+                            dLinewidth_in=None,
                             sField_color_in = None,
                             sExtend_in=None,
                             sFont_in=None,
                             sUnit_in=None,
+                            sFormat_colorbar_in=None,
                             aLegend_in=None,
                             aExtent_in=None,
+                            aDict_discrete_labels_in = None,
+                            aDict_value_color_in = None,
                             pProjection_map_in=None,
                             pProjection_data_in = None):
     """
@@ -218,6 +223,11 @@ def map_vector_polygon_file(iFiletype_in,
         iFlag_data_max = 0
         pass
 
+    if dLinewidth_in is not None:
+        dLinewidth = dLinewidth_in
+    else:
+        dLinewidth = 0.25
+
     if sColormap_in is not None:
         sColormap = sColormap_in
     else:
@@ -342,12 +352,36 @@ def map_vector_polygon_file(iFiletype_in,
     cwidth = int(plot_width_inch / char_width_inch)
 
     if iFlag_discrete == 1:
-        aIndex = np.linspace(0,1,nValue)
-        prng = np.random.RandomState(1234567890)
-        prng.shuffle(aIndex)
-        #print(aIndex)
-        colors = plt.colormaps[sColormap](aIndex)
-        pCmap = ListedColormap(colors)
+        nValue_current = len(aValue)
+        if aDict_value_color_in is not None:
+            custom_colors = []
+            all_values_have_colors = True
+            for val_code in aValue: # aValue is sorted unique values
+                color_for_val = aDict_value_color_in.get(val_code)
+                if color_for_val is None:
+                    print(f"Warning: Color for value {val_code} not found in dict_value_colors_in. Falling back to sColormap.")
+                    all_values_have_colors = False
+                    break
+                custom_colors.append(color_for_val)
+            if all_values_have_colors:
+                pCmap = ListedColormap(custom_colors)
+            else: # Fallback if custom color mapping is incomplete
+                if nValue_current > 0:
+                    # Fallback to using sColormap (consider if shuffling is always desired)
+                    aIndex = np.linspace(0, 1, nValue_current)
+                    # prng = np.random.RandomState(1234567890) # Shuffling might not be ideal for predefined qualitative maps
+                    # prng.shuffle(aIndex)
+                    colors_from_cmap = plt.colormaps[sColormap](aIndex)
+                    pCmap = ListedColormap(colors_from_cmap)
+                else:
+                    pCmap = ListedColormap(['white']) # Default for no values
+        else:
+            aIndex = np.linspace(0,1,nValue)
+            prng = np.random.RandomState(1234567890)
+            prng.shuffle(aIndex)
+            #print(aIndex)
+            colors = plt.colormaps[sColormap](aIndex)
+            pCmap = ListedColormap(colors)
     else:
         pCmap = plt.colormaps[sColormap]
 
@@ -500,34 +534,20 @@ def map_vector_polygon_file(iFiletype_in,
                     ax.add_patch(mPolygon)
             else:
                 if sGeometry_type == 'POLYGON':
-                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    if iFlag_buffer_in is not None:
+                        aCoords_gcs = get_geometry_coordinates(pGeometry_in.Buffer(1.0E-5))
+                    else:
+                        aCoords_gcs = get_geometry_coordinates(pGeometry_in)
                     aCoords_gcs = aCoords_gcs[:,0:2]
                     dArea = calculate_polygon_area(aCoords_gcs[:,0], aCoords_gcs[:,1])
                     if dArea > 1.0:
-                        # Initialize lists for simplified coordinates
-                        aCoords_gcs_simplified = simplify_coordinates(aCoords_gcs, min_distance=1.0)
-                        if aCoords_gcs_simplified.shape[0] < 4:
-                            continue
-                        pPolygon = spolygon(aCoords_gcs_simplified)
-                        if pPolygon.is_valid == False:
-                            print('Polygon is not valid')
-                            continue
+                        if iFlag_fill == 1:
+                            mPolygon = mpolygon(aCoords_gcs, closed=True, edgecolor='blue', facecolor='red',
+                                      alpha=dAlpha, transform=pProjection_data)
                         else:
-                            pGeometry_new = ogr.CreateGeometryFromWkt(pPolygon.wkt)
-                            #define the projection
-                            if pGeometry_new.IsValid() == False:
-                                print('Polygon is not valid')
-                                continue
-                            else:
-                                aCoords_gcs_new = get_geometry_coordinates(pGeometry_new)
-                                if iFlag_fill == 1:
-                                    mPolygon = mpolygon(aCoords_gcs_new, closed=True, edgecolor='blue', facecolor='red',
-                                              alpha=dAlpha, transform=pProjection_data)
-                                else:
-                                    mPolygon = mpolygon(aCoords_gcs_new, closed=True, edgecolor='blue', facecolor='none',
-                                              alpha=dAlpha, transform=pProjection_data)
-                                ax.add_patch(mPolygon)
-                                #ax.add_geometries([pPolygon], crs=pProjection_data, facecolor='red', edgecolor='blue', alpha=dAlpha)
+                            mPolygon = mpolygon(aCoords_gcs, closed=True, edgecolor='blue', facecolor='none',
+                                      alpha=dAlpha, transform=pProjection_data)
+                        ax.add_patch(mPolygon)
                     else:
                         pass
                 else:
@@ -570,7 +590,11 @@ def map_vector_polygon_file(iFiletype_in,
 
             else:
                 if sGeometry_type == 'POLYGON':
-                    aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+                    if iFlag_buffer_in is not None:
+                        aCoords_gcs = get_geometry_coordinates(pGeometry_in.Buffer(1.0E-5))
+                    else:
+                        aCoords_gcs = get_geometry_coordinates(pGeometry_in)
+
                     aCoords_gcs=aCoords_gcs[:,0:2]
                     aColor_index.append(iColor_index)
                     aPolygon.append(aCoords_gcs)
@@ -594,7 +618,7 @@ def map_vector_polygon_file(iFiletype_in,
                 pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor=aColor,
                                       facecolor='none',
-                                      linewidths=0.25,
+                                      linewidths=dLinewidth,
                                       transform=pProjection_data)
         else:
             if sColor_in is not None:
@@ -606,14 +630,13 @@ def map_vector_polygon_file(iFiletype_in,
                 pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor='none',
                                       facecolor=sColor,
-                                      linewidths=0.25,
                                       transform=pProjection_data)
             else:
                 aPatch = [mpolygon(poly, closed=True, fill=iFlag_fill) for poly in aPolygon]
                 pPC = PatchCollection(aPatch, alpha=dAlpha,
                                       edgecolor=sColor,
                                       facecolor='none',
-                                      linewidths=0.25,
+                                      linewidths=dLinewidth,
                                       transform=pProjection_data)
 
         ax.add_collection(pPC)
@@ -679,14 +702,51 @@ def map_vector_polygon_file(iFiletype_in,
                                            extend=sExtend, format=formatter)
         else:
             if iFlag_discrete ==1:
-                formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0f}".format(x))
+                if len(aValue) > 1:
+                    boundaries = [aValue[0] - 0.5] # Start boundary
+                    for k_val in range(len(aValue) - 1):
+                        boundaries.append((aValue[k_val] + aValue[k_val+1]) / 2.0)
+                    boundaries.append(aValue[-1] + 0.5) # End boundary
+                elif len(aValue) == 1: # Handle case with only one unique value
+                    boundaries = [aValue[0] - 0.5, aValue[0] + 0.5]
+                else: # No values, empty colorbar
+                    boundaries = [0, 1]
+
+                norm = mpl.colors.BoundaryNorm(boundaries, pCmap.N, clip=True)
+
+                # For discrete colorbars, 'extend' might not be desired unless explicitly handled
+                current_extend = sExtend if not iFlag_discrete else 'neither' # Or None, or handle based on actual data clipping
+                # Calculate tick positions to be at the center of each color patch
+                tick_centers = []
+                if len(aValue) > 0: # Ensure aValue is not empty
+                    for k_idx in range(len(aValue)): # Iterate for each category/color
+                        tick_centers.append((boundaries[k_idx] + boundaries[k_idx+1]) / 2.0)
+
+                #formatter = mpl.ticker.FuncFormatter(lambda x, pos: "{:.0f}".format(x))
+                #cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
+                #                           cmap=pCmap,
+                #                           norm=mpl.colors.Normalize(
+                #                               dValue_min, dValue_max),  # vmax and vmin
+                #                           extend=sExtend, format=formatter)
                 cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
-                                           cmap=pCmap,
-                                           norm=mpl.colors.Normalize(
-                                               dValue_min, dValue_max),  # vmax and vmin
-                                           extend=sExtend, format=formatter)
+                                               cmap=pCmap,
+                                               norm=norm, # Use the BoundaryNorm
+                                               extend=current_extend,
+                                               ticks=tick_centers)
+
+                discrete_tick_labelsize = iFont_size - 4
+                if aDict_discrete_labels_in is not None and len(aValue) > 0:
+                    labels = [aDict_discrete_labels_in.get(int(tick_val), str(int(tick_val))) for tick_val in aValue]
+                    cb.set_ticklabels(labels)
+                    cb.ax.tick_params(axis='y', which='major', labelsize=discrete_tick_labelsize) # Apply specific size
+                elif len(aValue) > 0:
+                    cb.set_ticklabels([str(int(val)) for val in aValue])
+                    cb.ax.tick_params(axis='y', which='major', labelsize=discrete_tick_labelsize)
             else:
-                formatter = OOMFormatter(fformat="%1.2f")
+                if sFormat_colorbar_in is not None:
+                    formatter = sFormat_colorbar_in
+                else:
+                    formatter = OOMFormatter(fformat="%1.2f")
                 cb = mpl.colorbar.ColorbarBase(ax_cb, orientation='vertical',
                                            cmap=pCmap,
                                            norm=mpl.colors.Normalize(

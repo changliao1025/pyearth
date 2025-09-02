@@ -1,5 +1,5 @@
 import numpy as np
-def degree_to_meter(dLatitude_mean_in, dResolution_degree_in):
+def degree_to_meter(dResolution_degree_in, dLatitude_mean_in=0.0 ):
     """[summary]
 
     Args:
@@ -14,7 +14,7 @@ def degree_to_meter(dLatitude_mean_in, dResolution_degree_in):
     dResolution_meter = dResolution_degree_in / 360.0 * (2*np.pi * dRadius2)
     return float(dResolution_meter)
 
-def meter_to_degree(dLatitude_mean_in, dResolution_meter_in ):
+def meter_to_degree(dResolution_meter_in, dLatitude_mean_in=0.0 ):
     """[summary]
 
     Args:

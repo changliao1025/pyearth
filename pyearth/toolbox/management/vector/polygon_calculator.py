@@ -9,7 +9,8 @@ from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 iFlag_cython = importlib.util.find_spec("cython")
 osr.UseExceptions()
 
-def polygon_difference_rtree(sFilename_base, sFilename_new, sAttribute_name_base, sAttribute_name_new, sFilename_output_in):
+#these functions assume that the input vector files have an attribute called 'id'
+def polygon_difference(sFilename_base, sFilename_new, sAttribute_name_base, sAttribute_name_new, sFilename_output_in):
     start_time = datetime.now()
     #read the base file
     pDriver_geojson = ogr.GetDriverByName('GeoJSON')
