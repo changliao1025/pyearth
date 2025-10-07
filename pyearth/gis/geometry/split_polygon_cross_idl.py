@@ -5,7 +5,10 @@ from pyearth.system.define_global_variables import *
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.gis.geometry.calculate_intersect_on_great_circle import find_great_circle_intersection
 
+
+
 def split_polygon_cross_idl(aCoord_gcs):
+    aCoord_gcs = np.array(aCoord_gcs)
     #find out the two index where the edge crosses the IDL
     nPoint = len(aCoord_gcs)
     aIndex = []
@@ -14,7 +17,7 @@ def split_polygon_cross_idl(aCoord_gcs):
     for i in range(nPoint - 1):
         dLongitude = aCoord_gcs[i,0]
         dLongitude_next = aCoord_gcs[i + 1,0]
-        if dLongitude > 0 and  dLongitude < 180.0 and dLongitude_next < 0:
+        if dLongitude > 0 and dLongitude < 180.0 and dLongitude_next < 0:
             aIndex.append(i)
             continue
         if dLongitude < 0 and dLongitude_next > 0:
@@ -106,5 +109,18 @@ def split_polygon_cross_idl(aCoord_gcs):
                         aCoord_gcs_right.append([-180+1.0E-10, dLat_bottom])
                 else:
                     aCoord_gcs_right.append(aCoord_gcs[i])
+    #convert to numpy array
+    aCoord_gcs_left = np.array(aCoord_gcs_left)
+    aCoord_gcs_right = np.array(aCoord_gcs_right)
+    # After converting to numpy arrays, ensure polygons are closed
+    if len(aCoord_gcs_left) > 0:
+        # Check if first and last points are the same (within tolerance)
+        if not np.allclose(aCoord_gcs_left[0], aCoord_gcs_left[-1], atol=1e-10):
+            aCoord_gcs_left = np.vstack([aCoord_gcs_left, aCoord_gcs_left[0:1]])
+    
+    if len(aCoord_gcs_right) > 0:
+        # Check if first and last points are the same (within tolerance)
+        if not np.allclose(aCoord_gcs_right[0], aCoord_gcs_right[-1], atol=1e-10):
+            aCoord_gcs_right = np.vstack([aCoord_gcs_right, aCoord_gcs_right[0:1]])
 
     return [aCoord_gcs_left, aCoord_gcs_right]

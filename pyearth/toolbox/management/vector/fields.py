@@ -1,8 +1,60 @@
 import numpy as np
-from osgeo import ogr
+from osgeo import ogr, gdal
+
+def check_parquet_support():
+    """
+    Check if Parquet/Arrow driver is available in OGR
+    """
+    driver_names = [ogr.GetDriver(i).GetName() for i in range(ogr.GetDriverCount())]
+    parquet_drivers = [name for name in driver_names if 'parquet' in name.lower() or 'arrow' in name.lower()]
+    return parquet_drivers
+
+def get_supported_formats():
+    """
+    Get list of all supported OGR formats
+    """
+    formats = {}
+    for i in range(ogr.GetDriverCount()):
+        driver = ogr.GetDriver(i)
+        formats[driver.GetName()] = driver.GetMetadata()
+    return formats
+
+def diagnose_parquet_issue():
+    """
+    Diagnose parquet support issues and suggest solutions
+    """
+    print("=== GDAL/OGR Parquet Support Diagnosis ===")
+    print(f"GDAL Version: {gdal.VersionInfo()}")
+
+    parquet_drivers = check_parquet_support()
+    if parquet_drivers:
+        print(f"Available Parquet drivers: {parquet_drivers}")
+    else:
+        print("No Parquet drivers found!")
+        print("\nSolutions:")
+        print("1. Install GDAL with Arrow/Parquet support:")
+        print("   conda install -c conda-forge gdal>=3.5 pyarrow")
+        print("2. Or convert parquet to supported format:")
+        print("   Use geopandas: gdf.to_file('file.gpkg', driver='GPKG')")
+        print("3. Check available drivers:")
+
+        print("Available drivers:")
+        for i in range(min(10, ogr.GetDriverCount())):
+            driver = ogr.GetDriver(i)
+            print(f"  - {driver.GetName()}")
+        print("  ... (showing first 10)")
+
+    return parquet_drivers
 def get_field_value(sFilename_vector_in, sField_name_in, dMissing_value = None):
     # Open the vector file
-    pDataset = ogr.Open(sFilename_vector_in)
+    try:
+        pDataset = ogr.Open(sFilename_vector_in)
+    except Exception as e:
+        if sFilename_vector_in.lower().endswith('.parquet'):
+            print("Parquet support may require GDAL with Arrow/Parquet driver.")
+            print("Available parquet drivers:", check_parquet_support())
+        raise ValueError(f"Could not open {sFilename_vector_in}: {e}")
+
     if pDataset is None:
         raise ValueError(f"Could not open {sFilename_vector_in}")
 
@@ -26,7 +78,14 @@ def get_field_value(sFilename_vector_in, sField_name_in, dMissing_value = None):
 
 def get_field_and_value(sFilename_vector_in):
     # Open the vector file
-    pDataset = ogr.Open(sFilename_vector_in)
+    try:
+        pDataset = ogr.Open(sFilename_vector_in)
+    except Exception as e:
+        if sFilename_vector_in.lower().endswith('.parquet'):
+            print("Parquet support may require GDAL with Arrow/Parquet driver.")
+            print("Available parquet drivers:", check_parquet_support())
+        raise ValueError(f"Could not open {sFilename_vector_in}: {e}")
+
     if pDataset is None:
         raise ValueError(f"Could not open {sFilename_vector_in}")
 
@@ -53,9 +112,25 @@ def get_field_and_value(sFilename_vector_in):
 def add_field_to_vector_file(sFilename_vector_in, aField, aValue):
 
     #open the file for updating
-    pDataset = ogr.Open(sFilename_vector_in, update=1)
+    try:
+        pDataset = ogr.Open(sFilename_vector_in, update=1)
+    except Exception as e:
+        # Try alternative approach for parquet files
+        if sFilename_vector_in.lower().endswith('.parquet'):
+            print(f"Warning: Direct parquet update not supported. Error: {e}")
+            print("Consider converting to a different format for field updates.")
+            return
+        else:
+            raise ValueError(f"Could not open {sFilename_vector_in} for updating: {e}")
+
     if pDataset is None:
-        raise ValueError(f"Could not open {sFilename_vector_in} for updating")
+        # Check if it's a parquet file
+        if sFilename_vector_in.lower().endswith('.parquet'):
+            print("Warning: Parquet format may not support in-place updates.")
+            print("Available drivers:", [ogr.GetDriver(i).GetName() for i in range(ogr.GetDriverCount())])
+            return
+        else:
+            raise ValueError(f"Could not open {sFilename_vector_in} for updating")
 
     pLayer = pDataset.GetLayer(0)
 
