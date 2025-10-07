@@ -59,7 +59,28 @@ cms2cmd = 24 * 3600
 earth_radius = 6378137.0
 
 sConda_env_path, sConda_env_name = get_python_environment()
-os.environ['PROJ_LIB'] = sConda_env_path + '/share/proj'
+
+# Check for PROJ data directory in multiple possible locations
+proj_paths = [
+    os.path.join(sConda_env_path, 'share', 'proj'),           # Linux/Mac typical
+    os.path.join(sConda_env_path, 'Library', 'share', 'proj'), # Windows conda-forge
+    os.path.join(sConda_env_path, 'Lib', 'site-packages', 'pyproj', 'proj_dir', 'share', 'proj'), # PyPI pyproj
+]
+
+sPath = None
+for proj_path in proj_paths:
+    if os.path.exists(proj_path):
+        sPath = proj_path
+        break
+
+if sPath:
+    os.environ['PROJ_LIB'] = sPath
+    print(f"PROJ_LIB set to: {sPath}")
+else:
+    print(f"Warning: PROJ data directory not found. Checked paths:")
+    for path in proj_paths:
+        print(f"  - {path}")
+    print("PROJ functionality may be limited.")
 
 
 
