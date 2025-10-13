@@ -24,14 +24,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install build twine check-manifest
 
-    - name: Verify package metadata
-      run: |
-        python -m build --check
-        check-manifest
-        twine check dist/*
+    - name: Check manifest
+      run: check-manifest
 
     - name: Build package
       run: python -m build
+
+    - name: Verify package metadata
+      run: |
+        twine check dist/*
 
     - name: Verify version matches tag
       run: |
