@@ -1,46 +1,41 @@
 import os
 from osgeo import ogr
-def gdal_validate_polygon_file(sFilename_in):
+
+def gdal_validate_polygon_file(filename: str) -> bool:
     """
-    Check if given polygon file is valid
-    Args:
-        sFilename_in (str): Filename of polygon file
+    Check if a given polygon file is valid.
+
+    Parameters:
+    filename (str): The filename of the polygon file.
 
     Returns:
-        int: 1-valid, 0-invalid
+    bool: True if the file is a valid polygon file, False otherwise.
     """
+    if not os.path.exists(filename):
+        return False
 
-    iFlag_valid = 1
+    try:
+        dataset = ogr.Open(filename)
+        if dataset is None:
+            return False
 
-    # Check if file exists
-    if not os.path.exists(sFilename_in):
-        iFlag_valid = 0
-    else:
-        # Check if file is a polygon file
-        try:
-            pDataset = ogr.Open(sFilename_in)
-            pLayer = pDataset.GetLayer()
-            pFeature = pLayer.GetNextFeature()
-            i = 0
-            while pFeature is not None:
-                #check if geometry is valid
-                pGeometry = pFeature.GetGeometryRef()
-                #check whether the geometry is a polygon
-                if pGeometry.GetGeometryName() != 'POLYGON':
-                    iFlag_valid = 0
-                    break
-                else:
-                    #check whether the polygon is valid
-                    if pGeometry.IsValid() == 0:
-                        print("Polygon WKT:", pGeometry.ExportToWkt())
-                        print(i)
-                        iFlag_valid = 0
-                        break
-                    else:
-                        pass
-                i = i + 1
-                pFeature = pLayer.GetNextFeature()
-        except:
-            iFlag_valid = 0
+        layer = dataset.GetLayer()
+        if layer is None:
+            return False
 
-    return iFlag_valid
+        for feature in layer:
+            geometry = feature.GetGeometryRef()
+            if geometry is None:
+                return False
+
+            if geometry.GetGeometryName() != 'POLYGON':
+                return False
+
+            if not geometry.IsValid():
+                return False
+
+        return True
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False

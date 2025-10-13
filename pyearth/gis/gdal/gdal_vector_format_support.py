@@ -1,51 +1,90 @@
 import os
-def get_supported_formats():
-    """
-    Return a dictionary of supported vector formats
-    """
-    return {
-        '.geojson': 'GeoJSON',
-        '.json': 'GeoJSON',
-        '.shp': 'ESRI Shapefile',
-        '.gpkg': 'GPKG (GeoPackage)',
-        '.kml': 'KML (Google Earth)',
-        '.gml': 'GML (Geography Markup Language)',
-        '.csv': 'CSV (with geometry column)',
-        '.parquet': 'Parquet',
-        '.geoparquet': 'Parquet'
-    }
+from osgeo import ogr
 
-def print_supported_formats():
+SUPPORTED_VECTOR_FORMATS = {
+    '.geojson': 'GeoJSON',
+    '.json': 'GeoJSON',
+    '.shp': 'ESRI Shapefile',
+    '.gpkg': 'GPKG',
+    '.kml': 'KML',
+    '.gml': 'GML',
+    '.sqlite': 'SQLite',
+    '.parquet': 'Parquet',
+    '.geoparquet': 'Parquet',
+    '.csv': 'CSV',
+    '.tab': 'MapInfo File',
+    '.mif': 'MapInfo File',
+    '.dxf': 'DXF',
+    '.gdb': 'OpenFileGDB'
+}
+
+def gdal_vector_format_support() -> dict[str, str]:
     """
-    Print all supported vector formats
+    Return a dictionary of supported vector formats.
+
+    Returns:
+    dict[str, str]: A dictionary of supported vector formats mapping file extensions to OGR driver names.
+    """
+    return SUPPORTED_VECTOR_FORMATS
+
+def print_supported_vector_formats() -> None:
+    """
+    Print all supported vector formats.
     """
     print("Supported vector formats:")
-    formats = get_supported_formats()
-    for ext, desc in formats.items():
-        print(f"  {ext}: {desc}")
+    for ext, driver in SUPPORTED_VECTOR_FORMATS.items():
+        print(f"  {ext}: {driver}")
 
-def get_format_from_extension(sFilename_in):
+def get_vector_format_from_extension(filename: str) -> str:
     """
     Determine the OGR format string from file extension.
 
-    Args:
-        filename: Input filename with extension
+    Parameters:
+    filename (str): Input filename with extension.
 
     Returns:
-        Format string for OGR driver
+    str: Format string for OGR driver.
+
+    Raises:
+    ValueError: If the file extension is not supported.
     """
-    _, ext = os.path.splitext(sFilename_in.lower())
+    _, ext = os.path.splitext(filename.lower())
 
-    format_map = {
-        '.geojson': 'GeoJSON',
-        '.json': 'GeoJSON',
-        '.shp': 'ESRI Shapefile',
-        '.gpkg': 'GPKG',
-        '.kml': 'KML',
-        '.gml': 'GML',
-        '.sqlite': 'SQLite',
-        '.parquet': 'Parquet',
-        '.geoparquet': 'Parquet'
-    }
+    if ext in SUPPORTED_VECTOR_FORMATS:
+        return SUPPORTED_VECTOR_FORMATS[ext]
+    else:
+        raise ValueError(f"Unsupported vector file extension: {ext}")
 
-    return format_map.get(ext, 'GeoJSON')
+def get_vector_driver(file_format: str) -> ogr.Driver:
+    """
+    Get the OGR driver based on the provided vector file format.
+
+    Parameters:
+    file_format (str): The vector file format (e.g., 'GeoJSON', 'ESRI Shapefile', 'GPKG').
+
+    Returns:
+    ogr.Driver: The OGR driver object corresponding to the file format.
+
+    Raises:
+    ValueError: If the driver is not found.
+    """
+    driver = ogr.GetDriverByName(file_format)
+    if driver is None:
+        raise ValueError(f"Driver for format '{file_format}' not found.")
+    return driver
+
+def get_vector_driver_from_extension(filename: str) -> ogr.Driver:
+    """
+    Get the OGR driver based on file extension.
+
+    Parameters:
+    filename (str): Input filename with extension.
+
+    Returns:
+    ogr.Driver: The OGR driver object corresponding to the file format.
+
+    Raises:
+    ValueError: If the file extension is not supported or driver is not found.
+    """
+    format_name = get_vector_format_from_extension(filename)
+    return get_vector_driver(format_name)

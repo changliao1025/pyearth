@@ -1,22 +1,20 @@
-
-#from math import acos
 import numpy as np
-def calculate_angle_between_vectors_degrees(u, v):
-    """Return the angle between two vectors in any dimension space,
-    in degrees.
+
+def calculate_angle_between_vectors_degrees(vector1: np.ndarray, vector2: np.ndarray) -> float:
     """
-    a = np.dot(u, v)
-    b = np.linalg.norm(u)
-    c = np.linalg.norm(v)
-    d = a / (b * c)
-    if d > 1:
-        d = 1
-    if d < -1:
-        d = -1
+    Return the angle between two vectors in any dimension space, in degrees.
 
-    #e = acos(d) 
-    e = np.arccos(d)
-    
-    f = np.degrees(e)
+    Parameters:
+    vector1 (np.ndarray): The first vector.
+    vector2 (np.ndarray): The second vector.
 
-    return f
+    Returns:
+    float: The angle between the two vectors in degrees.
+    """
+    dot_product = np.dot(vector1, vector2)
+    norm_product = np.linalg.norm(vector1) * np.linalg.norm(vector2)
+    cosine_similarity = np.clip(dot_product / norm_product, -1.0, 1.0)
+    angle_in_radians = np.arccos(cosine_similarity)
+    angle_in_degrees = np.degrees(angle_in_radians)
+
+    return angle_in_degrees

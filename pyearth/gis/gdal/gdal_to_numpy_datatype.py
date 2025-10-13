@@ -1,7 +1,17 @@
 import numpy as np
 from osgeo import gdalconst, ogr
+from typing import Any, Type, Union
 
-def gdal_to_numpy_datatype(gdal_dtype):
+def gdal_to_numpy_datatype(gdal_dtype: int) -> Type[np.number]:
+    """
+    Convert a GDAL data type to a NumPy data type.
+
+    Parameters:
+    gdal_dtype (int): The GDAL data type (e.g., gdalconst.GDT_Byte).
+
+    Returns:
+    Type[np.number]: The corresponding NumPy data type.
+    """
     if gdal_dtype == gdalconst.GDT_Byte:
         return np.uint8
     elif gdal_dtype == gdalconst.GDT_UInt16:
@@ -21,7 +31,16 @@ def gdal_to_numpy_datatype(gdal_dtype):
     else:
         raise ValueError(f"GDAL data type {gdal_dtype} not recognized")
 
-def numpy_dtype_to_gdal(numpy_dtype):
+def numpy_dtype_to_gdal(numpy_dtype: Type[np.number]) -> int:
+    """
+    Convert a NumPy data type to a GDAL data type.
+
+    Parameters:
+    numpy_dtype (Type[np.number]): The NumPy data type (e.g., np.uint8).
+
+    Returns:
+    int: The corresponding GDAL data type.
+    """
     if numpy_dtype == np.uint8:
         return gdalconst.GDT_Byte
     elif numpy_dtype == np.uint16:
@@ -42,21 +61,19 @@ def numpy_dtype_to_gdal(numpy_dtype):
         raise ValueError(f"Numpy data type {numpy_dtype} not recognized")
 
 
-def numpy_to_gdal_type(numpy_value, target_type=None):
+def numpy_to_gdal_type(numpy_value: Any, target_type: int = None) -> Union[int, float, str, bool, None]:
     """
     Convert a NumPy value to an appropriate type for GDAL/OGR functions.
 
     Parameters:
-    numpy_value: The NumPy value to convert
-    target_type: Target OGR field type (ogr.OFTInteger, ogr.OFTReal, etc.)
+    numpy_value (Any): The NumPy value to convert.
+    target_type (int, optional): Target OGR field type (e.g., ogr.OFTInteger). Defaults to None.
 
     Returns:
-    The value converted to a Python native type that GDAL/OGR can handle
+    Union[int, float, str, bool, None]: The value converted to a Python native type that GDAL/OGR can handle.
     """
-    # Handle None or np.nan
     if numpy_value is None or (hasattr(numpy_value, 'dtype') and np.isnan(numpy_value)):
-        # Return appropriate default value based on target type
-        if target_type == ogr.OFTInteger or target_type == ogr.OFTInteger64:
+        if target_type in (ogr.OFTInteger, ogr.OFTInteger64):
             return 0
         elif target_type == ogr.OFTReal:
             return 0.0
@@ -65,37 +82,22 @@ def numpy_to_gdal_type(numpy_value, target_type=None):
         else:
             return None
 
-    # Convert based on target type if specified
     if target_type is not None:
-        if target_type == ogr.OFTInteger or target_type == ogr.OFTInteger64:
+        if target_type in (ogr.OFTInteger, ogr.OFTInteger64):
             return int(numpy_value)
         elif target_type == ogr.OFTReal:
             return float(numpy_value)
         elif target_type == ogr.OFTString:
             return str(numpy_value)
-        # Add more type conversions as needed
 
-    # Otherwise, convert based on NumPy type
-    # Integer types
-    elif isinstance(numpy_value, (np.integer, np.int_, np.int8, np.int16, np.int32, np.int64,
+    if isinstance(numpy_value, (np.integer, np.int_, np.int8, np.int16, np.int32, np.int64,
                                 np.uint, np.uint8, np.uint16, np.uint32, np.uint64)):
         return int(numpy_value)
-
-    # Float types
     elif isinstance(numpy_value, (np.float_, np.float16, np.float32, np.float64)):
         return float(numpy_value)
-
-    # Boolean types
     elif isinstance(numpy_value, np.bool_):
         return bool(numpy_value)
-
-    # String types
     elif isinstance(numpy_value, (np.string_, np.unicode_)):
         return str(numpy_value)
-
-    # If it's already a Python native type or unknown NumPy type
     else:
-        try:
-            return numpy_value  # May already be a Python native type
-        except:
-            return str(numpy_value)  # Last resort: convert to string
+        return numpy_value

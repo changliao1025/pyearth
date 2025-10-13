@@ -1,14 +1,8 @@
-import os
 import json
 from json import JSONEncoder
-import importlib.util
 import numpy as np
-from osgeo import ogr, gdal, osr
-from geographiclib.geodesic import Geodesic
+from typing import List
 from pyearth.toolbox.mesh.vertex import pyvertex
-iFlag_cython = importlib.util.find_spec("cython")
-from pyearth.gis.geometry.calculate_angle_betwen_vertex import  calculate_angle_betwen_vertex
-from pyearth.gis.geometry.calculate_distance_to_plane import calculate_distance_to_plane
 
 class CircleClassEncoder(JSONEncoder):
     def default(self, obj):
@@ -18,37 +12,29 @@ class CircleClassEncoder(JSONEncoder):
             return float(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        if isinstance(obj, list):
-            pass
         if isinstance(obj, pyvertex):
             return json.loads(obj.tojson())
-
-
         return JSONEncoder.default(self, obj)
 
 class pycircle(object):
-    """The pyedge class
+    """The pycircle class represents a circle on a sphere."""
 
-    Args:
-        object (object): None
-
-    Returns:
-        pyedge: A edge object
-    """
-
-    pVertex_center = None
-    aVertex_circle = None
-
-    def __init__(self, pVertex_center_in, aVertex_circle_in):
+    def __init__(self, pVertex_center_in: pyvertex, aVertex_circle_in: List[pyvertex]):
         """
-        Initilize a pyedge object
+        Initialize a pycircle object.
 
         Args:
-            pVertex_start_in (pyvertex): The starting vertex
-            pVertex_end_in (pyvertex): The ending vertex
+            pVertex_center_in (pyvertex): The center vertex of the circle.
+            aVertex_circle_in (List[pyvertex]): A list of vertices that form the circle.
         """
-        self.pVertex_center = pVertex_center_in
-        self.aVertex_circle = aVertex_circle_in
+        self.pVertex_center: pyvertex = pVertex_center_in
+        self.aVertex_circle: List[pyvertex] = aVertex_circle_in
 
+    def tojson(self) -> str:
+        """
+        Convert the pycircle object to a JSON string.
 
-        return
+        Returns:
+            str: A JSON string representing the pycircle object.
+        """
+        return json.dumps(self, cls=CircleClassEncoder, sort_keys=True, indent=4)
