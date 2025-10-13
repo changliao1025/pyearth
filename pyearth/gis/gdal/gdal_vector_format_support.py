@@ -24,7 +24,7 @@ def print_supported_formats():
     for ext, desc in formats.items():
         print(f"  {ext}: {desc}")
 
-def get_format_from_extension(filename):
+def get_format_from_extension(sFilename_in):
     """
     Determine the OGR format string from file extension.
 
@@ -34,7 +34,7 @@ def get_format_from_extension(filename):
     Returns:
         Format string for OGR driver
     """
-    _, ext = os.path.splitext(filename.lower())
+    _, ext = os.path.splitext(sFilename_in.lower())
 
     format_map = {
         '.geojson': 'GeoJSON',
@@ -43,7 +43,9 @@ def get_format_from_extension(filename):
         '.gpkg': 'GPKG',
         '.kml': 'KML',
         '.gml': 'GML',
-        '.sqlite': 'SQLite'
+        '.sqlite': 'SQLite',
+        '.parquet': 'Parquet',
+        '.geoparquet': 'Parquet'
     }
 
     return format_map.get(ext, 'GeoJSON')
