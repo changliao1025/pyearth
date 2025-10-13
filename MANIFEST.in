@@ -1,5 +1,49 @@
 include MANIFEST.in
 include README.md
 include LICENSE.md
+include setup.py
+include setup.cfg
+include pyproject.toml
+include *.yml
+include *.yaml
 
+# Include documentation
+recursive-include docs *.rst *.py *.txt *.in Makefile *.bat
+prune docs/_build
 
+# Include all Python source files
+recursive-include pyearth *.py
+
+# Include test files
+recursive-include tests *.py
+
+# Exclude compiled files and caches
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude *.so
+global-exclude *.dylib
+
+# Exclude OS and IDE specific files
+global-exclude .DS_Store
+global-exclude .vscode
+global-exclude .idea
+global-exclude *.swp
+global-exclude *~
+
+# Exclude configuration files that shouldn't be distributed
+exclude .pypirc
+exclude .condarc
+exclude .readthedocs.yml
+exclude bld.bat
+exclude build_backup.sh
+exclude meta.yaml
+exclude disclaimer.md
+
+# Exclude data and notebook directories
+prune data
+prune notebooks
+prune figures
+prune build
+prune dist
+prune retired
