@@ -22,15 +22,13 @@ def calculate_angle_between_vertex(dLongitude1_in: float, dLatitude1_in: float,
         float: The angle in degrees between the vectors from the middle vertex to the other two.
     """
 
-    if not iFlag_radian:
-        dLongitude1_in, dLatitude1_in = np.radians([dLongitude1_in, dLatitude1_in])
-        dLongitude2_in, dLatitude2_in = np.radians([dLongitude2_in, dLatitude2_in])
-        dLongitude3_in, dLatitude3_in = np.radians([dLongitude3_in, dLatitude3_in])
+    # Determine whether the downstream conversion routine should treat inputs as radians.
+    iFlag_convert_radian = True if iFlag_radian else None
 
     # The points in 3D space
-    a3 = convert_longitude_latitude_to_sphere_3d(dLongitude1_in, dLatitude1_in)
-    b3 = convert_longitude_latitude_to_sphere_3d(dLongitude2_in, dLatitude2_in)
-    c3 = convert_longitude_latitude_to_sphere_3d(dLongitude3_in, dLatitude3_in)
+    a3 = convert_longitude_latitude_to_sphere_3d(dLongitude1_in, dLatitude1_in, iFlag_convert_radian)
+    b3 = convert_longitude_latitude_to_sphere_3d(dLongitude2_in, dLatitude2_in, iFlag_convert_radian)
+    c3 = convert_longitude_latitude_to_sphere_3d(dLongitude3_in, dLatitude3_in, iFlag_convert_radian)
 
     # Vectors in 3D space
     a3vec = a3 - b3

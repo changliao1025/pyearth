@@ -263,24 +263,3 @@ def spherical_polygon_area(lat, lon, r):
 
     return abs(sum) * r * r
 
-if __name__ == '__main__':
-    # test the polygon area calculation
-    #aLongitude_in = [-148, -148, -148.5, -148.5]
-    #aLatitude_in = [68, 68.5, 68.5, 68]
-#
-    #dArea = calculate_polygon_area(aLongitude_in, aLatitude_in, iFlag_algorithm=0)
-    #print(dArea)
-#
-    #dArea1 = calculate_polygon_area(aLongitude_in, aLatitude_in)
-    #print(dArea1)
-#
-    #print(dArea/dArea1)
-
-    xc = -148.1875
-    yc = 70.125
-    dResolution = 1.0/16
-
-    aLongitude_in = [xc-dResolution/2, xc+dResolution/2, xc+dResolution/2, xc-dResolution/2]
-    aLatitude_in = [yc-dResolution/2, yc-dResolution/2, yc+dResolution/2, yc+dResolution/2]
-    dArea1 = calculate_polygon_area(aLongitude_in, aLatitude_in)
-    print(dArea1)

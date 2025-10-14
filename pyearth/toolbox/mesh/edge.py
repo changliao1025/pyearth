@@ -8,7 +8,7 @@ from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.circle import pycircle
 
 from pyearth.gis.geometry.calculate_intersect_on_great_circle import calculate_intersect_on_great_circle
-from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_file import export_vertex_as_polygon
+from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon
 from pyearth.toolbox.mesh.algorithm.split_by_length import split_edge_by_length
 from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import find_minimal_enclosing_polygon
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude

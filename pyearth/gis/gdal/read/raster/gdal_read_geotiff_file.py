@@ -1,195 +1,226 @@
-import os, sys
+import os
+from typing import Any, Dict, Optional
+
 import numpy as np
 from osgeo import gdal, osr
 
-def gdal_read_geotiff_file(sFilename_in, iFlag_metadata_only = 0):
-    """Read a Geotiff format raster file.
 
-    Args:
-        sFilename_in (string): The file name
+def gdal_read_geotiff_file(sFilename_in: str, iFlag_metadata_only: int = 0) -> Dict[str, Any]:
+    """Read a single-band GeoTIFF raster and return data with metadata.
 
-    Returns:
-        tuple: aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+    Parameters
+    ----------
+    sFilename_in : str
+        Path to the GeoTIFF raster file.
+    iFlag_metadata_only : int, optional
+        If 1, return only metadata without reading raster data. Default is 0.
+
+    Returns
+    -------
+    dict
+        Dictionary containing raster metadata and optionally data. Keys include:
+        - 'pixelWidth', 'pixelHeight': pixel dimensions
+        - 'originX', 'originY': origin coordinates
+        - 'nrow', 'ncolumn': raster dimensions
+        - 'geotransform': GDAL geotransform tuple
+        - 'projection': spatial reference as WKT string
+        - 'dataOut': raster data array (if iFlag_metadata_only=0)
+        - 'dataType': GDAL data type constant (if iFlag_metadata_only=0)
+        - 'missingValue': NoData value (if iFlag_metadata_only=0)
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+    RuntimeError
+        If GDAL cannot open the file.
+    ValueError
+        If metadata is missing or invalid.
     """
 
-    if os.path.exists(sFilename_in):
-        pass
-    else:
-        print('The file does not exist!')
-        return
+    if not os.path.exists(sFilename_in):
+        raise FileNotFoundError(f"File {sFilename_in} does not exist.")
 
-    sDriverName='GTiff'
-    pDriver = gdal.GetDriverByName(sDriverName)
+    dataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
+    if dataset is None:
+        raise RuntimeError(f"Unable to open raster {sFilename_in}.")
 
-    if pDriver is None:
-        print ("%s pDriver not available.\n" % sDriverName)
+    band = None
+    try:
+        geotransform = dataset.GetGeoTransform()
+        if not geotransform:
+            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
 
-    pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
+        origin_x = geotransform[0]
+        origin_y = geotransform[3]
+        pixel_width = geotransform[1]
+        pixel_height = geotransform[5]
 
-    if pDataset is None:
-        print("Couldn't open this file: " + sFilename_in)
-        sys.exit("Try again!")
-    else:
-        #dMissing_value = -9999.0 #we will not assign a default missing value
-        pProjection = pDataset.GetProjection()
-        pDataset.GetMetadata()
-        ncolumn = pDataset.RasterXSize
-        nrow = pDataset.RasterYSize
-        nband = pDataset.RasterCount
-        pGeotransform = pDataset.GetGeoTransform()
-        dOriginX = pGeotransform[0]
-        dOriginY = pGeotransform[3]
-        dPixelWidth = pGeotransform[1]
-        dPixelHeight = pGeotransform[5]
-        #we will use one of them to keep the consistency
+        ncolumn = dataset.RasterXSize
+        nrow = dataset.RasterYSize
+        nband = dataset.RasterCount
 
-        if iFlag_metadata_only ==1:
-            pass
-        else:
-            if nband >1:
-                print('This is a multi-band raster file!')
-                print('We will only read the first band!')
-                pass
+        projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
+        if not projection_wkt:
+            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
 
-            pBand = pDataset.GetRasterBand(1)
-
-            # Data type of the values
-
-            iData_type = pBand.DataType
-            sDate_type = gdal.GetDataTypeName(iData_type)
-            # Compute statistics if needed
-            if pBand.GetMinimum() is None or pBand.GetMaximum() is None:
-                try:
-                    pBand.ComputeStatistics(0)
-                except RuntimeError:
-                    print("Failed to compute statistics")
-                    sys.exit(1)
-
-            dMissing_value = pBand.GetNoDataValue()
-            aData_out = pBand.ReadAsArray(0, 0, ncolumn, nrow)
-
-        pDataset = None
-        pBand = None
 
         if iFlag_metadata_only == 1:
-            pData = {
-                'pixelWidth': dPixelWidth,
-                'pixelHeight': dPixelHeight,
-                'originX': dOriginX,
-                'originY': dOriginY,
+            return {
+                'pixelWidth': pixel_width,
+                'pixelHeight': pixel_height,
+                'originX': origin_x,
+                'originY': origin_y,
                 'nrow': nrow,
                 'ncolumn': ncolumn,
-                #'missingValue': dMissing_value,
-                'geotransform': pGeotransform,
-                'projection': pProjection
+                'geotransform': geotransform,
+                'projection': projection_wkt,
             }
-            return pData
 
-        else:
-            pData = {
-                'dataOut': aData_out,
-                'dataType': iData_type, # 'Float32', 'Float64', 'UInt16', 'Int16', 'UInt32', 'Int32', 'Byte', 'UInt32', 'Int32', 'CInt16', 'CInt32', 'CFloat32', 'CFloat64
-                'pixelWidth': dPixelWidth,
-                'pixelHeight': dPixelHeight,
-                'originX': dOriginX,
-                'originY': dOriginY,
-                'nrow': nrow,
-                'ncolumn': ncolumn,
-                'missingValue': dMissing_value,
-                'geotransform': pGeotransform,
-                'projection': pProjection
-            }
-            return pData
+        band = dataset.GetRasterBand(1)
+        if band is None:
+            raise ValueError(f"Raster {sFilename_in} does not contain a raster band.")
 
-def gdal_read_geotiff_file_multiple_band(sFilename_in, iFlag_metadata_only = 0):
+        data_type = band.DataType
+        missing_value = band.GetNoDataValue()
 
-    """Read a Geotiff format raster file with multiple bands.
+        data = band.ReadAsArray(0, 0, ncolumn, nrow)
+        if data is None:
+            raise RuntimeError(f"Failed to read raster data from {sFilename_in}.")
 
-    Args:
-        sFilename_in (string): The filename
+        return {
+            'dataOut': data,
+            'dataType': data_type,
+            'pixelWidth': pixel_width,
+            'pixelHeight': pixel_height,
+            'originX': origin_x,
+            'originY': origin_y,
+            'nrow': nrow,
+            'ncolumn': ncolumn,
+            'missingValue': missing_value,
+            'geotransform': geotransform,
+            'projection': projection_wkt,
+        }
+    finally:
+        band = None
+        dataset = None
 
-    Returns:
-        tuple: aData_out, dPixelWidth, dOriginX, dOriginY, nrow, ncolumn, dMissing_value , pGeotransform, pProjection,  pSpatial_reference
+def gdal_read_geotiff_file_multiple_band(sFilename_in: str, iFlag_metadata_only: int = 0) -> Dict[str, Any]:
+    """Read a multi-band GeoTIFF raster and return stacked data with metadata.
+
+    Parameters
+    ----------
+    sFilename_in : str
+        Path to the GeoTIFF raster file.
+    iFlag_metadata_only : int, optional
+        If 1, return only metadata without reading raster data. Default is 0.
+
+    Returns
+    -------
+    dict
+        Dictionary containing raster metadata and optionally data. Keys include:
+        - 'pixelWidth', 'pixelHeight': pixel dimensions
+        - 'originX', 'originY': origin coordinates
+        - 'nrow', 'ncolumn': raster dimensions
+        - 'nband': number of bands (if iFlag_metadata_only=0)
+        - 'geotransform': GDAL geotransform tuple
+        - 'projection': spatial reference as WKT string
+        - 'dataOut': 3D array (nband, nrow, ncolumn) (if iFlag_metadata_only=0)
+        - 'dataType': GDAL data type constant (if iFlag_metadata_only=0)
+        - 'missingValue': NoData value (if iFlag_metadata_only=0)
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+    RuntimeError
+        If GDAL cannot open the file or read band data.
+    ValueError
+        If metadata is missing, invalid, or bands are missing.
     """
 
-    if os.path.exists(sFilename_in):
-        pass
-    else:
-        print('The file does not exist!')
-        return
+    if not os.path.exists(sFilename_in):
+        raise FileNotFoundError(f"File {sFilename_in} does not exist.")
 
-    sDriverName='GTiff'
-    pDriver = gdal.GetDriverByName(sDriverName)
+    dataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
+    if dataset is None:
+        raise RuntimeError(f"Unable to open raster {sFilename_in}.")
 
-    if pDriver is None:
-        print ("%s pDriver not available.\n" % sDriverName)
-    else:
-        print  ("%s pDriver IS available.\n" % sDriverName)
-    pDataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
+    band = None
+    try:
+        geotransform = dataset.GetGeoTransform()
+        if not geotransform:
+            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
 
-    if pDataset is None:
-        print("Couldn't open this file: " + sFilename_in)
+        origin_x = geotransform[0]
+        origin_y = geotransform[3]
+        pixel_width = geotransform[1]
+        pixel_height = geotransform[5]
 
-        sys.exit("Try again!")
-    else:
-        pProjection = pDataset.GetProjection()
-        pDataset.GetMetadata()
+        ncolumn = dataset.RasterXSize
+        nrow = dataset.RasterYSize
+        nband = dataset.RasterCount
 
-        ncolumn = pDataset.RasterXSize
-        nrow = pDataset.RasterYSize
-        nband = pDataset.RasterCount
+        if nband < 1:
+            raise ValueError(f"Raster {sFilename_in} does not contain any bands.")
 
-        pGeotransform = pDataset.GetGeoTransform()
-        dOriginX = pGeotransform[0]
-        dOriginY = pGeotransform[3]
-        dPixelWidth = pGeotransform[1]
-        dPixelHeight = pGeotransform[5]
+        projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
+        if not projection_wkt:
+            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
 
-        pBand = pDataset.GetRasterBand(1)
 
-        dummy_data = pBand.ReadAsArray(0, 0, ncolumn, nrow)
-        dt = type(dummy_data)
-        #there is a chance that GDAL datetype is not compatiable with numpy datatype.
-        dMissing_value = pBand.GetNoDataValue()
 
-        if iFlag_metadata_only ==1:
-            pass
-        else:
-            aData_out = np.full( (nband, nrow, ncolumn) , -9999.0, dtype= dt )
-            for iBand in range(nband):
-                pBand = pDataset.GetRasterBand( iBand + 1)
-                iData_type = pBand.DataType
-                aData_out[iBand, :, :] = pBand.ReadAsArray(0, 0, ncolumn, nrow)
-                pass
-
-        pDriver = None
-        pDataset = None
-        pBand = None
         if iFlag_metadata_only == 1:
-            pData = {
-                'pixelWidth': dPixelWidth,
-                'pixelHeight': dPixelHeight,
-                'originX': dOriginX,
-                'originY': dOriginY,
+            return {
+                'pixelWidth': pixel_width,
+                'pixelHeight': pixel_height,
+                'originX': origin_x,
+                'originY': origin_y,
                 'nrow': nrow,
                 'ncolumn': ncolumn,
-                #'missingValue': dMissing_value,
-                'geotransform': pGeotransform,
-                'projection': pProjection
+                'geotransform': geotransform,
+                'projection': projection_wkt,
             }
-            return pData
-        else:
-            pData = {
-                'dataOut': aData_out,
-                'dataType': iData_type,
-                'pixelWidth': dPixelWidth,
-                'pixelHeight': dPixelHeight,
-                'originX': dOriginX,
-                'originY': dOriginY,
-                'nrow': nrow,
-                'ncolumn': ncolumn,
-                'missingValue': dMissing_value,
-                'geotransform': pGeotransform,
-                'projection': pProjection
-            }
-            return pData
+
+        band = dataset.GetRasterBand(1)
+        if band is None:
+            raise ValueError(f"Raster {sFilename_in} does not contain raster bands.")
+
+        data_type = band.DataType
+        missing_value = band.GetNoDataValue()
+
+        first_data = band.ReadAsArray(0, 0, ncolumn, nrow)
+        if first_data is None:
+            raise RuntimeError(f"Failed to read raster data from {sFilename_in}.")
+
+        data = np.empty((nband, nrow, ncolumn), dtype=first_data.dtype)
+        data[0, :, :] = first_data
+
+        for i_band in range(1, nband):
+            band = dataset.GetRasterBand(i_band + 1)
+            if band is None:
+                raise ValueError(f"Raster {sFilename_in} is missing band {i_band + 1}.")
+
+            band_data = band.ReadAsArray(0, 0, ncolumn, nrow)
+            if band_data is None:
+                raise RuntimeError(f"Failed to read raster data from band {i_band + 1} of {sFilename_in}.")
+
+            data[i_band, :, :] = band_data
+
+        return {
+            'dataOut': data,
+            'dataType': data_type,
+            'pixelWidth': pixel_width,
+            'pixelHeight': pixel_height,
+            'originX': origin_x,
+            'originY': origin_y,
+            'nband': nband,
+            'nrow': nrow,
+            'ncolumn': ncolumn,
+            'missingValue': missing_value,
+            'geotransform': geotransform,
+            'projection': projection_wkt,
+        }
+    finally:
+        band = None
+        dataset = None

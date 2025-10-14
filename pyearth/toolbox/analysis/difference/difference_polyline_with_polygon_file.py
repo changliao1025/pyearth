@@ -1,19 +1,72 @@
-#import gdal
+"""
+Geometric difference analysis between polylines and polygons using spatial indexing.
+"""
 import os
+import sys
+import logging
+from typing import Optional, Union
 from osgeo import ogr, osr
 from datetime import datetime
-import importlib
+import importlib.util
 
-def calculate_polyline_polygon_difference(sFilename_base,
-                                              sFilename_new,
-                                               sFilename_difference_out  ):
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-    iFlag_cython = importlib.util.find_spec("cython")
-    iFlag_rtree = importlib.util.find_spec("tinyr")
-    if iFlag_cython is not None:
-        from tinyr import RTree
-    else:
-        import rtree #regular rtree?
+
+def _setup_spatial_index():
+    """Setup spatial indexing library with fallback options."""
+    try:
+        # Try tinyr first (fast C implementation)
+        if importlib.util.find_spec("tinyr") is not None:
+            from tinyr import RTree
+            logger.info("Using tinyr for spatial indexing")
+            return RTree, True
+    except ImportError:
+        pass
+    
+    try:
+        # Fallback to rtree
+        if importlib.util.find_spec("rtree") is not None:
+            import rtree.index
+            logger.info("Using rtree for spatial indexing")
+            return rtree.index.Index, False
+    except ImportError:
+        pass
+    
+    raise ImportError(
+        "No spatial indexing library available. Please install either 'tinyr' or 'rtree'.\n"
+        "Install with: pip install tinyr  OR  pip install rtree"
+    )
+
+
+def calculate_polyline_polygon_difference(
+    sFilename_base: str,
+    sFilename_new: str,
+    sFilename_difference_out: str
+) -> None:
+    """
+    Calculate the geometric difference between base polygons and new polygons.
+    
+    This function finds areas in the base polygons that are not covered by 
+    the new polygons and outputs them as difference polygons.
+    
+    Args:
+        sFilename_base: Path to the base polygon file (GeoJSON format)
+        sFilename_new: Path to the new polygon file (GeoJSON format) 
+        sFilename_difference_out: Path for the output difference file (GeoJSON format)
+        
+    Returns:
+        None
+        
+    Raises:
+        FileNotFoundError: If input files don't exist
+        ImportError: If required spatial indexing libraries are not available
+        RuntimeError: If GDAL/OGR operations fail
+    """
+    
+    # Setup spatial indexing
+    RTreeClass, is_tinyr = _setup_spatial_index()
 
 
     start_time = datetime.now()
@@ -102,5 +155,3 @@ def calculate_polyline_polygon_difference(sFilename_base,
 
     return None
 
-if __name__ == '__main__':
-    pass
