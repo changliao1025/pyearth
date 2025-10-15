@@ -24,7 +24,7 @@ def _setup_spatial_index():
             return RTree, True
     except ImportError:
         pass
-    
+
     try:
         # Fallback to rtree
         if importlib.util.find_spec("rtree") is not None:
@@ -33,7 +33,7 @@ def _setup_spatial_index():
             return rtree.index.Index, False
     except ImportError:
         pass
-    
+
     raise ImportError(
         "No spatial indexing library available. Please install either 'tinyr' or 'rtree'.\n"
         "Install with: pip install tinyr  OR  pip install rtree"
@@ -47,24 +47,24 @@ def calculate_polyline_polygon_difference(
 ) -> None:
     """
     Calculate the geometric difference between base polygons and new polygons.
-    
-    This function finds areas in the base polygons that are not covered by 
+
+    This function finds areas in the base polygons that are not covered by
     the new polygons and outputs them as difference polygons.
-    
+
     Args:
         sFilename_base: Path to the base polygon file (GeoJSON format)
-        sFilename_new: Path to the new polygon file (GeoJSON format) 
+        sFilename_new: Path to the new polygon file (GeoJSON format)
         sFilename_difference_out: Path for the output difference file (GeoJSON format)
-        
+
     Returns:
         None
-        
+
     Raises:
         FileNotFoundError: If input files don't exist
         ImportError: If required spatial indexing libraries are not available
         RuntimeError: If GDAL/OGR operations fail
     """
-    
+
     # Setup spatial indexing
     RTreeClass, is_tinyr = _setup_spatial_index()
 
