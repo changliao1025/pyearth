@@ -1,247 +1,389 @@
+"""
+Exclude vector features by multiple polygon files with support for multiple vector formats.
+
+This module provides functionality to exclude (remove) features from a vector file
+that fall within or intersect a union of multiple polygon boundaries.
+"""
 import os
+import logging
+from typing import List
 from osgeo import ogr
+
+from pyearth.system.define_global_variables import *
 from pyearth.toolbox.management.vector.reproject import reproject_vector
 from pyearth.toolbox.management.vector.merge_features import merge_features
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
 
-def exclude_vector_by_polygon_files(sFilename_vector_in, aFilename_polygon_in, sFilename_vector_out):
-    # Open the input shapefile
-    sExtension_source = os.path.splitext(sFilename_vector_in)[1]
-    if sExtension_source == '.geojson':
-        pDriver_source = ogr.GetDriverByName('GeoJSON')
-    else:
-        pDriver_source = ogr.GetDriverByName('ESRI Shapefile')
-    pDataset_source = ogr.Open(sFilename_vector_in)
-    if pDataset_source is None:
-        print("Error: Could not open the input shapefile.")
-        return
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-    sFolder_out = os.path.dirname(sFilename_vector_out)
-    #delete the output file if it exists
-    if os.path.exists(sFilename_vector_out):
-        os.remove(sFilename_vector_out)
 
-    # Get the input layer and clip polygon layer
-    pLayer_source = pDataset_source.GetLayer()
-    #get the spatial reference
-    pSpatial_reference_target = pLayer_source.GetSpatialRef()
-    pProjection_target = pSpatial_reference_target.ExportToWkt()
-    print(pProjection_target)
+def exclude_vector_by_polygon_files(
+    sFilename_vector_in: str,
+    aFilename_polygon_in: List[str],
+    sFilename_vector_out: str
+) -> None:
+    """
+    Exclude (remove) vector features that fall within a union of multiple polygon files.
 
-    # Create a new output
-    pDataset_clipped = pDriver_source.CreateDataSource(sFilename_vector_out )
-    if pDataset_clipped is None:
-        print("Error: Could not create the output shapefile.")
-        return
+    This function performs the inverse of clipping using multiple polygon files. It creates
+    a union of all polygons from all input files, then keeps only the features or parts of
+    features that are OUTSIDE this combined polygon boundary.
 
-    #get the layer
-    pLayer_in = pDataset_source.GetLayer()
-    #obtain the geotype
-    iGeomType = pLayer_in.GetGeomType()
+    Args:
+        sFilename_vector_in: Path to input vector file (supports .geojson, .shp, .gpkg, etc.)
+        aFilename_polygon_in: List of paths to exclusion polygon files
+        sFilename_vector_out: Path to output vector file with excluded features
 
-    if iGeomType == ogr.wkbPoint:
-        #create the layer
-        pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbPoint)
-    else:
-        if iGeomType == ogr.wkbLineString :
-            #create the layer
-            pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbLineString)
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If input files don't exist
+        RuntimeError: If GDAL/OGR operations fail
+        ValueError: If geometry type is not supported or polygon files are empty
+
+    Note:
+        - Supports multiple vector formats (GeoJSON, Shapefile, GeoPackage, KML, etc.)
+        - Automatically handles projection differences (reprojects polygons if needed)
+        - Merges multiple polygons within each file if necessary
+        - Creates union of all polygons from all files
+        - Uses geometric difference operation for partially overlapping features
+        - Handles multi-part geometries (e.g., MultiLineString) properly
+
+    Example:
+        >>> exclude_vector_by_polygon_files(
+        ...     'rivers.geojson',
+        ...     ['lake1.shp', 'lake2.shp', 'reservoir.gpkg'],
+        ...     'land_rivers.gpkg'  # Rivers excluding all water bodies
+        ... )
+    """
+    logger.info("="*80)
+    logger.info("Starting multi-polygon vector exclusion operation")
+    logger.info(f"Input vector: {sFilename_vector_in}")
+    logger.info(f"Number of polygon files: {len(aFilename_polygon_in)}")
+    logger.info(f"Output vector: {sFilename_vector_out}")
+
+    try:
+        # Validate input files
+        if not os.path.exists(sFilename_vector_in):
+            raise FileNotFoundError(f"Input vector file not found: {sFilename_vector_in}")
+
+        for polygon_file in aFilename_polygon_in:
+            if not os.path.exists(polygon_file):
+                raise FileNotFoundError(f"Polygon file not found: {polygon_file}")
+
+        # Remove existing output file
+        if os.path.exists(sFilename_vector_out):
+            os.remove(sFilename_vector_out)
+            logger.info(f"Removed existing output file: {sFilename_vector_out}")
+
+        sFolder_out = os.path.dirname(sFilename_vector_out)
+
+        # Get output driver using multi-format support
+        sExtension_out = os.path.splitext(sFilename_vector_out)[1]
+        pDriver_out = get_vector_driver_from_extension(sExtension_out)
+        if pDriver_out is None:
+            raise RuntimeError(f"Could not get driver for extension: {sExtension_out}")
+
+        logger.info(f"Using output driver: {pDriver_out.GetName()}")
+
+        # Open input vector dataset
+        pDataset_source = ogr.Open(sFilename_vector_in)
+        if pDataset_source is None:
+            raise RuntimeError(f"Could not open input vector file: {sFilename_vector_in}")
+
+        pLayer_source = pDataset_source.GetLayer()
+        if pLayer_source is None:
+            raise RuntimeError("Could not access layer in input vector file")
+
+        feature_count = pLayer_source.GetFeatureCount()
+        logger.info(f"Input vector contains {feature_count} features")
+
+        # Get spatial reference from source
+        pSpatial_reference_target = pLayer_source.GetSpatialRef()
+        if pSpatial_reference_target is None:
+            logger.warning("Input vector has no spatial reference")
+            pProjection_target = None
         else:
-            if iGeomType == ogr.wkbPolygon:
-                #create the layer
-                pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbPolygon)
-            else:
-                if iGeomType == ogr.wkbLineString25D:
-                    pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbLineString)
-                else:
-                    sGeomType = ogr.GeometryTypeToName(iGeomType)
-                    print('Geometry type not supported:', sGeomType)
-                    return
-            pass
-        pass
+            pProjection_target = pSpatial_reference_target.ExportToWkt()
+            logger.info(f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}")
 
-    # Get the feature definition of the source layer
-    pFeatureDefn_source = pLayer_source.GetLayerDefn()
+        # Create output dataset
+        pDataset_excluded = pDriver_out.CreateDataSource(sFilename_vector_out)
+        if pDataset_excluded is None:
+            raise RuntimeError(f"Could not create output file: {sFilename_vector_out}")
 
-    # Create the fields in the clipped layer
-    for i in range(pFeatureDefn_source.GetFieldCount()):
-        pFieldDefn_source = pFeatureDefn_source.GetFieldDefn(i)
-        pLayer_clipped.CreateField(pFieldDefn_source)
+        # Determine output geometry type
+        iGeomType = pLayer_source.GetGeomType()
 
-    # Get the geometry of the clip polygon
-    #get the extension of polygon file
-    aFilename_polygon = list()
-    for sFilename_polygon_in in aFilename_polygon_in:
-        # Open the clip polygon
-        pDataset_clip = ogr.Open(sFilename_polygon_in)
-        if pDataset_clip is None:
-            print("Error: Could not open the clip polygon.")
-            return
-        sExtension_clip = os.path.splitext(sFilename_vector_in)[1]
-        #get the driver for the extension
-        if sExtension_clip == '.geojson':
-            pDriver_clip = ogr.GetDriverByName('GeoJSON')
-        else:
-            pDriver_clip = ogr.GetDriverByName('ESRI Shapefile')
+        try:
+            output_geom_type = get_output_geometry_type(iGeomType)
+            geom_name = ogr.GeometryTypeToName(output_geom_type)
+            logger.info(f"Output geometry type: {geom_name}")
+        except ValueError as e:
+            raise ValueError(str(e))
 
-        if pDriver_clip is None:
-            print('The driver is not available')
-            return
+        # Create output layer
+        pLayer_excluded = pDataset_excluded.CreateLayer(
+            'layer',
+            pSpatial_reference_target,
+            geom_type=output_geom_type
+        )
+        if pLayer_excluded is None:
+            raise RuntimeError("Could not create output layer")
 
-        pLayer_clip = pDataset_clip.GetLayer()
-        pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
-        pProjection_clip = pSpatial_reference_clip.ExportToWkt()
-        print(pProjection_clip)
-        #check the number the clip polygon
-        nPolygon = pLayer_clip.GetFeatureCount()
-        if nPolygon == 0:
-            print('The polygon file does not contain any polygon!')
-            return
-        else:
-            if nPolygon > 1:
-                pDataset_clip = None
-                pLayer_clip = None
-                print('The polygon contains more than one polygon, the program will attempt to merge them as one!')
-                #obtain the file extension
-                sFilename_clip_new = sFilename_polygon_in.replace(sExtension_clip, '_merged' + sExtension_clip)
-                merge_features(sFilename_polygon_in, sFilename_clip_new)
-                sFilename_polygon_in = sFilename_clip_new
-                #open the new file
-                pDataset_clip = ogr.Open(sFilename_polygon_in)
-                pLayer_clip = pDataset_clip.GetLayer(0)
-                # Get the spatial reference of the layer
-                pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
-                pProjection_clip = pSpatial_reference_clip.ExportToWkt()
-            else:
-                pass
+        # Copy field definitions
+        pFeatureDefn_source = pLayer_source.GetLayerDefn()
+        for i in range(pFeatureDefn_source.GetFieldCount()):
+            pFieldDefn_source = pFeatureDefn_source.GetFieldDefn(i)
+            pLayer_excluded.CreateField(pFieldDefn_source)
 
-        if( pProjection_target != pProjection_clip):
-            pDataset_clip = None
-            pLayer_clip = None
-            sFolder = os.path.dirname(sFilename_polygon_in)
-            #get the name of the shapefile
-            sName = os.path.basename(sFilename_polygon_in)
-            #get the name of the shapefile without extension
-            sName_no_extension = os.path.splitext(sName)[0]
-            sFilename_clip_out = sFolder + '/' + sName_no_extension + '_transformed' + sExtension_clip
-            reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)
-            pDataset_clip = ogr.Open(sFilename_clip_out)
-            pLayer_clip = pDataset_clip.GetLayer(0)
-            aFilename_polygon.append(sFilename_clip_out)
-        else:
-            aFilename_polygon.append(sFilename_polygon_in)
+        logger.info("Processing polygon files for union...")
+        aFilename_polygon_processed = []
 
-    #merge the polygon files into one file
-    if len(aFilename_polygon) > 1:
-        pGeometry_merge = ogr.Geometry(ogr.wkbPolygon)
-        sFilenane_merge = os.path.join(sFolder_out, 'polygon_merged' + sExtension_source)
-        if os.path.exists(sFilenane_merge):
-            os.remove(sFilenane_merge)
-        pDataset_merge = pDriver_clip.CreateDataSource(sFilenane_merge )
-        if pDataset_merge is None:
-            print("Error: Could not create the output shapefile.")
-            return
-        pLayer_merge = pDataset_merge.CreateLayer('layer', pSpatial_reference_target, geom_type=ogr.wkbMultiPolygon)
-        iFlag_first = 1
+        # Process each polygon file
+        for idx, sFilename_polygon_in in enumerate(aFilename_polygon_in, 1):
+            logger.info(f"Processing polygon file {idx}/{len(aFilename_polygon_in)}: {sFilename_polygon_in}")
 
-        for sFilename_polygon_in in aFilename_polygon:
+            # Open polygon dataset
             pDataset_clip = ogr.Open(sFilename_polygon_in)
-            pLayer_clip = pDataset_clip.GetLayer()
-            for pFeature_clip in pLayer_clip:
-                pLayer_merge.CreateFeature(pFeature_clip)
-
-            pGeometry = pFeature_clip.GetGeometryRef()
-            if iFlag_first == 1:
-                if pGeometry is not None:
-                    # Union the geometry of each feature with the merged polygon
-                    pGeometry_merge = pGeometry_merge.Union(pGeometry)
-
-                iFlag_first = 0
-            else:
-                if pGeometry is not None:
-                    pGeometry_merge = pGeometry_merge.Union(pGeometry)
-    else:
-        # Open the clip polygon
-        pDataset_clip = ogr.Open(aFilename_polygon[0])
-        if pDataset_clip is None:
-            print("Error: Could not open the clip polygon.")
-            return
-        pLayer_clip = pDataset_clip.GetLayer()
-        # Get the geometry of the clip polygon using next feature
-        pFeature_clip = pLayer_clip.GetNextFeature()
-        pGeometry_merge = pFeature_clip.GetGeometryRef()
-
-    #use the merged polygon as the clip polygon
-    pPolygon_clip = pGeometry_merge
-    #print its envelope
-    aEnvelope = pPolygon_clip.GetEnvelope()
-    print('Envelope:', aEnvelope)
-
-    # Apply the clipping operation to each pFeature in the input shapefile
-    for pFeature in pLayer_source:
-        # Get the geometry of the input pFeature
-        pGeometry_source = pFeature.GetGeometryRef()
-        #check pFeature that is entirely within the clip polygon
-        if pPolygon_clip.Contains(pGeometry_source):
-            #if it is within, we definitely do not want to keep it
-            pass
-        else:
-            # Perform the clipping operation
-            iFlag_ok = 0
-            for i in range(pGeometry_source.GetPointCount()):
-                aPoint = pGeometry_source.GetPoint(i)
-                pPoint = ogr.Geometry(ogr.wkbPoint)
-                pPoint.AddPoint(*aPoint)
-                iFlag_within = pPoint.Within(pPolygon_clip)
-                if iFlag_within:
-                    iFlag_ok = 1
-                    break
-            if iFlag_ok == 1:
-                if pGeometry_source.Intersects(pPolygon_clip):
-                    pGeometry_clip = pGeometry_source.Difference(pPolygon_clip)
-                    #Create a new pFeature in the output layer with the clipped geometry
-                    if pGeometry_clip is not None and not pGeometry_clip.IsEmpty():
-                        iGeomType_intersect = pGeometry_clip.GetGeometryType()
-                        if iGeomType_intersect == iGeomType:
-                            #we only want to keep the clipped geometry that is outside the clip polygon
-                            nPart = pGeometry_clip.GetGeometryCount()
-                            #print('Number of parts:', nPart)
-                            pFeature_clipped = ogr.Feature(pLayer_clipped.GetLayerDefn())
-                            pFeature_clipped.SetGeometry(pGeometry_clip)
-                            #print pGeometry_clip to wkt
-                            print(pGeometry_clip.ExportToWkt())
-                            for i in range(0, pFeature.GetFieldCount()):
-                                pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
-                            pLayer_clipped.CreateFeature(pFeature_clipped)
-                        else:
-                            sGeomType = ogr.GeometryTypeToName(iGeomType_intersect)
-                            print('Intersect type:', sGeomType)
-                            #it is possible that the clipped geometry is a multi linesting
-                            if iGeomType_intersect == ogr.wkbMultiLineString:
-                                nPart = pGeometry_clip.GetGeometryCount()
-                                print('Number of parts here:', nPart)
-                                for iPart in range(nPart):
-                                    pGeometry_part = pGeometry_clip.GetGeometryRef(iPart)
-                                    pFeature_clipped = ogr.Feature(pLayer_clipped.GetLayerDefn())
-                                    pFeature_clipped.SetGeometry(pGeometry_part)
-                                    for i in range(0, pFeature.GetFieldCount()):
-                                        pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
-                                    pLayer_clipped.CreateFeature(pFeature_clipped)
-                            continue
-            else:
-                #we actually want to keep the pFeature because it is entirely outside the clip polygon
-                pFeature_clipped = ogr.Feature(pLayer_clipped.GetLayerDefn())
-                pFeature_clipped.SetGeometry(pGeometry_source)
-                # Copy attributes
-                for i in range(0, pFeature.GetFieldCount()):
-                    pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
-                pLayer_clipped.CreateFeature(pFeature_clipped)
+            if pDataset_clip is None:
+                logger.warning(f"Could not open polygon file, skipping: {sFilename_polygon_in}")
                 continue
 
-    # Close the shapefiles
-    pDataset_source = None
-    pDataset_clip = None
-    pDataset_clipped = None
-    pSpatial_reference_clip = None
-    pSpatial_reference_target = None
+            pLayer_clip = pDataset_clip.GetLayer()
+            nPolygon = pLayer_clip.GetFeatureCount()
+            logger.info(f"Polygon file contains {nPolygon} feature(s)")
 
-    print("Clipping completed.")
+            if nPolygon == 0:
+                logger.warning("Polygon file contains no features, skipping")
+                pDataset_clip = None
+                continue
+
+            sExtension_clip = os.path.splitext(sFilename_polygon_in)[1]
+
+            # Handle multiple polygons by merging
+            if nPolygon > 1:
+                logger.info("Multiple polygons detected, merging into single polygon")
+                sFilename_clip_merged = sFilename_polygon_in.replace(
+                    sExtension_clip,
+                    '_merged' + sExtension_clip
+                )
+
+                # Close current dataset before merging
+                pDataset_clip = None
+                pLayer_clip = None
+
+                # Merge features
+                merge_features(sFilename_polygon_in, sFilename_clip_merged)
+                sFilename_polygon_in = sFilename_clip_merged
+
+                # Reopen merged file
+                pDataset_clip = ogr.Open(sFilename_polygon_in)
+                pLayer_clip = pDataset_clip.GetLayer()
+
+            # Check projection compatibility
+            pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
+            if pSpatial_reference_clip is not None:
+                pProjection_clip = pSpatial_reference_clip.ExportToWkt()
+            else:
+                pProjection_clip = None
+                logger.warning(f"Polygon file {idx} has no spatial reference")
+
+            sFilename_clip_final = sFilename_polygon_in
+            if pProjection_target is not None and pProjection_clip is not None and pProjection_target != pProjection_clip:
+                logger.info("Projection mismatch detected, reprojecting polygon file")
+
+                # Close dataset before reprojection
+                pDataset_clip = None
+                pLayer_clip = None
+
+                # Reproject to target projection
+                sFolder = os.path.dirname(sFilename_polygon_in)
+                sName = os.path.basename(sFilename_polygon_in)
+                sName_no_ext = os.path.splitext(sName)[0]
+                sFilename_clip_final = os.path.join(
+                    sFolder,
+                    f"{sName_no_ext}_transformed{sExtension_clip}"
+                )
+
+                reproject_vector(sFilename_polygon_in, sFilename_clip_final, pProjection_target)
+
+                # Reopen reprojected file
+                pDataset_clip = ogr.Open(sFilename_clip_final)
+                pLayer_clip = pDataset_clip.GetLayer()
+
+            # Add to processed list
+            aFilename_polygon_processed.append(sFilename_clip_final)
+            pDataset_clip = None
+            pLayer_clip = None
+
+        if len(aFilename_polygon_processed) == 0:
+            raise ValueError("No valid polygon files could be processed!")
+
+        logger.info(f"Successfully processed {len(aFilename_polygon_processed)} polygon file(s)")
+
+        # Create union of all polygons
+        logger.info("Creating union of all polygon geometries...")
+        pGeometry_union = None
+
+        if len(aFilename_polygon_processed) == 1:
+            # Single polygon file - just use its geometry
+            pDataset_clip = ogr.Open(aFilename_polygon_processed[0])
+            pLayer_clip = pDataset_clip.GetLayer()
+            pFeature_clip = pLayer_clip.GetNextFeature()
+            pGeometry_union = pFeature_clip.GetGeometryRef().Clone()
+            pDataset_clip = None
+            logger.info("Using single polygon geometry")
+        else:
+            # Multiple polygon files - create union
+            logger.info(f"Creating union of {len(aFilename_polygon_processed)} polygon geometries...")
+
+            for idx, sFilename_polygon in enumerate(aFilename_polygon_processed, 1):
+                pDataset_clip = ogr.Open(sFilename_polygon)
+                pLayer_clip = pDataset_clip.GetLayer()
+
+                for pFeature_clip in pLayer_clip:
+                    pGeometry_current = pFeature_clip.GetGeometryRef()
+
+                    if pGeometry_current is None:
+                        continue
+
+                    if pGeometry_union is None:
+                        # First geometry - initialize union
+                        pGeometry_union = pGeometry_current.Clone()
+                    else:
+                        # Subsequent geometries - union with existing
+                        pGeometry_union = pGeometry_union.Union(pGeometry_current)
+
+                pDataset_clip = None
+                logger.info(f"Merged polygon {idx}/{len(aFilename_polygon_processed)}")
+
+        if pGeometry_union is None:
+            raise RuntimeError("Failed to create union of polygon geometries")
+
+        # Get envelope for logging
+        minx, maxx, miny, maxy = pGeometry_union.GetEnvelope()
+        logger.info(f"Union polygon envelope: ({minx:.2f}, {miny:.2f}) to ({maxx:.2f}, {maxy:.2f})")
+
+        # Use the union as the exclusion polygon
+        pPolygon_exclude = pGeometry_union
+
+        logger.info("Processing features for exclusion...")
+        excluded_count = 0
+        kept_count = 0
+        trimmed_count = 0
+        trimmed_multipart_count = 0
+
+        pLayer_source.ResetReading()
+
+        # Process each feature
+        for pFeature in pLayer_source:
+            pGeometry_source = pFeature.GetGeometryRef()
+            if pGeometry_source is None:
+                logger.debug("Feature has no geometry, skipping")
+                continue
+
+            # Check if feature is entirely within the exclusion polygon
+            if pPolygon_exclude.Contains(pGeometry_source):
+                # Feature is entirely inside - EXCLUDE it
+                excluded_count += 1
+                continue
+
+            # Check if feature intersects the exclusion polygon
+            if pGeometry_source.Intersects(pPolygon_exclude):
+                # Feature partially overlaps - need to trim it
+                pGeometry_difference = pGeometry_source.Difference(pPolygon_exclude)
+
+                if pGeometry_difference is None or pGeometry_difference.IsEmpty():
+                    logger.debug("Difference resulted in empty geometry, excluding feature")
+                    excluded_count += 1
+                    continue
+
+                iGeomType_difference = pGeometry_difference.GetGeometryType()
+
+                # Check if geometry type matches expected output
+                if get_output_geometry_type(iGeomType_difference) == output_geom_type:
+                    pFeature_excluded = ogr.Feature(pLayer_excluded.GetLayerDefn())
+                    pFeature_excluded.SetGeometry(pGeometry_difference)
+
+                    # Copy attributes
+                    for i in range(pFeature.GetFieldCount()):
+                        pFeature_excluded.SetField(
+                            pFeature.GetFieldDefnRef(i).GetNameRef(),
+                            pFeature.GetField(i)
+                        )
+
+                    pLayer_excluded.CreateFeature(pFeature_excluded)
+                    trimmed_count += 1
+
+                elif iGeomType_difference == ogr.wkbMultiLineString and output_geom_type == ogr.wkbLineString:
+                    # Handle MultiLineString -> LineString conversion
+                    nPart = pGeometry_difference.GetGeometryCount()
+                    logger.debug(f"Splitting MultiLineString into {nPart} LineString parts")
+
+                    for iPart in range(nPart):
+                        pGeometry_part = pGeometry_difference.GetGeometryRef(iPart)
+                        pFeature_excluded = ogr.Feature(pLayer_excluded.GetLayerDefn())
+                        pFeature_excluded.SetGeometry(pGeometry_part)
+
+                        # Copy attributes
+                        for i in range(pFeature.GetFieldCount()):
+                            pFeature_excluded.SetField(
+                                pFeature.GetFieldDefnRef(i).GetNameRef(),
+                                pFeature.GetField(i)
+                            )
+
+                        pLayer_excluded.CreateFeature(pFeature_excluded)
+
+                    trimmed_multipart_count += 1
+                else:
+                    sGeomType_diff = ogr.GeometryTypeToName(iGeomType_difference)
+                    logger.debug(f"Difference geometry type mismatch: {sGeomType_diff}, excluding")
+                    excluded_count += 1
+            else:
+                # Feature is entirely outside the exclusion polygon - KEEP it
+                pFeature_excluded = ogr.Feature(pLayer_excluded.GetLayerDefn())
+                pFeature_excluded.SetGeometry(pGeometry_source)
+
+                # Copy attributes
+                for i in range(pFeature.GetFieldCount()):
+                    pFeature_excluded.SetField(
+                        pFeature.GetFieldDefnRef(i).GetNameRef(),
+                        pFeature.GetField(i)
+                    )
+
+                pLayer_excluded.CreateFeature(pFeature_excluded)
+                kept_count += 1
+
+        logger.info(f"Exclusion summary:")
+        logger.info(f"  - Features kept (entirely outside): {kept_count}")
+        logger.info(f"  - Features trimmed (partially inside): {trimmed_count}")
+        logger.info(f"  - Features split from multipart: {trimmed_multipart_count}")
+        logger.info(f"  - Features excluded (entirely inside): {excluded_count}")
+        logger.info(f"  - Total output features: {kept_count + trimmed_count}")
+        logger.info(f"Multi-polygon exclusion completed successfully: {sFilename_vector_out}")
+
+    except Exception as e:
+        logger.error(f"Error during multi-polygon vector exclusion: {e}")
+        raise RuntimeError(f"Failed to exclude vector with multiple polygons: {e}")
+
+    finally:
+        # Clean up resources
+        if 'pDataset_source' in locals():
+            pDataset_source = None
+        if 'pDataset_clip' in locals():
+            pDataset_clip = None
+        if 'pDataset_excluded' in locals():
+            pDataset_excluded = None
+        if 'pSpatial_reference_clip' in locals():
+            pSpatial_reference_clip = None
+        if 'pSpatial_reference_target' in locals():
+            pSpatial_reference_target = None
+        if 'pGeometry_union' in locals():
+            pGeometry_union = None
+
+    return

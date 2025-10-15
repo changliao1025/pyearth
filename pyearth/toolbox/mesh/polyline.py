@@ -13,7 +13,7 @@ iFlag_cython = importlib.util.find_spec("cython")
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
 
 
-class FlowlineClassEncoder(JSONEncoder):
+class PolylineClassEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -30,7 +30,7 @@ class FlowlineClassEncoder(JSONEncoder):
 
         return JSONEncoder.default(self, obj)
 
-class pyflowline(object):
+class pypolyline(object):
     """The pyflowline class
 
     Args:
@@ -286,7 +286,7 @@ class pyflowline(object):
             else:
                 aEdge.append(edge)
                 pass
-        pFlowline_out=pyflowline(aEdge)
+        pFlowline_out=pypolyline(aEdge)
         #copy the attributes
         pFlowline_out.copy_attributes(self)
 
@@ -303,8 +303,8 @@ class pyflowline(object):
             second_leg = [int(nEdge/2), nEdge]
             aEdge0 = self.aEdge[first_leg[0]:first_leg[1]]
             aEdge1 = self.aEdge[second_leg[0]:second_leg[1]]
-            pFlowline0 = pyflowline(aEdge0)
-            pFlowline1 = pyflowline(aEdge1)
+            pFlowline0 = pypolyline(aEdge0)
+            pFlowline1 = pypolyline(aEdge1)
             pFlowline0.copy_attributes(self)
             pFlowline1.copy_attributes(self)
             if pFlowline0.dLength > dDistance:
@@ -518,7 +518,7 @@ class pyflowline(object):
             sort_keys=True,
                 indent = 4,
                     ensure_ascii=True,
-                        cls=FlowlineClassEncoder)
+                        cls=PolylineClassEncoder)
         return sJson
 
     def towkt(self):

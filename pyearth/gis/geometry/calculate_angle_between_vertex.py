@@ -1,5 +1,5 @@
 import numpy as np
-from pyearth.gis.location.convert_longitude_latitude_to_sphere_3d import convert_longitude_latitude_to_sphere_3d
+from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
 from pyearth.gis.geometry.calculate_angle_between_vectors_degrees import calculate_angle_between_vectors_degrees
 
 def calculate_angle_between_vertex(dLongitude1_in: float, dLatitude1_in: float,
