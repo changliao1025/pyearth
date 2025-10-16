@@ -1,6 +1,8 @@
 import os
 from osgeo import gdal
 
+from pyearth.system.filename import get_extension_from_path
+
 SUPPORTED_RASTER_FORMATS = {
     '.tif': 'GTiff',
     '.tiff': 'GTiff',
@@ -42,7 +44,7 @@ def print_supported_raster_formats() -> None:
     for ext, driver in SUPPORTED_RASTER_FORMATS.items():
         print(f"  {ext}: {driver}")
 
-def get_raster_format_from_extension(filename: str) -> str:
+def get_raster_format_from_extension(sExtension: str) -> str:
     """
     Determine the GDAL raster format string from file extension.
 
@@ -55,14 +57,33 @@ def get_raster_format_from_extension(filename: str) -> str:
     Raises:
     ValueError: If the file extension is not supported.
     """
-    _, ext = os.path.splitext(filename.lower())
+    ext = sExtension.lower()
 
     if ext in SUPPORTED_RASTER_FORMATS:
         return SUPPORTED_RASTER_FORMATS[ext]
     else:
         raise ValueError(f"Unsupported raster file extension: {ext}")
 
-def get_raster_driver(file_format: str) -> gdal.Driver:
+def get_raster_format_from_filename(filename: str) -> str:
+    """
+    Determine the GDAL raster format string from file extension.
+
+    Parameters:
+    filename (str): Input filename with extension.
+
+    Returns:
+    str: Format string for GDAL driver.
+
+    Raises:
+    ValueError: If the file extension is not supported.
+    """
+    sExtension = get_extension_from_path(filename).lower()
+    if sExtension == '':
+        raise ValueError(f"Filename '{filename}' does not have an extension to determine raster format.")
+
+    return get_raster_format_from_extension(sExtension)
+
+def get_raster_driver_from_format(file_format: str) -> gdal.Driver:
     """
     Get the GDAL driver based on the provided raster file format.
 
@@ -80,7 +101,7 @@ def get_raster_driver(file_format: str) -> gdal.Driver:
         raise ValueError(f"Driver for format '{file_format}' not found.")
     return driver
 
-def get_raster_driver_from_extension(filename: str) -> gdal.Driver:
+def get_raster_driver_from_filename(filename: str) -> gdal.Driver:
     """
     Get the GDAL driver based on file extension.
 
@@ -93,5 +114,10 @@ def get_raster_driver_from_extension(filename: str) -> gdal.Driver:
     Raises:
     ValueError: If the file extension is not supported or driver is not found.
     """
-    format_name = get_raster_format_from_extension(filename)
-    return get_raster_driver(format_name)
+    sExtension = get_extension_from_path(filename).lower()
+    if sExtension == '':
+        raise ValueError(f"Filename '{filename}' does not have an extension to determine raster format.")
+
+    format_name = get_raster_format_from_extension(sExtension)
+    return get_raster_driver_from_format(format_name)
+

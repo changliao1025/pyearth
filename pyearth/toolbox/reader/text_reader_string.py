@@ -31,10 +31,8 @@ def text_reader_string(sFilename_in,
 
     # check the parameter
     if ncolumn_in is not None:
-        iFlag_column = 1
-        ncolumn_out = ncolumn_in
-    else:
-        iFlag_column = 0
+        if not isinstance(ncolumn_in, int) or ncolumn_in <= 0:
+            raise ValueError(f"Number of columns must be a positive integer, got {ncolumn_in}")
 
     if nrow_in is not None:
         # there is nothing
