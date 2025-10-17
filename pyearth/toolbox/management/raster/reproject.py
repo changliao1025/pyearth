@@ -58,8 +58,7 @@ from osgeo import gdal, osr
 from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
 from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 from pyearth.gis.gdal.gdal_raster_format_support import (
-    get_raster_driver_from_extension,
-    get_raster_format_from_extension,
+    get_raster_driver_from_filename,
 )
 
 
@@ -208,7 +207,7 @@ def reproject_raster(
 
     # pick driver from extension (fallback to GTiff)
     try:
-        driver = get_raster_driver_from_extension(sFilename_raster_out)
+        driver = get_raster_driver_from_filename(sFilename_raster_out)
     except Exception:
         driver = gdal.GetDriverByName('GTiff')
         if driver is None:

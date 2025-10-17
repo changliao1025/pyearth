@@ -3,7 +3,7 @@ from typing import List, Optional, Any
 
 from osgeo import ogr, osr
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_extension, get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 
 
 def export_vertex_to_vector_file(
@@ -70,7 +70,7 @@ def export_vertex_to_vector_file(
         spatial_ref = pSpatial_reference_in
 
     # Get driver from file extension
-    driver = get_vector_driver_from_extension(sFilename_vector_in)
+    driver = get_vector_driver_from_filename(sFilename_vector_in)
 
     iFlag_attribute = aAttribute_data is not None
     attribute_data = aAttribute_data if aAttribute_data is not None else []
@@ -180,7 +180,7 @@ def export_vertex_as_polygon_file(
         os.remove(sFilename_out)
 
     # Get driver from file extension
-    driver = get_vector_driver_from_extension(sFilename_out)
+    driver = get_vector_driver_from_filename(sFilename_out)
 
     if pSpatial_reference_in is None:
         spatial_ref = osr.SpatialReference()
