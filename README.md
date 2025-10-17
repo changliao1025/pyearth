@@ -27,11 +27,15 @@ PyEarth depends on the following packages
 3. `matplotlib`
 4. `cartopy`
 
+**Build-time dependencies:**
+- `Cython` (>= 0.29.0) - for building Cython extensions
+- `setuptools` (>= 42) - for package building
+- `wheel` - for building wheel distributions
 
 PyEarth also has optional dependency packages for several functions:
 
 1. `netCDF4` for netCDF support
-2. `pandas` for pandas dataframes 
+2. `pandas` for pandas dataframes
 3. `scipy` for scientific computing
 4. `statsmodels` for statistical analysis
 
@@ -44,6 +48,16 @@ Please refer to the [documentation](https://pyearth.readthedocs.io) for details 
 `PyEarth` depends on several other packages, including gdal, which cannot be installed through `pip` easily. You are recommended to use `conda` to install dependency if necessary.
 
     conda install pyearth
+
+**Building from source:** If you are building PyEarth from source and it includes Cython extensions, you will need a C compiler. We recommend using conda's compilers for consistency across platforms:
+
+    # Install conda compilers
+    conda install -c conda-forge c-compiler cxx-compiler
+
+- On Linux/macOS: `gcc` or `clang` (usually pre-installed, or use conda compilers above)
+- On Windows: Use conda's compilers instead of Microsoft Visual C++ Build Tools
+
+If using Cython extensions with NumPy, ensure NumPy is available during the build process.
 
 ### Content
 
@@ -58,7 +72,7 @@ You can either call these functions through this package, or you can modify them
 
 ### Acknowledgment
 
-This research was supported as part of the Next Generation Ecosystem Experiments-Tropics, funded by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research at Pacific Northwest National Laboratory. The study was also partly supported by U.S. Department of Energy Office of Science Biological and Environmental Research through the Earth and Environmental System Modeling program as part of the Energy Exascale Earth System Model (E3SM) project. 
+This research was supported as part of the Next Generation Ecosystem Experiments-Tropics, funded by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research at Pacific Northwest National Laboratory. The study was also partly supported by U.S. Department of Energy Office of Science Biological and Environmental Research through the Earth and Environmental System Modeling program as part of the Energy Exascale Earth System Model (E3SM) project.
 
 ### License
 

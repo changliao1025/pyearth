@@ -2,7 +2,8 @@
 import io
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+from Cython.Build import cythonize
 
 NAME = "pyearth"
 DESCRIPTION = \
@@ -33,6 +34,42 @@ CLASSIFY = [
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
+# Cython extensions
+extensions = [
+    Extension(
+        "pyearth.gis.geometry.kernel",
+        ["pyearth/gis/geometry/kernel.pyx"],
+        include_dirs=[],
+        libraries=[],
+        library_dirs=[],
+    ),
+    Extension(
+        "pyearth.gis.location.kernel",
+        ["pyearth/gis/location/kernel.pyx"],
+        include_dirs=[],
+        libraries=[],
+        library_dirs=[],
+    ),
+    Extension(
+        "pyearth.external.tinyr.tinyr.tinyr",
+        ["pyearth/external/tinyr/tinyr/tinyr.pyx"],
+        include_dirs=[],
+        library_dirs=[],
+        libraries=[],
+    ),
+]
+
+# Cythonize extensions
+ext_modules = cythonize(
+    extensions,
+    compiler_directives={
+        'language_level': 3,
+        'boundscheck': False,
+        'wraparound': False,
+        'cdivision': True,
+    }
+)
+
 try:
     with io.open(os.path.join(
             HERE, "README.md"), encoding="utf-8") as f:
@@ -55,9 +92,13 @@ setup(
     keywords=KEYWORDS,
     url=URL,
     packages=find_packages(),
+    setup_requires=['Cython>=0.29.0'],
+    ext_modules=ext_modules,
     install_requires=REQUIRED,
     classifiers=CLASSIFY,
     extras_require={
-        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels']
+        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels'],
+        'spatial': ['rtree'],
+        'dev': ['Cython>=0.29.0']
     }
 )
