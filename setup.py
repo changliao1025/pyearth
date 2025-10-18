@@ -88,7 +88,7 @@ setup(
     classifiers=CLASSIFY,
     extras_require={
         'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels'],
-        'spatial': ['rtree'],
+        'spatial': ['rtree', 'tinyr'],
         'cython': ['Cython>=0.29.0', 'numpy'],
     }
 )

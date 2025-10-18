@@ -37,7 +37,7 @@ def setup_spatial_index() -> Tuple[Any, bool]:
     """
     try:
         # Try tinyr first (fast C implementation, requires Cython)
-        if importlib.util.find_spec("cython") is not None and importlib.util.find_spec("tinyr") is not None:
+        if importlib.util.find_spec("tinyr") is not None:
             from tinyr import RTree
             logger.info("Using tinyr for spatial indexing")
             return RTree, True
