@@ -34,7 +34,8 @@ CLASSIFY = [
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
-# Cython extensions
+
+# Optional Cython extensions (not built by default)
 extensions = [
     Extension(
         "pyearth.gis.geometry.kernel",
@@ -59,16 +60,7 @@ extensions = [
     ),
 ]
 
-# Cythonize extensions
-ext_modules = cythonize(
-    extensions,
-    compiler_directives={
-        'language_level': 3,
-        'boundscheck': False,
-        'wraparound': False,
-        'cdivision': True,
-    }
-)
+# To build Cython extensions, run: python setup.py build_ext --inplace
 
 try:
     with io.open(os.path.join(
@@ -92,13 +84,11 @@ setup(
     keywords=KEYWORDS,
     url=URL,
     packages=find_packages(),
-    setup_requires=['Cython>=0.29.0'],
-    ext_modules=ext_modules,
     install_requires=REQUIRED,
     classifiers=CLASSIFY,
     extras_require={
         'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels'],
         'spatial': ['rtree'],
-        'dev': ['Cython>=0.29.0']
+        'cython': ['Cython>=0.29.0', 'numpy'],
     }
 )

@@ -43,13 +43,25 @@ PyEarth also has optional dependency packages for several functions:
 
 Please refer to the [documentation](https://pyearth.readthedocs.io) for details on how to get started using the PyEarth package.
 
+
 ### Installation
 
-`PyEarth` depends on several other packages, including gdal, which cannot be installed through `pip` easily. You are recommended to use `conda` to install dependency if necessary.
+`PyEarth` depends on several other packages, including gdal, which cannot be installed through `pip` easily. You are recommended to use `conda` to install dependency if necessary:
 
     conda install pyearth
 
-**Building from source:** If you are building PyEarth from source and it includes Cython extensions, you will need a C compiler. We recommend using conda's compilers for consistency across platforms:
+#### Optional Cython Extensions
+
+By default, PyEarth installs and runs without compiling Cython extensions. For users who want maximum performance, Cython modules can be built optionally:
+
+- **With pip:**
+    pip install pyearth[cython]
+
+- **With conda:**
+    conda install cython numpy
+    python setup.py build_ext --inplace
+
+If you build from source and want Cython extensions, you will need a C compiler. We recommend using conda's compilers for consistency across platforms:
 
     # Install conda compilers
     conda install -c conda-forge c-compiler cxx-compiler
