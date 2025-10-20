@@ -2,9 +2,9 @@ import os, sys
 import numpy as np
 import time
 from typing import List, Tuple, Optional, Union, Dict, Any
-from osgeo import gdal, osr, ogr, gdalconst
+from osgeo import gdal, osr, ogr
+from rtree.index import Index as RTreeindex
 from pyearth.system.filename import get_extension_from_path
-from pyearth.toolbox.spatialindex import setup_spatial_index
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
@@ -40,8 +40,7 @@ def create_spatial_index(geometries: List[Optional[Any]], verbose: bool = False)
     RTree provides O(log n) query performance.
     """
     # Setup spatial indexing (rtree only)
-    RTreeClass = setup_spatial_index()
-    rtree = RTreeClass()
+    spatial_index = RTreeindex()
     geometry_map = {}
 
     for i, geom in enumerate(geometries):
@@ -49,10 +48,10 @@ def create_spatial_index(geometries: List[Optional[Any]], verbose: bool = False)
             envelope = geom.GetEnvelope()  # (minX, maxX, minY, maxY)
             # RTree expects (minX, minY, maxX, maxY)
             bbox = (envelope[0], envelope[2], envelope[1], envelope[3])
-            rtree.insert(i, bbox)
+            spatial_index.insert(i, bbox)
             geometry_map[i] = envelope
 
-    return rtree, geometry_map
+    return spatial_index, geometry_map
 
 def geometries_bbox_overlap(bbox1: Tuple[float, float, float, float], bbox2: Tuple[float, float, float, float], tolerance: float = 1e-10) -> bool:
     """

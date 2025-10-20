@@ -7,12 +7,12 @@ import logging
 from typing import Optional, Union, Tuple, Dict
 from osgeo import ogr, osr
 from datetime import datetime
+from rtree.index import Index as RTreeindex
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_extension,
     get_vector_format_from_extension
 )
-from pyearth.toolbox.spatialindex import setup_spatial_index
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -57,7 +57,6 @@ def difference_polyline_with_polygon_file(
 
 
     # Setup spatial indexing (rtree only)
-    RTreeClass = setup_spatial_index()
 
     # Validate input files
     if not os.path.exists(sFilename_base):
@@ -158,7 +157,7 @@ def difference_polyline_with_polygon_file(
 
         # Build spatial index for base features
         logger.info("Building spatial index for base features...")
-        index_base = RTreeClass()
+        index_base = RTreeindex()
 
         base_features = {}  # Cache base features to avoid repeated queries
         indexed_count = 0
