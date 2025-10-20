@@ -1,52 +1,107 @@
 import os, sys
 import numpy as np
+from typing import List
 from osgeo import gdal, osr, ogr, gdalconst
-
-def get_format_from_extension(filename):
-    """
-    Determine the OGR format string from file extension.
-
-    Args:
-        filename: Input filename with extension
-
-    Returns:
-        Format string for OGR driver
-    """
-    _, ext = os.path.splitext(filename.lower())
-
-    format_map = {
-        '.geojson': 'GeoJSON',
-        '.json': 'GeoJSON',
-        '.shp': 'ESRI Shapefile',
-        '.gpkg': 'GPKG',
-        '.kml': 'KML',
-        '.gml': 'GML',
-        '.sqlite': 'SQLite'
-    }
-
-    return format_map.get(ext, 'GeoJSON')
+from pyearth.gis.gdal.gdal_vector_format_support import (
+    get_vector_format_from_filename,
+    print_supported_vector_formats,
+    get_vector_driver_from_format,
+    get_vector_driver_from_filename
+)
 
 
-
-def merge_files(aFilename_in, sFilename_out, sFormat=None, copy_attributes=False, add_id_field=True, verbose=True):
+def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bool = False, add_id_field: bool = True, verbose: bool = True) -> None:
     """
     Merge multiple vector files into a single output file.
 
-    Args:
-        aFilename_in: List of input filenames
-        sFilename_out: Output filename
-        sFormat: Output format ('GeoJSON', 'ESRI Shapefile', 'GPKG', etc.)
-                If None, format will be determined from output file extension
-        copy_attributes: If True, copy all attributes from input files. If False, only copy geometries
-        add_id_field: If True, add an 'id' field with sequential numbering
-        verbose: If True, print progress and warning messages
+    This function combines multiple vector files of the same geometry type into a single
+    output file. All input files must have compatible geometry types (e.g., all points,
+    all polygons, etc.). The output format is automatically determined from the output
+    filename extension.
+
+    Parameters
+    ----------
+    aFilename_in : List[str]
+        List of input vector filenames to merge. All files must exist and be readable
+        by GDAL/OGR. Files should have compatible geometry types.
+    sFilename_out : str
+        Output filename with extension. Format will be auto-detected from extension.
+        Supported formats include GeoJSON (.geojson), Shapefile (.shp), GeoPackage (.gpkg), etc.
+    copy_attributes : bool, optional
+        If True, copy all attribute fields from input files to output. If False, only
+        geometries are copied. Default is False.
+    add_id_field : bool, optional
+        If True, add a sequential 'id' field to the output features. Default is True.
+    verbose : bool, optional
+        If True, print progress messages and warnings. Default is True.
+
+    Returns
+    -------
+    None
+        Function modifies files on disk but returns no value.
+
+    Raises
+    ------
+    FileNotFoundError
+        If any input file does not exist (implicit via GDAL).
+    RuntimeError
+        If output file cannot be created or input files cannot be read (implicit via GDAL).
+
+    Notes
+    -----
+    1. **Geometry Type Compatibility**: All input files must have the same base geometry
+       type (Point, LineString, Polygon, etc.). Multi-geometry types are supported.
+
+    2. **Spatial Reference System**: The SRS from the first input file is used for the
+       output. No coordinate transformation is performed.
+
+    3. **Attribute Handling**: When copy_attributes=True, field definitions are copied
+       from the first input file. Field name conflicts are not resolved.
+
+    4. **ID Field**: The sequential ID starts from 0 and increments for each feature
+       across all input files.
+
+    5. **Output Format Support**: Format availability depends on GDAL/OGR installation.
+       Use print_supported_vector_formats() to see available formats.
+
+    6. **File Overwrite**: Existing output files are automatically deleted before
+       creating new ones. For Shapefiles, all associated files (.shp, .shx, .dbf, etc.)
+       are removed.
+
+    Examples
+    --------
+    Basic merge without attributes:
+
+    >>> merge_files(
+    ...     ['input1.shp', 'input2.shp'],
+    ...     'merged_output.shp',
+    ...     copy_attributes=False,
+    ...     add_id_field=True
+    ... )
+
+    Merge with attributes preserved:
+
+    >>> merge_files(
+    ...     ['data/polygons1.geojson', 'data/polygons2.geojson'],
+    ...     'combined_polygons.gpkg',
+    ...     copy_attributes=True,
+    ...     verbose=False
+    ... )
+
+    See Also
+    --------
+    merge_features : Merge connected features within a single file
+    print_supported_vector_formats : List available vector formats
     """
 
     # Auto-detect format from output filename if not specified
+    sFormat = get_vector_format_from_filename(sFilename_out)
     if sFormat is None:
-        sFormat = get_format_from_extension(sFilename_out)
-        if verbose:
-            print(f'Auto-detected format: {sFormat}')
+        print('Could not determine output format from filename extension.')
+        print('Supported formats are:')
+        print_supported_vector_formats()
+        return
+
 
     if verbose:
         print(f'=== Starting merge_files operation ===')
@@ -211,48 +266,3 @@ def merge_files(aFilename_in, sFilename_out, sFormat=None, copy_attributes=False
 
     return
 
-def main():
-    """
-    Main function for command line usage
-    """
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Merge multiple vector files into a single output file')
-    parser.add_argument('inputs', nargs='+', help='Input vector files to merge')
-    parser.add_argument('output', help='Output vector file')
-    parser.add_argument('--format', help='Output format (auto-detected from extension if not specified)')
-    parser.add_argument('--no-attributes', action='store_true',
-                       help='Do not copy attributes from input files (geometries only)')
-    parser.add_argument('--no-id', action='store_true',
-                       help='Do not add sequential ID field to output')
-    parser.add_argument('--quiet', action='store_true',
-                       help='Suppress progress output')
-
-    args = parser.parse_args()
-
-    # Convert input arguments
-    copy_attributes = not args.no_attributes
-    add_id_field = not args.no_id
-    verbose = not args.quiet
-
-    if verbose:
-        print(f'Merging {len(args.inputs)} files into {args.output}')
-        print(f'Copy attributes: {copy_attributes}')
-        print(f'Add ID field: {add_id_field}')
-
-    merge_files(
-        args.inputs,
-        args.output,
-        sFormat=args.format,
-        copy_attributes=copy_attributes,
-        add_id_field=add_id_field,
-        verbose=verbose
-    )
-
-if __name__ == '__main__':
-    main()
-
-# Example usage:
-# merge_files(['file1.shp', 'file2.shp'], 'merged.shp')  # Auto-detect shapefile format, copy all attributes
-# merge_files(['file1.geojson', 'file2.geojson'], 'merged.gpkg', 'GPKG', copy_attributes=False)  # No attributes
-# merge_files(['file1.shp', 'file2.geojson'], 'merged.geojson', add_id_field=False)  # No ID field

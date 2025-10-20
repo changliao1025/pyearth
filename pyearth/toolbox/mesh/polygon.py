@@ -4,7 +4,7 @@ from json import JSONEncoder
 import numpy as np
 from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.edge import pyedge
-from pyearth.toolbox.mesh.flowline import pyflowline
+from pyearth.toolbox.mesh.polyline import pypolyline
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
 class PolygonClassEncoder(JSONEncoder):
@@ -21,7 +21,7 @@ class PolygonClassEncoder(JSONEncoder):
             return json.loads(obj.tojson())
         if isinstance(obj, pyedge):
             return obj.lEdgeID
-        if isinstance(obj, pyflowline):
+        if isinstance(obj, pypolyline):
             return obj.lFlowlineID
         if isinstance(obj, pypolygon):
             return obj.lCellID

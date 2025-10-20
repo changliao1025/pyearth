@@ -1,62 +1,80 @@
 import os
+from pathlib import Path
+
+
+_REQUIRED_KEYS = {
+    "sFilename",
+    "ncolumn",
+    "nrow",
+    "nband",
+    "offset",
+    "data_type",
+    "byte_order",
+    "missing_value",
+    "ULlon",
+    "ULlat",
+    "pixelSize",
+}
+
+
 def envi_write_header(sFilename_in, aHeader_in):
     """
-    write the header for ENVI raster file from the dictionary data type, 
-    currently it only supports WGS84 and a dict is required to store all the information. 
-    https://www.harrisgeospatial.com/docs/ENVIGridDefinition.html
+    Write an ENVI header file from a metadata dictionary.
+
+    The routine currently supports WGS-84 map info and expects the caller to supply
+    a dictionary containing ENVI-required fields.
 
     Parameters
     ----------
-        sFilename_in (string): The filename
-        aHeader (dict): A dict that contains all required information
-    Returns
-    -------
-
-    See Also
-    --------
-    
-    Examples
-    --------
+    sFilename_in : str
+        Path to the header file that will be written (for example ``"foo.hdr"``).
+    aHeader_in : dict
+        Dictionary containing header metadata. The following keys are required:
+        ``sFilename``, ``ncolumn``, ``nrow``, ``nband``, ``offset``, ``data_type``,
+        ``byte_order``, ``missing_value``, ``ULlon``, ``ULlat``, ``pixelSize``.
+        Provide either ``interleave`` or ``bsq`` to define the interleave layout.
     """
-    
-    
-    if os.path.exists(sFilename_in):
-        pass
-    else:
-        print('The envi file does not exist!')
-        return
 
-    pFile = open(sFilename_in, 'w')
-    sLine = 'ENVI' + '\n'
-    pFile.write(sLine)
-    sLine = 'description = ' + aHeader_in['sFilename'] + '\n'
-    pFile.write(sLine)
-    sLine = 'samples = ' + aHeader_in['ncolumn'] + '\n'
-    pFile.write(sLine)
-    sLine = 'lines = ' + aHeader_in['nrow'] + '\n'
-    pFile.write(sLine)
-    sLine = 'bands = ' + aHeader_in['nband'] + '\n'
-    pFile.write(sLine)
-    sLine = 'header offset = ' + aHeader_in['offset'] + '\n'
-    pFile.write(sLine)
-    sLine = 'data type = ' + aHeader_in['data_type'] + '\n'
-    pFile.write(sLine)
-    sLine = 'interleave = ' + aHeader_in['bsq'] + '\n'
-    pFile.write(sLine)
-    sLine = 'sensor type = Unknown' + '\n'
-    pFile.write(sLine)
-    sLine = 'byte order = ' + aHeader_in['byte_order'] + '\n'
-    pFile.write(sLine)
-    sLine = 'data ignore value = ' + aHeader_in['missing_value'] + '\n'
-    pFile.write(sLine)
+    header_path = Path(sFilename_in)
+    header_path.parent.mkdir(parents=True, exist_ok=True)
 
-    #only one spatial reference is supported here.
-    sLine = 'map info = {Geographic Lat/Lon, 1.000, 1.000, ' \
-        + aHeader_in['ULlon'] + ', ' + aHeader_in['ULlat'] + ', ' \
-        + aHeader_in['pixelSize'] + ', ' + aHeader_in['pixelSize'] + ', ' \
-        + 'WGS-84, units = Degrees}' + '\n'
-    pFile.write(sLine)
+    missing_keys = sorted(_REQUIRED_KEYS.difference(aHeader_in.keys()))
+    if missing_keys:
+        missing = ", ".join(missing_keys)
+        raise ValueError(f"ENVI header dictionary is missing required keys: {missing}")
 
-    sLine = 'wavelength units = Unknown ' + '\n'
-    pFile.write(sLine)
-    pFile.close()
+    interleave = aHeader_in.get("interleave", aHeader_in.get("bsq"))
+    if interleave is None:
+        raise ValueError("ENVI header dictionary must include an 'interleave' or 'bsq' entry")
+
+    def _as_str(key):
+        try:
+            value = aHeader_in[key]
+        except KeyError as exc:
+            raise ValueError(f"Missing required header value for '{key}'") from exc
+        return str(value)
+
+    map_info = (
+        "{Geographic Lat/Lon, 1.000, 1.000, "
+        f"{_as_str('ULlon')}, {_as_str('ULlat')}, {_as_str('pixelSize')}, {_as_str('pixelSize')}, "
+        "WGS-84, units = Degrees}"
+    )
+
+    header_lines = [
+        "ENVI",
+        f"description = {_as_str('sFilename')}",
+        f"samples = {_as_str('ncolumn')}",
+        f"lines = {_as_str('nrow')}",
+        f"bands = {_as_str('nband')}",
+        f"header offset = {_as_str('offset')}",
+        f"data type = {_as_str('data_type')}",
+        f"interleave = {interleave}",
+        "sensor type = Unknown",
+        f"byte order = {_as_str('byte_order')}",
+        f"data ignore value = {_as_str('missing_value')}",
+        f"map info = {map_info}",
+        "wavelength units = Unknown",
+    ]
+
+    with header_path.open("w", encoding="utf-8") as header_file:
+        header_file.write("\n".join(header_lines) + "\n")

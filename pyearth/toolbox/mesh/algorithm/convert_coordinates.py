@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Tuple
 from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.edge import pyedge
-from pyearth.toolbox.mesh.flowline import pyflowline
+from pyearth.toolbox.mesh.polyline import pypolyline
 from pyearth.toolbox.mesh.polygon import pypolygon
 from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates
 from pyearth.gis.geometry.calculate_angle_between_vertex import calculate_angle_between_vertex
@@ -50,7 +50,7 @@ def convert_gcs_coordinates_to_cell(iMesh_type_in: int,
 
     return pypolygon(dLongitude_center_in, dLatitude_center_in, edges, vertices)
 
-def convert_gcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float]]) -> pyflowline:
+def convert_gcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float]]) -> pypolyline:
     """
     Convert GCS coordinates to a pyflowline object.
 
@@ -67,9 +67,9 @@ def convert_gcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float
         print('No edge is created')
         return None
 
-    return pyflowline(edges)
+    return pypolyline(edges)
 
-def convert_pcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float]], pProjection_in: Any) -> pyflowline:
+def convert_pcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float]], pProjection_in: Any) -> pypolyline:
     """
     Convert PCS coordinates to a pyflowline object.
 
@@ -87,4 +87,4 @@ def convert_pcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float
 
     edges = [pyedge(vertices[j], vertices[j + 1]) for j in range(len(vertices) - 1)]
 
-    return pyflowline(edges)
+    return pypolyline(edges)

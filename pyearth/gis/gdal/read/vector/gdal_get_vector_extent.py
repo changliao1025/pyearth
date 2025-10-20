@@ -1,48 +1,80 @@
+import os
+from typing import Optional, Tuple, Union
+
 from osgeo import gdal, osr, ogr
-def gdal_get_vector_extent(sFilename_in, iFlag_return_union_geometry=False):
-    """
-    Get the extent of a vector file.
+
+
+def gdal_get_vector_extent(
+    sFilename_in: str,
+    iFlag_return_union_geometry: bool = False
+) -> Union[Tuple[float, float, float, float], Tuple[Tuple[float, float, float, float], Optional[ogr.Geometry]], None]:
+    """Get the spatial extent of a vector file, optionally with a union geometry.
 
     This function can also return a single geometry that is a collection of all
     feature geometries in the source file.
 
-    Args:
-        sFilename_in (str): The input vector file.
-        return_union_geometry (bool, optional): If True, return a collection of
-            all geometries. Defaults to False.
+    Parameters
+    ----------
+    sFilename_in : str
+        Path to the input vector file.
+    iFlag_return_union_geometry : bool, optional
+        If True, return a tuple containing both the extent and a geometry collection
+        of all features. Default is False.
 
-    Returns:
-        tuple or None:
-            If return_union_geometry is False, returns the extent as a
-            tuple (min_x, max_x, min_y, max_y), or None on error.
-            If return_union_geometry is True, returns a tuple (extent, union_geometry),
-            or (None, None) on error. The union_geometry will be a single OGR
+    Returns
+    -------
+    tuple or None
+        If iFlag_return_union_geometry is False:
+            Returns the extent as (min_x, max_x, min_y, max_y), or None on error.
+        If iFlag_return_union_geometry is True:
+            Returns (extent, union_geometry) where union_geometry is a single OGR
             Geometry object (e.g., MultiPolygon) containing all geometries from
-            the input layer.
+            the layer, or (None, None) on error.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the input file does not exist.
+    RuntimeError
+        If the vector file cannot be opened.
+    ValueError
+        If the layer cannot be accessed or has no features.
+
+    Notes
+    -----
+    When creating a union geometry, the function:
+    - Determines the appropriate multi-geometry type based on the layer's geometry type
+    - Flattens all geometries to 2D
+    - Handles multi-geometries by adding their individual parts
+    - Returns None for the union if the geometry type is not supported (Point, LineString, or Polygon)
     """
-    pDataset = None
+
+    if not os.path.exists(sFilename_in):
+        raise FileNotFoundError(f"File {sFilename_in} does not exist.")
+
+    dataset = None
     try:
-        pDataset = ogr.Open(sFilename_in)
-        if pDataset is None:
-            print(f"Could not open {sFilename_in}")
-            return (None, None) if iFlag_return_union_geometry else None
+        dataset = ogr.Open(sFilename_in, 0)  # 0 = read-only
+        if dataset is None:
+            raise RuntimeError(f"Unable to open vector file {sFilename_in}.")
 
-        pLayer = pDataset.GetLayer(0)
-        if pLayer is None:
-            print(f"Could not get layer from {sFilename_in}")
-            return (None, None) if iFlag_return_union_geometry else None
+        layer = dataset.GetLayer(0)
+        if layer is None:
+            raise ValueError(f"Unable to access layer from {sFilename_in}.")
 
-        aExtent = pLayer.GetExtent()
+        extent = layer.GetExtent()
+        if extent is None:
+            raise ValueError(f"Unable to retrieve extent from {sFilename_in}.")
 
         if not iFlag_return_union_geometry:
-            return aExtent
+            return extent
 
-        # The following part creates a collection of geometries.
-        pLayer_geom_type = pLayer.GetGeomType()
+        # Create a collection of all geometries
+        layer_geom_type = layer.GetGeomType()
 
         # Determine the target collection type using the flattened geometry type
-        #base_geom_type = ogr.wkbFlatten(pLayer_geom_type)
-        base_geom_type = pLayer_geom_type & 0xff
+        base_geom_type = layer_geom_type & 0xff  # Flatten to 2D base type
+
         if base_geom_type == ogr.wkbPoint:
             union_geom = ogr.Geometry(ogr.wkbMultiPoint)
         elif base_geom_type == ogr.wkbLineString:
@@ -50,31 +82,34 @@ def gdal_get_vector_extent(sFilename_in, iFlag_return_union_geometry=False):
         elif base_geom_type == ogr.wkbPolygon:
             union_geom = ogr.Geometry(ogr.wkbMultiPolygon)
         else:
-            sGeomType = ogr.GeometryTypeToName(pLayer_geom_type)
-            print(f"Geometry type '{sGeomType}' not supported for geometry collection.")
-            return aExtent, None
+            geom_type_name = ogr.GeometryTypeToName(layer_geom_type)
+            # For unsupported types, return extent without union geometry
+            return extent, None
 
-        pLayer.ResetReading()
-        for pFeature in pLayer:
-            geometry = pFeature.GetGeometryRef()
-            if geometry is not None:
-                geom_clone = geometry.Clone()
-                geom_clone.FlattenTo2D()
+        layer.ResetReading()
+        for feature in layer:
+            if feature is None:
+                continue
 
-                flat_geom_type = geom_clone.GetGeometryType()
+            geometry = feature.GetGeometryRef()
+            if geometry is None:
+                continue
 
-                if flat_geom_type in [ogr.wkbMultiPoint, ogr.wkbMultiLineString, ogr.wkbMultiPolygon]:
-                    for i in range(geom_clone.GetGeometryCount()):
-                        part = geom_clone.GetGeometryRef(i)
+            geom_clone = geometry.Clone()
+            geom_clone.FlattenTo2D()
+
+            flat_geom_type = geom_clone.GetGeometryType()
+
+            # Handle multi-geometries by adding their individual parts
+            if flat_geom_type in [ogr.wkbMultiPoint, ogr.wkbMultiLineString, ogr.wkbMultiPolygon]:
+                for i in range(geom_clone.GetGeometryCount()):
+                    part = geom_clone.GetGeometryRef(i)
+                    if part is not None:
                         union_geom.AddGeometry(part)
-                elif flat_geom_type in [ogr.wkbPoint, ogr.wkbLineString, ogr.wkbPolygon]:
-                    union_geom.AddGeometry(geom_clone)
+            elif flat_geom_type in [ogr.wkbPoint, ogr.wkbLineString, ogr.wkbPolygon]:
+                union_geom.AddGeometry(geom_clone)
 
-        return aExtent, union_geom
+        return extent, union_geom
 
-    except Exception as e:
-        print(f"Error in gdal_get_vector_extent: {e}")
-        return (None, None) if iFlag_return_union_geometry else None
     finally:
-        if pDataset is not None:
-            pDataset = None
+        dataset = None

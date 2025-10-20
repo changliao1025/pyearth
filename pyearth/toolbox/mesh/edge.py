@@ -8,7 +8,7 @@ from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.circle import pycircle
 
 from pyearth.gis.geometry.calculate_intersect_on_great_circle import calculate_intersect_on_great_circle
-from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_file import export_vertex_as_polygon
+from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon_file
 from pyearth.toolbox.mesh.algorithm.split_by_length import split_edge_by_length
 from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import find_minimal_enclosing_polygon
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
@@ -196,8 +196,8 @@ class pyedge(object):
             aVertex_circle.extend(aVertex_end_buffer)
 
             if sFolder_out:
-                export_vertex_as_polygon(aVertex_start_buffer, os.path.join(sFolder_out, f'buffer_zone_start_{i}.geojson'))
-                export_vertex_as_polygon(aVertex_end_buffer, os.path.join(sFolder_out, f'buffer_zone_end_{i}.geojson'))
+                export_vertex_as_polygon_file(aVertex_start_buffer, os.path.join(sFolder_out, f'buffer_zone_start_{i}.geojson'))
+                export_vertex_as_polygon_file(aVertex_end_buffer, os.path.join(sFolder_out, f'buffer_zone_end_{i}.geojson'))
 
             aCircle.extend([pEdge.pCircle_start, pEdge.pCircle_end])
 
@@ -209,7 +209,7 @@ class pyedge(object):
         aVertex_out = [pyvertex({'dLongitude_degree': p[0], 'dLatitude_degree': p[1]}) for p in pPolygon_out]
 
         if sFilename_out:
-            export_vertex_as_polygon(aVertex_out, sFilename_out)
+            export_vertex_as_polygon_file(aVertex_out, sFilename_out)
 
         return aVertex_out, aVertex_center, aVertex_circle, aCircle
 

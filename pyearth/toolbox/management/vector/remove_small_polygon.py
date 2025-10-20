@@ -1,294 +1,404 @@
-import os, sys
+import os
+import logging
+import time
+from typing import Optional, Union
 import numpy as np
 from osgeo import ogr, osr, gdal
+
 gdal.UseExceptions()
-from pyearth.system.define_global_variables import *
-from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
-from pyearth.gis.geometry.douglas_peucker_geodetic import douglas_peucker_geodetic
-from pyearth.gis.geometry.visvalingam_whyatt_geodetic import  visvalingam_whyatt_geodetic
+from pyearth.gis.gdal.gdal_vector_format_support import (
+    get_vector_format_from_filename,
+    print_supported_vector_formats,
+    get_vector_driver_from_format
+)
 
-from pyearth.gis.gdal.read.vector.get_supported_formats import get_supported_formats, print_supported_formats
+def remove_small_polygon(
+    sFilename_vector_in: str,
+    sFilename_vector_out: str,
+    dThreshold_in: Union[float, int],
+    iFlag_algorithm: int = 2,
+    verbose: bool = True,
+    progress_interval: int = 1000
+) -> None:
+    """
+    Remove small polygons from a vector file based on area threshold.
 
-def remove_small_polygon(sFilename_vector_in, sFilename_vector_out, dThreshold_in,
-                        verbose=True, progress_interval=1000):
+    This function filters polygon geometries from an input vector file, keeping only
+    those with areas greater than the specified threshold. The area calculation uses
+    geodesic methods for accurate results on large regions. Both POLYGON and
+    MULTIPOLYGON geometries are supported, with holes (inner rings) preserved.
+
+    Parameters
+    ----------
+    sFilename_vector_in : str
+        Path to the input vector file containing polygon geometries.
+    sFilename_vector_out : str
+        Path where the filtered output vector file will be created.
+    dThreshold_in : float or int
+        Minimum area threshold in square kilometers. Polygons with areas
+        less than or equal to this value will be removed.
+    iFlag_algorithm : int, optional
+        Algorithm flag for area calculation (default is 2 for geodesic).
+        - 1: Planar area calculation
+        - 2: Geodesic area calculation (recommended for large areas)
+    verbose : bool, optional
+        If True, print progress information and statistics (default is True).
+    progress_interval : int, optional
+        Number of features to process before printing progress updates
+        (default is 1000).
+
+    Returns
+    -------
+    None
+        The function creates a new vector file at `sFilename_vector_out`
+        containing only polygons that meet the area threshold.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the input file does not exist.
+    ValueError
+        If the threshold value is invalid or if vector format is unsupported.
+    RuntimeError
+        If GDAL operations fail (file opening, creation, or processing).
+
+    Notes
+    -----
+    - The function assumes input geometries are in WGS84 (EPSG:4326) coordinate system
+      for accurate geodesic area calculations.
+    - Output file will contain additional fields: 'id' (sequential integer) and
+      'area' (calculated area in square kilometers).
+    - All original attribute fields are preserved except for 'id' and 'area' which
+      are overwritten.
+    - Degenerate polygons (less than 3 vertices) are automatically skipped.
+    - For MULTIPOLYGON geometries, each individual polygon part is evaluated
+      separately against the threshold.
+
+    Examples
+    --------
+    Remove polygons smaller than 1 square kilometer:
+
+    >>> remove_small_polygon(
+    ...     'input_polygons.shp',
+    ...     'filtered_polygons.shp',
+    ...     1.0
+    ... )
+
+    Process with custom progress reporting:
+
+    >>> remove_small_polygon(
+    ...     'world_countries.geojson',
+    ...     'large_countries.geojson',
+    ...     1000.0,
+    ...     verbose=True,
+    ...     progress_interval=500
+    ... )
     """
-    This function is used to remove small polygons from a vector file
-    :param sFilename_vector_in: input vector file
-    :param sFilename_vector_out: output vector file
-    :param dThreshold_in: threshold for removing small polygons, in square kilo meters
-    :param verbose: whether to print progress information
-    :param progress_interval: how often to print progress updates
-    :return: None
-    """
+    # Input validation
+    if not isinstance(sFilename_vector_in, str) or not sFilename_vector_in.strip():
+        raise ValueError("Input filename must be a non-empty string")
+
+    if not isinstance(sFilename_vector_out, str) or not sFilename_vector_out.strip():
+        raise ValueError("Output filename must be a non-empty string")
 
     if not os.path.exists(sFilename_vector_in):
-        print('Error: file %s does not exist!' % sFilename_vector_in)
-        return
+        raise FileNotFoundError(f"Input file does not exist: {sFilename_vector_in}")
 
+    try:
+        dThreshold = float(dThreshold_in)
+    except (TypeError, ValueError) as e:
+        raise ValueError(f"Threshold must be a numeric value, got {type(dThreshold_in)}: {e}")
+
+    if dThreshold <= 0:
+        raise ValueError(f"Threshold must be positive, got {dThreshold}")
+
+    if iFlag_algorithm not in [1, 2]:
+        raise ValueError(f"Algorithm flag must be 1 or 2, got {iFlag_algorithm}")
+
+    # Remove existing output file if it exists
     if os.path.exists(sFilename_vector_out):
         if verbose:
-            print(f'Removing existing output file: {sFilename_vector_out}')
-        os.remove(sFilename_vector_out)
+            logging.info(f"Removing existing output file: {sFilename_vector_out}")
+        try:
+            os.remove(sFilename_vector_out)
+        except OSError as e:
+            raise RuntimeError(f"Could not remove existing output file: {e}")
 
-    dThreshold = float(dThreshold_in)
+    # Determine formats and drivers
+    try:
+        sFormat_in = get_vector_format_from_filename(sFilename_vector_in)
+        sFormat_out = get_vector_format_from_filename(sFilename_vector_out)
+        pDriver_out = get_vector_driver_from_format(sFormat_out)
+    except Exception as e:
+        raise RuntimeError(f"Failed to determine vector format: {e}")
 
-    # Automatically detect input format and set appropriate output driver
-    input_ext = os.path.splitext(sFilename_vector_in)[1].lower()
-    output_ext = os.path.splitext(sFilename_vector_out)[1].lower()
-
-    # Map file extensions to OGR driver names
-    driver_map = {
-        '.geojson': 'GeoJSON',
-        '.json': 'GeoJSON',
-        '.shp': 'ESRI Shapefile',
-        '.gpkg': 'GPKG',
-        '.kml': 'KML',
-        '.gml': 'GML',
-        '.csv': 'CSV'
-    }
-
-    # Get input driver (for reading, we can use any driver that supports the format)
-    input_driver_name = driver_map.get(input_ext, 'GeoJSON')  # default to GeoJSON
-    output_driver_name = driver_map.get(output_ext, 'GeoJSON')  # default to GeoJSON
-
-    if verbose:
-        print(f'Input format: {input_ext} -> {input_driver_name}')
-        print(f'Output format: {output_ext} -> {output_driver_name}')
-
-    pDriver_out = ogr.GetDriverByName(output_driver_name)
     if pDriver_out is None:
-        print(f'Error: Driver {output_driver_name} not available!')
-        if verbose:
-            print_supported_formats()
-        return
+        available_formats = print_supported_vector_formats()
+        raise ValueError(f"Output format '{sFormat_out}' is not supported. "
+                        f"Available formats: {available_formats}")
 
-
-    pSrs = osr.SpatialReference()
-    pSrs.ImportFromEPSG(4326)
-
-    # Open input datasource (GDAL can auto-detect format)
-    pDataSource_in = ogr.Open(sFilename_vector_in, 0)
-    if pDataSource_in is None:
-        print(f'Error: Could not open input file {sFilename_vector_in}')
-        return
-
-    pLayer_in = pDataSource_in.GetLayer()
-
-    # Get total feature count for progress tracking
-    nTotal_features = pLayer_in.GetFeatureCount()
     if verbose:
-        print(f'Processing {nTotal_features} features with area threshold > {dThreshold} km²...')
+        logging.info(f"Input format: {sFormat_in}")
+        logging.info(f"Output format: {sFormat_out}")
+        logging.info(f"Area threshold: {dThreshold} km²")
+        logging.info(f"Area calculation algorithm: {'Geodesic' if iFlag_algorithm == 2 else 'Planar'}")
 
-    pDataSource_out = pDriver_out.CreateDataSource(sFilename_vector_out)
-    if pDataSource_out is None:
-        print(f'Error: Could not create output file {sFilename_vector_out}')
+    # Set up spatial reference (WGS84 for geodesic calculations)
+    try:
+        pSrs = osr.SpatialReference()
+        pSrs.ImportFromEPSG(4326)
+    except Exception as e:
+        raise RuntimeError(f"Failed to create spatial reference: {e}")
+
+    # Open input datasource
+    try:
+        pDataSource_in = ogr.Open(sFilename_vector_in, 0)  # Read-only
+        if pDataSource_in is None:
+            raise RuntimeError(f"Could not open input file: {sFilename_vector_in}")
+    except Exception as e:
+        raise RuntimeError(f"GDAL error opening input file: {e}")
+
+    try:
+        pLayer_in = pDataSource_in.GetLayer()
+        if pLayer_in is None:
+            raise RuntimeError("Could not access input layer")
+
+        # Get feature count for progress tracking
+        nTotal_features = pLayer_in.GetFeatureCount()
+        if nTotal_features < 0:
+            logging.warning("Could not determine total feature count, progress reporting may be inaccurate")
+
+        if verbose:
+            logging.info(f"Processing {nTotal_features} features...")
+
+        # Create output datasource
+        try:
+            pDataSource_out = pDriver_out.CreateDataSource(sFilename_vector_out)
+            if pDataSource_out is None:
+                raise RuntimeError(f"Could not create output file: {sFilename_vector_out}")
+        except Exception as e:
+            raise RuntimeError(f"GDAL error creating output file: {e}")
+
+        try:
+            # Create output layer
+            pLayer_out = pDataSource_out.CreateLayer('filtered_polygons', pSrs, ogr.wkbPolygon)
+            if pLayer_out is None:
+                raise RuntimeError("Could not create output layer")
+
+            # Add standard fields
+            field_id = ogr.FieldDefn('id', ogr.OFTInteger)
+            field_area = ogr.FieldDefn('area', ogr.OFTReal)
+            pLayer_out.CreateField(field_id)
+            pLayer_out.CreateField(field_area)
+
+            # Copy existing fields from input (excluding id and area if they exist)
+            pLayerDefn_in = pLayer_in.GetLayerDefn()
+            nFieldCount = pLayerDefn_in.GetFieldCount()
+
+            for i in range(nFieldCount):
+                pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
+                field_name = pFieldDefn.GetName().lower()
+                if field_name not in ['id', 'area']:
+                    try:
+                        pLayer_out.CreateField(pFieldDefn)
+                    except Exception as e:
+                        logging.warning(f"Could not create field '{field_name}': {e}")
+
+            pLayerDefn_out = pLayer_out.GetLayerDefn()
+
+            # Process features
+            start_time = time.time()
+            lID = 1
+            nProcessed = 0
+            nKept = 0
+            nSkipped = 0
+
+            pLayer_in.ResetReading()  # Ensure we're at the beginning
+
+            for pFeature_in in pLayer_in:
+                nProcessed += 1
+
+                if verbose and progress_interval > 0 and nProcessed % progress_interval == 0:
+                    elapsed = time.time() - start_time
+                    rate = nProcessed / elapsed if elapsed > 0 else 0
+                    logging.info(f"Processed {nProcessed}/{nTotal_features} features "
+                               f"({rate:.1f} features/sec), kept {nKept}")
+
+                pGeometry = pFeature_in.GetGeometryRef()
+                if pGeometry is None:
+                    nSkipped += 1
+                    continue
+
+                geometry_type = pGeometry.GetGeometryName()
+
+                # Process POLYGON geometries
+                if geometry_type == 'POLYGON':
+                    kept = _process_single_polygon(
+                        pGeometry, dThreshold, iFlag_algorithm, pSrs,
+                        pLayerDefn_out, pFeature_in, pLayerDefn_in, lID, pLayer_out
+                    )
+                    if kept:
+                        lID += 1
+                        nKept += 1
+
+                # Process MULTIPOLYGON geometries
+                elif geometry_type == 'MULTIPOLYGON':
+                    polygons_kept = _process_multipolygon(
+                        pGeometry, dThreshold, iFlag_algorithm, pSrs,
+                        pLayerDefn_out, pFeature_in, pLayerDefn_in, lID, pLayer_out
+                    )
+                    lID += polygons_kept
+                    nKept += polygons_kept
+
+                else:
+                    nSkipped += 1
+                    if verbose and nSkipped <= 5:  # Log first few non-polygon features
+                        logging.debug(f"Skipping non-polygon geometry: {geometry_type}")
+
+            # Final statistics
+            total_time = time.time() - start_time
+
+            if verbose:
+                logging.info("Processing complete!")
+                logging.info(f"Total features processed: {nProcessed}")
+                logging.info(f"Features kept (area > {dThreshold} km²): {nKept}")
+                logging.info(f"Features removed: {nProcessed - nKept - nSkipped}")
+                logging.info(f"Features skipped (non-polygon): {nSkipped}")
+                logging.info(f"Processing time: {total_time:.2f} seconds")
+                logging.info(f"Average processing rate: {nProcessed/total_time:.1f} features/sec")
+                logging.info(f"Output saved to: {sFilename_vector_out}")
+
+        finally:
+            # Clean up output datasource
+            pDataSource_out = None
+
+    finally:
+        # Clean up input datasource
         pDataSource_in = None
-        return
 
-    # Handle layer creation based on output format
-    if output_driver_name == 'ESRI Shapefile':
-        # Shapefile requires simpler layer name
-        layer_name = os.path.splitext(os.path.basename(sFilename_vector_out))[0]
-        pLayer_out = pDataSource_out.CreateLayer(layer_name, pSrs, ogr.wkbPolygon)
-    else:
-        pLayer_out = pDataSource_out.CreateLayer('layer', pSrs, ogr.wkbPolygon)
-    #create fields for id and area
-    pFieldDefn = ogr.FieldDefn('id', ogr.OFTInteger)
-    pLayer_out.CreateField(pFieldDefn)
-    pFieldDefn = ogr.FieldDefn('area', ogr.OFTReal)
-    pLayer_out.CreateField(pFieldDefn)
-    pLayerDefn_in = pLayer_in.GetLayerDefn()
-    nFieldCount = pLayerDefn_in.GetFieldCount()
-    for i in range(nFieldCount):
-        pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
-        if pFieldDefn.GetName() == 'id':
-            continue
-        if pFieldDefn.GetName() == 'area':
-            continue
-        pLayer_out.CreateField(pFieldDefn)
 
-    pLayerDefn_out = pLayer_out.GetLayerDefn()
+def _process_single_polygon(
+    pGeometry: ogr.Geometry,
+    dThreshold: float,
+    iFlag_algorithm: int,
+    pSrs: osr.SpatialReference,
+    pLayerDefn_out: ogr.FeatureDefn,
+    pFeature_in: ogr.Feature,
+    pLayerDefn_in: ogr.FeatureDefn,
+    lID: int,
+    pLayer_out: ogr.Layer
+) -> bool:
+    """
+    Process a single POLYGON geometry.
 
-    # Pre-allocate arrays and optimize memory usage
-    lID = 1
-    nProcessed = 0
-    nKept = 0
+    Returns True if the polygon was kept, False otherwise.
+    """
+    try:
+        # Extract outer ring coordinates
+        pOuterRing = pGeometry.GetGeometryRef(0)
+        if pOuterRing is None or pOuterRing.GetPointCount() < 3:
+            return False
 
-    # Use batch processing for better performance
-    pLayer_in.SetNextByIndex(0)  # Reset to beginning
+        aCoords_outer = np.array([
+            [pOuterRing.GetPoint(i)[0], pOuterRing.GetPoint(i)[1]]
+            for i in range(pOuterRing.GetPointCount())
+        ])
 
-    for pFeature_in in pLayer_in:  # More pythonic iteration
-        nProcessed += 1
-        if verbose and nProcessed % progress_interval == 0:  # Progress indicator
-            print(f'Processed {nProcessed}/{nTotal_features} features, kept {nKept}')
+        # Calculate area
+        dArea = calculate_polygon_area(aCoords_outer[:, 0], aCoords_outer[:, 1], iFlag_algorithm)
+        dAreakm = dArea * 1.0E-6
 
-        pGeometry = pFeature_in.GetGeometryRef()
-        if pGeometry is None:
-            continue
+        if dAreakm <= dThreshold:
+            return False
 
-        sGeometry_type = pGeometry.GetGeometryName()
+        # Create output polygon with all rings
+        pGeometry_out = ogr.Geometry(ogr.wkbPolygon)
 
-        # Handle different geometry types more efficiently
-        if sGeometry_type == 'POLYGON':
-            # Get outer ring coordinates
-            pOuterRing = pGeometry.GetGeometryRef(0)
-            aCoords_outer = []
-            for iPoint in range(pOuterRing.GetPointCount()):
-                x, y, z = pOuterRing.GetPoint(iPoint)
-                aCoords_outer.append([x, y])
+        # Add outer ring
+        pRing_outer = ogr.Geometry(ogr.wkbLinearRing)
+        for coord in aCoords_outer:
+            pRing_outer.AddPoint(coord[0], coord[1])
+        pRing_outer.CloseRings()
+        pGeometry_out.AddGeometry(pRing_outer)
 
-            if len(aCoords_outer) < 3:  # Skip degenerate polygons
+        # Add inner rings (holes)
+        for iRing in range(1, pGeometry.GetGeometryCount()):
+            pInnerRing_src = pGeometry.GetGeometryRef(iRing)
+            if pInnerRing_src is None:
                 continue
 
-            aCoords_outer = np.array(aCoords_outer)
+            pInnerRing_new = ogr.Geometry(ogr.wkbLinearRing)
+            for iPoint in range(pInnerRing_src.GetPointCount()):
+                x, y, z = pInnerRing_src.GetPoint(iPoint)
+                pInnerRing_new.AddPoint(x, y)
+            pInnerRing_new.CloseRings()
+            pGeometry_out.AddGeometry(pInnerRing_new)
 
-            # Calculate area of outer ring
-            dArea = calculate_polygon_area(aCoords_outer[:,0], aCoords_outer[:,1], iFlag_algorithm=2)
-            dAreakm = dArea * 1.0E-6
+        pGeometry_out.AssignSpatialReference(pSrs)
 
-            if dAreakm > dThreshold:
-                # Create new polygon with outer ring and all inner rings
-                pGeometry_partial = ogr.Geometry(ogr.wkbPolygon)
+        # Create and populate output feature
+        pFeature_out = ogr.Feature(pLayerDefn_out)
+        pFeature_out.SetGeometry(pGeometry_out)
+        pFeature_out.SetField('id', lID)
+        pFeature_out.SetField('area', dAreakm)
 
-                # Add outer ring
-                pRing_outer = ogr.Geometry(ogr.wkbLinearRing)
-                for j in range(len(aCoords_outer)):
-                    pRing_outer.AddPoint(aCoords_outer[j, 0], aCoords_outer[j, 1])
-                pRing_outer.CloseRings()
-                pGeometry_partial.AddGeometry(pRing_outer)
+        # Copy other fields
+        for i in range(pLayerDefn_in.GetFieldCount()):
+            field_name = pLayerDefn_in.GetFieldDefn(i).GetName()
+            if field_name.lower() not in ['id', 'area']:
+                try:
+                    pFeature_out.SetField(field_name, pFeature_in.GetField(field_name))
+                except Exception:
+                    # Skip fields that can't be copied
+                    pass
 
-                # Add inner rings (holes)
-                nRings = pGeometry.GetGeometryCount()
-                for iRing in range(1, nRings):  # Start from 1 to skip outer ring
-                    pInnerRing_src = pGeometry.GetGeometryRef(iRing)
-                    pInnerRing_new = ogr.Geometry(ogr.wkbLinearRing)
-                    for iPoint in range(pInnerRing_src.GetPointCount()):
-                        x, y, z = pInnerRing_src.GetPoint(iPoint)
-                        pInnerRing_new.AddPoint(x, y)
-                    pInnerRing_new.CloseRings()
-                    pGeometry_partial.AddGeometry(pInnerRing_new)
+        pLayer_out.CreateFeature(pFeature_out)
+        pFeature_out = None
 
-                pGeometry_partial.AssignSpatialReference(pSrs)
+        return True
 
-                # Create output feature
-                pFeature_out = ogr.Feature(pLayerDefn_out)
-                pFeature_out.SetGeometry(pGeometry_partial)
-                pFeature_out.SetField('id', lID)
-                pFeature_out.SetField('area', dAreakm)
+    except Exception as e:
+        logging.warning(f"Error processing polygon: {e}")
+        return False
 
-                # Copy other fields efficiently
-                for k in range(nFieldCount):
-                    field_name = pLayerDefn_in.GetFieldDefn(k).GetName()
-                    if field_name not in ['id', 'area']:
-                        pFeature_out.SetField(field_name, pFeature_in.GetField(field_name))
 
-                pLayer_out.CreateFeature(pFeature_out)
-                pFeature_out = None
-                lID += 1
-                nKept += 1
-
-        elif sGeometry_type == 'MULTIPOLYGON':
-            # For multipolygons, process each polygon part
-            nPolygons = pGeometry.GetGeometryCount()
-            for iPoly in range(nPolygons):
-                pPolygon = pGeometry.GetGeometryRef(iPoly)
-
-                # Get outer ring coordinates
-                pOuterRing = pPolygon.GetGeometryRef(0)
-                aCoords_outer = []
-                for iPoint in range(pOuterRing.GetPointCount()):
-                    x, y, z = pOuterRing.GetPoint(iPoint)
-                    aCoords_outer.append([x, y])
-
-                aCoords_outer = np.array(aCoords_outer)
-
-                # Calculate area of outer ring
-                dArea = calculate_polygon_area(aCoords_outer[:,0], aCoords_outer[:,1], iFlag_algorithm=2)
-                dAreakm = dArea * 1.0E-6
-
-                if dAreakm > dThreshold:
-                    # Create new polygon with outer ring and all inner rings
-                    pGeometry_partial = ogr.Geometry(ogr.wkbPolygon)
-
-                    # Add outer ring
-                    pRing_outer = ogr.Geometry(ogr.wkbLinearRing)
-                    for j in range(len(aCoords_outer)):
-                        pRing_outer.AddPoint(aCoords_outer[j, 0], aCoords_outer[j, 1])
-                    pRing_outer.CloseRings()
-                    pGeometry_partial.AddGeometry(pRing_outer)
-
-                    # Add inner rings (holes)
-                    nRings = pPolygon.GetGeometryCount()
-                    for iRing in range(1, nRings):  # Start from 1 to skip outer ring
-                        pInnerRing_src = pPolygon.GetGeometryRef(iRing)
-                        pInnerRing_new = ogr.Geometry(ogr.wkbLinearRing)
-                        for iPoint in range(pInnerRing_src.GetPointCount()):
-                            x, y, z = pInnerRing_src.GetPoint(iPoint)
-                            pInnerRing_new.AddPoint(x, y)
-                        pInnerRing_new.CloseRings()
-                        pGeometry_partial.AddGeometry(pInnerRing_new)
-
-                    pGeometry_partial.AssignSpatialReference(pSrs)
-
-                    # Create output feature
-                    pFeature_out = ogr.Feature(pLayerDefn_out)
-                    pFeature_out.SetGeometry(pGeometry_partial)
-                    pFeature_out.SetField('id', lID)
-                    pFeature_out.SetField('area', dAreakm)
-
-                    # Copy other fields efficiently
-                    for k in range(nFieldCount):
-                        field_name = pLayerDefn_in.GetFieldDefn(k).GetName()
-                        if field_name not in ['id', 'area']:
-                            pFeature_out.SetField(field_name, pFeature_in.GetField(field_name))
-
-                    pLayer_out.CreateFeature(pFeature_out)
-                    pFeature_out = None
-                    lID += 1
-                    nKept += 1
-        else:
-            continue  # Skip non-polygon geometries
-
-    # Cleanup and final statistics
-    pDataSource_in = None  # Proper cleanup instead of Destroy()
-    pDataSource_out = None
-
-    if verbose:
-        print(f'Processing complete!')
-        print(f'Total features processed: {nProcessed}')
-        print(f'Features kept (area > {dThreshold} km²): {nKept}')
-        print(f'Features removed: {nProcessed - nKept}')
-        print(f'Output saved to: {sFilename_vector_out}')
-    return
-
-def main():
+def _process_multipolygon(
+    pGeometry: ogr.Geometry,
+    dThreshold: float,
+    iFlag_algorithm: int,
+    pSrs: osr.SpatialReference,
+    pLayerDefn_out: ogr.FeatureDefn,
+    pFeature_in: ogr.Feature,
+    pLayerDefn_in: ogr.FeatureDefn,
+    lID_start: int,
+    pLayer_out: ogr.Layer
+) -> int:
     """
-    Main function for command line usage
+    Process a MULTIPOLYGON geometry, creating separate features for each polygon part.
+
+    Returns the number of polygons that were kept.
     """
-    import argparse
+    polygons_kept = 0
 
-    parser = argparse.ArgumentParser(description='Remove small polygons from vector files')
-    parser.add_argument('input', help='Input vector file')
-    parser.add_argument('output', help='Output vector file')
-    parser.add_argument('threshold', type=float, help='Area threshold in square kilometers')
-    parser.add_argument('--quiet', action='store_true', help='Suppress progress output')
-    parser.add_argument('--progress', type=int, default=1000, help='Progress reporting interval')
-    parser.add_argument('--formats', action='store_true', help='Show supported formats and exit')
+    try:
+        for iPoly in range(pGeometry.GetGeometryCount()):
+            pPolygon = pGeometry.GetGeometryRef(iPoly)
+            if pPolygon is None or pPolygon.GetGeometryName() != 'POLYGON':
+                continue
 
-    args = parser.parse_args()
+            kept = _process_single_polygon(
+                pPolygon, dThreshold, iFlag_algorithm, pSrs,
+                pLayerDefn_out, pFeature_in, pLayerDefn_in,
+                lID_start + polygons_kept, pLayer_out
+            )
 
-    if args.formats:
-        print_supported_formats()
-        return
+            if kept:
+                polygons_kept += 1
 
-    remove_small_polygon(
-        args.input,
-        args.output,
-        args.threshold,
-        verbose=not args.quiet,
-        progress_interval=args.progress
-    )
+    except Exception as e:
+        logging.warning(f"Error processing multipolygon: {e}")
 
-if __name__ == '__main__':
-    main()
+    return polygons_kept
+

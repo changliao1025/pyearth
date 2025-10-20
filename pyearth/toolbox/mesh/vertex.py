@@ -4,7 +4,7 @@ from json import JSONEncoder
 import importlib.util
 import numpy as np
 from geographiclib.geodesic import Geodesic
-from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_file import export_vertex_as_polygon
+from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon_file
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
 
 iPrecision_default = 12 #used for comparison
@@ -208,7 +208,7 @@ class pyvertex(object):
 
         if sFilename_out is not None:
             #save as a geojson file
-            export_vertex_as_polygon(aVertex, sFilename_out)
+            export_vertex_as_polygon_file(aVertex, sFilename_out)
 
         return aVertex
 

@@ -2,7 +2,8 @@
 import io
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+from Cython.Build import cythonize
 
 NAME = "pyearth"
 DESCRIPTION = \
@@ -10,7 +11,7 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.27"
+VERSION = "0.1.28"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
@@ -32,6 +33,27 @@ CLASSIFY = [
 ]
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+
+
+# Optional Cython extensions (not built by default)
+extensions = [
+    Extension(
+        "pyearth.gis.geometry.kernel",
+        ["pyearth/gis/geometry/kernel.pyx"],
+        include_dirs=[],
+        libraries=[],
+        library_dirs=[],
+    ),
+    Extension(
+        "pyearth.gis.location.kernel",
+        ["pyearth/gis/location/kernel.pyx"],
+        include_dirs=[],
+        libraries=[],
+        library_dirs=[],
+    ),
+]
+
+# To build Cython extensions, run: python setup.py build_ext --inplace
 
 try:
     with io.open(os.path.join(
@@ -58,6 +80,8 @@ setup(
     install_requires=REQUIRED,
     classifiers=CLASSIFY,
     extras_require={
-        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels']
+        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels'],
+        'spatial': ['rtree'],
+        'cython': ['Cython>=0.29.0', 'numpy'],
     }
 )
