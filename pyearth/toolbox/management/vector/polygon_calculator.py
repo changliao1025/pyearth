@@ -2,8 +2,8 @@
 import os
 from osgeo import ogr, osr
 from datetime import datetime
-import importlib
 import numpy as np
+from rtree.index import Index as RTreeindex
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
@@ -99,7 +99,7 @@ def polygon_difference_rtree(sFilename_base, sFilename_new, sAttribute_name_base
     #find the numebr of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
     interleaved = True
-    index_base = rtree.index.Index(interleaved=interleaved)
+    index_base = RTreeindex()
     aData_base = list()
     lID = 0
     for pFeature_base in pLayer_base:
@@ -159,8 +159,6 @@ def polygon_difference_cython(sFilename_base,
                                dArea_threshold_in = 1000.0,
                                dBuffer_threshold_in = -0.0001):
 
-    from pyearth.toolbox.spatialindex import setup_spatial_index
-    RTreeClass = setup_spatial_index()
 
     pSpatial_reference_gcs = osr.SpatialReference()
     pSpatial_reference_gcs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -195,7 +193,7 @@ def polygon_difference_cython(sFilename_base,
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
     #find the numebr of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
-    index_base = RTreeClass()
+    index_base = RTreeindex()
     aData_base = list()
     lID = 0
     for pFeature_base in pLayer_base:
@@ -471,8 +469,6 @@ def polygon_difference_cython_channel(sFilename_base,
                                dArea_threshold_in = 1000.0,
                                dBuffer_threshold_in = -0.0001):
 
-    from pyearth.toolbox.spatialindex import setup_spatial_index
-    RTreeClass = setup_spatial_index()
 
     pSpatial_reference_gcs = osr.SpatialReference()
     pSpatial_reference_gcs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -495,7 +491,7 @@ def polygon_difference_cython_channel(sFilename_base,
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
     #find the numebr of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
-    index_base = RTreeClass()
+    index_base = RTreeindex()
     aData_base = list()
     lID = 0
     nFeature_base = pLayer_base.GetFeatureCount()

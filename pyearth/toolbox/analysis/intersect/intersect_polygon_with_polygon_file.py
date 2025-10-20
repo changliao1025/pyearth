@@ -71,7 +71,7 @@ from datetime import datetime
 from osgeo import ogr, osr, gdal
 
 # Import spatial indexing utility
-from pyearth.toolbox.spatialindex.setup_spatial_index import setup_spatial_index
+from pyearth.toolbox.spatialindex.retired.setup_spatial_index import setup_spatial_index
 
 # Import vector format support utilities
 from pyearth.gis.gdal.gdal_vector_format_support import (
