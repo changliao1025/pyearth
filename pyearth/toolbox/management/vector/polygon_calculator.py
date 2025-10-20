@@ -160,7 +160,7 @@ def polygon_difference_cython(sFilename_base,
                                dBuffer_threshold_in = -0.0001):
 
     from pyearth.toolbox.spatialindex import setup_spatial_index
-    RTreeClass, is_tinyr = setup_spatial_index()
+    RTreeClass = setup_spatial_index()
 
     pSpatial_reference_gcs = osr.SpatialReference()
     pSpatial_reference_gcs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -195,8 +195,7 @@ def polygon_difference_cython(sFilename_base,
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
     #find the numebr of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
-    interleaved = True
-    index_base = RTreeClass(interleaved=interleaved, max_cap=5, min_cap=2)
+    index_base = RTreeClass()
     aData_base = list()
     lID = 0
     for pFeature_base in pLayer_base:
@@ -473,7 +472,7 @@ def polygon_difference_cython_channel(sFilename_base,
                                dBuffer_threshold_in = -0.0001):
 
     from pyearth.toolbox.spatialindex import setup_spatial_index
-    RTreeClass, is_tinyr = setup_spatial_index()
+    RTreeClass = setup_spatial_index()
 
     pSpatial_reference_gcs = osr.SpatialReference()
     pSpatial_reference_gcs.ImportFromEPSG(4326)    # WGS84 lat/lon
@@ -496,8 +495,7 @@ def polygon_difference_cython_channel(sFilename_base,
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
     #find the numebr of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
-    interleaved = True
-    index_base = RTreeClass(interleaved=interleaved, max_cap=5, min_cap=2)
+    index_base = RTreeClass()
     aData_base = list()
     lID = 0
     nFeature_base = pLayer_base.GetFeatureCount()

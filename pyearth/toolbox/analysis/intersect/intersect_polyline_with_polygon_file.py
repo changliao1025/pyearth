@@ -20,7 +20,7 @@ Key Features
 ------------
 - Supports multiple vector formats (GeoJSON, Shapefile, GeoPackage, Parquet, etc.)
 - Automatic format detection based on file extension
-- Efficient spatial indexing with fallback support (tinyr or rtree)
+- Efficient spatial indexing with rtree
 - Geometry validation and automatic repair
 - Multi-part geometry handling (MULTIPOLYGON, GEOMETRYCOLLECTION)
 - Progress logging for long-running operations
@@ -28,8 +28,7 @@ Key Features
 
 Technical Details
 -----------------
-**Spatial Indexing**: The function uses `setup_spatial_index()` to automatically
-select the best available spatial indexing library for efficient processing.
+**Spatial Indexing**: The function uses `setup_spatial_index()` to select the rtree spatial indexing library for efficient processing.
 
 **Intersection Operation**: For each polyline feature:
 1. Uses spatial index to find potentially intersecting polygon features (bounding box test)
@@ -131,7 +130,7 @@ def intersect_polyline_with_polygon_files(
     FileNotFoundError
         If input files don't exist or cannot be accessed.
     ImportError
-        If required spatial indexing libraries (tinyr or rtree) are not available.
+        If required spatial indexing library (rtree) is not available.
     RuntimeError
         If GDAL/OGR operations fail (invalid datasets, layer access errors, etc.).
     ValueError
@@ -139,10 +138,7 @@ def intersect_polyline_with_polygon_files(
 
     Notes
     -----
-    1. **Spatial Indexing**: Automatically uses the best available library:
-       - tinyr (preferred): Fast C implementation, requires Cython
-       - rtree (fallback): Python with libspatialindex backend
-       See `setup_spatial_index()` for details.
+    1. **Spatial Indexing**: Uses rtree (Python with libspatialindex backend) for spatial indexing. See `setup_spatial_index()` for details.
 
     2. **Geometry Validation**: Invalid geometries are automatically repaired using
        the Buffer(0) technique. Features with empty or null geometries are skipped.
@@ -175,7 +171,7 @@ def intersect_polyline_with_polygon_files(
         ...     sFilename_difference_out='city_roads.gpkg',
         ...     spatial_ref_epsg=4326
         ... )
-        INFO:root:Using tinyr for spatial indexing
+    INFO:root:Using rtree for spatial indexing
         INFO:root:Base file contains 5420 polyline features
         INFO:root:New file contains 1 polygon features
         INFO:root:Generated 847 intersection polygons
@@ -208,9 +204,9 @@ def intersect_polyline_with_polygon_files(
     # Display GDAL version for debugging purposes
     logger.info(f"GDAL version: {gdal.__version__}")
 
-    # Setup spatial indexing library with automatic fallback
-    RTreeClass, is_tinyr = setup_spatial_index()
-    logger.info(f"Using {'tinyr' if is_tinyr else 'rtree'} for spatial indexing")
+    # Setup spatial indexing library (rtree only)
+    RTreeClass = setup_spatial_index()
+    logger.info("Using rtree for spatial indexing")
 
     # Validate that input files exist
     if not os.path.exists(sFilename_base):
@@ -311,10 +307,7 @@ def intersect_polyline_with_polygon_files(
 
         # Build spatial index for base polyline features
         logger.info("Building spatial index for polyline features...")
-        if is_tinyr:
-            index_base = RTreeClass(interleaved=True, max_cap=5, min_cap=2)
-        else:
-            index_base = RTreeClass()
+        index_base = RTreeClass()
 
         base_features = {}  # Cache base features
         indexed_count = 0
@@ -342,11 +335,7 @@ def intersect_polyline_with_polygon_files(
                 left, right, bottom, top = envelope
 
                 # Insert into spatial index
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    index_base.insert(fid, pBound)
-                else:
-                    index_base.insert(fid, (left, bottom, right, top))
+                index_base.insert(fid, (left, bottom, right, top))
 
                 # Cache feature
                 base_features[fid] = pFeature_base.Clone()
@@ -393,11 +382,7 @@ def intersect_polyline_with_polygon_files(
                 left, right, bottom, top = envelope
 
                 # Query spatial index to find candidate polylines
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    aIntersect = list(index_base.search(pBound))
-                else:
-                    aIntersect = list(index_base.intersection((left, bottom, right, top)))
+                aIntersect = list(index_base.intersection((left, bottom, right, top)))
 
                 # Process each candidate polyline feature
                 for base_fid in aIntersect:

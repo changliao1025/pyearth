@@ -11,7 +11,7 @@ intersect_polygon_with_polygon_file : Calculate intersection between two polygon
 
 Key Features
 ------------
-- Spatial indexing for efficient intersection queries (tinyr or rtree)
+- Spatial indexing for efficient intersection queries (rtree)
 - Multi-format support (Shapefile, GeoJSON, GeoPackage, etc.)
 - Multi-part geometry handling (MULTIPOLYGON, GEOMETRYCOLLECTION)
 - Configurable spatial reference system via EPSG codes
@@ -36,8 +36,7 @@ intersection tests. Spatial indexing reduces this to approximately N*log(M) by u
 bounding box tests to filter candidate pairs before performing exact geometric tests.
 
 Spatial Index Selection:
-- **tinyr**: Fast C implementation with Cython, preferred when available
-- **rtree**: Python fallback using libspatialindex
+Uses rtree (libspatialindex backend) for spatial indexing.
 
 The intersection process:
 1. Build spatial index of base polygon bounding boxes
@@ -55,7 +54,7 @@ Performance Characteristics
 Dependencies
 ------------
 - GDAL/OGR: Vector I/O and geometric operations
-- tinyr or rtree: Spatial indexing (automatic fallback)
+- rtree: Spatial indexing (automatic fallback)
 - numpy: Numerical operations (optional)
 
 See Also
@@ -140,10 +139,7 @@ def intersect_polygon_with_polygon_file(
 
     Notes
     -----
-    1. **Spatial Indexing**: The function automatically selects the best available
-       spatial indexing library (tinyr or rtree). Spatial indexing dramatically
-       improves performance by using bounding box tests to identify candidate pairs
-       before performing expensive exact geometric intersection tests.
+    1. **Spatial Indexing**: The function uses rtree (libspatialindex backend) for spatial indexing. This dramatically improves performance by using bounding box tests to identify candidate pairs before performing expensive exact geometric intersection tests.
 
     2. **Multi-Format Support**: Both input and output files can use any format
        supported by GDAL/OGR. Format is detected from file extension using
@@ -221,7 +217,7 @@ def intersect_polygon_with_polygon_file(
     Expected log output for successful processing:
     ```
     INFO: GDAL version: 3.4.1
-    INFO: Using tinyr for spatial indexing
+    INFO: Using rtree for spatial indexing
     INFO: Input formats - Base: GeoJSON, New: GeoJSON, Output: GeoJSON
     INFO: Removed existing output file: /output/intersect.geojson
     INFO: Using spatial reference EPSG:4326
@@ -245,10 +241,10 @@ def intersect_polygon_with_polygon_file(
     # Record start time for performance tracking
     start_time = datetime.now()
 
-    # Set up spatial indexing library (tinyr or rtree with automatic fallback)
+    # Set up spatial indexing library (rtree with automatic fallback)
     logger.info(f"GDAL version: {gdal.__version__}")
-    RTreeClass, is_tinyr = setup_spatial_index()
-    logger.info(f"Using {'tinyr' if is_tinyr else 'rtree'} for spatial indexing")
+    RTreeClass = setup_spatial_index()
+    logger.info(f"Using rtree for spatial indexing")
 
     # Validate input files exist
     if not os.path.exists(sFilename_base):
@@ -345,12 +341,8 @@ def intersect_polygon_with_polygon_file(
 
         # Build spatial index for base polygon features
         logger.info("Building spatial index for base features...")
-        if is_tinyr:
-            # tinyr uses interleaved coordinates (x1, y1, x2, y2)
-            index_base = RTreeClass(interleaved=True, max_cap=5, min_cap=2)
-        else:
-            # rtree uses default configuration
-            index_base = RTreeClass()
+
+        index_base = RTreeClass()
 
         base_features = {}  # Cache base features
         indexed_count = 0
@@ -378,11 +370,9 @@ def intersect_polygon_with_polygon_file(
                 left, right, bottom, top = envelope
 
                 # Insert into spatial index
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    index_base.insert(fid, pBound)
-                else:
-                    index_base.insert(fid, (left, bottom, right, top))
+                pBound = (left, bottom, right, top)
+                index_base.insert(fid, pBound)
+
 
                 # Cache feature
                 base_features[fid] = pFeature_base.Clone()
@@ -429,11 +419,9 @@ def intersect_polygon_with_polygon_file(
                 left, right, bottom, top = envelope
 
                 # Query spatial index to find candidate polygons
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    aIntersect = list(index_base.search(pBound))
-                else:
-                    aIntersect = list(index_base.intersection((left, bottom, right, top)))
+
+                pBound = (left, bottom, right, top)
+                aIntersect = list(index_base.intersection(pBound))
 
                 # Process each candidate base polygon feature
                 for base_fid in aIntersect:

@@ -20,7 +20,7 @@ Key Features
 ------------
 - Supports multiple vector formats (GeoJSON, Shapefile, GeoPackage, KML, etc.)
 - Automatic format detection based on file extension
-- Efficient spatial indexing with fallback support (tinyr or rtree)
+- Efficient spatial indexing with rtree
 - Geometry validation and automatic repair
 - Multi-part geometry handling (MULTIPOLYGON, GEOMETRYCOLLECTION)
 - Progress logging for long-running operations
@@ -29,10 +29,7 @@ Key Features
 
 Technical Details
 -----------------
-**Spatial Indexing**: The function uses `setup_spatial_index()` to automatically
-select the best available spatial indexing library:
-- tinyr (preferred): Fast C implementation requiring Cython
-- rtree (fallback): Pure Python implementation with libspatialindex backend
+**Spatial Indexing**: The function uses `setup_spatial_index()` to select rtree for spatial indexing.
 
 **Difference Operation**: For each feature in the new dataset:
 1. Uses spatial index to find potentially intersecting base features (bounding box test)
@@ -146,7 +143,7 @@ def difference_polygon_with_polygon_file(
     FileNotFoundError
         If input files don't exist or cannot be accessed.
     ImportError
-        If required spatial indexing libraries (tinyr or rtree) are not available.
+        If required spatial indexing library (rtree) is not available.
     RuntimeError
         If GDAL/OGR operations fail (invalid datasets, layer access errors, etc.).
     ValueError
@@ -154,10 +151,8 @@ def difference_polygon_with_polygon_file(
 
     Notes
     -----
-    1. **Spatial Indexing**: Automatically uses the best available library:
-       - tinyr (preferred): Fast C implementation, requires Cython
-       - rtree (fallback): Python with libspatialindex backend
-       See `setup_spatial_index()` for details.
+     1. **Spatial Indexing**: Uses rtree (libspatialindex backend) for efficient candidate lookup.
+         See `setup_spatial_index()` for details.
 
     2. **Geometry Validation**: Invalid geometries are automatically repaired using
        the Buffer(0) technique. Features with empty or null geometries are skipped
@@ -203,7 +198,7 @@ def difference_polygon_with_polygon_file(
         ...     spatial_ref_epsg=4326
         ... )
         INFO:root:Starting polygon difference calculation at 2024-10-14 12:00:00
-        INFO:root:Using tinyr for spatial indexing
+    INFO:root:Using rtree for spatial indexing
         INFO:root:Base file contains 15420 features
         INFO:root:New file contains 14856 features
         INFO:root:Indexed 15420 valid base features
@@ -243,10 +238,9 @@ def difference_polygon_with_polygon_file(
     difference_polyline_with_polygon : Difference operation for line geometries
     """
 
-    # Setup spatial indexing library with automatic fallback
-    # Returns the index class and a boolean indicating if tinyr is being used
-    RTreeClass, is_tinyr = setup_spatial_index()
-    logger.info(f"Using {'tinyr' if is_tinyr else 'rtree'} for spatial indexing")
+    # Setup spatial indexing library (rtree only)
+    RTreeClass = setup_spatial_index()
+    logger.info(f"Using rtree for spatial indexing")
 
     # Validate that input files exist before attempting to open them
     # This provides clearer error messages than GDAL's generic failures
@@ -359,15 +353,9 @@ def difference_polygon_with_polygon_file(
         # Build spatial index for efficient intersection queries
         # The index stores bounding boxes of base features for fast lookup
         logger.info("Building spatial index for base features...")
-        if is_tinyr:
-            # tinyr: Configure with interleaved coordinates and capacity parameters
-            # interleaved=True: coordinates stored as (x1, y1, x2, y2) for efficiency
-            # max_cap=5: maximum number of items per node before split
-            # min_cap=2: minimum number of items per node after split
-            index_base = RTreeClass(interleaved=True, max_cap=5, min_cap=2)
-        else:
+
             # rtree: Use default configuration
-            index_base = RTreeClass()
+        index_base = RTreeClass()
 
         # Cache base features in memory to avoid repeated disk access
         # Key: feature ID, Value: cloned feature object
@@ -402,14 +390,9 @@ def difference_polygon_with_polygon_file(
                 left, right, bottom, top = envelope
 
                 # Insert bounding box into spatial index
-                # tinyr and rtree use slightly different coordinate order
-                if is_tinyr:
-                    # tinyr expects: (minX, minY, maxX, maxY) with interleaved=True
-                    pBound = (left, bottom, right, top)
-                    index_base.insert(fid, pBound)
-                else:
-                    # rtree expects: (minX, minY, maxX, maxY)
-                    index_base.insert(fid, (left, bottom, right, top))
+                # rtree use coordinate order
+                pBound = (left, bottom, right, top)
+                index_base.insert(fid, pBound)
 
                 # Clone and cache the feature for later retrieval
                 # Clone() creates a deep copy to prevent issues with feature reuse
@@ -464,11 +447,7 @@ def difference_polygon_with_polygon_file(
 
                 # Query spatial index to find base features with overlapping bounding boxes
                 # This is a fast filter that returns candidates (may include false positives)
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    aIntersect = list(index_base.search(pBound))
-                else:
-                    aIntersect = list(index_base.intersection((left, bottom, right, top)))
+                aIntersect = list(index_base.intersection((left, bottom, right, top)))
 
                 # Process each candidate base feature
                 for base_fid in aIntersect:

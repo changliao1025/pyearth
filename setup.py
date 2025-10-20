@@ -11,7 +11,7 @@ DESCRIPTION = \
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.27"
+VERSION = "0.1.28"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
@@ -51,13 +51,6 @@ extensions = [
         libraries=[],
         library_dirs=[],
     ),
-    Extension(
-        "pyearth.external.tinyr.tinyr.tinyr",
-        ["pyearth/external/tinyr/tinyr/tinyr.pyx"],
-        include_dirs=[],
-        library_dirs=[],
-        libraries=[],
-    ),
 ]
 
 # To build Cython extensions, run: python setup.py build_ext --inplace
@@ -88,7 +81,7 @@ setup(
     classifiers=CLASSIFY,
     extras_require={
         'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels'],
-        'spatial': ['rtree', 'tinyr'],
+        'spatial': ['rtree'],
         'cython': ['Cython>=0.29.0', 'numpy'],
     }
 )

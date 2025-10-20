@@ -18,7 +18,7 @@ def create_spatial_index(geometries: List[Optional[Any]], verbose: bool = False)
     """
     Create a spatial index for geometries to speed up intersection queries.
 
-    Uses RTree if available, otherwise falls back to simple dictionary-based indexing.
+    Uses RTree (rtree) for spatial indexing.
 
     Parameters
     ----------
@@ -29,43 +29,30 @@ def create_spatial_index(geometries: List[Optional[Any]], verbose: bool = False)
 
     Returns
     -------
-    Tuple[Union[Any, Dict[int, Tuple[float, float, float, float]]], Optional[Dict[int, Tuple[float, float, float, float]]], bool]
+    Tuple[Any, Dict[int, Tuple[float, float, float, float]], bool]
         A tuple containing:
-        - spatial_index: RTree object if available, otherwise a dictionary mapping indices to bounding boxes
-        - geometry_map: Dictionary mapping geometry indices to envelopes (minX, maxX, minY, maxY), or None for dictionary-based index
-        - is_tinyr: Boolean indicating whether RTree (tinyr) is available and being used
+        - spatial_index: RTree object
+        - geometry_map: Dictionary mapping geometry indices to envelopes (minX, maxX, minY, maxY)
 
     Notes
     -----
     The spatial index enables efficient spatial queries for finding nearby geometries.
-    RTree provides O(log n) query performance, while the dictionary fallback provides O(n) performance.
+    RTree provides O(log n) query performance.
     """
-    # Setup spatial indexing
-    RTreeClass, is_tinyr = setup_spatial_index()
+    # Setup spatial indexing (rtree only)
+    RTreeClass = setup_spatial_index()
+    rtree = RTreeClass()
+    geometry_map = {}
 
-    if is_tinyr:
-        # Use RTree for efficient spatial indexing
-        rtree = RTreeClass()
-        geometry_map = {}
+    for i, geom in enumerate(geometries):
+        if geom is not None:
+            envelope = geom.GetEnvelope()  # (minX, maxX, minY, maxY)
+            # RTree expects (minX, minY, maxX, maxY)
+            bbox = (envelope[0], envelope[2], envelope[1], envelope[3])
+            rtree.insert(i, bbox)
+            geometry_map[i] = envelope
 
-        for i, geom in enumerate(geometries):
-            if geom is not None:
-                envelope = geom.GetEnvelope()  # (minX, maxX, minY, maxY)
-                # RTree expects (minX, minY, maxX, maxY)
-                bbox = (envelope[0], envelope[2], envelope[1], envelope[3])
-                rtree.insert(i, bbox)
-                geometry_map[i] = envelope
-
-        return rtree, geometry_map, is_tinyr
-    else:
-        # Fallback to simple dictionary-based index
-        spatial_index = {}
-        for i, geom in enumerate(geometries):
-            if geom is not None:
-                envelope = geom.GetEnvelope()  # (minX, maxX, minY, maxY)
-                spatial_index[i] = envelope
-
-        return spatial_index, None, is_tinyr
+    return rtree, geometry_map
 
 def geometries_bbox_overlap(bbox1: Tuple[float, float, float, float], bbox2: Tuple[float, float, float, float], tolerance: float = 1e-10) -> bool:
     """
@@ -100,8 +87,7 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
     """
     Find groups of connected geometries using optimized spatial indexing.
 
-    Uses RTree for efficient spatial queries when available, otherwise falls back
-    to bounding box overlap checks. Geometries are considered connected if they
+    Uses RTree for efficient spatial queries. Geometries are considered connected if they
     touch or intersect spatially.
 
     Parameters
@@ -125,9 +111,8 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
     3. Use BFS to find all connected geometries in the group
     4. Spatial relationships are checked using OGR's Touches() and Intersects() methods
 
-    Performance depends on spatial index availability:
-    - With RTree: O(n log n) for indexing + O(c) for connectivity where c is number of connections
-    - Without RTree: O(n²) worst case for dense geometries
+    Performance:
+    - RTree: O(n log n) for indexing + O(c) for connectivity where c is number of connections
 
     Examples
     --------
@@ -140,8 +125,8 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
 
     start_time = time.time()
 
-    # Create spatial index (RTree or dictionary)
-    spatial_index, geometry_map, is_tinyr = create_spatial_index(aGeometries, verbose)
+    # Create spatial index (rtree only)
+    spatial_index, geometry_map = create_spatial_index(aGeometries, verbose)
 
     # Track processed geometries
     processed = set()
@@ -166,41 +151,21 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
             if current_geom is None:
                 continue
 
-            # Get candidates using spatial index
-            if is_tinyr:
-                # Use RTree for efficient spatial query
-                current_envelope = current_geom.GetEnvelope()
-                # RTree expects (minX, minY, maxX, maxY)
-                query_bbox = (current_envelope[0], current_envelope[2], current_envelope[1], current_envelope[3])
+            # Get candidates using rtree spatial index
+            current_envelope = current_geom.GetEnvelope()
+            # RTree expects (minX, minY, maxX, maxY)
+            query_bbox = (current_envelope[0], current_envelope[2], current_envelope[1], current_envelope[3])
 
-                # Add small tolerance for near-touching geometries
-                tolerance = 1e-8
-                expanded_bbox = (
-                    query_bbox[0] - tolerance,
-                    query_bbox[1] - tolerance,
-                    query_bbox[2] + tolerance,
-                    query_bbox[3] + tolerance
-                )
+            # Add small tolerance for near-touching geometries
+            tolerance = 1e-8
+            expanded_bbox = (
+                query_bbox[0] - tolerance,
+                query_bbox[1] - tolerance,
+                query_bbox[2] + tolerance,
+                query_bbox[3] + tolerance
+            )
 
-                candidate_indices = list(spatial_index.search(expanded_bbox))
-            else:
-                # Fallback to checking all geometries with bbox overlap
-                current_bbox = spatial_index.get(current_idx)
-                if current_bbox is None:
-                    continue
-
-                candidate_indices = []
-                for j, geom2 in enumerate(aGeometries):
-                    if j in processed or j in current_indices or geom2 is None:
-                        continue
-
-                    bbox2 = spatial_index.get(j)
-                    if bbox2 is None:
-                        continue
-
-                    # Quick bounding box check first
-                    if geometries_bbox_overlap(current_bbox, bbox2, tolerance=1e-8):
-                        candidate_indices.append(j)
+            candidate_indices = list(spatial_index.search(expanded_bbox))
 
             # Check spatial relationships for candidates
             for j in candidate_indices:
@@ -231,8 +196,7 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
 
     if verbose:
         elapsed = time.time() - start_time
-        index_type = "RTree" if is_tinyr else "dictionary"
-        print(f'Connectivity grouping completed in {elapsed:.1f}s using {index_type}, found {len(groups)} groups')
+        print(f'Connectivity grouping completed in {elapsed:.1f}s using RTree, found {len(groups)} groups')
 
     return groups
 

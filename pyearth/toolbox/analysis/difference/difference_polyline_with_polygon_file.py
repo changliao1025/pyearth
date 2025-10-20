@@ -56,8 +56,8 @@ def difference_polyline_with_polygon_file(
     """
 
 
-    # Setup spatial indexing
-    RTreeClass, is_tinyr = setup_spatial_index()
+    # Setup spatial indexing (rtree only)
+    RTreeClass = setup_spatial_index()
 
     # Validate input files
     if not os.path.exists(sFilename_base):
@@ -155,12 +155,10 @@ def difference_polyline_with_polygon_file(
 
         logger.info(f"New file contains {nFeature_new} features")
 
+
         # Build spatial index for base features
         logger.info("Building spatial index for base features...")
-        if is_tinyr:
-            index_base = RTreeClass(interleaved=True, max_cap=5, min_cap=2)
-        else:
-            index_base = RTreeClass()
+        index_base = RTreeClass()
 
         base_features = {}  # Cache base features to avoid repeated queries
         indexed_count = 0
@@ -186,11 +184,8 @@ def difference_polyline_with_polygon_file(
                 envelope = pGeometry_base.GetEnvelope()
                 left, right, bottom, top = envelope
 
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    index_base.insert(fid, pBound)
-                else:
-                    index_base.insert(fid, (left, bottom, right, top))
+
+                index_base.insert(fid, (left, bottom, right, top))
 
                 # Cache feature for later use
                 base_features[fid] = pFeature_base.Clone()
@@ -235,12 +230,9 @@ def difference_polyline_with_polygon_file(
                 envelope = pGeometry_new.GetEnvelope()
                 left, right, bottom, top = envelope
 
+
                 # Find intersecting base features
-                if is_tinyr:
-                    pBound = (left, bottom, right, top)
-                    aIntersect = list(index_base.search(pBound))
-                else:
-                    aIntersect = list(index_base.intersection((left, bottom, right, top)))
+                aIntersect = list(index_base.intersection((left, bottom, right, top)))
 
                 for base_fid in aIntersect:
                     if base_fid not in base_features:
