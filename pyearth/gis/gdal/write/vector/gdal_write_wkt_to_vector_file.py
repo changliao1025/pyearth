@@ -2,7 +2,7 @@ import os
 from typing import Optional
 
 from osgeo import ogr
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
 
 
 def gdal_write_wkt_to_vector_file(
@@ -52,7 +52,7 @@ def gdal_write_wkt_to_vector_file(
         os.remove(sFilename_out)
 
     # Get the appropriate driver based on file extension
-    driver = get_vector_driver_from_extension(sFilename_out)
+    driver = get_vector_format_from_filename(sFilename_out)
 
     # Create geometry from WKT first to infer geometry type
     geometry = ogr.CreateGeometryFromWkt(wkt)

@@ -329,7 +329,7 @@ def rasterize_vector(
         raise RuntimeError(f"Could not open vector file: {sFilename_vector_in}")
 
     # Create memory data source for boundary operations
-    pDatasource_boundary = ogr.GetDriverByName('Memory').CreateDataSource('out')
+    pDatasource_boundary = ogr.GetDriverByName('MEM').CreateDataSource('out')
     if pDatasource_boundary is None:
         logger.warning("Could not create memory data source for boundary operations")
 

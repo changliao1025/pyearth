@@ -62,8 +62,8 @@ from osgeo import ogr, osr
 import cartopy.feature as cfeature
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_driver_from_filename,
+    get_vector_format_from_filename
 )
 # Configure module logger
 logger = logging.getLogger(__name__)
@@ -445,7 +445,7 @@ def create_land_ocean_vector_mask_naturalearth(
 
     if sFormat is None:
         try:
-            sFormat = get_vector_format_from_extension(sFilename_out)
+            sFormat = get_vector_format_from_filename(sFilename_out)
             logger.info(f"Auto-detected format from extension: {sFormat}")
         except Exception as e:
             raise ValueError(
@@ -461,7 +461,7 @@ def create_land_ocean_vector_mask_naturalearth(
 
     # Try to get driver from extension first, then fall back to driver by name
     try:
-        pDriver_out = get_vector_driver_from_extension(sFilename_out)
+        pDriver_out = get_vector_driver_from_filename(sFilename_out)
         if pDriver_out is None:
             # Fallback to getting driver by name
             pDriver_out = ogr.GetDriverByName(sFormat)

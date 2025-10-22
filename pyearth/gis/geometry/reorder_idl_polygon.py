@@ -261,6 +261,10 @@ def reorder_idl_polygon(vertices: List[Coord]) -> List[Coord]:
     # Step 1: Strip the closing vertex for processing
     # The closing vertex (duplicate of first vertex) will be re-added at the end
     # to ensure the reordered polygon is properly closed
+    # Ensure polygon is closed; append first vertex if not closed.
+    if vertices and (vertices[0] != vertices[-1]):
+        vertices = vertices + [vertices[0]]
+
     unique_vertices = vertices[:-1]
 
     # Step 2: Separate points into Eastern and Western hemispheres

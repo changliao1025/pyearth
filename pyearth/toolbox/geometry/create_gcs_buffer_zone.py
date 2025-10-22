@@ -72,8 +72,7 @@ from osgeo import ogr, gdal, osr
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_format_from_filename
 )
 from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.edge import pyedge
@@ -572,7 +571,7 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
 
     # Calculate buffer zone
     try:
-        sWkt_buffer_polygon = pPolyline.calculate_buffer_zone(dBuffer_distance_in)
+        sWkt_buffer_polygon, _ , _ = pPolyline.calculate_buffer_zone_polygon(dBuffer_distance_in)
     except Exception as e:
         error_msg = f"Failed to calculate buffer zone: {str(e)}"
         logger.error(error_msg)
@@ -808,7 +807,7 @@ def create_buffer_zone_polygon_file(
 
     # Get output driver name from extension
     try:
-        output_driver_name = get_vector_format_from_extension(sFilename_polygon_out)
+        output_driver_name = get_vector_format_from_filename(sFilename_polygon_out)
     except ValueError as e:
         # Fall back to GeoJSON if format is not supported
         logger.warning(f'Unsupported output format {output_ext}, using GeoJSON: {str(e)}')

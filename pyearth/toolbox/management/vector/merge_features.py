@@ -164,7 +164,7 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
                 query_bbox[3] + tolerance
             )
 
-            candidate_indices = list(spatial_index.search(expanded_bbox))
+            candidate_indices = list(spatial_index.intersection(expanded_bbox))
 
             # Check spatial relationships for candidates
             for j in candidate_indices:
@@ -272,9 +272,11 @@ def cascaded_union(geometries: List[Any], verbose: bool = False) -> Optional[Any
 
     return result
 
-def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True) -> None:
+def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, iFlag_force: bool = False) -> None:
     """
-    Merge features in a vector file based on connectivity (touching or intersecting geometries).
+    Merge features in a vector file.
+    By default, it merges based on connectivity (touching or intersecting geometries).
+    If iFlag_force is True, all features are merged as one, ignoring connectivity.
 
     Features that touch or intersect will be merged into single features.
     Features that don't touch or intersect will remain as separate features.
@@ -548,8 +550,13 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True) 
     if verbose:
         print(f'Collected {len(aGeometries)} geometries, now grouping by connectivity...')
 
-    # Group geometries by connectivity using optimized algorithm
-    aGeometry_groups = find_connectivity_groups_optimized(aGeometries, verbose)
+    if iFlag_force:
+        if verbose:
+            print('iFlag_force is True, merging all features into a single group.')
+        aGeometry_groups = [aGeometries] # All geometries in one group
+    else:
+        # Group geometries by connectivity using optimized algorithm
+        aGeometry_groups = find_connectivity_groups_optimized(aGeometries, verbose)
 
     if verbose:
         print(f'Found {len(aGeometry_groups)} connected groups of geometries')

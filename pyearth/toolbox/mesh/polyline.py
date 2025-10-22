@@ -8,10 +8,7 @@ from osgeo import ogr, gdal, osr
 from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.edge import pyedge
 from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon_file
-import importlib.util
-iFlag_cython = importlib.util.find_spec("cython")
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
-
 
 class PolylineClassEncoder(JSONEncoder):
     def default(self, obj):
@@ -425,7 +422,11 @@ class pypolyline(object):
         if sFilename_out is not None:
             export_vertex_as_polygon_file(aVertex_out, sFilename_out)
 
-        return aVertex_out, aCircle_out
+
+        sWkt_buffer_polygon = pUnionPolygon.ExportToWkt()
+
+
+        return sWkt_buffer_polygon, aVertex_out, aCircle_out
 
     def calculate_distance_to_flowline(self, pFlowline_other):
         aVertex_a = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in self.aVertex])
@@ -468,7 +469,6 @@ class pypolyline(object):
         bearing_deg = (bearing_deg + 360) % 360
 
         return bearing_deg
-
 
     def __eq__(self, other):
         """

@@ -2,7 +2,7 @@ import numpy as np
 import logging
 from typing import List, Tuple, Union, Optional, Any, Dict
 from osgeo import ogr, gdal
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
 
 def get_field_value(sFilename_vector_in: str, sField_name_in: str, dMissing_value: Optional[Any] = None, iLayer: Optional[Union[int, str]] = None, bVerbose: bool = False, bUnique: bool = False) -> np.ndarray:
     """Return values for a field from a specified layer of a vector.
@@ -38,7 +38,7 @@ def get_field_value(sFilename_vector_in: str, sField_name_in: str, dMissing_valu
     if bVerbose:
         logging.info(f"Opening vector file: {sFilename_vector_in}")
     try:
-        drv = get_vector_driver_from_extension(sFilename_vector_in)
+        drv = get_vector_format_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 0)
     except Exception:
@@ -138,7 +138,7 @@ def get_field_and_value(sFilename_vector_in: str, iLayer: Optional[Union[int, st
     """
     pDataset = None
     try:
-        drv = get_vector_driver_from_extension(sFilename_vector_in)
+        drv = get_vector_format_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 0)
     except Exception:
@@ -172,7 +172,9 @@ def get_field_and_value(sFilename_vector_in: str, iLayer: Optional[Union[int, st
 
     return aField_names, aValues
 
-def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[str]], aValue: Union[Any, List[Any], Dict[str, Any], List[Dict[str, Any]]], iLayer: Optional[Union[int, str]] = None, bVerbose: bool = False) -> None:
+def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[str]],
+                             aValue: Union[Any, List[Any], Dict[str, Any], List[Dict[str, Any]]],
+                             iLayer: Optional[Union[int, str]] = None, bVerbose: bool = False) -> None:
     """Add fields to a vector file with specified values.
 
     This function opens a vector datasource for updating, creates new fields if they
@@ -211,7 +213,7 @@ def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[s
     if bVerbose:
         logging.info(f"Opening vector file for updating: {sFilename_vector_in}")
     try:
-        drv = get_vector_driver_from_extension(sFilename_vector_in)
+        drv = get_vector_format_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 1)  # 1 for update
     except Exception:

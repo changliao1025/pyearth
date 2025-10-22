@@ -372,6 +372,3 @@ def convert_vector_to_global_raster(
 
     return None
 
-
-if __name__ == '__main__':
-    pass

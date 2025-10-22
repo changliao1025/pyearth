@@ -61,8 +61,8 @@ Dependencies
 
 See Also
 --------
-- get_vector_driver_from_extension: Automatic driver selection
-- get_vector_format_from_extension: Format name extraction
+- get_vector_driver_from_filename: Automatic driver selection
+- get_vector_format_from_filename: Format name extraction
 """
 
 import os
@@ -72,8 +72,8 @@ import osgeo
 from osgeo import ogr, osr, gdal
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_driver_from_filename,
+    get_vector_format_from_filename
 )
 from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
 
@@ -139,7 +139,7 @@ def convert_vector_format(
     Notes
     -----
     1. **Automatic Format Detection**: Both input and output formats are detected
-       from file extensions using `get_vector_driver_from_extension()`. No need
+       from file extensions using `get_vector_driver_from_filename()`. No need
        to specify drivers manually.
 
     2. **Conditional Coordinate Transformation**: Transformation behavior depends
@@ -227,8 +227,8 @@ def convert_vector_format(
 
     See Also
     --------
-    get_vector_driver_from_extension : Automatic driver selection from filename
-    get_vector_format_from_extension : Format name extraction from filename
+    get_vector_driver_from_filename : Automatic driver selection from filename
+    get_vector_format_from_filename : Format name extraction from filename
     get_output_geometry_type : Normalize geometry types (multi → single, 3D → 2D)
     rasterize_vector : Convert vector to raster format
     """
@@ -241,11 +241,11 @@ def convert_vector_format(
 
     # Get input and output drivers based on file extensions
     try:
-        driver_in = get_vector_driver_from_extension(sFilename_vector_in)
-        driver_out = get_vector_driver_from_extension(sFilename_vector_out)
+        driver_in = get_vector_driver_from_filename(sFilename_vector_in)
+        driver_out = get_vector_driver_from_filename(sFilename_vector_out)
 
-        format_in = get_vector_format_from_extension(sFilename_vector_in)
-        format_out = get_vector_format_from_extension(sFilename_vector_out)
+        format_in = get_vector_format_from_filename(sFilename_vector_in)
+        format_out = get_vector_format_from_filename(sFilename_vector_out)
 
         logger.info(f"Converting from {format_in} to {format_out}")
     except ValueError as e:

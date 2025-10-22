@@ -29,8 +29,9 @@ __all__ = [
     'get_available_vector_formats',
     'print_supported_vector_formats',
     'get_vector_format_from_extension',
-    'get_vector_driver',
-    'get_vector_driver_from_extension',
+    'get_vector_driver_from_filename',
+    'get_vector_driver_from_format',
+    'get_vector_format_from_filename',
     'check_parquet_support',
     'has_parquet_support',
 ]
@@ -48,8 +49,8 @@ def get_available_vector_formats() -> dict[str, str]:
     for ext, format_name in SUPPORTED_VECTOR_FORMATS.items():
         # Special handling for Parquet/GeoParquet
         if ext in ('.parquet', '.geoparquet'):
-            if check_parquet_support():
-                available_formats[ext] = check_parquet_support()
+            if check_parquet_support() is not None:
+                available_formats[ext] = 'Parquet' # Use the canonical name
         else:
             # Check if the driver is available
             driver = ogr.GetDriverByName(format_name)
@@ -97,7 +98,7 @@ def get_vector_format_from_extension(sExtension: str) -> str:
     Only accepts extensions that are both in the supported list and have available drivers.
 
     Parameters:
-    filename (str): Input filename with extension.
+    sExtension (str): Input file extension (e.g., '.shp').
 
     Returns:
     str: Format string for OGR driver.
@@ -159,7 +160,7 @@ def get_vector_driver_from_filename(filename: str) -> ogr.Driver:
     Get the OGR driver based on file extension.
 
     Parameters:
-    filename (str): Input filename with extension.
+    filename (str): Path to the input file.
 
     Returns:
     ogr.Driver: The OGR driver object corresponding to the file format.
