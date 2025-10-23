@@ -7,7 +7,6 @@ import os
 import numpy as np
 from osgeo import ogr, osr
 from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_cell
-from pyearth.gis.spatialref.reproject_coordinates import  reproject_coordinates_batch
 
 def create_latlon_mesh(dLongitude_left_in,
                        dLatitude_bot_in,

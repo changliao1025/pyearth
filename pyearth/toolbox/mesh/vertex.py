@@ -5,7 +5,12 @@ import importlib.util
 import numpy as np
 from geographiclib.geodesic import Geodesic
 from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon_file
-from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
+#check whether cython module is available
+iFlag_cython = importlib.util.find_spec("cython")
+if iFlag_cython is not None:
+    from pyearth.gis.geometry.kernel import calculate_distance_based_on_longitude_latitude
+else:
+    from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
 
 iPrecision_default = 12 #used for comparison
 
@@ -106,19 +111,15 @@ class pyvertex(object):
     def __hash__(self, precision=iPrecision_default):
 
         #design a hash function that uses both dLongitude and dLatitude
-
         # Scale the dLatitude and dLongitude to a suitable range
         dLongitude = self.dLongitude_degree
         dLatitude = self.dLatitude_degree
-
         scale_factor = 10 ** precision
         scaled_latitude = int((dLatitude + 90)* scale_factor)
         scaled_longitude = int((dLongitude + 180)* scale_factor)
 
         # Combine the scaled values into a single hash code
         hash_code = (scaled_latitude << 32) | scaled_longitude
-
-
         return hash_code
 
     def __eq__(self, other):
@@ -264,7 +265,6 @@ class pyvertex(object):
         return sWKT
 
 
-
 class pynvector(object):
     """
     The vector class
@@ -292,8 +292,8 @@ class pynvector(object):
         self.dX = self.dX/self.dLength
         self.dY = self.dY /self.dLength
         self.dZ= self.dZ /self.dLength
-
         return
+
     def calculate_length(self):
         self.dLength = np.sqrt( self.dX * self.dX + self.dY * self.dY + self.dZ * self.dZ )
         return self.dLength
@@ -303,24 +303,18 @@ class pynvector(object):
         point['x'] = self.dX + other.dX
         point['y'] = self.dY + other.dY
         point['z'] = self.dZ + other.dZ
-
         pnv = pynvector( point )
-
         return pnv
 
     def toLatLon(self):
-
         x = self.dX
         y = self.dY
         z = self.dZ
-
         a = np.arctan2(z, np.sqrt(x*x + y*y))
         b = np.arctan2(y, x)
-
         point0= dict()
         point0['dLongitude_degree'] = np.degrees(b)
         point0['dLatitude_degree'] = np.degrees(a)
-
         pv = pyvertex(point0)
         return pv
 

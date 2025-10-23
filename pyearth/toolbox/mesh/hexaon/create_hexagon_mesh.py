@@ -476,5 +476,3 @@ def create_hexagon_mesh(iFlag_rotation_in,
     pDataset = pLayer = pFeature  = None
     return aHexagon_out
 
-
-

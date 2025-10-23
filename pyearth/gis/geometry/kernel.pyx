@@ -154,7 +154,7 @@ cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z
     return f
 
 @cython.boundscheck(False)  # deactivate bnds checking
-cpdef calculate_angle_betwen_vertex(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):
+cpdef calculate_angle_between_vertex(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):
     #all in degree
 
     cdef double angle3deg

@@ -2,13 +2,19 @@
 import os
 import copy
 import json
+import importlib.util
 from json import JSONEncoder
 import numpy as np
-from osgeo import ogr, gdal, osr
+from osgeo import ogr
 from pyearth.toolbox.mesh.vertex import pyvertex
 from pyearth.toolbox.mesh.edge import pyedge
 from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon_file
-from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
+iFlag_cython = importlib.util.find_spec("cython")
+if iFlag_cython is not None:
+    from pyearth.gis.geometry.kernel import calculate_distance_based_on_longitude_latitude
+else:
+    from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
+
 
 class PolylineClassEncoder(JSONEncoder):
     def default(self, obj):
