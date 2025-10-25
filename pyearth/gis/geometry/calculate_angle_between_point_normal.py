@@ -1,9 +1,9 @@
 
 
 """
-Calculate angle between vertex normal for geographic coordinates.
+Calculate angle between point normal for geographic coordinates.
 
-This module provides functionality to calculate the angle at a vertex (middle point)
+This module provides functionality to calculate the angle at a point (middle point)
 formed by three points on a sphere, useful for geographic calculations involving
 lines and polygons on Earth's surface.
 """
@@ -12,7 +12,7 @@ from typing import Union
 
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
 
-def calculate_angle_between_vertex_normal(
+def calculate_angle_between_point_normal(
     dLongitude1_in: float,
     dLatitude1_in: float,
     dLongitude2_in: float,
@@ -22,44 +22,44 @@ def calculate_angle_between_vertex_normal(
     iFlag_radian: bool = False
 ) -> float:
     """
-    Calculate the angle at vertex (point 2) formed by three points on a sphere.
+    Calculate the angle at point (point 2) formed by three points on a sphere.
 
-    This function computes the angle at the middle vertex of three geographic points
+    This function computes the angle at the middle point of three geographic points
     by converting them to 3D Cartesian coordinates on a unit sphere, then calculating
     the angle using vector operations.
 
     Args:
         dLongitude1_in: Longitude of first point (degrees or radians)
         dLatitude1_in: Latitude of first point (degrees or radians)
-        dLongitude2_in: Longitude of middle point/vertex (degrees or radians)
-        dLatitude2_in: Latitude of middle point/vertex (degrees or radians)
+        dLongitude2_in: Longitude of middle point (degrees or radians)
+        dLatitude2_in: Latitude of middle point (degrees or radians)
         dLongitude3_in: Longitude of third point (degrees or radians)
         dLatitude3_in: Latitude of third point (degrees or radians)
         iFlag_radian: If True, input coordinates are in radians; if False, in degrees (default: False)
 
     Returns:
-        float: Angle at vertex (point 2) in degrees, ranging from 0 to 360
+    float: Angle at point (point 2) in degrees, ranging from 0 to 360
 
     Note:
-        - The angle is measured from point 1 to point 3 around point 2 (the vertex)
-        - Returns values in range [0, 360) degrees
-        - Point 2 is the vertex where the angle is measured
-        - Uses 3D vector cross product and dot product for accurate spherical calculations
+    - The angle is measured from point 1 to point 3 around point 2 (the point)
+    - Returns values in range [0, 360) degrees
+    - Point 2 is the point where the angle is measured
+    - Uses 3D vector cross product and dot product for accurate spherical calculations
 
     Example:
-        >>> # Calculate angle at vertex for three geographic points
-        >>> angle = calculate_angle_between_vertex_normal(
-        ...     -122.0, 37.0,  # Point 1: San Francisco area
-        ...     -121.0, 37.5,  # Point 2: Vertex (middle point)
-        ...     -120.0, 38.0   # Point 3: Sacramento area
-        ... )
-        >>> print(f"Angle at vertex: {angle:.2f} degrees")
+    >>> # Calculate angle at point for three geographic points
+    >>> angle = calculate_angle_between_point_normal(
+    ...     -122.0, 37.0,  # Point 1: San Francisco area
+    ...     -121.0, 37.5,  # Point 2: Middle point
+    ...     -120.0, 38.0   # Point 3: Sacramento area
+    ... )
+    >>> print(f"Angle at point: {angle:.2f} degrees")
 
     Algorithm:
-        1. Convert lat/lon to radians if needed
-        2. Project points onto 3D unit sphere
-        3. Create vectors from vertex to other two points
-        4. Calculate angle using arctan2(det, dot) where:
+    1. Convert lat/lon to radians if needed
+    2. Project points onto 3D unit sphere
+    3. Create vectors from point to other two points
+    4. Calculate angle using arctan2(det, dot) where:
            - dot = dot product of the two vectors
            - det = determinant using cross product
         5. Convert to degrees and normalize to [0, 360)
@@ -79,10 +79,10 @@ def calculate_angle_between_vertex_normal(
 
     # Convert geographic coordinates to 3D Cartesian coordinates on unit sphere
     point1_3d = convert_longitude_latitude_to_sphere_3d(dLongitude1_radian, dLatitude1_radian)
-    point2_3d = convert_longitude_latitude_to_sphere_3d(dLongitude2_radian, dLatitude2_radian)  # Vertex
+    point2_3d = convert_longitude_latitude_to_sphere_3d(dLongitude2_radian, dLatitude2_radian)  # Middle point
     point3_3d = convert_longitude_latitude_to_sphere_3d(dLongitude3_radian, dLatitude3_radian)
 
-    # Create vectors from vertex (point 2) to the other two points
+    # Create vectors from point (point 2) to the other two points
     vector_to_point1 = point1_3d - point2_3d
     vector_to_point3 = point3_3d - point2_3d
 

@@ -4,11 +4,12 @@ import copy
 import json
 import importlib.util
 from json import JSONEncoder
+from typing import List, Tuple, Optional
 import numpy as np
 from osgeo import ogr
-from pyearth.toolbox.mesh.vertex import pyvertex
-from pyearth.toolbox.mesh.edge import pyedge
-from pyearth.gis.gdal.write.vector.gdal_export_vertex_to_vector_file import export_vertex_as_polygon_file
+from pyearth.toolbox.mesh.point import pypoint
+from pyearth.toolbox.mesh.line import pyline
+from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import export_point_as_polygon_file
 iFlag_cython = importlib.util.find_spec("cython")
 if iFlag_cython is not None:
     from pyearth.gis.geometry.kernel import calculate_distance_based_on_longitude_latitude
@@ -17,6 +18,7 @@ else:
 
 
 class PolylineClassEncoder(JSONEncoder):
+    """Custom JSON encoder for pypolyline objects and their dependencies."""
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -26,438 +28,412 @@ class PolylineClassEncoder(JSONEncoder):
             return obj.tolist()
         if isinstance(obj, list):
             pass
-        if isinstance(obj, pyvertex):
+        if isinstance(obj, pypoint):
             return json.loads(obj.tojson())
-        if isinstance(obj, pyedge):
-            return obj.lEdgeID
+        if isinstance(obj, pyline):
+            return obj.lLineID
 
         return JSONEncoder.default(self, obj)
 
-class pypolyline(object):
-    """The pyflowline class
+class pypolyline:
+    """
+    Represents a polyline composed of connected line segments.
 
-    Args:
-        object (object): None
+    A polyline is a continuous path made up of one or more line segments,
+    where each segment connects to the next. This class provides geometric
+    operations including length calculations, splitting, reversing, and
+    buffer zone generation.
 
-    Returns:
-        pyflowline: The flowline object
+    Attributes:
+        aLine (List[pyline]): List of line segments composing the polyline.
+        aPoint (List[pypoint]): List of all points along the polyline.
+        pPoint_start (pypoint): Starting point of the polyline.
+        pPoint_end (pypoint): Ending point of the polyline.
+        nLine (int): Number of line segments.
+        nPoint (int): Number of points (nLine + 1).
+        dLength (float): Total geodesic length in meters.
+        wkt (str): WKT representation of the polyline.
+        pBound (Tuple[float, float, float, float]): Bounding box.
+        lLineID (int): Optional identifier (default: -1).
+        lLineIndex (int): Optional index (default: -1).
+        iFlag_right (int): Right flag (default: 0).
+        iFlag_left (int): Left flag (default: 0).
+        dSinuosity (float): Sinuosity value (set by calculate_polyline_sinuosity).
     """
 
-    lFlowlineID=-1
-    lFlowlineID_downstream=-1 #if braided, then we need a list
-    lFlowlineIndex=-1
-    lIndex_upstream=-1
-    lIndex_downstream=-1
-
-    iFlag_keep = 1 #used for simplification algorithm
-
-    iFlag_dam = 0
-    iFlag_endorheic = 0 #used for endorheic basin
-    lNHDPlusID=-1
-
-    pVertex_start=None
-    pVertex_end=None
-    aEdge=None
-    aVertex=None
-
-    dLength=0.0
-    dSinuosity=0.0
-    dDrainage_area=0.0
-
-    iStream_segment=-1
-    iStream_order = -1
-
-    nEdge=0
-    nVertex=0
-    iFlag_right = 0
-    iFlag_left = 0
-    aFlowlineID_start_start = None
-    aFlowlineID_start_end = None
-    aFlowlineID_end_start = None
-    aFlowlineID_end_end = None
-
-    #for stream topology
-    lFlowlineIndex_downstream = None #only store the index, not the actual objects
-    aFlowline_upstream = None
-
-    pBound=None
-
-    def __init__(self, aEdge):
+    def __init__(self, aLine: List[pyline]):
         """
-        Initilize a flowline object
+        Initialize a polyline object.
 
         Args:
-            aEdge (list [pyedge]): A list of edge objects
+            aLine (List[pyline]): A list of connected line segments.
+
+        Raises:
+            ValueError: If aLine is empty or lines are not connected.
+            TypeError: If aLine contains non-pyline objects.
         """
-        self.aEdge = aEdge
-        nEdge = len(aEdge)
-        self.nEdge = nEdge
-        self.pVertex_start = aEdge[0].pVertex_start
-        self.pVertex_end =  aEdge[ nEdge-1  ].pVertex_end
-        nVertex = nEdge +1
-        self.aVertex=list()
-        for i in range(nEdge):
-            self.aVertex.append( aEdge[i].pVertex_start )
-            pass
+        if not aLine:
+            raise ValueError("Cannot create polyline from empty line list.")
 
-        self.aVertex.append( aEdge[nEdge-1].pVertex_end )
-        self.nVertex = nVertex
-        self.dLength= self.calculate_length()
-        self.aFlowlineID_start_start = list()
-        self.aFlowlineID_start_end = list()
-        self.aFlowlineID_end_start = list()
-        self.aFlowlineID_end_end = list()
-        self.iFlag_keep = 1
+        if not all(isinstance(line, pyline) for line in aLine):
+            raise TypeError("All elements in aLine must be pyline objects.")
 
-        self.towkt()
-        self.calculate_flowline_bound()
+        # Validate that lines are connected
+        for i in range(len(aLine) - 1):
+            if aLine[i].pPoint_end != aLine[i + 1].pPoint_start:
+                raise ValueError(f"Lines are not connected at index {i}.")
 
-        return
+        self.lLineID: int = -1
+        self.lLineIndex: int = -1
+        self.iFlag_right: int = 0
+        self.iFlag_left: int = 0
 
-    def __hash__(self):
-        return hash((self.pVertex_start, self.pVertex_end))
+        # Store the line segments (CRITICAL FIX)
+        self.aLine: List[pyline] = aLine
+        self.nLine: int = len(aLine)
 
-    def calculate_length(self):
+        # Set start and end points
+        self.pPoint_start: pypoint = aLine[0].pPoint_start
+        self.pPoint_end: pypoint = aLine[self.nLine - 1].pPoint_end
+
+        # Build point list from line segments
+        self.aPoint: List[pypoint] = []
+        for i in range(self.nLine):
+            self.aPoint.append(aLine[i].pPoint_start)
+        self.aPoint.append(aLine[self.nLine - 1].pPoint_end)
+        self.nPoint: int = len(self.aPoint)
+
+        # Calculate derived properties
+        self.dLength: float = self.calculate_length()
+        self.wkt: str = self.towkt()
+        self.pBound: Tuple[float, float, float, float] = self.calculate_line_bound()
+
+    def __hash__(self) -> int:
         """
-        Calcualte the length
+        Generate hash for the polyline based on its endpoints.
 
         Returns:
-            float: The length of the flowline
+            int: Hash value for the polyline.
         """
+        return hash((self.pPoint_start, self.pPoint_end))
 
-        self.dLength = sum(edge.dLength for edge in self.aEdge)
+    def __repr__(self) -> str:
+        """
+        Return a detailed string representation for debugging.
+
+        Returns:
+            str: Developer-friendly representation.
+        """
+        return (f"pypolyline(nLine={self.nLine}, nPoint={self.nPoint}, "
+                f"length={self.dLength:.2f}m, "
+                f"start=({self.pPoint_start.dLongitude_degree:.6f}, "
+                f"{self.pPoint_start.dLatitude_degree:.6f}), "
+                f"end=({self.pPoint_end.dLongitude_degree:.6f}, "
+                f"{self.pPoint_end.dLatitude_degree:.6f}))")
+
+    def __str__(self) -> str:
+        """
+        Return a user-friendly string representation.
+
+        Returns:
+            str: Human-readable description.
+        """
+        return (f"Polyline with {self.nLine} segments, {self.nPoint} points, "
+                f"length {self.dLength:.2f}m from "
+                f"({self.pPoint_start.dLongitude_degree:.4f}°, "
+                f"{self.pPoint_start.dLatitude_degree:.4f}°) to "
+                f"({self.pPoint_end.dLongitude_degree:.4f}°, "
+                f"{self.pPoint_end.dLatitude_degree:.4f}°)")
+
+    def calculate_length(self) -> float:
+        """
+        Calculate the total length of the polyline.
+
+        Returns:
+            float: The total geodesic length in meters.
+        """
+        self.dLength = sum(line.dLength for line in self.aLine)
         return self.dLength
 
-    def calculate_flowline_bound(self):
+    def calculate_line_bound(self) -> Tuple[float, float, float, float]:
+        """
+        Calculate the bounding box of the polyline.
 
-        #use wkt to get bound
+        Returns:
+            Tuple[float, float, float, float]: Bounding box (lon_min, lat_min, lon_max, lat_max).
 
+        Raises:
+            ValueError: If WKT geometry is invalid.
+        """
         pGeometry = ogr.CreateGeometryFromWkt(self.wkt)
-
         if pGeometry is None:
-            raise ValueError("Invalid geometry in flowline")
-        (minX, maxX, minY, maxY) = pGeometry.GetEnvelope()  # (minX, maxX, minY, maxY)
+            raise ValueError("Invalid geometry in polyline")
+        (minX, maxX, minY, maxY) = pGeometry.GetEnvelope()
         self.pBound = (float(minX), float(minY), float(maxX), float(maxY))
-
         return self.pBound
 
-    def check_upstream(self, other):
+    def reverse(self) -> None:
         """
-        Check whether another flowline is upstream or not
+        Reverse the direction of the polyline.
+
+        This method reverses both the point list and reconstructs the line
+        segments in reverse order, updating start and end points accordingly.
+        """
+        # Reverse point list
+        self.aPoint = list(reversed(self.aPoint))
+
+        # Rebuild line segments from reversed points
+        self.aLine = [pyline(self.aPoint[i], self.aPoint[i + 1])
+                      for i in range(len(self.aPoint) - 1)]
+
+        # Update endpoints
+        self.pPoint_start = self.aLine[0].pPoint_start
+        self.pPoint_end = self.aLine[-1].pPoint_end
+
+
+    def split_line_by_length(self, dDistance: float) -> "pypolyline":
+        """
+        Split line segments that exceed the length threshold.
 
         Args:
-            other (pyflowline): The other flowline
+            dDistance (float): Maximum length for each segment in meters.
 
         Returns:
-            int: 1 if it is, 0 if not
+            pypolyline: New polyline with subdivided segments.
+
+        Raises:
+            ValueError: If dDistance is not positive.
         """
-        iFlag_upstream = -1
-        v0 = self.pVertex_start
-        v1 = self.pVertex_end
+        if dDistance <= 0:
+            raise ValueError("Distance threshold must be positive.")
 
-        v2 = other.pVertex_start
-        v3 = other.pVertex_end
-
-        if v0 == v3:
-            iFlag_upstream =1
-        else:
-            iFlag_upstream=0
-
-        return iFlag_upstream
-
-    def check_downstream(self, other):
-        """
-        Check whether another flowline is downstream or not
-
-        Args:
-            other (pyflowline): The other flowline
-
-        Returns:
-            int: 1 if it is, 0 if not
-        """
-        iFlag_downstream =-1
-        v0 = self.pVertex_start
-        v1 = self.pVertex_end
-        v2 = other.pVertex_start
-        v3 = other.pVertex_end
-        if v1 == v2:
-            iFlag_downstream =1
-        else:
-            iFlag_downstream=0
-
-        return iFlag_downstream
-
-    def reverse(self):
-        """
-        Reverse a flowline
-        """
-        aVertex = self.aVertex
-        nVertex = self.nVertex
-        aVertex_new = list()
-        for i in range(nVertex-1,-1,-1) :
-            aVertex_new.append( aVertex[i] )
-
-        self.aVertex = aVertex_new
-        nVertex  = len(aVertex)
-        aEdge = list()
-        for i in range(nVertex-1):
-            pEdge = pyedge( self.aVertex[i], self.aVertex[i+1] )
-            aEdge.append(pEdge)
-            pass
-
-        self.aEdge = aEdge
-        nEdge = len(aEdge)
-        self.pVertex_start = aEdge[0].pVertex_start
-        self.pVertex_end =  aEdge[ nEdge-1  ].pVertex_end
-
-    def merge_upstream(self, other):
-        """
-        Merge two flowlines as one
-
-        Args:
-            other (pyflowline): The other flowline
-
-        Returns:
-            pyflowline: The merged flowline
-        """
-        pFlowline_out = copy.deepcopy(other)
-
-        iFlag_dam1 = other.iFlag_dam
-        pVertex_start1 = other.pVertex_start
-        pVertex_end1 = other.pVertex_end
-        nVertex1 = other.nVertex
-        nEdge1 = other.nEdge
-
-        pVertex_start2 = self.pVertex_start
-        pVertex_end2 = self.pVertex_end
-        nVertex2 = self.nVertex
-        nEdge2 = self.nEdge
-        iFlag_dam2 = self.iFlag_dam
-
-
-        if pVertex_end1 == pVertex_start2:
-            #this is the supposed operation because they should connect
-            nVertex = nVertex1 + nVertex2 - 1
-            nEdge = nVertex -1
-            aEdge = copy.deepcopy(other.aEdge )
-            for i in range(nEdge2):
-                aEdge.append( self.aEdge[i] )
-                pass
-
-            aVertex = copy.deepcopy(other.aVertex)
-            for i in range(1, nVertex2):
-                aVertex.append( self.aVertex[i] )
-                pass
-
-            pFlowline_out.iFlag_dam = max(iFlag_dam1, iFlag_dam2)
-            pFlowline_out.aEdge = aEdge
-            pFlowline_out.aVertex = aVertex
-            pFlowline_out.nEdge = nEdge
-            pFlowline_out.nVertex = nVertex
-            pFlowline_out.dLength = self.dLength + other.dLength
-            pFlowline_out.pVertex_start = pVertex_start1
-            pFlowline_out.pVertex_end = pVertex_end2
-            pass
-        else:
-            pass
-
-        #is this necessary
-        #pFlowline_out.iStream_segment = self.iStream_segment
-
-        return pFlowline_out
-
-    def split_edge_by_length(self, dDistance):
-        """
-        Split a flowline using the length threshold
-
-        Args:
-            dDistance (float): The length threshold for each edge
-
-        Returns:
-            pyflowline: The updated flowline
-        """
-        aEdge=list()
-        pFlowline_out=None
-        for edge in self.aEdge:
-            #edge.calculate_length()
-            if edge.dLength > dDistance:
-                #break it
-                aEdge0=edge.split_by_length(dDistance)
-                for edge0 in aEdge0:
-                    aEdge.append(edge0)
-                pass
+        aLine = []
+        for line in self.aLine:
+            if line.dLength > dDistance:
+                aLine.extend(line.split_by_length(dDistance))
             else:
-                aEdge.append(edge)
-                pass
-        pFlowline_out=pypolyline(aEdge)
-        #copy the attributes
-        pFlowline_out.copy_attributes(self)
+                aLine.append(line)
 
-        return pFlowline_out
+        pPolyline_out = pypolyline(aLine)
+        pPolyline_out.copy_attributes(self)
+        return pPolyline_out
 
-    def split_by_length(self, dDistance):
-        aFlowline = list()
-        if self.dLength<=dDistance:
-            aFlowline.append(self)
-        else:
-            #split using the half of the edge
-            nEdge = len(self.aEdge)
-            first_leg = [0, int(nEdge/2)]
-            second_leg = [int(nEdge/2), nEdge]
-            aEdge0 = self.aEdge[first_leg[0]:first_leg[1]]
-            aEdge1 = self.aEdge[second_leg[0]:second_leg[1]]
-            pFlowline0 = pypolyline(aEdge0)
-            pFlowline1 = pypolyline(aEdge1)
-            pFlowline0.copy_attributes(self)
-            pFlowline1.copy_attributes(self)
-            if pFlowline0.dLength > dDistance:
-                aFlowline.extend(pFlowline0.split_by_length(dDistance))
-            else:
-                aFlowline.append(pFlowline0)
-            if pFlowline1.dLength > dDistance:
-                aFlowline.extend(pFlowline1.split_by_length(dDistance))
-            else:
-                aFlowline.append(pFlowline1)
-            pass
-
-        return aFlowline
-
-    def copy_attributes(self, other):
+    def split_by_length(self, dDistance: float) -> List["pypolyline"]:
         """
-        Copy the attributes from another flowline
+        Split polyline into multiple polylines based on length threshold.
+
+        Uses recursive bisection to split the polyline until all segments
+        are shorter than the threshold.
 
         Args:
-            other (pyflowline): The other flowline
+            dDistance (float): Maximum length for each polyline in meters.
+
+        Returns:
+            List[pypolyline]: List of polylines, each shorter than threshold.
+
+        Raises:
+            ValueError: If dDistance is not positive.
         """
-        self.lFlowlineID = other.lFlowlineID
-        self.lFlowlineID_downstream = other.lFlowlineID_downstream
-        self.lFlowlineIndex = other.lFlowlineIndex
-        self.iFlag_dam = other.iFlag_dam
-        self.lNHDPlusID = other.lNHDPlusID
-        self.iStream_segment = other.iStream_segment
-        self.iStream_order = other.iStream_order
-        self.dDrainage_area = other.dDrainage_area
+        if dDistance <= 0:
+            raise ValueError("Distance threshold must be positive.")
+
+        if self.dLength <= dDistance:
+            return [self]
+
+        # Split at midpoint
+        mid_idx = len(self.aLine) // 2
+        aLine0 = self.aLine[:mid_idx]
+        aLine1 = self.aLine[mid_idx:]
+
+        pPolyline0 = pypolyline(aLine0)
+        pPolyline1 = pypolyline(aLine1)
+        pPolyline0.copy_attributes(self)
+        pPolyline1.copy_attributes(self)
+
+        # Recursively split if still too long
+        aPolyline = []
+        if pPolyline0.dLength > dDistance:
+            aPolyline.extend(pPolyline0.split_by_length(dDistance))
+        else:
+            aPolyline.append(pPolyline0)
+
+        if pPolyline1.dLength > dDistance:
+            aPolyline.extend(pPolyline1.split_by_length(dDistance))
+        else:
+            aPolyline.append(pPolyline1)
+
+        return aPolyline
+
+    def copy_attributes(self, other: "pypolyline") -> None:
+        """
+        Copy attributes from another polyline.
+
+        Args:
+            other (pypolyline): Source polyline to copy attributes from.
+        """
         self.iFlag_right = other.iFlag_right
         self.iFlag_left = other.iFlag_left
-        self.iFlag_keep = other.iFlag_keep
-        self.lFlowlineIndex_downstream = other.lFlowlineIndex_downstream
-        return
 
-    def calculate_flowline_sinuosity(self):
+    def calculate_polyline_sinuosity(self) -> float:
         """
-        Calculate the sinuosoty of a flowline
-        """
-        pVertex_start = self.pVertex_start
-        pVertex_end = self.pVertex_end
-        dDistance = pVertex_start.calculate_distance(pVertex_end)
-        self.dSinuosity = self.dLength / dDistance
-        return
+        Calculate the sinuosity of the polyline.
 
-    def calculate_distance_to_vertex(self, pVertex):
-        dDistance_min_vertex = 1.0E10
-        pVertex_min_vertex = None
-        for i in range(self.nVertex):
-            dDistance = pVertex.calculate_distance(self.aVertex[i])
-            if dDistance < dDistance_min_vertex:
-                dDistance_min_vertex = dDistance
-                pVertex_min_vertex = self.aVertex[i]
-            pass
-
-        dDistance_min_edge = 1.0E10
-        pVertex_min_edge = None
-        for i in range(self.nEdge):
-            dDistance, pVertex_out_edge = self.aEdge[i].calculate_distance_to_vertex(pVertex)
-            if dDistance < dDistance_min_edge:
-                dDistance_min_edge = dDistance
-                pVertex_min_edge = pVertex_out_edge
-            pass
-
-        if dDistance_min_vertex < dDistance_min_edge:
-            dDistance_min = dDistance_min_vertex
-            pVertex_out = pVertex_min_vertex
-        else:
-            dDistance_min = dDistance_min_edge
-            pVertex_out = pVertex_min_edge
-            pass
-
-        return dDistance_min, pVertex_out
-
-    def calculate_buffer_zone_polygon(self, dRadius,sFilename_out = None, sFolder_out=None):
-        """
-        Calculate the buffer zone polygon
-
-        Args:
-            dRadius (float): The buffer zone distance
+        Sinuosity is the ratio of the actual path length to the straight-line
+        distance between endpoints. A value of 1.0 indicates a straight line,
+        higher values indicate more meandering.
 
         Returns:
-            list: A list of buffer zone points
+            float: The sinuosity ratio (>= 1.0).
         """
+        dDistance_straight = self.pPoint_start.calculate_distance(self.pPoint_end)
+        if dDistance_straight == 0:
+            return 1.0
+        self.dSinuosity = self.dLength / dDistance_straight
+        return self.dSinuosity
+
+    def calculate_distance_to_point(self, pPoint: pypoint) -> Tuple[float, pypoint]:
+        """
+        Calculate the minimum distance from a point to this polyline.
+
+        This method checks distances to all vertices and line segments,
+        returning the minimum distance and the closest point on the polyline.
+
+        Args:
+            pPoint (pypoint): The point to measure distance from.
+
+        Returns:
+            Tuple[float, pypoint]:
+                - Minimum distance in meters
+                - Closest point on the polyline
+        """
+        # Check distances to all vertices
+        dDistance_min_point = float('inf')
+        pPoint_min_point = None
+
+        for point in self.aPoint:
+            dDistance = pPoint.calculate_distance(point)
+            if dDistance < dDistance_min_point:
+                dDistance_min_point = dDistance
+                pPoint_min_point = point
+
+        # Check distances to all line segments (FIXED: was using non-existent nEdge/aEdge)
+        dDistance_min_edge = float('inf')
+        pPoint_min_edge = None
+
+        for line in self.aLine:
+            dDistance, pPoint_out_edge = line.calculate_distance_to_point(pPoint)
+            if dDistance < dDistance_min_edge:
+                dDistance_min_edge = dDistance
+                pPoint_min_edge = pPoint_out_edge
+
+        # Return the minimum of vertex and edge distances
+        if dDistance_min_point < dDistance_min_edge:
+            return dDistance_min_point, pPoint_min_point
+        else:
+            return dDistance_min_edge, pPoint_min_edge
+
+    def calculate_buffer_zone_polygon(self, dRadius: float, sFilename_out: Optional[str] = None,
+                                     sFolder_out: Optional[str] = None) -> Tuple[str, List[pypoint], List]:
+        """
+        Calculate the buffer zone polygon around the polyline.
+
+        Args:
+            dRadius (float): Buffer radius in meters.
+            sFilename_out (Optional[str]): Output file path for the buffer polygon.
+            sFolder_out (Optional[str]): Output folder for intermediate buffer files.
+
+        Returns:
+            Tuple containing:
+                - str: WKT representation of the buffer polygon
+                - List[pypoint]: Vertices of the buffer polygon
+                - List: Circle objects created
+
+        Raises:
+            ValueError: If dRadius is not positive.
+        """
+        if dRadius <= 0:
+            raise ValueError("Buffer radius must be positive.")
+
         pMultiPolygon = ogr.Geometry(ogr.wkbMultiPolygon)
-        aVertex_out = list()
+        aPoint_out = list()
         aCircle_out = list()
-        for i in range(self.nEdge):
-            edge = self.aEdge[i]
-            aVertex, aVertex_center, aVertex_circle, aCircle = edge.calculate_buffer_zone_polygon(dRadius)
-
+        for i in range(self.nLine):
+            line = self.aLine[i]
+            aPoint, aPoint_center, aPoint_circle, aCircle = line.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
-            #create a polygon feature for each edge
             ring = ogr.Geometry(ogr.wkbLinearRing)
-            for pVertex in aVertex:
-                ring.AddPoint(pVertex.dLongitude_degree, pVertex.dLatitude_degree)
+            for pPoint in aPoint:
+                ring.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
 
-            ring.AddPoint(aVertex[0].dLongitude_degree, aVertex[0].dLatitude_degree) #close the ring
-            # Create a polygon and add the ring to it
+            ring.CloseRings()
             pPolygon = ogr.Geometry(ogr.wkbPolygon)
             pPolygon.AddGeometry(ring)
             # Add the polygon to the MultiPolygon
             pMultiPolygon.AddGeometry(pPolygon)
-            #save out for debug
             if sFolder_out is not None:
-                sFilename_dummy= os.path.join(sFolder_out, 'buffer_zone_edge_%d.geojson' % i)
-                export_vertex_as_polygon_file(aVertex, sFilename_dummy)
+                sFilename_dummy = os.path.join(sFolder_out, 'buffer_zone_line_%d.geojson' % i)
+                export_point_as_polygon_file(aPoint, sFilename_dummy)
 
         pUnionPolygon = pMultiPolygon.UnionCascaded()
         for i in range(pUnionPolygon.GetGeometryRef(0).GetPointCount()):
             lon, lat, _ = pUnionPolygon.GetGeometryRef(0).GetPoint(i)
-            point2= dict()
+            point2 = dict()
             point2['dLongitude_degree'] = lon
-            point2['dLatitude_degree'] =  lat
-            pVertex2 = pyvertex(point2)
-            aVertex_out.append(pVertex2)
+            point2['dLatitude_degree'] = lat
+            pPoint2 = pypoint(point2)
+            aPoint_out.append(pPoint2)
 
         if sFilename_out is not None:
-            export_vertex_as_polygon_file(aVertex_out, sFilename_out)
-
+            export_point_as_polygon_file(aPoint_out, sFilename_out)
 
         sWkt_buffer_polygon = pUnionPolygon.ExportToWkt()
 
+        return sWkt_buffer_polygon, aPoint_out, aCircle_out
 
-        return sWkt_buffer_polygon, aVertex_out, aCircle_out
+    def calculate_distance_to_polyline(self, pPolyline_other: "pypolyline") -> float:
+        """
+        Calculate the minimum distance between two polylines.
 
-    def calculate_distance_to_flowline(self, pFlowline_other):
-        aVertex_a = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in self.aVertex])
-        aVertex_b = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in pFlowline_other.aVertex])
+        Uses vectorized operations to efficiently compute all pairwise distances
+        between points on both polylines.
+
+        Args:
+            pPolyline_other (pypolyline): The other polyline to measure distance to.
+
+        Returns:
+            float: Minimum distance in meters between the two polylines.
+        """
+        aPoint_a = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in self.aPoint])
+        aPoint_b = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in pPolyline_other.aPoint])
 
         # Use broadcasting to calculate all pairwise distances at once
-        lon1 = aVertex_a[:, 0:1]  # Convert to column vector
-        lat1 = aVertex_a[:, 1:2]
-        lon2 = aVertex_b[:, 0]    # Keep as row vector
-        lat2 = aVertex_b[:, 1]
-
+        lon1 = aPoint_a[:, 0:1]  # Convert to column vector
+        lat1 = aPoint_a[:, 1:2]
+        lon2 = aPoint_b[:, 0]    # Keep as row vector
+        lat2 = aPoint_b[:, 1]
         # Vectorized distance calculation
         distances = calculate_distance_based_on_longitude_latitude(lon1, lat1, lon2, lat2)
         return np.min(distances)
 
-    def calculate_bearing_angle(self):
-        #calculate the bearing angle of the flowline using its start and end vertex
-        if self.nVertex < 2:
+    def calculate_bearing_angle(self) -> Optional[float]:
+        """
+        Calculate the bearing angle of the polyline.
+
+        The bearing is calculated from the start point to the end point using
+        the forward azimuth formula on a sphere.
+
+        Returns:
+            Optional[float]: Bearing angle in degrees (0-360°), where 0° is North,
+                            or None if polyline has less than 2 points.
+        """
+        if self.nPoint < 2:
             return None
-        pVertex_start = self.pVertex_start
-        pVertex_end = self.pVertex_end
-        dLon_start = pVertex_start.dLongitude_degree
-        dLat_start = pVertex_start.dLatitude_degree
-        dLon_end = pVertex_end.dLongitude_degree
-        dLat_end = pVertex_end.dLatitude_degree
+
+        dLon_start = self.pPoint_start.dLongitude_degree
+        dLat_start = self.pPoint_start.dLatitude_degree
+        dLon_end = self.pPoint_end.dLongitude_degree
+        dLat_end = self.pPoint_end.dLatitude_degree
+
         # Convert to radians
         lat1_rad = np.radians(dLat_start)
         lat2_rad = np.radians(dLat_end)
@@ -476,76 +452,84 @@ class pypolyline(object):
 
         return bearing_deg
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """
-        Check whether two flowline are equivalent
+        Check whether two polylines are equivalent.
 
         Args:
-            other (pyflowline): The other flowline
+            other: Object to compare with.
 
         Returns:
-            int: 1 if equivalent, 0 if not
+            bool: True if polylines have identical line segments in order.
         """
-        if len(self.aEdge) != len(other.aEdge):
-            return 0
+        if not isinstance(other, pypolyline):
+            return NotImplemented
 
-        return int(all(edge1 == edge2 for edge1, edge2 in zip(self.aEdge, other.aEdge)))
+        if len(self.aLine) != len(other.aLine):
+            return False
 
-    def __ne__(self, other):
+        return all(line1 == line2 for line1, line2 in zip(self.aLine, other.aLine))
+
+    def __ne__(self, other: object) -> bool:
         """
-        Check whether two flowline are equivalent
+        Check whether two polylines are not equivalent.
 
         Args:
-            other (pyflowline): The other flowline
+            other: Object to compare with.
 
         Returns:
-            int: 0 if equivalent, 1 if not
+            bool: True if polylines are not equivalent.
         """
-        return not self.__eq__(other)
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
-    def tojson(self):
+    def tojson(self) -> str:
         """
-        Convert a pyflowline object to a json string
+        Convert the polyline object to a JSON string.
 
         Returns:
-            json str: A json string
+            str: JSON representation of the polyline.
+
+        Note:
+            The 'aLine' and 'aPoint' attributes are excluded from JSON output
+            to avoid circular references and reduce size.
         """
-        aSkip = ['aEdge',
-                'aVertex','aFlowlineID_start_start','aFlowlineID_start_end',
-                'aFlowlineID_end_start','aFlowlineID_end_end']
+        aSkip = ['aLine', 'aPoint']
 
         obj = self.__dict__.copy()
         for sKey in aSkip:
             obj.pop(sKey, None)
-            pass
-
 
         sJson = json.dumps(obj,
             sort_keys=True,
-                indent = 4,
-                    ensure_ascii=True,
-                        cls=PolylineClassEncoder)
+            indent=4,
+            ensure_ascii=True,
+            cls=PolylineClassEncoder)
         return sJson
 
-    def towkt(self):
+    def towkt(self) -> str:
         """
-        Convert a pyflowline object to a wkt string
+        Convert the polyline object to a WKT string.
 
         Returns:
-            str: A wkt string
+            str: WKT (Well-Known Text) representation of the polyline.
         """
         pGeometry = ogr.Geometry(ogr.wkbLineString)
-        for i in range(self.nVertex):
-            pGeometry.AddPoint(self.aVertex[i].dLongitude_degree, self.aVertex[i].dLatitude_degree)
+        for i in range(self.nPoint):
+            pGeometry.AddPoint(self.aPoint[i].dLongitude_degree, self.aPoint[i].dLatitude_degree)
 
         sWKT = pGeometry.ExportToWkt()
         pGeometry = None
         self.wkt = sWKT
         return sWKT
 
-    def update_wkt(self):
+    def update_wkt(self) -> str:
         """
-        Update the wkt string of the flowline
+        Update and return the WKT string of the polyline.
+
+        Returns:
+            str: Updated WKT representation.
         """
-        self.towkt()
-        return self.wkt
+        return self.towkt()

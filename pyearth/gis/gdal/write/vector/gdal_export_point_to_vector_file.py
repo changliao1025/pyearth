@@ -6,20 +6,21 @@ from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 
 
-def export_vertex_to_vector_file(
-    aVertex_in: List[Any],
+
+def export_point_to_vector_file(
+    aPoint_in: List[Any],
     sFilename_vector_in: str,
     iFlag_projected_in: Optional[int] = None,
     pSpatial_reference_in: Optional[osr.SpatialReference] = None,
     aAttribute_data: Optional[List[int]] = None,
     overwrite: bool = True
 ) -> None:
-    """Export vertices as points to a vector file.
+    """Export points to a vector file.
 
     Parameters
     ----------
-    aVertex_in : list
-        List of vertex objects with coordinate information. Each vertex must have:
+    aPoint_in : list
+        List of point objects with coordinate information. Each point must have:
         - For geographic (iFlag_projected_in=0): dLongitude_degree, dLatitude_degree
         - For projected (iFlag_projected_in=1): dx, dy
     sFilename_vector_in : str
@@ -31,14 +32,14 @@ def export_vertex_to_vector_file(
     pSpatial_reference_in : osr.SpatialReference, optional
         Spatial reference system. If None, defaults to WGS84 (EPSG:4326).
     aAttribute_data : list of int, optional
-        Optional connectivity attribute data for each vertex.
+        Optional connectivity attribute data for each point.
     overwrite : bool, optional
         If True, overwrite existing file. Default is True.
 
     Raises
     ------
     ValueError
-        If aVertex_in is empty or if file extension is not supported.
+        If aPoint_in is empty or if file extension is not supported.
     FileExistsError
         If the output file exists and overwrite is False.
     RuntimeError
@@ -51,8 +52,8 @@ def export_vertex_to_vector_file(
     - Automatically determines output format from file extension
     """
 
-    if not aVertex_in:
-        raise ValueError("Vertex list cannot be empty.")
+    if not aPoint_in:
+        raise ValueError("Point list cannot be empty.")
 
     # Handle overwrite
     if os.path.exists(sFilename_vector_in):
@@ -85,7 +86,7 @@ def export_vertex_to_vector_file(
         if dataset is None:
             raise RuntimeError(f"Could not create output dataset: {sFilename_vector_in}")
 
-        layer = dataset.CreateLayer('vertex', spatial_ref, ogr.wkbPoint)
+        layer = dataset.CreateLayer('point', spatial_ref, ogr.wkbPoint)
         if layer is None:
             raise RuntimeError(f"Could not create layer in output dataset: {sFilename_vector_in}")
 
@@ -97,34 +98,35 @@ def export_vertex_to_vector_file(
         layer_defn = layer.GetLayerDefn()
         feature = ogr.Feature(layer_defn)
 
-        # Add vertices as features
-        for vertex_id, vertex in enumerate(aVertex_in):
+
+        # Add points as features
+        for point_id, pPoint in enumerate(aPoint_in):
             point = ogr.Geometry(ogr.wkbPoint)
 
             if iFlag_projected == 1:
-                if not hasattr(vertex, 'dx') or not hasattr(vertex, 'dy'):
-                    raise ValueError(f"Vertex {vertex_id} missing dx or dy attributes for projected coordinates.")
-                point.AddPoint(vertex.dx, vertex.dy)
+                if not hasattr(pPoint, 'dx') or not hasattr(pPoint, 'dy'):
+                    raise ValueError(f"Point {point_id} missing dx or dy attributes for projected coordinates.")
+                point.AddPoint(pPoint.dx, pPoint.dy)
             else:
-                if not hasattr(vertex, 'dLongitude_degree') or not hasattr(vertex, 'dLatitude_degree'):
-                    raise ValueError(f"Vertex {vertex_id} missing coordinate attributes.")
-                point.AddPoint(vertex.dLongitude_degree, vertex.dLatitude_degree)
+                if not hasattr(pPoint, 'dLongitude_degree') or not hasattr(pPoint, 'dLatitude_degree'):
+                    raise ValueError(f"Point {point_id} missing coordinate attributes.")
+                point.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
 
             geometry = ogr.CreateGeometryFromWkb(point.ExportToWkb())
             if geometry is None:
-                raise RuntimeError(f"Could not create geometry for vertex {vertex_id}.")
+                raise RuntimeError(f"Could not create geometry for point {point_id}.")
 
             feature.SetGeometry(geometry)
-            feature.SetField("pointid", vertex_id + 1)
+            feature.SetField("pointid", point_id + 1)
 
             if iFlag_attribute:
-                if vertex_id >= len(attribute_data):
-                    raise ValueError(f"Attribute data missing for vertex {vertex_id}.")
-                feature.SetField("connectivity", int(attribute_data[vertex_id]))
+                if point_id >= len(attribute_data):
+                    raise ValueError(f"Attribute data missing for point {point_id}.")
+                feature.SetField("connectivity", int(attribute_data[point_id]))
 
             result = layer.CreateFeature(feature)
             if result != ogr.OGRERR_NONE:
-                raise RuntimeError(f"Could not create feature for vertex {vertex_id}.")
+                raise RuntimeError(f"Could not create feature for point {point_id}.")
 
         dataset.FlushCache()
 
@@ -134,18 +136,18 @@ def export_vertex_to_vector_file(
         dataset = None
 
 
-def export_vertex_as_polygon_file(
-    aVertex_in: List[Any],
+def export_point_as_polygon_file(
+    aPoint_in: List[Any],
     sFilename_out: str,
     pSpatial_reference_in: Optional[osr.SpatialReference] = None,
     overwrite: bool = True
 ) -> None:
-    """Export vertices as a closed polygon to a vector file.
+    """Export points as a closed polygon to a vector file.
 
     Parameters
     ----------
-    aVertex_in : list
-        List of vertex objects with dLongitude_degree and dLatitude_degree attributes.
+    aPoint_in : list
+        List of point objects with dLongitude_degree and dLatitude_degree attributes.
     sFilename_out : str
         Output filename with extension. Format is determined from extension.
         Supports GeoJSON, Shapefile, GeoPackage, KML, etc.
@@ -157,7 +159,7 @@ def export_vertex_as_polygon_file(
     Raises
     ------
     ValueError
-        If aVertex_in has fewer than 3 vertices or if file extension is not supported.
+        If aPoint_in has fewer than 3 points or if file extension is not supported.
     FileExistsError
         If the output file exists and overwrite is False.
     RuntimeError
@@ -165,13 +167,13 @@ def export_vertex_as_polygon_file(
 
     Notes
     -----
-    - Automatically closes the polygon by connecting the last vertex to the first
+    - Automatically closes the polygon by connecting the last point to the first
     - Adds an 'area' field containing the calculated polygon area
     - Automatically determines output format from file extension
     """
 
-    if not aVertex_in or len(aVertex_in) < 3:
-        raise ValueError("Polygon requires at least 3 vertices.")
+    if not aPoint_in or len(aPoint_in) < 3:
+        raise ValueError("Polygon requires at least 3 points.")
 
     # Handle overwrite
     if os.path.exists(sFilename_out):
@@ -213,16 +215,17 @@ def export_vertex_as_polygon_file(
         lon_list = []
         lat_list = []
 
-        for vertex_id, vertex in enumerate(aVertex_in):
-            if not hasattr(vertex, 'dLongitude_degree') or not hasattr(vertex, 'dLatitude_degree'):
-                raise ValueError(f"Vertex {vertex_id} missing coordinate attributes.")
 
-            ring.AddPoint(vertex.dLongitude_degree, vertex.dLatitude_degree)
-            lon_list.append(vertex.dLongitude_degree)
-            lat_list.append(vertex.dLatitude_degree)
+        for point_id, pPoint in enumerate(aPoint_in):
+            if not hasattr(pPoint, 'dLongitude_degree') or not hasattr(pPoint, 'dLatitude_degree'):
+                raise ValueError(f"Point {point_id} missing coordinate attributes.")
+
+            ring.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
+            lon_list.append(pPoint.dLongitude_degree)
+            lat_list.append(pPoint.dLatitude_degree)
 
         # Close the ring
-        ring.AddPoint(aVertex_in[0].dLongitude_degree, aVertex_in[0].dLatitude_degree)
+        ring.AddPoint(aPoint_in[0].dLongitude_degree, aPoint_in[0].dLatitude_degree)
 
         # Calculate area
         area = calculate_polygon_area(lon_list, lat_list)

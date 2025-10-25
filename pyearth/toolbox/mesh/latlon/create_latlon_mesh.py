@@ -6,7 +6,7 @@
 import os
 import numpy as np
 from osgeo import ogr, osr
-from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_cell
+from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_meshcell
 
 def create_latlon_mesh(dLongitude_left_in,
                        dLatitude_bot_in,
@@ -82,7 +82,7 @@ def create_latlon_mesh(dLongitude_left_in,
     lCellIndex = 0
     def add_cell_into_list(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords ):
 
-        pLatlon = convert_gcs_coordinates_to_cell(2, dLongitude_center, dLatitude_center, aCoords)
+        pLatlon = convert_gcs_coordinates_to_meshcell(2, dLongitude_center, dLatitude_center, aCoords)
         pLatlon.lCellID = lCellID
         dArea = pLatlon.calculate_cell_area()
         pLatlon.calculate_edge_length()

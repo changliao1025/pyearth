@@ -1,7 +1,9 @@
 
 cimport cython
 from libc.math cimport M_PI, sin, cos, asin, acos, sqrt, abs
+cimport numpy as cnp
 import numpy as np
+from pyearth.gis.location.kernel cimport convert_longitude_latitude_to_sphere_3d
 
 """ Low-level function for pyflowline
 """
@@ -52,7 +54,7 @@ cpdef double calculate_distance_based_on_longitude_latitude(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef np.ndarray calculate_distance_based_on_longitude_latitude_array(
+cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(
     double[:] dLongitude1_in, double[:] dLatitude1_in,
     double[:] dLongitude2_in, double[:] dLatitude2_in,
     bint bFlag_radian=False
@@ -74,8 +76,10 @@ cpdef np.ndarray calculate_distance_based_on_longitude_latitude_array(
     """
     cdef int i
     cdef int n = dLongitude1_in.shape[0]
-    cdef np.ndarray result = np.zeros(n, dtype=np.float64)
+    cdef cnp.ndarray[cnp.float64_t, ndim=1] result = np.zeros(n, dtype=np.float64)
     cdef double lon1, lat1, lon2, lat2
+    cdef double dLongtitude_diff, dLatitude_diff
+    cdef double a, b, c
     for i in range(n):
         if not bFlag_radian:
             lon1 = dLongitude1_in[i] / 180.0 * M_PI
@@ -87,11 +91,11 @@ cpdef np.ndarray calculate_distance_based_on_longitude_latitude_array(
             lat1 = dLatitude1_in[i]
             lon2 = dLongitude2_in[i]
             lat2 = dLatitude2_in[i]
-        cdef double dLongtitude_diff = lon2 - lon1
-        cdef double dLatitude_diff = lat2 - lat1
-        cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
-        cdef double b = 2 * asin(sqrt(a))
-        cdef double c = b * dRadius
+        dLongtitude_diff = lon2 - lon1
+        dLatitude_diff = lat2 - lat1
+        a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
+        b = 2 * asin(sqrt(a))
+        c = b * dRadius
         result[i] = c
     return result
 
@@ -154,7 +158,7 @@ cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z
     return f
 
 @cython.boundscheck(False)  # deactivate bnds checking
-cpdef calculate_angle_between_vertex(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):
+cpdef calculate_angle_between_point(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):
     #all in degree
 
     cdef double angle3deg
@@ -165,9 +169,9 @@ cpdef calculate_angle_between_vertex(dLongitude_degree1_in, dLatitude_degree1_in
     cdef double x5, y5, z5
 
     # The points in 3D space
-    x1, y1, z1 = longlat_to_3d(dLongitude_degree1_in, dLatitude_degree1_in)
-    x2, y2, z2 = longlat_to_3d(dLongitude_degree2_in, dLatitude_degree2_in)
-    x3, y3, z3 = longlat_to_3d(dLongitude_degree3_in, dLatitude_degree3_in)
+    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
+    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
+    x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
     # Vectors in 3D space
 
     x4 = x1 - x2
@@ -200,9 +204,9 @@ def calculate_distance_to_plane(double dLongitude_degree1_in, double dLatitude_d
     cdef double distance
 
     # Convert the three points to 3D coordinates
-    x1, y1, z1 = longlat_to_3d(dLongitude_degree1_in, dLatitude_degree1_in)
-    x2, y2, z2 = longlat_to_3d(dLongitude_degree2_in, dLatitude_degree2_in)
-    x3, y3, z3 = longlat_to_3d(dLongitude_degree3_in, dLatitude_degree3_in)
+    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
+    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
+    x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
 
     # Calculate two vectors on the plane
     v1_x = x2 - x1

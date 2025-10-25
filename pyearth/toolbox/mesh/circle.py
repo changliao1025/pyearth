@@ -2,7 +2,7 @@ import json
 from json import JSONEncoder
 import numpy as np
 from typing import List
-from pyearth.toolbox.mesh.vertex import pyvertex
+from pyearth.toolbox.mesh.point import pypoint
 
 class CircleClassEncoder(JSONEncoder):
     def default(self, obj):
@@ -12,23 +12,23 @@ class CircleClassEncoder(JSONEncoder):
             return float(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        if isinstance(obj, pyvertex):
+        if isinstance(obj, pypoint):
             return json.loads(obj.tojson())
         return JSONEncoder.default(self, obj)
 
 class pycircle(object):
     """The pycircle class represents a circle on a sphere."""
 
-    def __init__(self, pVertex_center_in: pyvertex, aVertex_circle_in: List[pyvertex]):
+    def __init__(self, pPoint_center_in: pypoint, aPoint_circle_in: List[pypoint]):
         """
         Initialize a pycircle object.
 
         Args:
-            pVertex_center_in (pyvertex): The center vertex of the circle.
-            aVertex_circle_in (List[pyvertex]): A list of vertices that form the circle.
+            pPoint_center_in (pypoint): The center point of the circle.
+            aPoint_circle_in (List[pypoint]): A list of points that form the circle.
         """
-        self.pVertex_center: pyvertex = pVertex_center_in
-        self.aVertex_circle: List[pyvertex] = aVertex_circle_in
+        self.pPoint_center: pypoint = pPoint_center_in
+        self.aPoint_circle: List[pypoint] = aPoint_circle_in
 
     def tojson(self) -> str:
         """

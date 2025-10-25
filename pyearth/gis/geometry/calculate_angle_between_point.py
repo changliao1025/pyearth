@@ -2,24 +2,25 @@ import numpy as np
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
 from pyearth.gis.geometry.calculate_angle_between_vectors_degrees import calculate_angle_between_vectors_degrees
 
-def calculate_angle_between_vertex(dLongitude1_in: float, dLatitude1_in: float,
+def calculate_angle_between_point(dLongitude1_in: float, dLatitude1_in: float,
                                 dLongitude2_in: float, dLatitude2_in: float,
                                 dLongitude3_in: float, dLatitude3_in: float,
                                 iFlag_radian: bool = False) -> float:
     """
-    Calculates the angle between three vertices on a sphere.
+
+    Calculates the angle between three points on a sphere.
 
     Args:
-        dLongitude1_in (float): Longitude of the first vertex.
-        dLatitude1_in (float): Latitude of the first vertex.
-        dLongitude2_in (float): Longitude of the second vertex (the middle one).
-        dLatitude2_in (float): Latitude of the second vertex (the middle one).
-        dLongitude3_in (float): Longitude of the third vertex.
-        dLatitude3_in (float): Latitude of the third vertex.
+        dLongitude1_in (float): Longitude of the first point.
+        dLatitude1_in (float): Latitude of the first point.
+        dLongitude2_in (float): Longitude of the second point (the middle one).
+        dLatitude2_in (float): Latitude of the second point (the middle one).
+        dLongitude3_in (float): Longitude of the third point.
+        dLatitude3_in (float): Latitude of the third point.
         iFlag_radian (bool, optional): If True, input coordinates are in radians. Defaults to False (degrees).
 
     Returns:
-        float: The angle in degrees between the vectors from the middle vertex to the other two.
+        float: The angle in degrees between the vectors from the middle point to the other two.
     """
 
     # Determine whether the downstream conversion routine should treat inputs as radians.

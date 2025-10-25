@@ -1,16 +1,16 @@
 from typing import List, Dict, Any, Tuple
-from pyearth.toolbox.mesh.vertex import pyvertex
-from pyearth.toolbox.mesh.edge import pyedge
+from pyearth.toolbox.mesh.point import pypoint
+from pyearth.toolbox.mesh.line import pyline
 from pyearth.toolbox.mesh.polyline import pypolyline
 from pyearth.toolbox.mesh.polygon import pypolygon
 from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates
-from pyearth.gis.geometry.calculate_angle_between_vertex import calculate_angle_between_vertex
+from pyearth.gis.geometry.calculate_angle_between_point import calculate_angle_between_point
 
-def _create_vertex(coords: Dict[str, Any]) -> pyvertex:
-    """Helper function to create a pyvertex object."""
-    return pyvertex(coords)
+def _create_point(coords: Dict[str, Any]) -> pypoint:
+    """Helper function to create a pypoint object."""
+    return pypoint(coords)
 
-def convert_gcs_coordinates_to_cell(iMesh_type_in: int,
+def convert_gcs_coordinates_to_meshcell(iMesh_type_in: int,
                                     dLongitude_center_in: float,
                                     dLatitude_center_in: float,
                                     aCoordinates_gcs_in: List[Tuple[float, float]],
@@ -28,29 +28,29 @@ def convert_gcs_coordinates_to_cell(iMesh_type_in: int,
     Returns:
         pypolygon: A pypolygon object.
     """
-    vertices = [_create_vertex({'dLongitude_degree': lon, 'dLatitude_degree': lat}) for lon, lat in aCoordinates_gcs_in[:-1]]
+    points = [_create_point({'dLongitude_degree': lon, 'dLatitude_degree': lat}) for lon, lat in aCoordinates_gcs_in[:-1]]
 
     if iFlag_simplify_in:
-        simplified_vertices = []
-        num_vertices = len(vertices)
-        for i in range(num_vertices):
-            pv_start = vertices[i - 1]
-            pv_middle = vertices[i]
-            pv_end = vertices[(i + 1) % num_vertices]
+        simplified_points = []
+        num_points = len(points)
+        for i in range(num_points):
+            pt_start = points[i - 1]
+            pt_middle = points[i]
+            pt_end = points[(i + 1) % num_points]
 
-            angle3deg = calculate_angle_between_vertex(pv_start.dLongitude_degree, pv_start.dLatitude_degree,
-                                                   pv_middle.dLongitude_degree, pv_middle.dLatitude_degree,
-                                                   pv_end.dLongitude_degree, pv_end.dLatitude_degree)
+            angle3deg = calculate_angle_between_point(pt_start.dLongitude_degree, pt_start.dLatitude_degree,
+                                                   pt_middle.dLongitude_degree, pt_middle.dLatitude_degree,
+                                                   pt_end.dLongitude_degree, pt_end.dLatitude_degree)
 
             if angle3deg <= 175:
-                simplified_vertices.append(pv_middle)
-        vertices = simplified_vertices
+                simplified_points.append(pt_middle)
+        points = simplified_points
 
-    edges = [pyedge(vertices[i], vertices[(i + 1) % len(vertices)]) for i in range(len(vertices))]
+    edges = [pyline(points[i], points[(i + 1) % len(points)]) for i in range(len(points))]
 
-    return pypolygon(dLongitude_center_in, dLatitude_center_in, edges, vertices)
+    return pypolygon(dLongitude_center_in, dLatitude_center_in, edges, points)
 
-def convert_gcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float]]) -> pypolyline:
+def convert_gcs_coordinates_to_polyline(aCoordinates_in: List[Tuple[float, float]]) -> pypolyline:
     """
     Convert GCS coordinates to a pyflowline object.
 
@@ -60,8 +60,8 @@ def convert_gcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float
     Returns:
         pyflowline: A pyflowline object or None if no edge is created.
     """
-    vertices = [_create_vertex({'dLongitude_degree': lon, 'dLatitude_degree': lat}) for lon, lat in aCoordinates_in]
-    edges = [pyedge(vertices[j], vertices[j + 1]) for j in range(len(vertices) - 1) if vertices[j] != vertices[j + 1]]
+    points = [_create_point({'dLongitude_degree': lon, 'dLatitude_degree': lat}) for lon, lat in aCoordinates_in]
+    edges = [pyline(points[j], points[j + 1]) for j in range(len(points) - 1) if points[j] != points[j + 1]]
 
     if not edges:
         print('No edge is created')
@@ -69,7 +69,7 @@ def convert_gcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float
 
     return pypolyline(edges)
 
-def convert_pcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float]], pProjection_in: Any) -> pypolyline:
+def convert_pcs_coordinates_to_polyline(aCoordinates_in: List[Tuple[float, float]], pProjection_in: Any) -> pypolyline:
     """
     Convert PCS coordinates to a pyflowline object.
 
@@ -80,11 +80,11 @@ def convert_pcs_coordinates_to_flowline(aCoordinates_in: List[Tuple[float, float
     Returns:
         pyflowline: A pyflowline object.
     """
-    vertices = []
+    points = []
     for x, y in aCoordinates_in:
         lon, lat = reproject_coordinates(x, y, pProjection_in)
-        vertices.append(_create_vertex({'x': x, 'y': y, 'lon': lon, 'lat': lat}))
+        points.append(_create_point({'x': x, 'y': y, 'lon': lon, 'lat': lat}))
 
-    edges = [pyedge(vertices[j], vertices[j + 1]) for j in range(len(vertices) - 1)]
+    edges = [pyline(points[j], points[j + 1]) for j in range(len(points) - 1)]
 
     return pypolyline(edges)

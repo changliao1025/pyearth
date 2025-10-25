@@ -7,7 +7,7 @@ import os
 import numpy as np
 from osgeo import ogr, osr
 from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates_batch
-from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_cell
+from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_meshcell
 
 
 def index_to_row_col(index, num_columns):
@@ -103,7 +103,7 @@ def create_hexagon_mesh(iFlag_rotation_in,
     lCellIndex = 0
 
     def add_cell_into_list1(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords ):
-        pHexagon = convert_gcs_coordinates_to_cell(1, dLongitude_center, dLatitude_center, aCoords)
+        pHexagon = convert_gcs_coordinates_to_meshcell(1, dLongitude_center, dLatitude_center, aCoords)
         pHexagon.lCellID = lCellID
         dArea = pHexagon.calculate_cell_area()
         pHexagon.calculate_edge_length()
@@ -181,7 +181,7 @@ def create_hexagon_mesh(iFlag_rotation_in,
         return aList, dArea
 
     def add_cell_into_list2(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords ):
-        pHexagon = convert_gcs_coordinates_to_cell(1, dLongitude_center, dLatitude_center, aCoords)
+        pHexagon = convert_gcs_coordinates_to_meshcell(1, dLongitude_center, dLatitude_center, aCoords)
         pHexagon.lCellID = lCellID
         dArea = pHexagon.calculate_cell_area()
         pHexagon.dArea = dArea

@@ -52,12 +52,12 @@ Dependencies
 ------------
 - osgeo (GDAL/OGR): Geometry operations and file I/O
 - numpy: Numerical operations
-- pyearth.toolbox.mesh: Vertex, edge, polyline, polygon classes
+- pyearth.toolbox.mesh: point, edge, polyline, polygon classes
 - pyearth.gis: Coordinate extraction and area calculation
 
 See Also
 --------
-- pyvertex.calculate_buffer_zone: Point buffer implementation
+- pypoint.calculate_buffer_zone: Point buffer implementation
 - pypolyline.calculate_buffer_zone: Polyline buffer implementation
 - pypolygon.calculate_buffer_zone: Polygon buffer implementation
 """
@@ -74,8 +74,8 @@ from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename
 )
-from pyearth.toolbox.mesh.vertex import pyvertex
-from pyearth.toolbox.mesh.edge import pyedge
+from pyearth.toolbox.mesh.point import pypoint
+from pyearth.toolbox.mesh.line import pyline
 from pyearth.toolbox.mesh.polyline import pypolyline
 from pyearth.toolbox.mesh.polygon import pypolygon
 
@@ -105,7 +105,7 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
         Buffer distance in meters. Must be positive.
 
         - Typical values: 100-10000 meters for local analysis
-        - Maximum: Limited by vertex class implementation
+        - Maximum: Limited by point class implementation
         - Minimum: Should be > 0 for meaningful results
 
     Returns
@@ -132,9 +132,9 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
     -----
     1. **Geodesic Calculation**: Uses WGS84 ellipsoid for accurate distances
     2. **Coordinate Order**: WKT format is "longitude latitude" (x y)
-    3. **Buffer Shape**: Creates approximate circle with multiple vertices
-    4. **Vertex Count**: More vertices used at higher latitudes for accuracy
-    5. **Return Format**: Closed polygon in WKT format (first = last vertex)
+    3. **Buffer Shape**: Creates approximate circle with multiple points
+    4. **Point Count**: More points used at higher latitudes for accuracy
+    5. **Return Format**: Closed polygon in WKT format (first = last point)
     6. **Coordinate System**: Assumes input/output in WGS84 (EPSG:4326)
     7. **Error Handling**: Returns None on errors with logged messages
     8. **Distance Units**: Input in meters, calculation on ellipsoid
@@ -183,7 +183,7 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
     --------
     create_polyline_buffer_zone : Create buffer around polyline
     create_buffer_zone_polygon_file : Batch buffer creation for polygons
-    pyvertex.calculate_buffer_zone : Underlying buffer calculation method
+    pypoint.calculate_buffer_zone : Underlying buffer calculation method
 
     References
     ----------
@@ -271,22 +271,24 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
         logger.error(error_msg)
         raise ValueError(error_msg)
 
-    # Create vertex object
+
+    # Create point object
     point = {
         'dLongitude_degree': lon,
         'dLatitude_degree': lat
     }
 
     try:
-        pVertex = pyvertex(point)
+        pPoint = pypoint(point)
     except Exception as e:
-        error_msg = f"Failed to create vertex: {str(e)}"
+        error_msg = f"Failed to create point: {str(e)}"
         logger.error(error_msg)
         return None
 
+
     # Calculate buffer zone
     try:
-        sWkt_buffer_polygon = pVertex.calculate_buffer_zone(dBuffer_distance_in)
+        sWkt_buffer_polygon = pPoint.calculate_buffer_zone(dBuffer_distance_in)
     except Exception as e:
         error_msg = f"Failed to calculate buffer zone: {str(e)}"
         logger.error(error_msg)
@@ -373,7 +375,7 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
     Algorithm Details
     -----------------
     1. Parse WKT to extract LINESTRING coordinates
-    2. Create vertex objects for each point
+    2. Create pypoint objects for each point
     3. Build edge objects between consecutive vertices
     4. Skip duplicate vertices to avoid zero-length edges
     5. Construct polyline from edge list
@@ -511,8 +513,9 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
         print(f'Error: {error_msg}')
         return None
 
-    # Create vertex objects from coordinates
-    aVertex = []
+
+    # Create point objects from coordinates
+    aPoint = []
     for i in range(nPoint):
         lon, lat = aCoords_gcs[i][0], aCoords_gcs[i][1]
 
@@ -532,34 +535,36 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
         }
 
         try:
-            pVertex = pyvertex(point)
-            aVertex.append(pVertex)
+            pPoint = pypoint(point)
+            aPoint.append(pPoint)
         except Exception as e:
-            error_msg = f"Failed to create vertex at point {i}: {str(e)}"
+            error_msg = f"Failed to create point at point {i}: {str(e)}"
             logger.error(error_msg)
             return None
 
-    nVertex = len(aVertex)
+    nPoint = len(aPoint)
 
-    # Build edges between consecutive vertices, skipping duplicates
+
+    # Build edges between consecutive points, skipping duplicates
     aEdge = []
-    for i in range(nVertex - 1):
-        if aVertex[i] != aVertex[i + 1]:
+    for i in range(nPoint - 1):
+        if aPoint[i] != aPoint[i + 1]:
             try:
-                pEdge = pyedge(aVertex[i], aVertex[i + 1])
+                pEdge = pyline(aPoint[i], aPoint[i + 1])
                 aEdge.append(pEdge)
             except Exception as e:
-                error_msg = f"Failed to create edge between vertices {i} and {i+1}: {str(e)}"
+                error_msg = f"Failed to create edge between points {i} and {i+1}: {str(e)}"
                 logger.warning(error_msg)
                 # Continue processing other edges
         else:
-            logger.debug(f"Skipping duplicate vertex at position {i}")
+            logger.debug(f"Skipping duplicate point at position {i}")
 
     if len(aEdge) == 0:
-        error_msg = "No valid edges created (all vertices may be duplicates)"
+        error_msg = "No valid edges created (all points may be duplicates)"
         logger.error(error_msg)
         print(f'Error: {error_msg}')
         return None
+
 
     # Create polyline from edges
     try:
@@ -568,6 +573,7 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
         error_msg = f"Failed to create polyline: {str(e)}"
         logger.error(error_msg)
         return None
+
 
     # Calculate buffer zone
     try:
@@ -707,7 +713,7 @@ def create_buffer_zone_polygon_file(
        a. Extract polygon geometry
        b. Calculate geodesic area
        c. Filter by area threshold
-       d. Create vertex/edge objects
+       d. Create pypoint/line objects
        e. Calculate geodesic buffer
        f. Write buffer polygon to output
     6. Report processing statistics
@@ -983,9 +989,10 @@ def create_buffer_zone_polygon_file(
         for i in range(nPart):
             aCoords_gcs = aaCoords_gcs[i]
 
+
             # Skip degenerate polygons
             if len(aCoords_gcs) < 3:
-                logger.debug(f'Skipping degenerate polygon with {len(aCoords_gcs)} vertices')
+                logger.debug(f'Skipping degenerate polygon with {len(aCoords_gcs)} points')
                 nSkipped_degenerate += 1
                 continue
 
@@ -1009,43 +1016,44 @@ def create_buffer_zone_polygon_file(
                 nSkipped_area += 1
                 continue
 
+
             # Remove the last point which is the same as the first point
             nPoint = len(aCoords_gcs) - 1
-            aVertex = []
+            aPoint = []
 
-            # Create vertex objects
+            # Create point objects
             for j in range(nPoint):
                 point = {
                     'dLongitude_degree': aCoords_gcs[j, 0],
                     'dLatitude_degree': aCoords_gcs[j, 1]
                 }
                 try:
-                    pVertex = pyvertex(point)
-                    aVertex.append(pVertex)
+                    pPoint = pypoint(point)
+                    aPoint.append(pPoint)
                 except Exception as e:
-                    logger.warning(f'Failed to create vertex {j} for feature {nProcessed}: {str(e)}')
+                    logger.warning(f'Failed to create point {j} for feature {nProcessed}: {str(e)}')
 
-            if len(aVertex) < 3:
-                logger.debug(f'Not enough valid vertices ({len(aVertex)}) for polygon')
+            if len(aPoint) < 3:
+                logger.debug(f'Not enough valid points ({len(aPoint)}) for polygon')
                 nSkipped_degenerate += 1
                 continue
 
-            nVertex = len(aVertex)
+            nPoint2 = len(aPoint)
             aEdge = []
 
             # Build edges, skipping duplicates
-            for j in range(nVertex - 1):
-                if aVertex[j] != aVertex[j + 1]:
+            for j in range(nPoint2 - 1):
+                if aPoint[j] != aPoint[j + 1]:
                     try:
-                        pEdge = pyedge(aVertex[j], aVertex[j + 1])
+                        pEdge = pyline(aPoint[j], aPoint[j + 1])
                         aEdge.append(pEdge)
                     except Exception as e:
                         logger.warning(f'Failed to create edge {j} for feature {nProcessed}: {str(e)}')
 
             # Close the polygon
-            if nVertex > 0:
+            if nPoint2 > 0:
                 try:
-                    pEdge = pyedge(aVertex[nVertex - 1], aVertex[0])
+                    pEdge = pyline(aPoint[nPoint2 - 1], aPoint[0])
                     aEdge.append(pEdge)
                 except Exception as e:
                     logger.warning(f'Failed to close polygon for feature {nProcessed}: {str(e)}')

@@ -2,7 +2,10 @@
 
 cimport cython
 from libc.math cimport M_PI, sin, cos
+
+cimport numpy as cnp
 import numpy as np
+
 
 """
 Geospatial 3D conversion utilities for PyEarth.
@@ -19,7 +22,7 @@ Authors: Chang Liao
 cdef double dRadius = 6378137.0
 
 @cython.boundscheck(False)
-cpdef np.ndarray convert_longitude_latitude_to_sphere_3d(double dLongitude_in, double dLatitude_in, bint bFlag_radian=False):
+cpdef object convert_longitude_latitude_to_sphere_3d(double dLongitude_in, double dLatitude_in):
     """
     Convert geographic coordinates (longitude, latitude) to 3D Cartesian coordinates on a unit sphere.
 
@@ -31,8 +34,7 @@ cpdef np.ndarray convert_longitude_latitude_to_sphere_3d(double dLongitude_in, d
     dLatitude_in : double
         Latitude coordinate. In degrees by default, or radians if bFlag_radian=True.
         Valid range: [-90, 90] degrees or [-π/2, π/2] radians.
-    bFlag_radian : bint, optional
-        If True, input coordinates are in radians. If False (default), input coordinates are in degrees.
+
 
     Returns
     -------
@@ -57,20 +59,13 @@ cpdef np.ndarray convert_longitude_latitude_to_sphere_3d(double dLongitude_in, d
     longitude = dLongitude_in
     latitude = dLatitude_in
 
-    if not bFlag_radian:
-        if latitude < -90.0 or latitude > 90.0:
-            raise ValueError("Latitude must be in range [-90, 90] degrees.")
-        if longitude < -180.0 or longitude > 180.0:
-            raise ValueError("Longitude must be in range [-180, 180] degrees.")
-        longitude_rad = longitude / 180.0 * M_PI
-        latitude_rad = latitude / 180.0 * M_PI
-    else:
-        if latitude < -M_PI/2 or latitude > M_PI/2:
-            raise ValueError("Latitude must be in range [-π/2, π/2] radians.")
-        if longitude < -M_PI or longitude > M_PI:
-            raise ValueError("Longitude must be in range [-π, π] radians.")
-        longitude_rad = longitude
-        latitude_rad = latitude
+    # Always assume input is in degrees
+    if latitude < -90.0 or latitude > 90.0:
+        raise ValueError("Latitude must be in range [-90, 90] degrees.")
+    if longitude < -180.0 or longitude > 180.0:
+        raise ValueError("Longitude must be in range [-180, 180] degrees.")
+    longitude_rad = longitude / 180.0 * M_PI
+    latitude_rad = latitude / 180.0 * M_PI
 
     x = cos(latitude_rad) * cos(longitude_rad)
     y = cos(latitude_rad) * sin(longitude_rad)
