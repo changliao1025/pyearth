@@ -5,8 +5,6 @@ from osgeo import ogr, osr
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 
-
-
 def export_point_to_vector_file(
     aPoint_in: List[Any],
     sFilename_vector_in: str,
