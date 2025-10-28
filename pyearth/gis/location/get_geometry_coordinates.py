@@ -8,72 +8,7 @@ enforced to be in counter-clockwise (CCW) order following the right-hand rule.
 from typing import List, Union
 import numpy as np
 from osgeo import ogr
-
-
-def check_ccw(coords: np.ndarray) -> bool:
-    """Determine if polygon coordinates are in counter-clockwise (CCW) order.
-
-    Uses the shoelace formula to calculate the signed area of a polygon.
-    A positive signed area indicates counter-clockwise orientation.
-
-    Parameters
-    ----------
-    coords : np.ndarray
-        Array of shape (n, 2) representing polygon coordinates in (x, y) format,
-        typically (longitude, latitude).
-
-    Returns
-    -------
-    bool
-        True if coordinates are in counter-clockwise order, False if clockwise.
-
-    Raises
-    ------
-    ValueError
-        If coords is not a 2D array with shape (n, 2) where n >= 3.
-
-    Notes
-    -----
-    - The shoelace formula computes: Area = 0.5 * sum(x[i]*y[i+1] - x[i+1]*y[i])
-    - Positive area indicates CCW, negative indicates CW
-    - For geographic coordinates, this assumes a planar approximation
-    - Minimum 3 points required for a valid polygon
-
-    Examples
-    --------
-    >>> # Square in CCW order
-    >>> coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])
-    >>> check_ccw(coords)
-    True
-
-    >>> # Square in CW order
-    >>> coords = np.array([[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]])
-    >>> check_ccw(coords)
-    False
-    """
-    if not isinstance(coords, np.ndarray):
-        raise ValueError("Coordinates must be a numpy array")
-    
-    if coords.ndim != 2 or coords.shape[1] != 2:
-        raise ValueError(
-            f"Coordinates must be a 2D array with shape (n, 2). Got shape {coords.shape}"
-        )
-    
-    if len(coords) < 3:
-        raise ValueError(
-            f"Polygon must have at least 3 points. Got {len(coords)} points"
-        )
-
-    # Shoelace formula to calculate signed area
-    x = coords[:, 0]  # X coordinates (longitude)
-    y = coords[:, 1]  # Y coordinates (latitude)
-    
-    # Calculate signed area: sum of cross products
-    signed_area = np.sum(x[:-1] * y[1:] - x[1:] * y[:-1]) + (x[-1] * y[0] - x[0] * y[-1])
-
-    # Positive signed area indicates CCW
-    return signed_area > 0
-
+from pyearth.gis.geometry.check_ccw import check_ccw
 
 def get_geometry_coordinates(geometry: ogr.Geometry) -> Union[np.ndarray, List[np.ndarray]]:
     """Extract coordinates from an OGR geometry object.

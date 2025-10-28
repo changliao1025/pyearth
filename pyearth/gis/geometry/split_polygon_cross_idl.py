@@ -105,7 +105,7 @@ import numpy as np
 from typing import List, Tuple, Optional
 from osgeo import ogr, gdal, osr
 from pyearth.gis.geometry.calculate_intersect_on_great_circle import find_great_circle_intersection_with_meridian
-
+from pyearth.gis.geometry.check_ccw import check_ccw
 
 def split_polygon_cross_idl(aCoord_gcs):
     """
@@ -261,6 +261,9 @@ def split_polygon_cross_idl(aCoord_gcs):
     # Convert input to numpy array for efficient operations
     aCoord_gcs = np.array(aCoord_gcs)
 
+    if not check_ccw(aCoord_gcs):
+        aCoord_gcs = aCoord_gcs[::-1]
+
     # Get number of points in the polygon
     nPoint = len(aCoord_gcs)
 
@@ -309,7 +312,10 @@ def split_polygon_cross_idl(aCoord_gcs):
     target_lon = 180.0
 
     # Find where this great circle arc intersects the 180° meridian
-    d, dLat0 = find_great_circle_intersection_with_meridian(lon1, lat1, lon2, lat2, target_lon)
+    if lon1>0 and lon2<0:
+        d, dLat0 = find_great_circle_intersection_with_meridian(lon1, lat1, lon2, lat2, target_lon)
+    else:
+        d, dLat0 = find_great_circle_intersection_with_meridian(lon2, lat2, lon1, lat1, target_lon)
 
     # Calculate the second great circle intersection point with the IDL
     # Get the edge endpoints for the second crossing
@@ -326,7 +332,10 @@ def split_polygon_cross_idl(aCoord_gcs):
     target_lon = 180.0
 
     # Find where this great circle arc intersects the 180° meridian
-    d, dLat1 = find_great_circle_intersection_with_meridian(lon1, lat1, lon2, lat2, target_lon)
+    if lon1>0 and lon2<0:
+        d, dLat1 = find_great_circle_intersection_with_meridian(lon1, lat1, lon2, lat2, target_lon)
+    else:
+        d, dLat1 = find_great_circle_intersection_with_meridian(lon2, lat2, lon1, lat1, target_lon)
 
     # Determine which intersection is north (top) and which is south (bottom)
     # This ordering is crucial for correctly partitioning the polygon vertices
