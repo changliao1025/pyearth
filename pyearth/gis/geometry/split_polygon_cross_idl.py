@@ -64,7 +64,7 @@ Limitations
 
 See Also
 --------
-pyearth.gis.geometry.reorder_idl_polygon : Alternative IDL handling approach
+
 pyearth.gis.geometry.convert_idl_polygon_to_valid_polygon : Longitude shift approach
 pyearth.gis.geometry.calculate_intersect_on_great_circle : Great circle intersection
 
@@ -254,7 +254,7 @@ def split_polygon_cross_idl(aCoord_gcs):
 
     See Also
     --------
-    reorder_idl_polygon : Alternative approach to handling IDL polygons
+
     convert_idl_polygon_to_valid_polygon : Longitude shifting approach
     find_great_circle_intersection_with_meridian : Great circle intersection calculation
     """
