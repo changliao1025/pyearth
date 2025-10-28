@@ -436,4 +436,8 @@ def split_polygon_cross_idl(aCoord_gcs):
     # Return both split polygons as a list
     # First element: Left polygon (positive longitudes, Eastern hemisphere)
     # Second element: Right polygon (negative longitudes, Western hemisphere)
+    if not check_ccw(aCoord_gcs_left):
+        aCoord_gcs_left = aCoord_gcs_left[::-1]
+    if not check_ccw(aCoord_gcs_right):
+        aCoord_gcs_right = aCoord_gcs_right[::-1]
     return [aCoord_gcs_left, aCoord_gcs_right]

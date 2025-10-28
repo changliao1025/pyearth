@@ -64,7 +64,7 @@ import numpy as np
 from osgeo import ogr
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 
-
+from pyearth.gis.geometry.reorder_idl_polygon import reorder_idl_polygon
 def convert_idl_polygon_to_valid_polygon(
     geometry_in: ogr.Geometry
 ) -> Optional[ogr.Geometry]:
@@ -243,9 +243,7 @@ def convert_idl_polygon_to_valid_polygon(
     if spatial_ref is not None:
         geometry_out.AssignSpatialReference(spatial_ref)
 
-    # Validate the output geometry
-    if not geometry_out.IsValid():
-        return None
+    # Validate the output geometry?
 
     return geometry_out
 
