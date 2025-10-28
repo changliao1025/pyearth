@@ -6,7 +6,7 @@
 import os
 from osgeo import ogr, osr
 import numpy as np
-from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_cell
+from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_meshcell
 from pyearth.gis.spatialref.reproject_coordinates import  reproject_coordinates_batch
 
 def index_to_row_col(index, num_columns):
@@ -97,7 +97,7 @@ def create_square_mesh(dX_left_in, dY_bot_in,
     lCellIndex = 0
     def add_cell_into_list(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords ):
 
-        pSquare = convert_gcs_coordinates_to_cell(2, dLongitude_center, dLatitude_center, aCoords)
+        pSquare = convert_gcs_coordinates_to_meshcell(2, dLongitude_center, dLatitude_center, aCoords)
         pSquare.lCellID = lCellID
         dArea = pSquare.calculate_cell_area()
         pSquare.calculate_edge_length()
