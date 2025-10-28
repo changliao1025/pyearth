@@ -8,7 +8,7 @@ enforced to be in counter-clockwise (CCW) order following the right-hand rule.
 from typing import List, Union
 import numpy as np
 from osgeo import ogr
-from pyearth.gis.geometry.check_ccw import check_ccw
+from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
 
 def get_geometry_coordinates(geometry: ogr.Geometry) -> Union[np.ndarray, List[np.ndarray]]:
     """Extract coordinates from an OGR geometry object.
@@ -159,7 +159,7 @@ def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
     coords_array = np.array(exterior_coords)
 
     # Ensure counter-clockwise order
-    if not check_ccw(coords_array):
+    if not check_counter_clockwise(coords_array):
         coords_array = coords_array[::-1]
 
     return coords_array
@@ -257,7 +257,7 @@ def get_multipolygon_exterior_coords(multipolygon_geometry: ogr.Geometry) -> Lis
             coords_array = np.array(part_coords)
 
             # Ensure counter-clockwise order
-            if not check_ccw(coords_array):
+            if not check_counter_clockwise(coords_array):
                 coords_array = coords_array[::-1]
 
             exterior_coords_list.append(coords_array)
