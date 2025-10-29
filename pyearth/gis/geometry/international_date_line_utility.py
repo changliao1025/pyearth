@@ -589,6 +589,38 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> bool:
 # Alias for backward compatibility
 check_cross_idl = check_cross_international_date_line_polygon
 
+def check_cross_international_date_line_geometry(geometry_in: ogr.Geometry) -> bool:
+    """Check if an OGR geometry crosses the International Date Line.
+
+    Parameters
+    ----------
+    geometry_in : ogr.Geometry
+        Input OGR geometry to check.
+
+    Returns
+    -------
+    bool
+        True if the geometry crosses the IDL, False otherwise.
+
+    Raises
+    ------
+    ValueError
+        If geometry_in is None or invalid.
+
+    Notes
+    -----
+    Extracts coordinates from the geometry and checks for IDL crossing.
+    """
+    if geometry_in is None:
+        raise ValueError("geometry_in cannot be None")
+
+    coordinates_gcs = get_geometry_coordinates(geometry_in)
+
+    if coordinates_gcs is None or len(coordinates_gcs) == 0:
+        raise ValueError("Failed to extract coordinates from geometry")
+
+    return check_cross_international_date_line_polygon(coordinates_gcs)
+
 def _validate_coordinate_array(coords: np.ndarray, min_points: int = 3) -> None:
     """Validate coordinate array format and content.
 
