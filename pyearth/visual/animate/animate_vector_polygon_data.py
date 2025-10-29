@@ -188,7 +188,6 @@ def animate_vector_polygon_data(
     aColor_index = (aData - dData_min) / (dData_max - dData_min)
     aColors = [cmap_reversed(aColor_index[i]) for i in range(ncell_animation)]
 
-    # Precompute polygon locations
     # Precompute polygon locations and add them to the axes
     aPolygon = [
         mpatches.Polygon(
@@ -218,31 +217,10 @@ def animate_vector_polygon_data(
         rgb = aColors[i]
         aPolygon[i].set_facecolor(rgb)
         pArtist0.set_xy(aPolygon[i].get_xy())
-        #if iFlag_type_in == 1: #full
-        #    dLon_min_zoom = dLon_min
-        #    dLon_max_zoom = dLon_max
-        #    dLat_min_zoom = dLat_min
-        #    dLat_max_zoom = dLat_max
-        #else:
-        #    dLon_min_zoom = dlon - marginx * 2
-        #    dLon_max_zoom = dlon + marginx * 2
-        #    dLat_min_zoom = dlat - marginy * 2
-        #    dLat_max_zoom = dlat + marginy * 2
-        #x = (dlon - dLon_min_zoom) / (dLon_max_zoom - dLon_min_zoom)
-        #y = (dlat - dLat_min_zoom) / (dLat_max_zoom - dLat_min_zoom)
         x = (aLongitude[i] - dLon_min) / (dLon_max - dLon_min)
         y = (aLatitude[i] - dLat_min) / (dLat_max - dLat_min)
         dummy0, dummy = aData_raw[i], aData[i]
         y1, y2 = (y + 0.05, y - 0.05) if dummy0 > dummy else (y - 0.05, y + 0.05)
-
-        #if iFlag_type_in == 2:
-        #    aExtent_zoom = [
-        #        dlon - marginx * 2,
-        #        dlon + marginx * 2,
-        #        dlat - marginy * 2,
-        #        dlat + marginy * 2,
-        #    ]
-        #    ax.set_extent(aExtent_zoom)
         pArtist1.set_position((x, y1))
         pArtist1.set_text(f"Before: {dummy0:.2f}m")
         pArtist2.set_position((x, y2))

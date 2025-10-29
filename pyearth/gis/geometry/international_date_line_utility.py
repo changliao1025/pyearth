@@ -592,34 +592,226 @@ check_cross_idl = check_cross_international_date_line_polygon
 def check_cross_international_date_line_geometry(geometry_in: ogr.Geometry) -> bool:
     """Check if an OGR geometry crosses the International Date Line.
 
+    This function provides comprehensive IDL crossing detection for various OGR geometry types
+    including Polygon, MultiPolygon, LineString, MultiLineString, Point, MultiPoint, and
+    GeometryCollection. It uses optimized algorithms and proper error handling.
+
     Parameters
     ----------
     geometry_in : ogr.Geometry
-        Input OGR geometry to check.
+        Input OGR geometry to check. Must be a valid OGR Geometry object.
 
     Returns
     -------
     bool
         True if the geometry crosses the IDL, False otherwise.
 
+        - For POLYGON/MULTIPOLYGON: Uses robust coordinate analysis
+        - For LINESTRING/MULTILINESTRING: Checks line segments for IDL crossings
+        - For POINT/MULTIPOINT: Always returns False (points can't cross IDL)
+        - For GEOMETRYCOLLECTION: Recursively checks all sub-geometries
+
     Raises
     ------
     ValueError
-        If geometry_in is None or invalid.
+        If geometry_in is None, invalid, or if coordinate extraction fails.
+    TypeError
+        If geometry_in is not an OGR Geometry object.
 
     Notes
     -----
-    Extracts coordinates from the geometry and checks for IDL crossing.
+    **Algorithm Improvements**:
+
+    1. **Comprehensive Type Support**: Handles all major OGR geometry types
+    2. **Optimized Processing**: Early returns and vectorized operations where possible
+    3. **Robust Error Handling**: Validates geometry before processing
+    4. **Recursive Support**: Properly handles nested geometries in collections
+    5. **Performance**: Caches geometry type checks and minimizes coordinate extraction
+
+    **IDL Crossing Logic**:
+
+    - **Polygons**: Uses coordinate span analysis and consecutive point jumps
+    - **LineStrings**: Examines individual segments for longitude sign changes
+    - **Multi-geometries**: Returns True if ANY sub-geometry crosses IDL
+    - **Collections**: Recursively processes all contained geometries
+
+    **Performance Optimizations**:
+
+    - Early validation to avoid unnecessary processing
+    - Geometry type caching to minimize OGR calls
+    - Vectorized coordinate analysis where applicable
+    - Short-circuit evaluation for multi-part geometries
+
+    Examples
+    --------
+    Check a simple polygon:
+
+    >>> from osgeo import ogr
+    >>> wkt = "POLYGON((170 -10, 180 -10, -170 -10, -160 -10, 170 -10))"
+    >>> geom = ogr.CreateGeometryFromWkt(wkt)
+    >>> check_cross_international_date_line_geometry(geom)
+    True
+
+    Check a non-crossing polygon:
+
+    >>> wkt = "POLYGON((10 10, 20 10, 20 20, 10 20, 10 10))"
+    >>> geom = ogr.CreateGeometryFromWkt(wkt)
+    >>> check_cross_international_date_line_geometry(geom)
+    False
+
+    Check a multipolygon:
+
+    >>> wkt = "MULTIPOLYGON(((170 0, 180 0, -170 0, 170 0)), ((10 0, 20 0, 20 10, 10 10, 10 0)))"
+    >>> geom = ogr.CreateGeometryFromWkt(wkt)
+    >>> check_cross_international_date_line_geometry(geom)
+    True
+
+    Check a linestring:
+
+    >>> wkt = "LINESTRING(170 0, -170 0)"
+    >>> geom = ogr.CreateGeometryFromWkt(wkt)
+    >>> check_cross_international_date_line_geometry(geom)
+    True
+
+    See Also
+    --------
+    check_cross_international_date_line_polygon : Polygon-specific IDL checking
+    split_international_date_line_polygon_coordinates : Split IDL-crossing polygons
     """
+    # Input validation
     if geometry_in is None:
         raise ValueError("geometry_in cannot be None")
 
-    coordinates_gcs = get_geometry_coordinates(geometry_in)
+    # Verify it's an OGR Geometry object
+    if not hasattr(geometry_in, 'GetGeometryName'):
+        raise TypeError("geometry_in must be an OGR Geometry object")
 
-    if coordinates_gcs is None or len(coordinates_gcs) == 0:
-        raise ValueError("Failed to extract coordinates from geometry")
+    # Validate geometry before processing
+    if geometry_in.IsEmpty():
+        return False
 
-    return check_cross_international_date_line_polygon(coordinates_gcs)
+    # Cache geometry type to minimize OGR calls
+    sGeometry_type = geometry_in.GetGeometryName()
+
+    # Handle different geometry types with optimized logic
+    if sGeometry_type == "POLYGON":
+        return _check_polygon_idl_crossing(geometry_in)
+
+    elif sGeometry_type == "MULTIPOLYGON":
+        return _check_multipolygon_idl_crossing(geometry_in)
+
+    elif sGeometry_type == "LINESTRING":
+        return _check_linestring_idl_crossing(geometry_in)
+
+    elif sGeometry_type == "MULTILINESTRING":
+        return _check_multilinestring_idl_crossing(geometry_in)
+
+    elif sGeometry_type in ["POINT", "MULTIPOINT"]:
+        # Points cannot cross the IDL by definition
+        return False
+
+    elif sGeometry_type == "GEOMETRYCOLLECTION":
+        return _check_geometry_collection_idl_crossing(geometry_in)
+
+    else:
+        # Handle unknown or unsupported geometry types
+        raise ValueError(f"Unsupported geometry type: {sGeometry_type}. "
+                        f"Supported types: POLYGON, MULTIPOLYGON, LINESTRING, "
+                        f"MULTILINESTRING, POINT, MULTIPOINT, GEOMETRYCOLLECTION")
+
+
+def _check_polygon_idl_crossing(polygon: ogr.Geometry) -> bool:
+    """Check if a single polygon crosses the IDL."""
+    try:
+        coordinates_gcs = get_geometry_coordinates(polygon)
+        if coordinates_gcs is None or len(coordinates_gcs) == 0:
+            raise ValueError("Failed to extract coordinates from polygon")
+
+        return check_cross_international_date_line_polygon(coordinates_gcs)
+    except Exception as e:
+        raise ValueError(f"Error processing polygon: {e}")
+
+
+def _check_multipolygon_idl_crossing(multipolygon: ogr.Geometry) -> bool:
+    """Check if any polygon in a multipolygon crosses the IDL."""
+    try:
+        nGeometries = multipolygon.GetGeometryCount()
+        if nGeometries == 0:
+            return False
+
+        # Use short-circuit evaluation - return True as soon as one crossing is found
+        for i in range(nGeometries):
+            sub_geometry = multipolygon.GetGeometryRef(i)
+            if sub_geometry is None:
+                continue
+
+            # Recursively check each polygon
+            if check_cross_international_date_line_geometry(sub_geometry):
+                return True
+        return False
+    except Exception as e:
+        raise ValueError(f"Error processing multipolygon: {e}")
+
+
+def _check_linestring_idl_crossing(linestring: ogr.Geometry) -> bool:
+    """Check if a linestring crosses the IDL."""
+    try:
+        coordinates_gcs = get_geometry_coordinates(linestring)
+        if coordinates_gcs is None or len(coordinates_gcs) < 2:
+            return False
+
+        # Check for large longitude jumps between consecutive points
+        lons = coordinates_gcs[:, 0]
+
+        # Vectorized approach for better performance
+        lon_diffs = np.abs(np.diff(lons))
+        return np.any(lon_diffs > 180.0)
+
+    except Exception as e:
+        raise ValueError(f"Error processing linestring: {e}")
+
+
+def _check_multilinestring_idl_crossing(multilinestring: ogr.Geometry) -> bool:
+    """Check if any linestring in a multilinestring crosses the IDL."""
+    try:
+        nGeometries = multilinestring.GetGeometryCount()
+        if nGeometries == 0:
+            return False
+
+        # Use short-circuit evaluation
+        for i in range(nGeometries):
+            sub_geometry = multilinestring.GetGeometryRef(i)
+            if sub_geometry is None:
+                continue
+
+            # Recursively check each linestring
+            if check_cross_international_date_line_geometry(sub_geometry):
+                return True
+        return False
+    except Exception as e:
+        raise ValueError(f"Error processing multilinestring: {e}")
+
+
+def _check_geometry_collection_idl_crossing(collection: ogr.Geometry) -> bool:
+    """Check if any geometry in a collection crosses the IDL."""
+    try:
+        nGeometries = collection.GetGeometryCount()
+        if nGeometries == 0:
+            return False
+
+        # Use short-circuit evaluation
+        for i in range(nGeometries):
+            sub_geometry = collection.GetGeometryRef(i)
+            if sub_geometry is None:
+                continue
+
+            # Recursively check each geometry in the collection
+            if check_cross_international_date_line_geometry(sub_geometry):
+                return True
+        return False
+    except Exception as e:
+        raise ValueError(f"Error processing geometry collection: {e}")
+
 
 def _validate_coordinate_array(coords: np.ndarray, min_points: int = 3) -> None:
     """Validate coordinate array format and content.
@@ -648,6 +840,7 @@ def _validate_coordinate_array(coords: np.ndarray, min_points: int = 3) -> None:
         raise ValueError("Longitudes must be in range [-180, 180]")
     if not np.all((-90 <= lats) & (lats <= 90)):
         raise ValueError("Latitudes must be in range [-90, 90]")
+
 
 def check_counter_clockwise_local(coords: np.ndarray) -> bool:
     """Local implementation of counter-clockwise check to avoid circular imports.
@@ -678,6 +871,7 @@ def check_counter_clockwise_local(coords: np.ndarray) -> bool:
         signed_area = calculate_signed_area_shoelace(coords)
     return signed_area > 0
 
+
 def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     """Calculate the signed area of a polygon using the shoelace formula.
 
@@ -700,6 +894,7 @@ def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
 
     signed_area = 0.5 * np.sum(x * y_rolled - x_rolled * y)
     return signed_area
+
 
 def reorder_international_date_line_polygon_vertices(vertices: List[Coord]) -> List[Coord]:
     """Reorder polygon vertices to create a valid geometry by rotation.
