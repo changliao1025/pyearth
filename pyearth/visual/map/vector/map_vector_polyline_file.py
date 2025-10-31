@@ -13,7 +13,7 @@ import cartopy.crs as ccrs
 from cartopy.io.img_tiles import OSM
 import shapely.geometry as sgeom
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from pyearth.system.define_global_variables import *
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.visual.formatter import OOMFormatter
 from pyearth.visual.map.zebra_frame import zebra_frame
@@ -24,10 +24,10 @@ from pyearth.visual.map.map_servers import StadiaStamen, EsriTerrain, EsriHydro,
 iYear_current = datetime.datetime.now().year
 sYear = str(iYear_current)
 
-def map_vector_polyline_file(iFiletype_in,
-                             sFilename_in,
+def map_vector_polyline_file(sFilename_in,
                              sFilename_output_in=None,
                              iFlag_thickness_in =None,
+                             iFlag_global_in=None,
                              iFlag_color_in= None,
                              iFlag_colorbar_in=None,
                              iFlag_arrow_in = None,
@@ -87,14 +87,8 @@ def map_vector_polyline_file(iFiletype_in,
     pSRS_wgs84 = ccrs.PlateCarree()  # for latlon data only
     pSRS_geodetic = ccrs.Geodetic()
 
-    if iFiletype_in == 1:  # geojson
-        pDriver = ogr.GetDriverByName('GeoJSON')
-    else:
-        if iFiletype_in == 2:  # shapefile
-            pDriver = ogr.GetDriverByName('Esri Shapefile')
-        else:
-            pDriver = ogr.GetDriverByName('Parquet')
 
+    pDriver = get_vector_driver_from_filename(sFilename_in)
     if os.path.exists(sFilename_in) is False:
         print('file does not exist')
         return
