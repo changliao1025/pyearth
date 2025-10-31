@@ -15,7 +15,7 @@ import cartopy.crs as ccrs
 from cartopy.io.img_tiles import OSM
 import shapely.geometry as sgeom
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from pyearth.system.define_global_variables import *
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.toolbox.data.cgpercentiles import cgpercentiles
 from pyearth.toolbox.math.stat.remap import remap
@@ -68,13 +68,7 @@ def map_vector_point_file(iFiletype_in,
     iCount0 = 0
     iCount1 = 0
 
-    if iFiletype_in == 1:  # geojson
-        pDriver = ogr.GetDriverByName('GeoJSON')
-    else:
-        if iFiletype_in == 2:  # shapefile
-            pDriver = ogr.GetDriverByName('Esri Shapefile')
-        else:
-            pDriver = ogr.GetDriverByName('Parquet')
+    pDriver = get_vector_driver_from_filename(sFilename_in)
 
     if os.path.exists(sFilename_in) is False:
         print('file does not exist')

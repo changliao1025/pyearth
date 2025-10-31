@@ -100,7 +100,7 @@ def map_vector_polyline_file(sFilename_in,
     if iDPI_in is not None:
         iDPI = iDPI_in
     else:
-        iDPI = 300
+        iDPI = 150
 
     if iSize_x_in is not None:
         iSize_x = iSize_x_in
@@ -256,7 +256,6 @@ def map_vector_polyline_file(sFilename_in,
 
         if sGeometry_type =='LINESTRING':
             aCoords_gcs =   get_geometry_coordinates(pGeometry_in)
-            #aCoords_gcs = aCoords_gcs[:,0:2]
             dLon_max = float(np.max( [dLon_max, np.max(aCoords_gcs[:,0])] ))
             dLon_min = float(np.min( [dLon_min, np.min(aCoords_gcs[:,0])] ))
             dLat_max = float(np.max( [dLat_max, np.max(aCoords_gcs[:,1])] ))
@@ -265,9 +264,7 @@ def map_vector_polyline_file(sFilename_in,
     if iFlag_color == 1:
         aValue_field_color = np.array(aValue_field_color)
         if iFlag_discrete ==1:
-            #convert to integer
             aValue_field_color = np.array(aValue_field_color, dtype=int)
-            #reorder it
             aValue_field_color = np.unique(aValue_field_color)
             aValue_field_color = np.sort(aValue_field_color)
             nValue_field = len(aValue_field_color) #get unique values from the aValue_field_color
@@ -304,6 +301,7 @@ def map_vector_polyline_file(sFilename_in,
     if pProjection_data_in is not None:
         pProjection_data = pProjection_data_in
     else:
+
         pProjection_data = pSRS_wgs84
 
 
@@ -351,8 +349,12 @@ def map_vector_polyline_file(sFilename_in,
         aExtent = aExtent_in
 
     print(aExtent)
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
-    minx, maxx, miny, maxy = aExtent
+    if iFlag_global_in is None:
+        ax.set_extent(aExtent, crs = pSRS_wgs84)
+        minx, maxx, miny, maxy = aExtent
+    else:
+        minx, maxx, miny, maxy = -180, 180, -90, 90
+        
     if iFlag_filter == 1:
         pLayer.SetSpatialFilterRect(minx, miny, maxx, maxy)
 
@@ -436,13 +438,6 @@ def map_vector_polyline_file(sFilename_in,
             aCoords_gcs = get_geometry_coordinates(pGeometry_in)
             aCoords_gcs = aCoords_gcs[:,0:2]
             nvertex = len(aCoords_gcs)
-            #if nvertex == 2 :
-            #    dLon_label = 0.5 * (aCoords_gcs[0][0] + aCoords_gcs[1][0] )
-            #    dLat_label = 0.5 * (aCoords_gcs[0][1] + aCoords_gcs[1][1] )
-            #else:
-            #    lIndex_mid = int(nvertex/2)
-            #    dLon_label = aCoords_gcs[lIndex_mid][0]
-            #    dLat_label = aCoords_gcs[lIndex_mid][1]
 
             codes = np.full(nvertex, mpl.path.Path.LINETO, dtype=int )
             codes[0] = mpl.path.Path.MOVETO
@@ -475,8 +470,9 @@ def map_vector_polyline_file(sFilename_in,
                          facecolor='none', linewidths=aThickness, transform=pProjection_data)
 
     ax.add_collection(pLC)
+    if iFlag_global_in is None:
+        ax.set_extent(aExtent, crs = pSRS_wgs84)
 
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
     gl = ax.gridlines(crs=cpl.crs.PlateCarree(), draw_labels=True,
                       linewidth=1, color='gray', alpha=0.5, linestyle='--',
                       xlocs=np.arange(minx, maxx+(maxx-minx)/9, (maxx-minx)/8),
@@ -488,13 +484,15 @@ def map_vector_polyline_file(sFilename_in,
     gl.ylocator = mpl.ticker.MaxNLocator(4)
     gl.xlabel_style = {'size': 10, 'color': 'k', 'rotation': 0, 'ha': 'right'}
     gl.ylabel_style = {'size': 10, 'color': 'k',
-                       'rotation': 90, 'weight': 'normal'}
+                           'rotation': 90, 'weight': 'normal'}
 
-    if iFlag_zebra ==1:
-        ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
-        ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
-        ax.set_axis_off()
-
+    if iFlag_global_in is not None:
+        pass
+    else:
+        if iFlag_zebra ==1:
+            ax.set_xticks(np.arange(minx, maxx+(maxx-minx)/11, (maxx-minx)/10))
+            ax.set_yticks(np.arange(miny, maxy+(maxy-miny)/11, (maxy-miny)/10))
+            ax.set_axis_off()
 
     if aLegend_in is not None:
         nlegend = len(aLegend_in)
@@ -507,8 +505,12 @@ def map_vector_polyline_file(sFilename_in,
                     transform=ax.transAxes,
                     color='black', fontsize=iFont_size + 2)
 
+
     if iFlag_zebra ==1:
-        ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
+        if iFlag_global_in is None:
+            ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=1)
+        else:
+            ax.zebra_frame(crs=pSRS_wgs84, iFlag_outer_frame_in=None)
 
     sTitle = "\n".join(textwrap.wrap(sTitle, width=cwidth))
     if iFlag_title is None:
@@ -518,8 +520,8 @@ def map_vector_polyline_file(sFilename_in,
             ax.set_title( sTitle )
         else:
             pass
-
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    if iFlag_global_in is None:
+        ax.set_extent(aExtent, crs = pSRS_wgs84)
     if iFlag_colorbar == 1:
         fig.canvas.draw()
         ax_pos = ax.get_position() # get the original position
@@ -554,7 +556,8 @@ def map_vector_polyline_file(sFilename_in,
         cb.ax.get_yaxis().set_label_position('left')
         cb.ax.tick_params(labelsize=iFont_size-2)
 
-    ax.set_extent(aExtent, crs = pSRS_wgs84)
+    if iFlag_global_in is None:
+        ax.set_extent(aExtent, crs = pSRS_wgs84)
     pDataset = pLayer = pFeature  = None
 
     if sFilename_output_in is None:
