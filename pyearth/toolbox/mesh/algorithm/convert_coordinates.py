@@ -48,6 +48,9 @@ def convert_gcs_coordinates_to_meshcell(iMesh_type_in: int,
 
     edges = [pyline(points[i], points[(i + 1) % len(points)]) for i in range(len(points))]
 
+    #add the closing point back to the points list
+    points.append(points[0])
+
     return pypolygon(dLongitude_center_in, dLatitude_center_in, edges, points)
 
 def convert_gcs_coordinates_to_polyline(aCoordinates_in: List[Tuple[float, float]]) -> pypolyline:
