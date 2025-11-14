@@ -239,8 +239,7 @@ def create_latlon_mesh(dLongitude_left_in: float,
     aLatlon = list()
     aLatlon_dict = dict()
     lCellIndex = 0
-    def add_cell_into_list(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords ):
-
+    def add_cell_into_list(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords):
         pLatlon = convert_gcs_coordinates_to_meshcell(2, dLongitude_center, dLatitude_center, aCoords)
         pLatlon.lCellID = lCellID
         dArea = pLatlon.calculate_polygon_area()
