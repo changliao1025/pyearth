@@ -34,7 +34,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
         return True  # Degenerate case
 
     # Check if polygon crosses the International Date Line
-    if check_cross_international_date_line_polygon(coords):
+    iFlag_cross, _ = check_cross_international_date_line_polygon(coords)
+    if iFlag_cross:
         coords_unwrapped = unwrap_longitudes(coords)
         # Calculate signed area using optimized shoelace formula
         signed_area = calculate_signed_area_shoelace(coords_unwrapped)

@@ -69,8 +69,7 @@ from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_
 from pyearth.gis.gdal.read.raster.gdal_get_raster_spatial_reference import gdal_get_raster_spatial_reference_wkt
 from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 from pyearth.gis.gdal.gdal_raster_format_support import (
-    get_raster_driver_from_extension,
-    get_raster_format_from_extension,
+    get_raster_driver_from_filename,
 )
 gdal.UseExceptions()
 #set default spatial reference
@@ -189,18 +188,20 @@ def resample_raster(
     tgt_srs = osr.SpatialReference()
     tgt_srs.ImportFromWkt(pProjection_target)
     if int(gdal.__version__[0]) >= 3:
-        src_srs.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
-        tgt_srs.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        src_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        tgt_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     # warp in-memory
     warp_opts = gdal.WarpOptions(
         cropToCutline=False,
         xRes=dResolution_x,
         yRes=dResolution_y,
-        dstSRS=tgt_srs.ExportToWkt(),
+        dstSRS=tgt_srs,
         format='MEM',
         resampleAlg=sResampleAlg,
-    )
+        srcNodata=dMissing_value_source,  # Source NoData value
+        dstNodata=dMissing_value_target   # Target NoData value
+        )
     warped = gdal.Warp('', src_ds, options=warp_opts)
     if warped is None:
         raise RuntimeError('GDAL warp failed')
@@ -221,7 +222,7 @@ def resample_raster(
 
     # choose driver from extension
     try:
-        driver = get_raster_driver_from_extension(sFilename_out)
+        driver = get_raster_driver_from_filename(sFilename_out)
     except Exception:
         driver = gdal.GetDriverByName('GTiff')
     if driver is None:

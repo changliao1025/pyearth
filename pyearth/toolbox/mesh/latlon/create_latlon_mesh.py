@@ -392,7 +392,7 @@ def create_latlon_mesh(dLongitude_left_in: float,
             pCell.nNeighbor= len(aNeighbor_land_update)
             pCell.aNeighbor_land = aNeighbor_land_update
             pCell.nNeighbor_land= len(aNeighbor_land_update)
-            pCell.nNeighbor_ocean = pCell.nVertex - pCell.nNeighbor_land
+            pCell.nNeighbor_ocean = pCell.nPoint - pCell.nNeighbor_land
             aLatlon_out.append(pCell)
     except Exception as e:
         print(f"Error updating cell neighbors: {e}")
@@ -408,7 +408,7 @@ def create_latlon_mesh(dLongitude_left_in: float,
                     #use dictionary to get index
                     lIndex = aLatlon_dict[lCellID1]
                     pLatlon1 = aLatlon_out[lIndex]
-                    dDistance = pLatlon.pVertex_center.calculate_distance( pLatlon1.pVertex_center )
+                    dDistance = pLatlon.pPoint_center.calculate_distance( pLatlon1.pPoint_center )
                     pLatlon.aNeighbor_distance.append(dDistance)
             except Exception as e:
                 print(f"Error calculating neighbor distances: {e}")

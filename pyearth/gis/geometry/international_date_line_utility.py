@@ -233,14 +233,14 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
     """
     Split a polygon crossing the International Date Line into left and right hemisphere polygons.
 
-    This function takes a polygon that crosses the IDL (180°/-180° longitude) and splits it
+    This function takes a polygon that actually crosses the IDL (180°/-180° longitude) and splits it
     into two separate polygons: one for the Eastern hemisphere (positive longitudes) and one
     for the Western hemisphere (negative longitudes). The split is performed along the IDL
     meridian using great circle intersection calculations.
 
-    The algorithm identifies edges that cross the IDL, calculates exact intersection points,
-    and partitions vertices into left (Eastern) and right (Western) polygons, adding boundary
-    points at ±180° as needed.
+    **Important**: This function should only be called for polygons that have actual edge crossings
+    of the IDL. Polygons with vertices exactly on the IDL (±180°) but no edge crossings should be
+    handled by `check_cross_international_date_line_polygon` which returns adjusted coordinates.
 
     Parameters
     ----------
@@ -250,8 +250,9 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
         Requirements:
         - Should be a closed polygon (first point equals last point)
         - Vertices should be in counter-clockwise (CCW) order
-        - Must cross the IDL exactly twice (one continuous crossing)
+        - Must have actual edges crossing the IDL (exactly 2 crossings)
         - Minimum 4 points (3 unique + 1 closure)
+        - No vertices exactly on ±180° meridian (handled separately)
 
         Format: [[lon1, lat1], [lon2, lat2], ..., [lonN, latN]]
 
@@ -273,52 +274,43 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
           - Includes boundary points near -180°
           - Closed polygon (first == last)
 
-        Returns None if exactly 2 IDL crossings are not found.
-
     Raises
     ------
     ValueError
-        If input coordinates are invalid or don't meet requirements.
+        If exactly 2 IDL crossings are not found, or if input coordinates are invalid.
     TypeError
         If input is not a valid array-like structure.
 
     Notes
     -----
-    1. **Crossing Detection**: The function identifies edges where longitude changes sign
-       across the IDL. It checks both the polygon perimeter and the closing edge.
+    **Algorithm Overview:**
 
-    2. **Intersection Calculation**: Uses great circle calculations via
-       `find_great_circle_intersection_with_meridian` to find exact latitude where
-       each edge crosses the 180° meridian.
+    1. **Preprocessing**: Excludes vertices exactly on IDL from crossing detection
+    2. **Edge Crossing Detection**: Finds edges that transition between hemispheres
+    3. **Intersection Calculation**: Uses great circle math to find exact crossing latitudes
+    4. **Boundary Addition**: Adds meridian boundary points for polygon closure
+    5. **Vertex Partitioning**: Assigns vertices to eastern/western polygons
+    6. **Polygon Closure**: Ensures both result polygons are properly closed
 
-    3. **Boundary Points**: Adds points slightly inside ±180° to avoid numerical issues:
-       - Left polygon: 180° - 1e-10 (Eastern boundary)
-       - Right polygon: -180° + 1e-10 (Western boundary)
+    **IDL Vertex Handling:**
 
-    4. **Vertex Partitioning**: Vertices are assigned based on longitude sign:
-       - Positive longitude → left polygon (Eastern hemisphere)
-       - Negative longitude → right polygon (Western hemisphere)
-       - Vertices at crossing points are included in both polygons
+    - Vertices exactly on ±180° are excluded from crossing detection
+    - Such cases should be pre-processed by `check_cross_international_date_line_polygon`
+    - This function focuses only on actual edge crossings
 
-    5. **Polygon Closure**: Both resulting polygons are automatically closed by
-       appending the first vertex to the end if not already closed.
+    **Numerical Precision:**
 
-    6. **CCW Order Requirement**: The algorithm assumes counter-clockwise vertex order.
-       Clockwise polygons may produce incorrect results.
-
-    7. **Two Crossings Only**: If the polygon crosses the IDL more than twice or
-       doesn't cross at all, the function returns None with a warning.
-
-    8. **Numerical Precision**: Uses 1e-10 offset from ±180° for boundary points and
-       1e-10 tolerance for closure checks to handle floating-point precision.
+    - Uses 1e-8 offset from ±180° for boundary points
+    - 1e-10 tolerance for closure checks
+    - Great circle calculations for accurate intersection latitudes
 
     Warnings
     --------
-    - Function prints warning and returns None if exactly 2 crossings not found
+    - Only handles polygons with exactly 2 IDL edge crossings
     - Does not validate CCW order - incorrect order will produce wrong results
     - Does not handle polygons with holes or multi-part geometries
     - May fail for self-intersecting or very complex polygons
-    - Assumes continuous crossing (not multiple separate crossings)
+    - Vertices exactly on IDL should be handled before calling this function
 
     Examples
     --------
@@ -416,20 +408,36 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
     longitudes = aCoord_gcs[:, 0]
     longitudes_next = np.roll(longitudes, -1)  # Next longitude with wrap-around
 
+    # Check if any point lies exactly on the IDL
+    # Exclude the last point to avoid duplication in closed polygons (first == last)
+    idl_points = np.zeros_like(longitudes, dtype=bool)
+    idl_points[:-1] = (longitudes[:-1] == 180.0) | (longitudes[:-1] == -180.0)
+
+    # More explicit IDL point detection for crossing logic
+    current_on_idl = (np.abs(longitudes - 180.0) < 1e-10) | (np.abs(longitudes + 180.0) < 1e-10)
+    next_on_idl = (np.abs(longitudes_next - 180.0) < 1e-10) | (np.abs(longitudes_next + 180.0) < 1e-10)
+
     # Find eastward crossings: positive to negative longitude (0° → 180° → -180°)
-    eastward_crossings = ((longitudes > 0) & (longitudes < 180.0) & (longitudes_next < 0))
+    # Exclude edges where either vertex is exactly on the IDL
+    eastward_crossings = ((longitudes > 0) & (longitudes < 180.0) & (longitudes_next < 0) &
+                         ~current_on_idl & ~next_on_idl)
 
     # Find westward crossings: negative to positive longitude (-180° → 180° → 0°)
-    westward_crossings = ((longitudes < 0) & (longitudes_next > 0))
+    # Exclude edges where either vertex is exactly on the IDL
+    westward_crossings = ((longitudes < 0) & (longitudes > -180.0) & (longitudes_next > 0) &
+                         ~current_on_idl & ~next_on_idl)
 
     # Combine crossing conditions
-    crossing_mask = eastward_crossings | westward_crossings
+    crossing_mask = idl_points | eastward_crossings | westward_crossings
     crossing_indices = np.where(crossing_mask)[0]
 
     # Convert to list for compatibility with existing code
     aIndex = crossing_indices.tolist()
 
-    # Verify we found exactly 2 crossings
+    # Find vertices that are exactly on the IDL (±180°)
+    idl_vertex_indices = np.where(idl_points)[0].tolist()
+
+    # Verify we found exactly 2 crossings for normal splitting
     # A polygon crossing the IDL should have exactly 2 edges that cross it
     if len(aIndex) != 2:
         raise ValueError(f"Expected exactly 2 IDL crossings, found {len(aIndex)}. "
@@ -474,7 +482,7 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
     western_polygon_coords = []  # Negative longitudes (Western hemisphere)
 
     # Constants for numerical stability
-    LONGITUDE_OFFSET = 1.0e-10
+    LONGITUDE_OFFSET = 1.0e-8
     EASTERN_BOUNDARY = 180.0 - LONGITUDE_OFFSET
     WESTERN_BOUNDARY = -180.0 + LONGITUDE_OFFSET
 
@@ -493,7 +501,12 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
 
         # Process Eastern hemisphere vertices (positive longitude)
         if longitude > 0:
-            eastern_polygon_coords.append(aCoord_gcs[vertex_index])
+            # Apply offset if vertex is exactly on +180° IDL
+            if abs(longitude - 180.0) < 1e-10:
+                coord_to_add = [EASTERN_BOUNDARY, aCoord_gcs[vertex_index, 1]]
+            else:
+                coord_to_add = aCoord_gcs[vertex_index]
+            eastern_polygon_coords.append(coord_to_add)
 
             # Add boundary points at crossing vertices
             if is_crossing_vertex and not eastern_boundary_added:
@@ -506,7 +519,12 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
 
         # Process Western hemisphere vertices (negative longitude)
         elif longitude < 0:
-            western_polygon_coords.append(aCoord_gcs[vertex_index])
+            # Apply offset if vertex is exactly on -180° IDL
+            if abs(longitude + 180.0) < 1e-10:
+                coord_to_add = [WESTERN_BOUNDARY, aCoord_gcs[vertex_index, 1]]
+            else:
+                coord_to_add = aCoord_gcs[vertex_index]
+            western_polygon_coords.append(coord_to_add)
 
             # Add boundary points at crossing vertices
             if is_crossing_vertex and not western_boundary_added:
@@ -542,8 +560,12 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
 
     return [eastern_polygon, western_polygon]
 
-def check_cross_international_date_line_polygon(coords: np.ndarray) -> bool:
+def check_cross_international_date_line_polygon(coords: np.ndarray) -> Tuple[bool, np.ndarray]:
     """Check if polygon coordinates cross the International Date Line.
+
+    This function distinguishes between actual IDL edge crossings and vertices
+    that happen to lie exactly on the IDL meridian (±180°). Vertices on the IDL
+    without edge crossings are adjusted slightly to avoid numerical issues.
 
     Parameters
     ----------
@@ -552,31 +574,117 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> bool:
 
     Returns
     -------
-    bool
-        True if the polygon crosses the IDL, False otherwise.
+    Tuple[bool, np.ndarray]
+        A tuple containing:
+        - bool: True if the polygon has actual edges crossing the IDL, False otherwise
+        - np.ndarray or None:
+          - If False: Adjusted coordinates with IDL vertices moved slightly off the meridian
+          - If True: None (original coordinates should be used for splitting)
 
     Notes
     -----
-    Uses a more robust method than simple longitude range checking by
-    examining consecutive longitude differences.
+    **IDL Detection Logic:**
+
+    1. **Vertex Detection**: Identifies vertices exactly on ±180° meridian
+    2. **Edge Crossing Detection**: Finds edges that actually cross the IDL
+       (excludes edges involving IDL vertices)
+    3. **Coordinate Adjustment**: If no edge crossings but IDL vertices exist,
+       moves these vertices slightly (±1e-6°) based on neighboring vertices
+    4. **Hemisphere Assignment**: IDL vertices are moved to the hemisphere
+       containing the majority of their neighbors
+
+    **Return Behavior:**
+
+    - Returns (False, adjusted_coords) for polygons with IDL vertices but no crossings
+    - Returns (True, None) for polygons with actual IDL edge crossings
+    - Returns (False, coords) for polygons that don't involve the IDL
+
+    This approach ensures that single IDL vertices don't cause false crossing
+    detection while preserving the ability to split truly crossing polygons.
     """
     try:
         if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
             raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
 
         if len(coords) < 3:
-            return False
+            return False, coords.copy()
 
         # Validate coordinate ranges
         lons, lats = coords[:, 0], coords[:, 1]
         if not (np.all((-180 <= lons) & (lons <= 180)) and np.all((-90 <= lats) & (lats <= 90))):
-            return False
+            return False, coords.copy()
 
     except (ValueError, IndexError, TypeError):
-        return False  # Invalid coordinates can't cross IDL
+        return False, coords.copy()  # Invalid coordinates can't cross IDL
 
-    lons = coords[:, 0]
+    # Make a copy to avoid modifying the original
+    coords_updated = coords.copy()
+    lons = coords_updated[:, 0]
 
+    # Check if any vertices are exactly on the IDL
+    # Exclude the last point to avoid duplication in closed polygons (first == last)
+    idl_vertices = np.zeros_like(lons, dtype=bool)
+    idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < 1e-10
+
+    # If there are vertices on IDL, check if there are actual edge crossings
+    if np.any(idl_vertices):
+        lons_next = np.roll(lons, -1)
+
+        # Find eastward crossings: positive to negative longitude, excluding IDL vertices
+        eastward_crossings = ((lons > 0) & (lons < 180.0) & (lons_next < 0) &
+                             ~idl_vertices & ~np.roll(idl_vertices, -1))
+
+        # Find westward crossings: negative to positive longitude, excluding IDL vertices
+        westward_crossings = ((lons < 0) & (lons_next > 0) &
+                             ~idl_vertices & ~np.roll(idl_vertices, -1))
+
+        # If no actual edge crossings, adjust IDL vertices and return False
+        if not (np.any(eastward_crossings) or np.any(westward_crossings)):
+            # Adjust vertices that are exactly on the IDL by slightly moving them
+            IDL_OFFSET = 1e-6  # Small offset to move points just off the IDL
+            idl_indices = np.where(idl_vertices)[0]
+
+            for idx in idl_indices:
+                # Determine which hemisphere to move to based on neighboring vertices
+                prev_idx = (idx - 1) % len(coords_updated)
+                next_idx = (idx + 1) % len(coords_updated)
+
+                prev_lon = coords_updated[prev_idx, 0]
+                next_lon = coords_updated[next_idx, 0]
+
+                # Count non-IDL neighbors to determine preferred hemisphere
+                neighbor_lons = []
+                if abs(abs(prev_lon) - 180.0) > 1e-10:  # Previous vertex not on IDL
+                    neighbor_lons.append(prev_lon)
+                if abs(abs(next_lon) - 180.0) > 1e-10:  # Next vertex not on IDL
+                    neighbor_lons.append(next_lon)
+
+                if neighbor_lons:
+                    # Move to hemisphere containing majority of neighbors
+                    positive_neighbors = sum(1 for lon in neighbor_lons if lon > 0)
+                    if positive_neighbors >= len(neighbor_lons) / 2:
+                        # Move to eastern hemisphere
+                        coords_updated[idx, 0] = 180.0 - IDL_OFFSET
+                    else:
+                        # Move to western hemisphere
+                        coords_updated[idx, 0] = -180.0 + IDL_OFFSET
+                else:
+                    # If neighbors are also on IDL, check overall polygon distribution
+                    positive_lons = np.sum(lons > 0)
+                    negative_lons = np.sum(lons < 0)
+
+                    if positive_lons >= negative_lons:
+                        coords_updated[idx, 0] = 180.0 - IDL_OFFSET
+                    else:
+                        coords_updated[idx, 0] = -180.0 + IDL_OFFSET
+
+            # After adjustment, no crossing
+            return False, coords_updated
+        else:
+            # There are actual edge crossings
+            return True, None
+
+    # Original logic for cases without IDL vertices
     # Check for large jumps between consecutive points (> 180 degrees)
     lon_diffs = np.abs(np.diff(lons))
     max_jump = np.max(lon_diffs)
@@ -584,7 +692,8 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> bool:
     # Also check the wrap-around from last to first point
     wrap_jump = abs(lons[-1] - lons[0])
 
-    return max_jump > 180 or wrap_jump > 180
+    crossing = max_jump > 180 or wrap_jump > 180
+    return crossing, None
 
 # Alias for backward compatibility
 check_cross_idl = check_cross_international_date_line_polygon
@@ -727,7 +836,8 @@ def _check_polygon_idl_crossing(polygon: ogr.Geometry) -> bool:
         if coordinates_gcs is None or len(coordinates_gcs) == 0:
             raise ValueError("Failed to extract coordinates from polygon")
 
-        return check_cross_international_date_line_polygon(coordinates_gcs)
+        crosses_idl, _ = check_cross_international_date_line_polygon(coordinates_gcs)
+        return crosses_idl
     except Exception as e:
         raise ValueError(f"Error processing polygon: {e}")
 
@@ -862,13 +972,16 @@ def check_counter_clockwise_local(coords: np.ndarray) -> bool:
         return True  # Degenerate case
 
     # Check if polygon crosses the International Date Line
-    if check_cross_international_date_line_polygon(coords):
+    crosses_idl, coords_adjusted = check_cross_international_date_line_polygon(coords)
+    if crosses_idl:
         coords_unwrapped = unwrap_longitudes(coords)
         # Calculate signed area using optimized shoelace formula
         signed_area = calculate_signed_area_shoelace(coords_unwrapped)
     else:
         # Standard case: calculate signed area directly
-        signed_area = calculate_signed_area_shoelace(coords)
+        # Use adjusted coordinates if available (for cases where IDL vertices were moved)
+        coords_to_use = coords_adjusted if coords_adjusted is not None else coords
+        signed_area = calculate_signed_area_shoelace(coords_to_use)
     return signed_area > 0
 
 
