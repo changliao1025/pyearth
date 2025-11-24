@@ -1896,16 +1896,16 @@ struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_o
 /* "pyearth/gis/geometry/kernel.pyx":17
  * 
  * @cython.boundscheck(False)
- * cpdef double calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
+ * cpdef calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
  */
 struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude {
   int __pyx_n;
-  int bFlag_radian;
+  PyObject *bFlag_radian;
 };
 
-/* "pyearth/gis/geometry/kernel.pyx":57
+/* "pyearth/gis/geometry/kernel.pyx":96
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(             # <<<<<<<<<<<<<<
@@ -3247,7 +3247,7 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static double __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(double, double, double, double, int __pyx_skip_dispatch, struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude *__pyx_optional_args); /*proto*/
+static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(PyObject *, PyObject *, PyObject *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude *__pyx_optional_args); /*proto*/
 static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude_array(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude_array *__pyx_optional_args); /*proto*/
 static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_vectors_coordinates(double, double, double, double, double, double, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_point(PyObject *, PyObject *, PyObject *, PyObject *, PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
@@ -3296,12 +3296,12 @@ int __pyx_module_is_main_pyearth__gis__geometry__kernel = 0;
 
 /* Implementation of "pyearth.gis.geometry.kernel" */
 /* #### Code section: global_var ### */
+static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin___import__;
 static PyObject *__pyx_builtin_MemoryError;
 static PyObject *__pyx_builtin_enumerate;
-static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_AssertionError;
 static PyObject *__pyx_builtin_Ellipsis;
 static PyObject *__pyx_builtin_id;
@@ -3383,6 +3383,7 @@ static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_struct[] = "struct";
 static const char __pyx_k_unpack[] = "unpack";
 static const char __pyx_k_update[] = "update";
+static const char __pyx_k_asarray[] = "asarray";
 static const char __pyx_k_disable[] = "disable";
 static const char __pyx_k_float64[] = "float64";
 static const char __pyx_k_fortran[] = "fortran";
@@ -3479,14 +3480,14 @@ static const char __pyx_k_Invalid_mode_expected_c_or_fortr[] = "Invalid mode, ex
 static const char __pyx_k_Out_of_bounds_on_buffer_access_a[] = "Out of bounds on buffer access (axis ";
 static const char __pyx_k_Unable_to_convert_item_to_object[] = "Unable to convert item to object";
 static const char __pyx_k_Zero_length_vector_encountered_C[] = "Zero-length vector encountered. Cannot calculate angle.";
-static const char __pyx_k_calculate_distance_based_on_long[] = "calculate_distance_based_on_longitude_latitude";
+static const char __pyx_k_calculate_distance_based_on_long[] = "calculate_distance_based_on_longitude_latitude_numpy";
 static const char __pyx_k_got_differing_extents_in_dimensi[] = "got differing extents in dimension ";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static const char __pyx_k_numpy__core_multiarray_failed_to[] = "numpy._core.multiarray failed to import";
 static const char __pyx_k_numpy__core_umath_failed_to_impo[] = "numpy._core.umath failed to import";
 static const char __pyx_k_unable_to_allocate_shape_and_str[] = "unable to allocate shape and strides.";
-static const char __pyx_k_calculate_distance_based_on_long_2[] = "calculate_distance_based_on_longitude_latitude_array";
-static const char __pyx_k_calculate_distance_based_on_long_3[] = "calculate_distance_based_on_longitude_latitude_numpy";
+static const char __pyx_k_calculate_distance_based_on_long_2[] = "calculate_distance_based_on_longitude_latitude";
+static const char __pyx_k_calculate_distance_based_on_long_3[] = "calculate_distance_based_on_longitude_latitude_array";
 /* #### Code section: decls ### */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -3529,7 +3530,7 @@ static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewsl
 static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_15View_dot_MemoryView___pyx_unpickle_Enum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_dLongitude1_in, double __pyx_v_dLatitude1_in, double __pyx_v_dLongitude2_in, double __pyx_v_dLatitude2_in, int __pyx_v_bFlag_radian); /* proto */
+static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_dLongitude1_in, PyObject *__pyx_v_dLatitude1_in, PyObject *__pyx_v_dLongitude2_in, PyObject *__pyx_v_dLatitude2_in, PyObject *__pyx_v_bFlag_radian); /* proto */
 static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_2calculate_distance_based_on_longitude_latitude_array(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dLongitude1_in, __Pyx_memviewslice __pyx_v_dLatitude1_in, __Pyx_memviewslice __pyx_v_dLongitude2_in, __Pyx_memviewslice __pyx_v_dLatitude2_in, int __pyx_v_bFlag_radian); /* proto */
 static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_based_on_longitude_latitude_numpy(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_dLongitude1_in, PyObject *__pyx_v_dLatitude1_in, PyObject *__pyx_v_dLongitude2_in, PyObject *__pyx_v_dLatitude2_in, PyObject *__pyx_v_bFlag_radian); /* proto */
 static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_6calculate_angle_between_vectors_coordinates(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_x1, double __pyx_v_y1, double __pyx_v_z1, double __pyx_v_x2, double __pyx_v_y2, double __pyx_v_z2); /* proto */
@@ -3668,6 +3669,7 @@ typedef struct {
   PyObject *__pyx_n_s_allocate_buffer;
   PyObject *__pyx_kp_u_and;
   PyObject *__pyx_n_s_arcsin;
+  PyObject *__pyx_n_s_asarray;
   PyObject *__pyx_n_s_asyncio_coroutines;
   PyObject *__pyx_n_s_bFlag_radian;
   PyObject *__pyx_n_s_base;
@@ -3767,6 +3769,7 @@ typedef struct {
   PyObject *__pyx_n_s_setstate;
   PyObject *__pyx_n_s_setstate_cython;
   PyObject *__pyx_n_s_shape;
+  PyObject *__pyx_n_u_shape;
   PyObject *__pyx_n_s_sin;
   PyObject *__pyx_n_s_size;
   PyObject *__pyx_n_s_spec;
@@ -3958,6 +3961,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_allocate_buffer);
   Py_CLEAR(clear_module_state->__pyx_kp_u_and);
   Py_CLEAR(clear_module_state->__pyx_n_s_arcsin);
+  Py_CLEAR(clear_module_state->__pyx_n_s_asarray);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
   Py_CLEAR(clear_module_state->__pyx_n_s_bFlag_radian);
   Py_CLEAR(clear_module_state->__pyx_n_s_base);
@@ -4057,6 +4061,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate);
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate_cython);
   Py_CLEAR(clear_module_state->__pyx_n_s_shape);
+  Py_CLEAR(clear_module_state->__pyx_n_u_shape);
   Py_CLEAR(clear_module_state->__pyx_n_s_sin);
   Py_CLEAR(clear_module_state->__pyx_n_s_size);
   Py_CLEAR(clear_module_state->__pyx_n_s_spec);
@@ -4226,6 +4231,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_allocate_buffer);
   Py_VISIT(traverse_module_state->__pyx_kp_u_and);
   Py_VISIT(traverse_module_state->__pyx_n_s_arcsin);
+  Py_VISIT(traverse_module_state->__pyx_n_s_asarray);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
   Py_VISIT(traverse_module_state->__pyx_n_s_bFlag_radian);
   Py_VISIT(traverse_module_state->__pyx_n_s_base);
@@ -4325,6 +4331,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate);
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate_cython);
   Py_VISIT(traverse_module_state->__pyx_n_s_shape);
+  Py_VISIT(traverse_module_state->__pyx_n_u_shape);
   Py_VISIT(traverse_module_state->__pyx_n_s_sin);
   Py_VISIT(traverse_module_state->__pyx_n_s_size);
   Py_VISIT(traverse_module_state->__pyx_n_s_spec);
@@ -4532,6 +4539,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_allocate_buffer __pyx_mstate_global->__pyx_n_s_allocate_buffer
 #define __pyx_kp_u_and __pyx_mstate_global->__pyx_kp_u_and
 #define __pyx_n_s_arcsin __pyx_mstate_global->__pyx_n_s_arcsin
+#define __pyx_n_s_asarray __pyx_mstate_global->__pyx_n_s_asarray
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
 #define __pyx_n_s_bFlag_radian __pyx_mstate_global->__pyx_n_s_bFlag_radian
 #define __pyx_n_s_base __pyx_mstate_global->__pyx_n_s_base
@@ -4631,6 +4639,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_setstate __pyx_mstate_global->__pyx_n_s_setstate
 #define __pyx_n_s_setstate_cython __pyx_mstate_global->__pyx_n_s_setstate_cython
 #define __pyx_n_s_shape __pyx_mstate_global->__pyx_n_s_shape
+#define __pyx_n_u_shape __pyx_mstate_global->__pyx_n_u_shape
 #define __pyx_n_s_sin __pyx_mstate_global->__pyx_n_s_sin
 #define __pyx_n_s_size __pyx_mstate_global->__pyx_n_s_size
 #define __pyx_n_s_spec __pyx_mstate_global->__pyx_n_s_spec
@@ -20032,9 +20041,9 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
 /* "pyearth/gis/geometry/kernel.pyx":17
  * 
  * @cython.boundscheck(False)
- * cpdef double calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
+ * cpdef calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
  */
 
 static PyObject *__pyx_pw_7pyearth_3gis_8geometry_6kernel_1calculate_distance_based_on_longitude_latitude(PyObject *__pyx_self, 
@@ -20044,139 +20053,747 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static double __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(double __pyx_v_dLongitude1_in, double __pyx_v_dLatitude1_in, double __pyx_v_dLongitude2_in, double __pyx_v_dLatitude2_in, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude *__pyx_optional_args) {
+static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(PyObject *__pyx_v_dLongitude1_in, PyObject *__pyx_v_dLatitude1_in, PyObject *__pyx_v_dLongitude2_in, PyObject *__pyx_v_dLatitude2_in, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude *__pyx_optional_args) {
 
   /* "pyearth/gis/geometry/kernel.pyx":20
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
- *     bint bFlag_radian=False             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
+ *     bFlag_radian=False             # <<<<<<<<<<<<<<
  * ):
  *     """
  */
-  int __pyx_v_bFlag_radian = ((int)0);
+  PyObject *__pyx_v_bFlag_radian = ((PyObject *)Py_False);
+  PyObject *__pyx_v_np = NULL;
+  PyObject *__pyx_v_lon1_arr = NULL;
+  PyObject *__pyx_v_lat1_arr = NULL;
+  PyObject *__pyx_v_lon2_arr = NULL;
+  PyObject *__pyx_v_lat2_arr = NULL;
   double __pyx_v_lon1;
   double __pyx_v_lat1;
   double __pyx_v_lon2;
   double __pyx_v_lat2;
+  double __pyx_v_dLongitude1_scalar;
+  double __pyx_v_dLatitude1_scalar;
+  double __pyx_v_dLongitude2_scalar;
+  double __pyx_v_dLatitude2_scalar;
   double __pyx_v_dLongtitude_diff;
   double __pyx_v_dLatitude_diff;
   double __pyx_v_a;
   double __pyx_v_b;
   double __pyx_v_c;
-  double __pyx_r;
-  int __pyx_t_1;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_t_4;
+  int __pyx_t_5;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
+  PyObject *__pyx_t_9 = NULL;
+  unsigned int __pyx_t_10;
+  PyObject *__pyx_t_11 = NULL;
+  PyObject *__pyx_t_12 = NULL;
+  PyObject *__pyx_t_13 = NULL;
+  int __pyx_t_14;
+  double __pyx_t_15;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("calculate_distance_based_on_longitude_latitude", 1);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_bFlag_radian = __pyx_optional_args->bFlag_radian;
     }
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":38
+  /* "pyearth/gis/geometry/kernel.pyx":40
  *     """
- *     cdef double lon1, lat1, lon2, lat2
- *     if not bFlag_radian:             # <<<<<<<<<<<<<<
- *         lon1 = dLongitude1_in / 180.0 * M_PI
- *         lat1 = dLatitude1_in / 180.0 * M_PI
+ *     # Check if inputs are arrays
+ *     try:             # <<<<<<<<<<<<<<
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or
  */
-  __pyx_t_1 = (!__pyx_v_bFlag_radian);
-  if (__pyx_t_1) {
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_1, &__pyx_t_2, &__pyx_t_3);
+    __Pyx_XGOTREF(__pyx_t_1);
+    __Pyx_XGOTREF(__pyx_t_2);
+    __Pyx_XGOTREF(__pyx_t_3);
+    /*try:*/ {
 
-    /* "pyearth/gis/geometry/kernel.pyx":39
- *     cdef double lon1, lat1, lon2, lat2
- *     if not bFlag_radian:
- *         lon1 = dLongitude1_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
- *         lat1 = dLatitude1_in / 180.0 * M_PI
- *         lon2 = dLongitude2_in / 180.0 * M_PI
+      /* "pyearth/gis/geometry/kernel.pyx":42
+ *     try:
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or             # <<<<<<<<<<<<<<
+ *             hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):
+ *             # Convert to numpy arrays and use the numpy version
  */
-    __pyx_v_lon1 = ((__pyx_v_dLongitude1_in / 180.0) * M_PI);
+      __pyx_t_5 = __Pyx_HasAttr(__pyx_v_dLongitude1_in, __pyx_n_u_shape); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 42, __pyx_L3_error)
+      if (!__pyx_t_5) {
+      } else {
+        __pyx_t_4 = __pyx_t_5;
+        goto __pyx_L10_bool_binop_done;
+      }
+      __pyx_t_5 = __Pyx_HasAttr(__pyx_v_dLatitude1_in, __pyx_n_u_shape); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 42, __pyx_L3_error)
+      if (!__pyx_t_5) {
+      } else {
+        __pyx_t_4 = __pyx_t_5;
+        goto __pyx_L10_bool_binop_done;
+      }
+
+      /* "pyearth/gis/geometry/kernel.pyx":43
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or
+ *             hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):             # <<<<<<<<<<<<<<
+ *             # Convert to numpy arrays and use the numpy version
+ *             import numpy as np
+ */
+      __pyx_t_5 = __Pyx_HasAttr(__pyx_v_dLongitude2_in, __pyx_n_u_shape); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 43, __pyx_L3_error)
+      if (!__pyx_t_5) {
+      } else {
+        __pyx_t_4 = __pyx_t_5;
+        goto __pyx_L10_bool_binop_done;
+      }
+      __pyx_t_5 = __Pyx_HasAttr(__pyx_v_dLatitude2_in, __pyx_n_u_shape); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 43, __pyx_L3_error)
+      __pyx_t_4 = __pyx_t_5;
+      __pyx_L10_bool_binop_done:;
+
+      /* "pyearth/gis/geometry/kernel.pyx":42
+ *     try:
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or             # <<<<<<<<<<<<<<
+ *             hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):
+ *             # Convert to numpy arrays and use the numpy version
+ */
+      if (__pyx_t_4) {
+
+        /* "pyearth/gis/geometry/kernel.pyx":45
+ *             hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):
+ *             # Convert to numpy arrays and use the numpy version
+ *             import numpy as np             # <<<<<<<<<<<<<<
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ */
+        __pyx_t_6 = __Pyx_ImportDottedModule(__pyx_n_s_numpy, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 45, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __pyx_v_np = __pyx_t_6;
+        __pyx_t_6 = 0;
+
+        /* "pyearth/gis/geometry/kernel.pyx":46
+ *             # Convert to numpy arrays and use the numpy version
+ *             import numpy as np
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ */
+        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 46, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_7);
+        __Pyx_INCREF(__pyx_v_dLongitude1_in);
+        __Pyx_GIVEREF(__pyx_v_dLongitude1_in);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_v_dLongitude1_in)) __PYX_ERR(0, 46, __pyx_L3_error);
+        __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 46, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 46, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 46, __pyx_L3_error)
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 46, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __pyx_v_lon1_arr = __pyx_t_9;
+        __pyx_t_9 = 0;
+
+        /* "pyearth/gis/geometry/kernel.pyx":47
+ *             import numpy as np
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ */
+        __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 47, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 47, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __Pyx_INCREF(__pyx_v_dLatitude1_in);
+        __Pyx_GIVEREF(__pyx_v_dLatitude1_in);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_v_dLatitude1_in)) __PYX_ERR(0, 47, __pyx_L3_error);
+        __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 47, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 47, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 47, __pyx_L3_error)
+        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 47, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __pyx_v_lat1_arr = __pyx_t_6;
+        __pyx_t_6 = 0;
+
+        /* "pyearth/gis/geometry/kernel.pyx":48
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ */
+        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 48, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 48, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_7);
+        __Pyx_INCREF(__pyx_v_dLongitude2_in);
+        __Pyx_GIVEREF(__pyx_v_dLongitude2_in);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_v_dLongitude2_in)) __PYX_ERR(0, 48, __pyx_L3_error);
+        __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 48, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 48, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 48, __pyx_L3_error)
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 48, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __pyx_v_lon2_arr = __pyx_t_9;
+        __pyx_t_9 = 0;
+
+        /* "pyearth/gis/geometry/kernel.pyx":49
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+ */
+        __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 49, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 49, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __Pyx_INCREF(__pyx_v_dLatitude2_in);
+        __Pyx_GIVEREF(__pyx_v_dLatitude2_in);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_v_dLatitude2_in)) __PYX_ERR(0, 49, __pyx_L3_error);
+        __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 49, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 49, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 49, __pyx_L3_error)
+        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 49, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __pyx_v_lat2_arr = __pyx_t_6;
+        __pyx_t_6 = 0;
+
+        /* "pyearth/gis/geometry/kernel.pyx":50
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ *             return calculate_distance_based_on_longitude_latitude_numpy(             # <<<<<<<<<<<<<<
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+ * 
+ */
+        __Pyx_XDECREF(__pyx_r);
+        __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_calculate_distance_based_on_long); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 50, __pyx_L3_error)
+        __Pyx_GOTREF(__pyx_t_7);
+
+        /* "pyearth/gis/geometry/kernel.pyx":51
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)             # <<<<<<<<<<<<<<
+ * 
+ *         # If we can iterate over the inputs, they might be lists/tuples
+ */
+        __pyx_t_8 = NULL;
+        __pyx_t_10 = 0;
+        #if CYTHON_UNPACK_METHODS
+        if (unlikely(PyMethod_Check(__pyx_t_7))) {
+          __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
+          if (likely(__pyx_t_8)) {
+            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
+            __Pyx_INCREF(__pyx_t_8);
+            __Pyx_INCREF(function);
+            __Pyx_DECREF_SET(__pyx_t_7, function);
+            __pyx_t_10 = 1;
+          }
+        }
+        #endif
+        {
+          PyObject *__pyx_callargs[6] = {__pyx_t_8, __pyx_v_lon1_arr, __pyx_v_lat1_arr, __pyx_v_lon2_arr, __pyx_v_lat2_arr, __pyx_v_bFlag_radian};
+          __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_10, 5+__pyx_t_10);
+          __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+          if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 50, __pyx_L3_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        }
+        __pyx_r = __pyx_t_6;
+        __pyx_t_6 = 0;
+        goto __pyx_L7_try_return;
+
+        /* "pyearth/gis/geometry/kernel.pyx":42
+ *     try:
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or             # <<<<<<<<<<<<<<
+ *             hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):
+ *             # Convert to numpy arrays and use the numpy version
+ */
+      }
+
+      /* "pyearth/gis/geometry/kernel.pyx":54
+ * 
+ *         # If we can iterate over the inputs, they might be lists/tuples
+ *         try:             # <<<<<<<<<<<<<<
+ *             iter(dLongitude1_in)
+ *             # Convert to numpy arrays and use the numpy version
+ */
+      {
+        __Pyx_PyThreadState_declare
+        __Pyx_PyThreadState_assign
+        __Pyx_ExceptionSave(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
+        __Pyx_XGOTREF(__pyx_t_11);
+        __Pyx_XGOTREF(__pyx_t_12);
+        __Pyx_XGOTREF(__pyx_t_13);
+        /*try:*/ {
+
+          /* "pyearth/gis/geometry/kernel.pyx":55
+ *         # If we can iterate over the inputs, they might be lists/tuples
+ *         try:
+ *             iter(dLongitude1_in)             # <<<<<<<<<<<<<<
+ *             # Convert to numpy arrays and use the numpy version
+ *             import numpy as np
+ */
+          __pyx_t_6 = PyObject_GetIter(__pyx_v_dLongitude1_in); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 55, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+          /* "pyearth/gis/geometry/kernel.pyx":57
+ *             iter(dLongitude1_in)
+ *             # Convert to numpy arrays and use the numpy version
+ *             import numpy as np             # <<<<<<<<<<<<<<
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ */
+          __pyx_t_6 = __Pyx_ImportDottedModule(__pyx_n_s_numpy, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 57, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __pyx_v_np = __pyx_t_6;
+          __pyx_t_6 = 0;
+
+          /* "pyearth/gis/geometry/kernel.pyx":58
+ *             # Convert to numpy arrays and use the numpy version
+ *             import numpy as np
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ */
+          __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 58, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 58, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __Pyx_INCREF(__pyx_v_dLongitude1_in);
+          __Pyx_GIVEREF(__pyx_v_dLongitude1_in);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_v_dLongitude1_in)) __PYX_ERR(0, 58, __pyx_L14_error);
+          __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 58, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_8);
+          __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 58, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 58, __pyx_L14_error)
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 58, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __pyx_v_lon1_arr = __pyx_t_9;
+          __pyx_t_9 = 0;
+
+          /* "pyearth/gis/geometry/kernel.pyx":59
+ *             import numpy as np
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ */
+          __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 59, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 59, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_8);
+          __Pyx_INCREF(__pyx_v_dLatitude1_in);
+          __Pyx_GIVEREF(__pyx_v_dLatitude1_in);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_v_dLatitude1_in)) __PYX_ERR(0, 59, __pyx_L14_error);
+          __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 59, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 59, __pyx_L14_error)
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+          __pyx_v_lat1_arr = __pyx_t_6;
+          __pyx_t_6 = 0;
+
+          /* "pyearth/gis/geometry/kernel.pyx":60
+ *             lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ */
+          __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 60, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 60, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __Pyx_INCREF(__pyx_v_dLongitude2_in);
+          __Pyx_GIVEREF(__pyx_v_dLongitude2_in);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_v_dLongitude2_in)) __PYX_ERR(0, 60, __pyx_L14_error);
+          __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 60, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_8);
+          __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 60, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 60, __pyx_L14_error)
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 60, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __pyx_v_lon2_arr = __pyx_t_9;
+          __pyx_t_9 = 0;
+
+          /* "pyearth/gis/geometry/kernel.pyx":61
+ *             lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)             # <<<<<<<<<<<<<<
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+ */
+          __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_asarray); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 61, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_9);
+          __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 61, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_8);
+          __Pyx_INCREF(__pyx_v_dLatitude2_in);
+          __Pyx_GIVEREF(__pyx_v_dLatitude2_in);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_v_dLatitude2_in)) __PYX_ERR(0, 61, __pyx_L14_error);
+          __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 61, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_np, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 61, __pyx_L14_error)
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+          __pyx_v_lat2_arr = __pyx_t_6;
+          __pyx_t_6 = 0;
+
+          /* "pyearth/gis/geometry/kernel.pyx":62
+ *             lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ *             return calculate_distance_based_on_longitude_latitude_numpy(             # <<<<<<<<<<<<<<
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+ *         except TypeError:
+ */
+          __Pyx_XDECREF(__pyx_r);
+          __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_calculate_distance_based_on_long); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 62, __pyx_L14_error)
+          __Pyx_GOTREF(__pyx_t_7);
+
+          /* "pyearth/gis/geometry/kernel.pyx":63
+ *             lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)             # <<<<<<<<<<<<<<
+ *         except TypeError:
+ *             pass  # Not iterable, proceed with scalar calculation
+ */
+          __pyx_t_8 = NULL;
+          __pyx_t_10 = 0;
+          #if CYTHON_UNPACK_METHODS
+          if (unlikely(PyMethod_Check(__pyx_t_7))) {
+            __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
+            if (likely(__pyx_t_8)) {
+              PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
+              __Pyx_INCREF(__pyx_t_8);
+              __Pyx_INCREF(function);
+              __Pyx_DECREF_SET(__pyx_t_7, function);
+              __pyx_t_10 = 1;
+            }
+          }
+          #endif
+          {
+            PyObject *__pyx_callargs[6] = {__pyx_t_8, __pyx_v_lon1_arr, __pyx_v_lat1_arr, __pyx_v_lon2_arr, __pyx_v_lat2_arr, __pyx_v_bFlag_radian};
+            __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_10, 5+__pyx_t_10);
+            __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+            if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 62, __pyx_L14_error)
+            __Pyx_GOTREF(__pyx_t_6);
+            __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+          }
+          __pyx_r = __pyx_t_6;
+          __pyx_t_6 = 0;
+          goto __pyx_L18_try_return;
+
+          /* "pyearth/gis/geometry/kernel.pyx":54
+ * 
+ *         # If we can iterate over the inputs, they might be lists/tuples
+ *         try:             # <<<<<<<<<<<<<<
+ *             iter(dLongitude1_in)
+ *             # Convert to numpy arrays and use the numpy version
+ */
+        }
+        __pyx_L14_error:;
+        __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+        __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+
+        /* "pyearth/gis/geometry/kernel.pyx":64
+ *             return calculate_distance_based_on_longitude_latitude_numpy(
+ *                 lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+ *         except TypeError:             # <<<<<<<<<<<<<<
+ *             pass  # Not iterable, proceed with scalar calculation
+ * 
+ */
+        __pyx_t_14 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_TypeError);
+        if (__pyx_t_14) {
+          __Pyx_ErrRestore(0,0,0);
+          goto __pyx_L15_exception_handled;
+        }
+        goto __pyx_L16_except_error;
+
+        /* "pyearth/gis/geometry/kernel.pyx":54
+ * 
+ *         # If we can iterate over the inputs, they might be lists/tuples
+ *         try:             # <<<<<<<<<<<<<<
+ *             iter(dLongitude1_in)
+ *             # Convert to numpy arrays and use the numpy version
+ */
+        __pyx_L16_except_error:;
+        __Pyx_XGIVEREF(__pyx_t_11);
+        __Pyx_XGIVEREF(__pyx_t_12);
+        __Pyx_XGIVEREF(__pyx_t_13);
+        __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+        goto __pyx_L3_error;
+        __pyx_L18_try_return:;
+        __Pyx_XGIVEREF(__pyx_t_11);
+        __Pyx_XGIVEREF(__pyx_t_12);
+        __Pyx_XGIVEREF(__pyx_t_13);
+        __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+        goto __pyx_L7_try_return;
+        __pyx_L15_exception_handled:;
+        __Pyx_XGIVEREF(__pyx_t_11);
+        __Pyx_XGIVEREF(__pyx_t_12);
+        __Pyx_XGIVEREF(__pyx_t_13);
+        __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+      }
+
+      /* "pyearth/gis/geometry/kernel.pyx":40
+ *     """
+ *     # Check if inputs are arrays
+ *     try:             # <<<<<<<<<<<<<<
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    goto __pyx_L8_try_end;
+    __pyx_L3_error:;
+    __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+
+    /* "pyearth/gis/geometry/kernel.pyx":67
+ *             pass  # Not iterable, proceed with scalar calculation
+ * 
+ *     except:             # <<<<<<<<<<<<<<
+ *         pass  # Any error, proceed with scalar calculation
+ * 
+ */
+    /*except:*/ {
+      __Pyx_ErrRestore(0,0,0);
+      goto __pyx_L4_exception_handled;
+    }
 
     /* "pyearth/gis/geometry/kernel.pyx":40
- *     if not bFlag_radian:
- *         lon1 = dLongitude1_in / 180.0 * M_PI
- *         lat1 = dLatitude1_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
- *         lon2 = dLongitude2_in / 180.0 * M_PI
- *         lat2 = dLatitude2_in / 180.0 * M_PI
- */
-    __pyx_v_lat1 = ((__pyx_v_dLatitude1_in / 180.0) * M_PI);
-
-    /* "pyearth/gis/geometry/kernel.pyx":41
- *         lon1 = dLongitude1_in / 180.0 * M_PI
- *         lat1 = dLatitude1_in / 180.0 * M_PI
- *         lon2 = dLongitude2_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
- *         lat2 = dLatitude2_in / 180.0 * M_PI
- *     else:
- */
-    __pyx_v_lon2 = ((__pyx_v_dLongitude2_in / 180.0) * M_PI);
-
-    /* "pyearth/gis/geometry/kernel.pyx":42
- *         lat1 = dLatitude1_in / 180.0 * M_PI
- *         lon2 = dLongitude2_in / 180.0 * M_PI
- *         lat2 = dLatitude2_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
- *     else:
- *         lon1 = dLongitude1_in
- */
-    __pyx_v_lat2 = ((__pyx_v_dLatitude2_in / 180.0) * M_PI);
-
-    /* "pyearth/gis/geometry/kernel.pyx":38
  *     """
- *     cdef double lon1, lat1, lon2, lat2
- *     if not bFlag_radian:             # <<<<<<<<<<<<<<
- *         lon1 = dLongitude1_in / 180.0 * M_PI
- *         lat1 = dLatitude1_in / 180.0 * M_PI
+ *     # Check if inputs are arrays
+ *     try:             # <<<<<<<<<<<<<<
+ *         # Try to access shape attribute to detect arrays
+ *         if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or
  */
-    goto __pyx_L3;
+    __pyx_L7_try_return:;
+    __Pyx_XGIVEREF(__pyx_t_1);
+    __Pyx_XGIVEREF(__pyx_t_2);
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_ExceptionReset(__pyx_t_1, __pyx_t_2, __pyx_t_3);
+    goto __pyx_L0;
+    __pyx_L4_exception_handled:;
+    __Pyx_XGIVEREF(__pyx_t_1);
+    __Pyx_XGIVEREF(__pyx_t_2);
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_ExceptionReset(__pyx_t_1, __pyx_t_2, __pyx_t_3);
+    __pyx_L8_try_end:;
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":44
- *         lat2 = dLatitude2_in / 180.0 * M_PI
+  /* "pyearth/gis/geometry/kernel.pyx":72
+ *     # Scalar calculation
+ *     cdef double lon1, lat1, lon2, lat2
+ *     cdef double dLongitude1_scalar = <double>dLongitude1_in             # <<<<<<<<<<<<<<
+ *     cdef double dLatitude1_scalar = <double>dLatitude1_in
+ *     cdef double dLongitude2_scalar = <double>dLongitude2_in
+ */
+  __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude1_in); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_v_dLongitude1_scalar = ((double)__pyx_t_15);
+
+  /* "pyearth/gis/geometry/kernel.pyx":73
+ *     cdef double lon1, lat1, lon2, lat2
+ *     cdef double dLongitude1_scalar = <double>dLongitude1_in
+ *     cdef double dLatitude1_scalar = <double>dLatitude1_in             # <<<<<<<<<<<<<<
+ *     cdef double dLongitude2_scalar = <double>dLongitude2_in
+ *     cdef double dLatitude2_scalar = <double>dLatitude2_in
+ */
+  __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude1_in); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_v_dLatitude1_scalar = ((double)__pyx_t_15);
+
+  /* "pyearth/gis/geometry/kernel.pyx":74
+ *     cdef double dLongitude1_scalar = <double>dLongitude1_in
+ *     cdef double dLatitude1_scalar = <double>dLatitude1_in
+ *     cdef double dLongitude2_scalar = <double>dLongitude2_in             # <<<<<<<<<<<<<<
+ *     cdef double dLatitude2_scalar = <double>dLatitude2_in
+ * 
+ */
+  __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude2_in); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_v_dLongitude2_scalar = ((double)__pyx_t_15);
+
+  /* "pyearth/gis/geometry/kernel.pyx":75
+ *     cdef double dLatitude1_scalar = <double>dLatitude1_in
+ *     cdef double dLongitude2_scalar = <double>dLongitude2_in
+ *     cdef double dLatitude2_scalar = <double>dLatitude2_in             # <<<<<<<<<<<<<<
+ * 
+ *     if not bFlag_radian:
+ */
+  __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude2_in); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_v_dLatitude2_scalar = ((double)__pyx_t_15);
+
+  /* "pyearth/gis/geometry/kernel.pyx":77
+ *     cdef double dLatitude2_scalar = <double>dLatitude2_in
+ * 
+ *     if not bFlag_radian:             # <<<<<<<<<<<<<<
+ *         lon1 = dLongitude1_scalar / 180.0 * M_PI
+ *         lat1 = dLatitude1_scalar / 180.0 * M_PI
+ */
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_bFlag_radian); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_5 = (!__pyx_t_4);
+  if (__pyx_t_5) {
+
+    /* "pyearth/gis/geometry/kernel.pyx":78
+ * 
+ *     if not bFlag_radian:
+ *         lon1 = dLongitude1_scalar / 180.0 * M_PI             # <<<<<<<<<<<<<<
+ *         lat1 = dLatitude1_scalar / 180.0 * M_PI
+ *         lon2 = dLongitude2_scalar / 180.0 * M_PI
+ */
+    __pyx_v_lon1 = ((__pyx_v_dLongitude1_scalar / 180.0) * M_PI);
+
+    /* "pyearth/gis/geometry/kernel.pyx":79
+ *     if not bFlag_radian:
+ *         lon1 = dLongitude1_scalar / 180.0 * M_PI
+ *         lat1 = dLatitude1_scalar / 180.0 * M_PI             # <<<<<<<<<<<<<<
+ *         lon2 = dLongitude2_scalar / 180.0 * M_PI
+ *         lat2 = dLatitude2_scalar / 180.0 * M_PI
+ */
+    __pyx_v_lat1 = ((__pyx_v_dLatitude1_scalar / 180.0) * M_PI);
+
+    /* "pyearth/gis/geometry/kernel.pyx":80
+ *         lon1 = dLongitude1_scalar / 180.0 * M_PI
+ *         lat1 = dLatitude1_scalar / 180.0 * M_PI
+ *         lon2 = dLongitude2_scalar / 180.0 * M_PI             # <<<<<<<<<<<<<<
+ *         lat2 = dLatitude2_scalar / 180.0 * M_PI
  *     else:
- *         lon1 = dLongitude1_in             # <<<<<<<<<<<<<<
- *         lat1 = dLatitude1_in
- *         lon2 = dLongitude2_in
+ */
+    __pyx_v_lon2 = ((__pyx_v_dLongitude2_scalar / 180.0) * M_PI);
+
+    /* "pyearth/gis/geometry/kernel.pyx":81
+ *         lat1 = dLatitude1_scalar / 180.0 * M_PI
+ *         lon2 = dLongitude2_scalar / 180.0 * M_PI
+ *         lat2 = dLatitude2_scalar / 180.0 * M_PI             # <<<<<<<<<<<<<<
+ *     else:
+ *         lon1 = dLongitude1_scalar
+ */
+    __pyx_v_lat2 = ((__pyx_v_dLatitude2_scalar / 180.0) * M_PI);
+
+    /* "pyearth/gis/geometry/kernel.pyx":77
+ *     cdef double dLatitude2_scalar = <double>dLatitude2_in
+ * 
+ *     if not bFlag_radian:             # <<<<<<<<<<<<<<
+ *         lon1 = dLongitude1_scalar / 180.0 * M_PI
+ *         lat1 = dLatitude1_scalar / 180.0 * M_PI
+ */
+    goto __pyx_L20;
+  }
+
+  /* "pyearth/gis/geometry/kernel.pyx":83
+ *         lat2 = dLatitude2_scalar / 180.0 * M_PI
+ *     else:
+ *         lon1 = dLongitude1_scalar             # <<<<<<<<<<<<<<
+ *         lat1 = dLatitude1_scalar
+ *         lon2 = dLongitude2_scalar
  */
   /*else*/ {
-    __pyx_v_lon1 = __pyx_v_dLongitude1_in;
+    __pyx_v_lon1 = __pyx_v_dLongitude1_scalar;
 
-    /* "pyearth/gis/geometry/kernel.pyx":45
+    /* "pyearth/gis/geometry/kernel.pyx":84
  *     else:
- *         lon1 = dLongitude1_in
- *         lat1 = dLatitude1_in             # <<<<<<<<<<<<<<
- *         lon2 = dLongitude2_in
- *         lat2 = dLatitude2_in
+ *         lon1 = dLongitude1_scalar
+ *         lat1 = dLatitude1_scalar             # <<<<<<<<<<<<<<
+ *         lon2 = dLongitude2_scalar
+ *         lat2 = dLatitude2_scalar
  */
-    __pyx_v_lat1 = __pyx_v_dLatitude1_in;
+    __pyx_v_lat1 = __pyx_v_dLatitude1_scalar;
 
-    /* "pyearth/gis/geometry/kernel.pyx":46
- *         lon1 = dLongitude1_in
- *         lat1 = dLatitude1_in
- *         lon2 = dLongitude2_in             # <<<<<<<<<<<<<<
- *         lat2 = dLatitude2_in
+    /* "pyearth/gis/geometry/kernel.pyx":85
+ *         lon1 = dLongitude1_scalar
+ *         lat1 = dLatitude1_scalar
+ *         lon2 = dLongitude2_scalar             # <<<<<<<<<<<<<<
+ *         lat2 = dLatitude2_scalar
  *     cdef double dLongtitude_diff = lon2 - lon1
  */
-    __pyx_v_lon2 = __pyx_v_dLongitude2_in;
+    __pyx_v_lon2 = __pyx_v_dLongitude2_scalar;
 
-    /* "pyearth/gis/geometry/kernel.pyx":47
- *         lat1 = dLatitude1_in
- *         lon2 = dLongitude2_in
- *         lat2 = dLatitude2_in             # <<<<<<<<<<<<<<
+    /* "pyearth/gis/geometry/kernel.pyx":86
+ *         lat1 = dLatitude1_scalar
+ *         lon2 = dLongitude2_scalar
+ *         lat2 = dLatitude2_scalar             # <<<<<<<<<<<<<<
  *     cdef double dLongtitude_diff = lon2 - lon1
  *     cdef double dLatitude_diff = lat2 - lat1
  */
-    __pyx_v_lat2 = __pyx_v_dLatitude2_in;
+    __pyx_v_lat2 = __pyx_v_dLatitude2_scalar;
   }
-  __pyx_L3:;
+  __pyx_L20:;
 
-  /* "pyearth/gis/geometry/kernel.pyx":48
- *         lon2 = dLongitude2_in
- *         lat2 = dLatitude2_in
+  /* "pyearth/gis/geometry/kernel.pyx":87
+ *         lon2 = dLongitude2_scalar
+ *         lat2 = dLatitude2_scalar
  *     cdef double dLongtitude_diff = lon2 - lon1             # <<<<<<<<<<<<<<
  *     cdef double dLatitude_diff = lat2 - lat1
  *     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
  */
   __pyx_v_dLongtitude_diff = (__pyx_v_lon2 - __pyx_v_lon1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":49
- *         lat2 = dLatitude2_in
+  /* "pyearth/gis/geometry/kernel.pyx":88
+ *         lat2 = dLatitude2_scalar
  *     cdef double dLongtitude_diff = lon2 - lon1
  *     cdef double dLatitude_diff = lat2 - lat1             # <<<<<<<<<<<<<<
  *     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
@@ -20184,7 +20801,7 @@ static double __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_o
  */
   __pyx_v_dLatitude_diff = (__pyx_v_lat2 - __pyx_v_lat1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":50
+  /* "pyearth/gis/geometry/kernel.pyx":89
  *     cdef double dLongtitude_diff = lon2 - lon1
  *     cdef double dLatitude_diff = lat2 - lat1
  *     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)             # <<<<<<<<<<<<<<
@@ -20193,7 +20810,7 @@ static double __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_o
  */
   __pyx_v_a = ((sin((__pyx_v_dLatitude_diff / 2.0)) * sin((__pyx_v_dLatitude_diff / 2.0))) + (((cos(__pyx_v_lat1) * cos(__pyx_v_lat2)) * sin((__pyx_v_dLongtitude_diff / 2.0))) * sin((__pyx_v_dLongtitude_diff / 2.0))));
 
-  /* "pyearth/gis/geometry/kernel.pyx":51
+  /* "pyearth/gis/geometry/kernel.pyx":90
  *     cdef double dLatitude_diff = lat2 - lat1
  *     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
  *     cdef double b = 2 * asin(sqrt(a))             # <<<<<<<<<<<<<<
@@ -20202,7 +20819,7 @@ static double __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_o
  */
   __pyx_v_b = (2.0 * asin(sqrt(__pyx_v_a)));
 
-  /* "pyearth/gis/geometry/kernel.pyx":52
+  /* "pyearth/gis/geometry/kernel.pyx":91
  *     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
  *     cdef double b = 2 * asin(sqrt(a))
  *     cdef double c = b * dRadius             # <<<<<<<<<<<<<<
@@ -20211,26 +20828,44 @@ static double __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_o
  */
   __pyx_v_c = (__pyx_v_b * __pyx_v_7pyearth_3gis_8geometry_6kernel_dRadius);
 
-  /* "pyearth/gis/geometry/kernel.pyx":53
+  /* "pyearth/gis/geometry/kernel.pyx":92
  *     cdef double b = 2 * asin(sqrt(a))
  *     cdef double c = b * dRadius
  *     return c             # <<<<<<<<<<<<<<
  * 
  * @cython.boundscheck(False)
  */
-  __pyx_r = __pyx_v_c;
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_v_c); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __pyx_r = __pyx_t_6;
+  __pyx_t_6 = 0;
   goto __pyx_L0;
 
   /* "pyearth/gis/geometry/kernel.pyx":17
  * 
  * @cython.boundscheck(False)
- * cpdef double calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
+ * cpdef calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
  */
 
   /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_AddTraceback("pyearth.gis.geometry.kernel.calculate_distance_based_on_longitude_latitude", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
   __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_np);
+  __Pyx_XDECREF(__pyx_v_lon1_arr);
+  __Pyx_XDECREF(__pyx_v_lat1_arr);
+  __Pyx_XDECREF(__pyx_v_lon2_arr);
+  __Pyx_XDECREF(__pyx_v_lat2_arr);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
@@ -20242,7 +20877,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude, "\n    Calculate the great circle distance between two points on the earth.\n\n    Parameters\n    ----------\n    dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in : double\n        Coordinates of the two points. In degrees by default, or radians if bFlag_radian=True.\n    bFlag_radian : bint, optional\n        If True, input coordinates are in radians. If False (default), input is in degrees.\n\n    Returns\n    -------\n    double\n        Great circle distance in meters.\n    ");
+PyDoc_STRVAR(__pyx_doc_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude, "\n    Calculate the great circle distance between two points on the earth.\n    Automatically handles both scalar and array inputs.\n\n    Parameters\n    ----------\n    dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in : double or array-like\n        Coordinates of the two points. In degrees by default, or radians if bFlag_radian=True.\n        Can be scalars or arrays.\n    bFlag_radian : bint, optional\n        If True, input coordinates are in radians. If False (default), input is in degrees.\n\n    Returns\n    -------\n    double or np.ndarray\n        Great circle distance in meters. Returns scalar if inputs are scalars, array if inputs are arrays.\n    ");
 static PyMethodDef __pyx_mdef_7pyearth_3gis_8geometry_6kernel_1calculate_distance_based_on_longitude_latitude = {"calculate_distance_based_on_longitude_latitude", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7pyearth_3gis_8geometry_6kernel_1calculate_distance_based_on_longitude_latitude, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude};
 static PyObject *__pyx_pw_7pyearth_3gis_8geometry_6kernel_1calculate_distance_based_on_longitude_latitude(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
@@ -20251,11 +20886,11 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
-  double __pyx_v_dLongitude1_in;
-  double __pyx_v_dLatitude1_in;
-  double __pyx_v_dLongitude2_in;
-  double __pyx_v_dLatitude2_in;
-  int __pyx_v_bFlag_radian;
+  PyObject *__pyx_v_dLongitude1_in = 0;
+  PyObject *__pyx_v_dLatitude1_in = 0;
+  PyObject *__pyx_v_dLongitude2_in = 0;
+  PyObject *__pyx_v_dLatitude2_in = 0;
+  PyObject *__pyx_v_bFlag_radian = 0;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
@@ -20277,6 +20912,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
   {
     PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dLongitude1_in,&__pyx_n_s_dLatitude1_in,&__pyx_n_s_dLongitude2_in,&__pyx_n_s_dLatitude2_in,&__pyx_n_s_bFlag_radian,0};
+
+    /* "pyearth/gis/geometry/kernel.pyx":20
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
+ *     bFlag_radian=False             # <<<<<<<<<<<<<<
+ * ):
+ *     """
+ */
+    values[4] = __Pyx_Arg_NewRef_FASTCALL(((PyObject *)Py_False));
     if (__pyx_kwds) {
       Py_ssize_t kw_args;
       switch (__pyx_nargs) {
@@ -20356,23 +21000,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_dLongitude1_in = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_dLongitude1_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L3_error)
-    __pyx_v_dLatitude1_in = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_dLatitude1_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L3_error)
-    __pyx_v_dLongitude2_in = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_dLongitude2_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L3_error)
-    __pyx_v_dLatitude2_in = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_dLatitude2_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L3_error)
-    if (values[4]) {
-      __pyx_v_bFlag_radian = __Pyx_PyObject_IsTrue(values[4]); if (unlikely((__pyx_v_bFlag_radian == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 20, __pyx_L3_error)
-    } else {
-
-      /* "pyearth/gis/geometry/kernel.pyx":20
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
- *     bint bFlag_radian=False             # <<<<<<<<<<<<<<
- * ):
- *     """
- */
-      __pyx_v_bFlag_radian = ((int)0);
-    }
+    __pyx_v_dLongitude1_in = values[0];
+    __pyx_v_dLatitude1_in = values[1];
+    __pyx_v_dLongitude2_in = values[2];
+    __pyx_v_dLatitude2_in = values[3];
+    __pyx_v_bFlag_radian = values[4];
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
@@ -20395,9 +21027,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   /* "pyearth/gis/geometry/kernel.pyx":17
  * 
  * @cython.boundscheck(False)
- * cpdef double calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
+ * cpdef calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
  */
 
   /* function exit code */
@@ -20411,12 +21043,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_dLongitude1_in, double __pyx_v_dLatitude1_in, double __pyx_v_dLongitude2_in, double __pyx_v_dLatitude2_in, int __pyx_v_bFlag_radian) {
+static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_dLongitude1_in, PyObject *__pyx_v_dLatitude1_in, PyObject *__pyx_v_dLongitude2_in, PyObject *__pyx_v_dLatitude2_in, PyObject *__pyx_v_bFlag_radian) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  double __pyx_t_1;
+  PyObject *__pyx_t_1 = NULL;
   struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude __pyx_t_2;
-  PyObject *__pyx_t_3 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -20424,16 +21055,15 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_calculate_distance_bas
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 1;
   __pyx_t_2.bFlag_radian = __pyx_v_bFlag_radian;
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(__pyx_v_dLongitude1_in, __pyx_v_dLatitude1_in, __pyx_v_dLongitude2_in, __pyx_v_dLatitude2_in, 0, &__pyx_t_2); if (unlikely(__pyx_t_1 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_r = __pyx_t_3;
-  __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude(__pyx_v_dLongitude1_in, __pyx_v_dLatitude1_in, __pyx_v_dLongitude2_in, __pyx_v_dLatitude2_in, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("pyearth.gis.geometry.kernel.calculate_distance_based_on_longitude_latitude", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -20442,7 +21072,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_calculate_distance_bas
   return __pyx_r;
 }
 
-/* "pyearth/gis/geometry/kernel.pyx":57
+/* "pyearth/gis/geometry/kernel.pyx":96
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(             # <<<<<<<<<<<<<<
@@ -20459,7 +21089,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 ); /*proto*/
 static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude_array(__Pyx_memviewslice __pyx_v_dLongitude1_in, __Pyx_memviewslice __pyx_v_dLatitude1_in, __Pyx_memviewslice __pyx_v_dLongitude2_in, __Pyx_memviewslice __pyx_v_dLatitude2_in, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude_array *__pyx_optional_args) {
 
-  /* "pyearth/gis/geometry/kernel.pyx":60
+  /* "pyearth/gis/geometry/kernel.pyx":99
  *     double[:] dLongitude1_in, double[:] dLatitude1_in,
  *     double[:] dLongitude2_in, double[:] dLatitude2_in,
  *     bint bFlag_radian=False             # <<<<<<<<<<<<<<
@@ -20508,7 +21138,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
   __pyx_pybuffernd_result.data = NULL;
   __pyx_pybuffernd_result.rcbuffer = &__pyx_pybuffer_result;
 
-  /* "pyearth/gis/geometry/kernel.pyx":78
+  /* "pyearth/gis/geometry/kernel.pyx":117
  *     """
  *     cdef int i
  *     cdef int n = dLongitude1_in.shape[0]             # <<<<<<<<<<<<<<
@@ -20517,46 +21147,46 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
  */
   __pyx_v_n = (__pyx_v_dLongitude1_in.shape[0]);
 
-  /* "pyearth/gis/geometry/kernel.pyx":79
+  /* "pyearth/gis/geometry/kernel.pyx":118
  *     cdef int i
  *     cdef int n = dLongitude1_in.shape[0]
  *     cdef cnp.ndarray[cnp.float64_t, ndim=1] result = np.zeros(n, dtype=np.float64)             # <<<<<<<<<<<<<<
  *     cdef double lon1, lat1, lon2, lat2
  *     cdef double dLongtitude_diff, dLatitude_diff
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float64); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float64); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 79, __pyx_L1_error)
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 118, __pyx_L1_error)
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_result.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_result = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_result.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 79, __pyx_L1_error)
+      __PYX_ERR(0, 118, __pyx_L1_error)
     } else {__pyx_pybuffernd_result.diminfo[0].strides = __pyx_pybuffernd_result.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_result.diminfo[0].shape = __pyx_pybuffernd_result.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -20564,7 +21194,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
   __pyx_v_result = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":83
+  /* "pyearth/gis/geometry/kernel.pyx":122
  *     cdef double dLongtitude_diff, dLatitude_diff
  *     cdef double a, b, c
  *     for i in range(n):             # <<<<<<<<<<<<<<
@@ -20576,7 +21206,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "pyearth/gis/geometry/kernel.pyx":84
+    /* "pyearth/gis/geometry/kernel.pyx":123
  *     cdef double a, b, c
  *     for i in range(n):
  *         if not bFlag_radian:             # <<<<<<<<<<<<<<
@@ -20586,7 +21216,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
     __pyx_t_10 = (!__pyx_v_bFlag_radian);
     if (__pyx_t_10) {
 
-      /* "pyearth/gis/geometry/kernel.pyx":85
+      /* "pyearth/gis/geometry/kernel.pyx":124
  *     for i in range(n):
  *         if not bFlag_radian:
  *             lon1 = dLongitude1_in[i] / 180.0 * M_PI             # <<<<<<<<<<<<<<
@@ -20596,7 +21226,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lon1 = (((*((double *) ( /* dim=0 */ (__pyx_v_dLongitude1_in.data + __pyx_t_11 * __pyx_v_dLongitude1_in.strides[0]) ))) / 180.0) * M_PI);
 
-      /* "pyearth/gis/geometry/kernel.pyx":86
+      /* "pyearth/gis/geometry/kernel.pyx":125
  *         if not bFlag_radian:
  *             lon1 = dLongitude1_in[i] / 180.0 * M_PI
  *             lat1 = dLatitude1_in[i] / 180.0 * M_PI             # <<<<<<<<<<<<<<
@@ -20606,7 +21236,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lat1 = (((*((double *) ( /* dim=0 */ (__pyx_v_dLatitude1_in.data + __pyx_t_11 * __pyx_v_dLatitude1_in.strides[0]) ))) / 180.0) * M_PI);
 
-      /* "pyearth/gis/geometry/kernel.pyx":87
+      /* "pyearth/gis/geometry/kernel.pyx":126
  *             lon1 = dLongitude1_in[i] / 180.0 * M_PI
  *             lat1 = dLatitude1_in[i] / 180.0 * M_PI
  *             lon2 = dLongitude2_in[i] / 180.0 * M_PI             # <<<<<<<<<<<<<<
@@ -20616,7 +21246,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lon2 = (((*((double *) ( /* dim=0 */ (__pyx_v_dLongitude2_in.data + __pyx_t_11 * __pyx_v_dLongitude2_in.strides[0]) ))) / 180.0) * M_PI);
 
-      /* "pyearth/gis/geometry/kernel.pyx":88
+      /* "pyearth/gis/geometry/kernel.pyx":127
  *             lat1 = dLatitude1_in[i] / 180.0 * M_PI
  *             lon2 = dLongitude2_in[i] / 180.0 * M_PI
  *             lat2 = dLatitude2_in[i] / 180.0 * M_PI             # <<<<<<<<<<<<<<
@@ -20626,7 +21256,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lat2 = (((*((double *) ( /* dim=0 */ (__pyx_v_dLatitude2_in.data + __pyx_t_11 * __pyx_v_dLatitude2_in.strides[0]) ))) / 180.0) * M_PI);
 
-      /* "pyearth/gis/geometry/kernel.pyx":84
+      /* "pyearth/gis/geometry/kernel.pyx":123
  *     cdef double a, b, c
  *     for i in range(n):
  *         if not bFlag_radian:             # <<<<<<<<<<<<<<
@@ -20636,7 +21266,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       goto __pyx_L5;
     }
 
-    /* "pyearth/gis/geometry/kernel.pyx":90
+    /* "pyearth/gis/geometry/kernel.pyx":129
  *             lat2 = dLatitude2_in[i] / 180.0 * M_PI
  *         else:
  *             lon1 = dLongitude1_in[i]             # <<<<<<<<<<<<<<
@@ -20647,7 +21277,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lon1 = (*((double *) ( /* dim=0 */ (__pyx_v_dLongitude1_in.data + __pyx_t_11 * __pyx_v_dLongitude1_in.strides[0]) )));
 
-      /* "pyearth/gis/geometry/kernel.pyx":91
+      /* "pyearth/gis/geometry/kernel.pyx":130
  *         else:
  *             lon1 = dLongitude1_in[i]
  *             lat1 = dLatitude1_in[i]             # <<<<<<<<<<<<<<
@@ -20657,7 +21287,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lat1 = (*((double *) ( /* dim=0 */ (__pyx_v_dLatitude1_in.data + __pyx_t_11 * __pyx_v_dLatitude1_in.strides[0]) )));
 
-      /* "pyearth/gis/geometry/kernel.pyx":92
+      /* "pyearth/gis/geometry/kernel.pyx":131
  *             lon1 = dLongitude1_in[i]
  *             lat1 = dLatitude1_in[i]
  *             lon2 = dLongitude2_in[i]             # <<<<<<<<<<<<<<
@@ -20667,7 +21297,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
       __pyx_t_11 = __pyx_v_i;
       __pyx_v_lon2 = (*((double *) ( /* dim=0 */ (__pyx_v_dLongitude2_in.data + __pyx_t_11 * __pyx_v_dLongitude2_in.strides[0]) )));
 
-      /* "pyearth/gis/geometry/kernel.pyx":93
+      /* "pyearth/gis/geometry/kernel.pyx":132
  *             lat1 = dLatitude1_in[i]
  *             lon2 = dLongitude2_in[i]
  *             lat2 = dLatitude2_in[i]             # <<<<<<<<<<<<<<
@@ -20679,7 +21309,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
     }
     __pyx_L5:;
 
-    /* "pyearth/gis/geometry/kernel.pyx":94
+    /* "pyearth/gis/geometry/kernel.pyx":133
  *             lon2 = dLongitude2_in[i]
  *             lat2 = dLatitude2_in[i]
  *         dLongtitude_diff = lon2 - lon1             # <<<<<<<<<<<<<<
@@ -20688,7 +21318,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
  */
     __pyx_v_dLongtitude_diff = (__pyx_v_lon2 - __pyx_v_lon1);
 
-    /* "pyearth/gis/geometry/kernel.pyx":95
+    /* "pyearth/gis/geometry/kernel.pyx":134
  *             lat2 = dLatitude2_in[i]
  *         dLongtitude_diff = lon2 - lon1
  *         dLatitude_diff = lat2 - lat1             # <<<<<<<<<<<<<<
@@ -20697,7 +21327,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
  */
     __pyx_v_dLatitude_diff = (__pyx_v_lat2 - __pyx_v_lat1);
 
-    /* "pyearth/gis/geometry/kernel.pyx":96
+    /* "pyearth/gis/geometry/kernel.pyx":135
  *         dLongtitude_diff = lon2 - lon1
  *         dLatitude_diff = lat2 - lat1
  *         a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)             # <<<<<<<<<<<<<<
@@ -20706,7 +21336,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
  */
     __pyx_v_a = ((sin((__pyx_v_dLatitude_diff / 2.0)) * sin((__pyx_v_dLatitude_diff / 2.0))) + (((cos(__pyx_v_lat1) * cos(__pyx_v_lat2)) * sin((__pyx_v_dLongtitude_diff / 2.0))) * sin((__pyx_v_dLongtitude_diff / 2.0))));
 
-    /* "pyearth/gis/geometry/kernel.pyx":97
+    /* "pyearth/gis/geometry/kernel.pyx":136
  *         dLatitude_diff = lat2 - lat1
  *         a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
  *         b = 2 * asin(sqrt(a))             # <<<<<<<<<<<<<<
@@ -20715,7 +21345,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
  */
     __pyx_v_b = (2.0 * asin(sqrt(__pyx_v_a)));
 
-    /* "pyearth/gis/geometry/kernel.pyx":98
+    /* "pyearth/gis/geometry/kernel.pyx":137
  *         a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
  *         b = 2 * asin(sqrt(a))
  *         c = b * dRadius             # <<<<<<<<<<<<<<
@@ -20724,7 +21354,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
  */
     __pyx_v_c = (__pyx_v_b * __pyx_v_7pyearth_3gis_8geometry_6kernel_dRadius);
 
-    /* "pyearth/gis/geometry/kernel.pyx":99
+    /* "pyearth/gis/geometry/kernel.pyx":138
  *         b = 2 * asin(sqrt(a))
  *         c = b * dRadius
  *         result[i] = c             # <<<<<<<<<<<<<<
@@ -20735,7 +21365,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
     *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_result.rcbuffer->pybuffer.buf, __pyx_t_11, __pyx_pybuffernd_result.diminfo[0].strides) = __pyx_v_c;
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":100
+  /* "pyearth/gis/geometry/kernel.pyx":139
  *         c = b * dRadius
  *         result[i] = c
  *     return result             # <<<<<<<<<<<<<<
@@ -20747,7 +21377,7 @@ static PyArrayObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance
   __pyx_r = ((PyArrayObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":57
+  /* "pyearth/gis/geometry/kernel.pyx":96
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(             # <<<<<<<<<<<<<<
@@ -20846,7 +21476,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -20854,9 +21484,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, 1); __PYX_ERR(0, 57, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, 1); __PYX_ERR(0, 96, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -20864,9 +21494,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, 2); __PYX_ERR(0, 57, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, 2); __PYX_ERR(0, 96, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -20874,21 +21504,21 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, 3); __PYX_ERR(0, 57, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, 3); __PYX_ERR(0, 96, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_bFlag_radian);
           if (value) { values[4] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_distance_based_on_longitude_latitude_array") < 0)) __PYX_ERR(0, 57, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_distance_based_on_longitude_latitude_array") < 0)) __PYX_ERR(0, 96, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -20902,15 +21532,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_dLongitude1_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLongitude1_in.memview)) __PYX_ERR(0, 58, __pyx_L3_error)
-    __pyx_v_dLatitude1_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLatitude1_in.memview)) __PYX_ERR(0, 58, __pyx_L3_error)
-    __pyx_v_dLongitude2_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLongitude2_in.memview)) __PYX_ERR(0, 59, __pyx_L3_error)
-    __pyx_v_dLatitude2_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLatitude2_in.memview)) __PYX_ERR(0, 59, __pyx_L3_error)
+    __pyx_v_dLongitude1_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLongitude1_in.memview)) __PYX_ERR(0, 97, __pyx_L3_error)
+    __pyx_v_dLatitude1_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLatitude1_in.memview)) __PYX_ERR(0, 97, __pyx_L3_error)
+    __pyx_v_dLongitude2_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLongitude2_in.memview)) __PYX_ERR(0, 98, __pyx_L3_error)
+    __pyx_v_dLatitude2_in = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dLatitude2_in.memview)) __PYX_ERR(0, 98, __pyx_L3_error)
     if (values[4]) {
-      __pyx_v_bFlag_radian = __Pyx_PyObject_IsTrue(values[4]); if (unlikely((__pyx_v_bFlag_radian == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 60, __pyx_L3_error)
+      __pyx_v_bFlag_radian = __Pyx_PyObject_IsTrue(values[4]); if (unlikely((__pyx_v_bFlag_radian == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L3_error)
     } else {
 
-      /* "pyearth/gis/geometry/kernel.pyx":60
+      /* "pyearth/gis/geometry/kernel.pyx":99
  *     double[:] dLongitude1_in, double[:] dLatitude1_in,
  *     double[:] dLongitude2_in, double[:] dLatitude2_in,
  *     bint bFlag_radian=False             # <<<<<<<<<<<<<<
@@ -20922,7 +21552,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, __pyx_nargs); __PYX_ERR(0, 57, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_array", 0, 4, 5, __pyx_nargs); __PYX_ERR(0, 96, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -20942,7 +21572,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_7pyearth_3gis_8geometry_6kernel_2calculate_distance_based_on_longitude_latitude_array(__pyx_self, __pyx_v_dLongitude1_in, __pyx_v_dLatitude1_in, __pyx_v_dLongitude2_in, __pyx_v_dLatitude2_in, __pyx_v_bFlag_radian);
 
-  /* "pyearth/gis/geometry/kernel.pyx":57
+  /* "pyearth/gis/geometry/kernel.pyx":96
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(             # <<<<<<<<<<<<<<
@@ -20975,13 +21605,13 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_2calculate_distance_ba
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_distance_based_on_longitude_latitude_array", 1);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_dLongitude1_in.memview)) { __Pyx_RaiseUnboundLocalError("dLongitude1_in"); __PYX_ERR(0, 57, __pyx_L1_error) }
-  if (unlikely(!__pyx_v_dLatitude1_in.memview)) { __Pyx_RaiseUnboundLocalError("dLatitude1_in"); __PYX_ERR(0, 57, __pyx_L1_error) }
-  if (unlikely(!__pyx_v_dLongitude2_in.memview)) { __Pyx_RaiseUnboundLocalError("dLongitude2_in"); __PYX_ERR(0, 57, __pyx_L1_error) }
-  if (unlikely(!__pyx_v_dLatitude2_in.memview)) { __Pyx_RaiseUnboundLocalError("dLatitude2_in"); __PYX_ERR(0, 57, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_dLongitude1_in.memview)) { __Pyx_RaiseUnboundLocalError("dLongitude1_in"); __PYX_ERR(0, 96, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_dLatitude1_in.memview)) { __Pyx_RaiseUnboundLocalError("dLatitude1_in"); __PYX_ERR(0, 96, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_dLongitude2_in.memview)) { __Pyx_RaiseUnboundLocalError("dLongitude2_in"); __PYX_ERR(0, 96, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_dLatitude2_in.memview)) { __Pyx_RaiseUnboundLocalError("dLatitude2_in"); __PYX_ERR(0, 96, __pyx_L1_error) }
   __pyx_t_2.__pyx_n = 1;
   __pyx_t_2.bFlag_radian = __pyx_v_bFlag_radian;
-  __pyx_t_1 = ((PyObject *)__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude_array(__pyx_v_dLongitude1_in, __pyx_v_dLatitude1_in, __pyx_v_dLongitude2_in, __pyx_v_dLatitude2_in, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_distance_based_on_longitude_latitude_array(__pyx_v_dLongitude1_in, __pyx_v_dLatitude1_in, __pyx_v_dLongitude2_in, __pyx_v_dLatitude2_in, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 96, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -20998,7 +21628,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_2calculate_distance_ba
   return __pyx_r;
 }
 
-/* "pyearth/gis/geometry/kernel.pyx":103
+/* "pyearth/gis/geometry/kernel.pyx":142
  * 
  * # For compatibility, also provide a version that works with NumPy arrays directly
  * @cython.boundscheck(False)             # <<<<<<<<<<<<<<
@@ -21050,7 +21680,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dLongitude1_in,&__pyx_n_s_dLatitude1_in,&__pyx_n_s_dLongitude2_in,&__pyx_n_s_dLatitude2_in,&__pyx_n_s_bFlag_radian,0};
 
-    /* "pyearth/gis/geometry/kernel.pyx":106
+    /* "pyearth/gis/geometry/kernel.pyx":145
  * @cython.wraparound(False)
  * def calculate_distance_based_on_longitude_latitude_numpy(
  *     dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in, bFlag_radian=False):             # <<<<<<<<<<<<<<
@@ -21081,7 +21711,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -21089,9 +21719,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, 1); __PYX_ERR(0, 103, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, 1); __PYX_ERR(0, 142, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -21099,9 +21729,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, 2); __PYX_ERR(0, 103, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, 2); __PYX_ERR(0, 142, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -21109,21 +21739,21 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, 3); __PYX_ERR(0, 103, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, 3); __PYX_ERR(0, 142, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_bFlag_radian);
           if (value) { values[4] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_distance_based_on_longitude_latitude_numpy") < 0)) __PYX_ERR(0, 103, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_distance_based_on_longitude_latitude_numpy") < 0)) __PYX_ERR(0, 142, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -21145,7 +21775,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, __pyx_nargs); __PYX_ERR(0, 103, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("calculate_distance_based_on_longitude_latitude_numpy", 0, 4, 5, __pyx_nargs); __PYX_ERR(0, 142, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -21161,7 +21791,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_based_on_longitude_latitude_numpy(__pyx_self, __pyx_v_dLongitude1_in, __pyx_v_dLatitude1_in, __pyx_v_dLongitude2_in, __pyx_v_dLatitude2_in, __pyx_v_bFlag_radian);
 
-  /* "pyearth/gis/geometry/kernel.pyx":103
+  /* "pyearth/gis/geometry/kernel.pyx":142
  * 
  * # For compatibility, also provide a version that works with NumPy arrays directly
  * @cython.boundscheck(False)             # <<<<<<<<<<<<<<
@@ -21205,90 +21835,90 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_distance_based_on_longitude_latitude_numpy", 1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":123
+  /* "pyearth/gis/geometry/kernel.pyx":162
  *     """
  *     # Convert to radians if needed
  *     if not bFlag_radian:             # <<<<<<<<<<<<<<
  *         dLongitude_radian1_in = dLongitude1_in / 180.0 * M_PI
  *         dLatitude_radian1_in = dLatitude1_in / 180.0 * M_PI
  */
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_bFlag_radian); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_bFlag_radian); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 162, __pyx_L1_error)
   __pyx_t_2 = (!__pyx_t_1);
   if (__pyx_t_2) {
 
-    /* "pyearth/gis/geometry/kernel.pyx":124
+    /* "pyearth/gis/geometry/kernel.pyx":163
  *     # Convert to radians if needed
  *     if not bFlag_radian:
  *         dLongitude_radian1_in = dLongitude1_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
  *         dLatitude_radian1_in = dLatitude1_in / 180.0 * M_PI
  *         dLongitude_radian2_in = dLongitude2_in / 180.0 * M_PI
  */
-    __pyx_t_3 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLongitude1_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 124, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLongitude1_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 163, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 124, __pyx_L1_error)
+    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 163, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 124, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 163, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_v_dLongitude_radian1_in = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":125
+    /* "pyearth/gis/geometry/kernel.pyx":164
  *     if not bFlag_radian:
  *         dLongitude_radian1_in = dLongitude1_in / 180.0 * M_PI
  *         dLatitude_radian1_in = dLatitude1_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
  *         dLongitude_radian2_in = dLongitude2_in / 180.0 * M_PI
  *         dLatitude_radian2_in = dLatitude2_in / 180.0 * M_PI
  */
-    __pyx_t_5 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLatitude1_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLatitude1_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 164, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 164, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 164, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_v_dLatitude_radian1_in = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":126
+    /* "pyearth/gis/geometry/kernel.pyx":165
  *         dLongitude_radian1_in = dLongitude1_in / 180.0 * M_PI
  *         dLatitude_radian1_in = dLatitude1_in / 180.0 * M_PI
  *         dLongitude_radian2_in = dLongitude2_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
  *         dLatitude_radian2_in = dLatitude2_in / 180.0 * M_PI
  *     else:
  */
-    __pyx_t_3 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLongitude2_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLongitude2_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 165, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 165, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 165, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_v_dLongitude_radian2_in = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":127
+    /* "pyearth/gis/geometry/kernel.pyx":166
  *         dLatitude_radian1_in = dLatitude1_in / 180.0 * M_PI
  *         dLongitude_radian2_in = dLongitude2_in / 180.0 * M_PI
  *         dLatitude_radian2_in = dLatitude2_in / 180.0 * M_PI             # <<<<<<<<<<<<<<
  *     else:
  *         dLongitude_radian1_in = dLongitude1_in
  */
-    __pyx_t_5 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLatitude2_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyFloat_TrueDivideObjC(__pyx_v_dLatitude2_in, __pyx_float_180_0, 180.0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 166, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_4 = PyFloat_FromDouble(M_PI); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 166, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 166, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_v_dLatitude_radian2_in = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":123
+    /* "pyearth/gis/geometry/kernel.pyx":162
  *     """
  *     # Convert to radians if needed
  *     if not bFlag_radian:             # <<<<<<<<<<<<<<
@@ -21298,7 +21928,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     goto __pyx_L3;
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":129
+  /* "pyearth/gis/geometry/kernel.pyx":168
  *         dLatitude_radian2_in = dLatitude2_in / 180.0 * M_PI
  *     else:
  *         dLongitude_radian1_in = dLongitude1_in             # <<<<<<<<<<<<<<
@@ -21309,7 +21939,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     __Pyx_INCREF(__pyx_v_dLongitude1_in);
     __pyx_v_dLongitude_radian1_in = __pyx_v_dLongitude1_in;
 
-    /* "pyearth/gis/geometry/kernel.pyx":130
+    /* "pyearth/gis/geometry/kernel.pyx":169
  *     else:
  *         dLongitude_radian1_in = dLongitude1_in
  *         dLatitude_radian1_in = dLatitude1_in             # <<<<<<<<<<<<<<
@@ -21319,7 +21949,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     __Pyx_INCREF(__pyx_v_dLatitude1_in);
     __pyx_v_dLatitude_radian1_in = __pyx_v_dLatitude1_in;
 
-    /* "pyearth/gis/geometry/kernel.pyx":131
+    /* "pyearth/gis/geometry/kernel.pyx":170
  *         dLongitude_radian1_in = dLongitude1_in
  *         dLatitude_radian1_in = dLatitude1_in
  *         dLongitude_radian2_in = dLongitude2_in             # <<<<<<<<<<<<<<
@@ -21329,7 +21959,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     __Pyx_INCREF(__pyx_v_dLongitude2_in);
     __pyx_v_dLongitude_radian2_in = __pyx_v_dLongitude2_in;
 
-    /* "pyearth/gis/geometry/kernel.pyx":132
+    /* "pyearth/gis/geometry/kernel.pyx":171
  *         dLatitude_radian1_in = dLatitude1_in
  *         dLongitude_radian2_in = dLongitude2_in
  *         dLatitude_radian2_in = dLatitude2_in             # <<<<<<<<<<<<<<
@@ -21341,43 +21971,43 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
   }
   __pyx_L3:;
 
-  /* "pyearth/gis/geometry/kernel.pyx":133
+  /* "pyearth/gis/geometry/kernel.pyx":172
  *         dLongitude_radian2_in = dLongitude2_in
  *         dLatitude_radian2_in = dLatitude2_in
  *     dLongtitude_diff = dLongitude_radian2_in - dLongitude_radian1_in             # <<<<<<<<<<<<<<
  *     dLatitude_diff = dLatitude_radian2_in - dLatitude_radian1_in
  *     a = np.sin(dLatitude_diff/2)**2 + np.cos(dLatitude_radian1_in) * np.cos(dLatitude_radian2_in) * np.sin(dLongtitude_diff/2)**2
  */
-  __pyx_t_3 = PyNumber_Subtract(__pyx_v_dLongitude_radian2_in, __pyx_v_dLongitude_radian1_in); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Subtract(__pyx_v_dLongitude_radian2_in, __pyx_v_dLongitude_radian1_in); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_v_dLongtitude_diff = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":134
+  /* "pyearth/gis/geometry/kernel.pyx":173
  *         dLatitude_radian2_in = dLatitude2_in
  *     dLongtitude_diff = dLongitude_radian2_in - dLongitude_radian1_in
  *     dLatitude_diff = dLatitude_radian2_in - dLatitude_radian1_in             # <<<<<<<<<<<<<<
  *     a = np.sin(dLatitude_diff/2)**2 + np.cos(dLatitude_radian1_in) * np.cos(dLatitude_radian2_in) * np.sin(dLongtitude_diff/2)**2
  *     c = 2 * np.arcsin(np.sqrt(a)) * dRadius
  */
-  __pyx_t_3 = PyNumber_Subtract(__pyx_v_dLatitude_radian2_in, __pyx_v_dLatitude_radian1_in); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Subtract(__pyx_v_dLatitude_radian2_in, __pyx_v_dLatitude_radian1_in); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_v_dLatitude_diff = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":135
+  /* "pyearth/gis/geometry/kernel.pyx":174
  *     dLongtitude_diff = dLongitude_radian2_in - dLongitude_radian1_in
  *     dLatitude_diff = dLatitude_radian2_in - dLatitude_radian1_in
  *     a = np.sin(dLatitude_diff/2)**2 + np.cos(dLatitude_radian1_in) * np.cos(dLatitude_radian2_in) * np.sin(dLongtitude_diff/2)**2             # <<<<<<<<<<<<<<
  *     c = 2 * np.arcsin(np.sqrt(a)) * dRadius
  *     return c
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_sin); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_sin); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_TrueDivideObjC(__pyx_v_dLatitude_diff, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_TrueDivideObjC(__pyx_v_dLatitude_diff, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_6 = NULL;
   __pyx_t_7 = 0;
@@ -21398,16 +22028,16 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  __pyx_t_5 = PyNumber_Power(__pyx_t_3, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Power(__pyx_t_3, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_cos); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_cos); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -21428,13 +22058,13 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_v_dLatitude_radian1_in};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_cos); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_cos); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -21455,20 +22085,20 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_v_dLatitude_radian2_in};
     __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_8, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 135, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 174, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   }
-  __pyx_t_8 = PyNumber_Multiply(__pyx_t_3, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_8 = PyNumber_Multiply(__pyx_t_3, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sin); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sin); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_v_dLongtitude_diff, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_v_dLongtitude_diff, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_9 = NULL;
   __pyx_t_7 = 0;
@@ -21489,39 +22119,39 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 135, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 174, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_t_4 = PyNumber_Power(__pyx_t_6, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Power(__pyx_t_6, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = PyNumber_Multiply(__pyx_t_8, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_6 = PyNumber_Multiply(__pyx_t_8, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyNumber_Add(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Add(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_a = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":136
+  /* "pyearth/gis/geometry/kernel.pyx":175
  *     dLatitude_diff = dLatitude_radian2_in - dLatitude_radian1_in
  *     a = np.sin(dLatitude_diff/2)**2 + np.cos(dLatitude_radian1_in) * np.cos(dLatitude_radian2_in) * np.sin(dLongtitude_diff/2)**2
  *     c = 2 * np.arcsin(np.sqrt(a)) * dRadius             # <<<<<<<<<<<<<<
  *     return c
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_arcsin); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_arcsin); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_np); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_np); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __pyx_t_8 = NULL;
@@ -21542,7 +22172,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_a};
     __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 136, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 175, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
@@ -21565,23 +22195,23 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 136, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 175, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  __pyx_t_5 = __Pyx_PyInt_MultiplyCObj(__pyx_int_2, __pyx_t_4, 2, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_MultiplyCObj(__pyx_int_2, __pyx_t_4, 2, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_7pyearth_3gis_8geometry_6kernel_dRadius); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_7pyearth_3gis_8geometry_6kernel_dRadius); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_6 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_c = __pyx_t_6;
   __pyx_t_6 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":137
+  /* "pyearth/gis/geometry/kernel.pyx":176
  *     a = np.sin(dLatitude_diff/2)**2 + np.cos(dLatitude_radian1_in) * np.cos(dLatitude_radian2_in) * np.sin(dLongtitude_diff/2)**2
  *     c = 2 * np.arcsin(np.sqrt(a)) * dRadius
  *     return c             # <<<<<<<<<<<<<<
@@ -21593,7 +22223,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
   __pyx_r = __pyx_v_c;
   goto __pyx_L0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":103
+  /* "pyearth/gis/geometry/kernel.pyx":142
  * 
  * # For compatibility, also provide a version that works with NumPy arrays directly
  * @cython.boundscheck(False)             # <<<<<<<<<<<<<<
@@ -21625,7 +22255,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_4calculate_distance_ba
   return __pyx_r;
 }
 
-/* "pyearth/gis/geometry/kernel.pyx":140
+/* "pyearth/gis/geometry/kernel.pyx":179
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z1, double x2, double y2, double z2):             # <<<<<<<<<<<<<<
@@ -21658,7 +22288,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_angle_between_vectors_coordinates", 1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":145
+  /* "pyearth/gis/geometry/kernel.pyx":184
  *     """
  *     cdef double a, b, c, d, e, f
  *     a = x1*x2 + y1*y2 + z1*z2             # <<<<<<<<<<<<<<
@@ -21667,7 +22297,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_a = (((__pyx_v_x1 * __pyx_v_x2) + (__pyx_v_y1 * __pyx_v_y2)) + (__pyx_v_z1 * __pyx_v_z2));
 
-  /* "pyearth/gis/geometry/kernel.pyx":146
+  /* "pyearth/gis/geometry/kernel.pyx":185
  *     cdef double a, b, c, d, e, f
  *     a = x1*x2 + y1*y2 + z1*z2
  *     b = sqrt( x1*x1 + y1*y1 + z1*z1   )             # <<<<<<<<<<<<<<
@@ -21676,7 +22306,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_b = sqrt((((__pyx_v_x1 * __pyx_v_x1) + (__pyx_v_y1 * __pyx_v_y1)) + (__pyx_v_z1 * __pyx_v_z1)));
 
-  /* "pyearth/gis/geometry/kernel.pyx":147
+  /* "pyearth/gis/geometry/kernel.pyx":186
  *     a = x1*x2 + y1*y2 + z1*z2
  *     b = sqrt( x1*x1 + y1*y1 + z1*z1   )
  *     c = sqrt( x2*x2 + y2*y2 + z2*z2   )             # <<<<<<<<<<<<<<
@@ -21685,7 +22315,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_c = sqrt((((__pyx_v_x2 * __pyx_v_x2) + (__pyx_v_y2 * __pyx_v_y2)) + (__pyx_v_z2 * __pyx_v_z2)));
 
-  /* "pyearth/gis/geometry/kernel.pyx":148
+  /* "pyearth/gis/geometry/kernel.pyx":187
  *     b = sqrt( x1*x1 + y1*y1 + z1*z1   )
  *     c = sqrt( x2*x2 + y2*y2 + z2*z2   )
  *     if b == 0 or c == 0:             # <<<<<<<<<<<<<<
@@ -21703,20 +22333,20 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
   __pyx_L4_bool_binop_done:;
   if (unlikely(__pyx_t_1)) {
 
-    /* "pyearth/gis/geometry/kernel.pyx":149
+    /* "pyearth/gis/geometry/kernel.pyx":188
  *     c = sqrt( x2*x2 + y2*y2 + z2*z2   )
  *     if b == 0 or c == 0:
  *         raise ValueError("Zero-length vector encountered. Cannot calculate angle.")             # <<<<<<<<<<<<<<
  *     d = a / (b* c)
  *     # Clamp d to [-1, 1] to avoid floating point errors outside acos domain
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 149, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 188, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 149, __pyx_L1_error)
+    __PYX_ERR(0, 188, __pyx_L1_error)
 
-    /* "pyearth/gis/geometry/kernel.pyx":148
+    /* "pyearth/gis/geometry/kernel.pyx":187
  *     b = sqrt( x1*x1 + y1*y1 + z1*z1   )
  *     c = sqrt( x2*x2 + y2*y2 + z2*z2   )
  *     if b == 0 or c == 0:             # <<<<<<<<<<<<<<
@@ -21725,7 +22355,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":150
+  /* "pyearth/gis/geometry/kernel.pyx":189
  *     if b == 0 or c == 0:
  *         raise ValueError("Zero-length vector encountered. Cannot calculate angle.")
  *     d = a / (b* c)             # <<<<<<<<<<<<<<
@@ -21735,11 +22365,11 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
   __pyx_t_4 = (__pyx_v_b * __pyx_v_c);
   if (unlikely(__pyx_t_4 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 150, __pyx_L1_error)
+    __PYX_ERR(0, 189, __pyx_L1_error)
   }
   __pyx_v_d = (__pyx_v_a / __pyx_t_4);
 
-  /* "pyearth/gis/geometry/kernel.pyx":152
+  /* "pyearth/gis/geometry/kernel.pyx":191
  *     d = a / (b* c)
  *     # Clamp d to [-1, 1] to avoid floating point errors outside acos domain
  *     if d > 1:             # <<<<<<<<<<<<<<
@@ -21749,7 +22379,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
   __pyx_t_1 = (__pyx_v_d > 1.0);
   if (__pyx_t_1) {
 
-    /* "pyearth/gis/geometry/kernel.pyx":153
+    /* "pyearth/gis/geometry/kernel.pyx":192
  *     # Clamp d to [-1, 1] to avoid floating point errors outside acos domain
  *     if d > 1:
  *         d = 1             # <<<<<<<<<<<<<<
@@ -21758,7 +22388,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
     __pyx_v_d = 1.0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":152
+    /* "pyearth/gis/geometry/kernel.pyx":191
  *     d = a / (b* c)
  *     # Clamp d to [-1, 1] to avoid floating point errors outside acos domain
  *     if d > 1:             # <<<<<<<<<<<<<<
@@ -21767,7 +22397,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":154
+  /* "pyearth/gis/geometry/kernel.pyx":193
  *     if d > 1:
  *         d = 1
  *     if d < -1:             # <<<<<<<<<<<<<<
@@ -21777,7 +22407,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
   __pyx_t_1 = (__pyx_v_d < -1.0);
   if (__pyx_t_1) {
 
-    /* "pyearth/gis/geometry/kernel.pyx":155
+    /* "pyearth/gis/geometry/kernel.pyx":194
  *         d = 1
  *     if d < -1:
  *         d = -1             # <<<<<<<<<<<<<<
@@ -21786,7 +22416,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
     __pyx_v_d = -1.0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":154
+    /* "pyearth/gis/geometry/kernel.pyx":193
  *     if d > 1:
  *         d = 1
  *     if d < -1:             # <<<<<<<<<<<<<<
@@ -21795,7 +22425,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":156
+  /* "pyearth/gis/geometry/kernel.pyx":195
  *     if d < -1:
  *         d = -1
  *     e = acos(d)             # <<<<<<<<<<<<<<
@@ -21804,7 +22434,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_e = acos(__pyx_v_d);
 
-  /* "pyearth/gis/geometry/kernel.pyx":157
+  /* "pyearth/gis/geometry/kernel.pyx":196
  *         d = -1
  *     e = acos(d)
  *     f = e / M_PI * 180.0             # <<<<<<<<<<<<<<
@@ -21813,11 +22443,11 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   if (unlikely(M_PI == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 157, __pyx_L1_error)
+    __PYX_ERR(0, 196, __pyx_L1_error)
   }
   __pyx_v_f = ((__pyx_v_e / ((double)M_PI)) * 180.0);
 
-  /* "pyearth/gis/geometry/kernel.pyx":158
+  /* "pyearth/gis/geometry/kernel.pyx":197
  *     e = acos(d)
  *     f = e / M_PI * 180.0
  *     return f             # <<<<<<<<<<<<<<
@@ -21825,13 +22455,13 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  * @cython.boundscheck(False)  # deactivate bnds checking
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_f); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_f); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":140
+  /* "pyearth/gis/geometry/kernel.pyx":179
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z1, double x2, double y2, double z2):             # <<<<<<<<<<<<<<
@@ -21919,7 +22549,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -21927,9 +22557,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 1); __PYX_ERR(0, 140, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 1); __PYX_ERR(0, 179, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -21937,9 +22567,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 2); __PYX_ERR(0, 140, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 2); __PYX_ERR(0, 179, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -21947,9 +22577,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 3); __PYX_ERR(0, 140, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 3); __PYX_ERR(0, 179, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -21957,9 +22587,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 4); __PYX_ERR(0, 140, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 4); __PYX_ERR(0, 179, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -21967,14 +22597,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 5); __PYX_ERR(0, 140, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, 5); __PYX_ERR(0, 179, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_angle_between_vectors_coordinates") < 0)) __PYX_ERR(0, 140, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_angle_between_vectors_coordinates") < 0)) __PYX_ERR(0, 179, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 6)) {
       goto __pyx_L5_argtuple_error;
@@ -21986,16 +22616,16 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
       values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
     }
-    __pyx_v_x1 = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_x1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
-    __pyx_v_y1 = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_y1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
-    __pyx_v_z1 = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_z1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
-    __pyx_v_x2 = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_x2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
-    __pyx_v_y2 = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_y2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
-    __pyx_v_z2 = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_z2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+    __pyx_v_x1 = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_x1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
+    __pyx_v_y1 = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_y1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
+    __pyx_v_z1 = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_z1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
+    __pyx_v_x2 = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_x2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
+    __pyx_v_y2 = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_y2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
+    __pyx_v_z2 = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_z2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 140, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("calculate_angle_between_vectors_coordinates", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 179, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -22031,7 +22661,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_6calculate_angle_betwe
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_angle_between_vectors_coordinates", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_vectors_coordinates(__pyx_v_x1, __pyx_v_y1, __pyx_v_z1, __pyx_v_x2, __pyx_v_y2, __pyx_v_z2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_vectors_coordinates(__pyx_v_x1, __pyx_v_y1, __pyx_v_z1, __pyx_v_x2, __pyx_v_y2, __pyx_v_z2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 179, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -22048,7 +22678,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_6calculate_angle_betwe
   return __pyx_r;
 }
 
-/* "pyearth/gis/geometry/kernel.pyx":161
+/* "pyearth/gis/geometry/kernel.pyx":200
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_point(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):             # <<<<<<<<<<<<<<
@@ -22096,16 +22726,16 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_angle_between_point", 1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":172
+  /* "pyearth/gis/geometry/kernel.pyx":211
  * 
  *     # The points in 3D space
  *     x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)             # <<<<<<<<<<<<<<
  *     x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
  *     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
  */
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude_degree1_in); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L1_error)
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude_degree1_in); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L1_error)
-  __pyx_t_3 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_t_1, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude_degree1_in); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude_degree1_in); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_t_1, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
     PyObject* sequence = __pyx_t_3;
@@ -22113,7 +22743,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 172, __pyx_L1_error)
+      __PYX_ERR(0, 211, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -22129,17 +22759,17 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_INCREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_t_6);
     #else
-    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_6 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     #endif
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_8 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_7);
@@ -22149,7 +22779,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_GOTREF(__pyx_t_5);
     index = 2; __pyx_t_6 = __pyx_t_8(__pyx_t_7); if (unlikely(!__pyx_t_6)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_6);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 172, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 211, __pyx_L1_error)
     __pyx_t_8 = NULL;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     goto __pyx_L4_unpacking_done;
@@ -22157,29 +22787,29 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_t_8 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 172, __pyx_L1_error)
+    __PYX_ERR(0, 211, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_x1 = __pyx_t_2;
   __pyx_v_y1 = __pyx_t_1;
   __pyx_v_z1 = __pyx_t_9;
 
-  /* "pyearth/gis/geometry/kernel.pyx":173
+  /* "pyearth/gis/geometry/kernel.pyx":212
  *     # The points in 3D space
  *     x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
  *     x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)             # <<<<<<<<<<<<<<
  *     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
  *     # Vectors in 3D space
  */
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude_degree2_in); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 173, __pyx_L1_error)
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude_degree2_in); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 173, __pyx_L1_error)
-  __pyx_t_3 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_t_9, __pyx_t_1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude_degree2_in); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude_degree2_in); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_t_9, __pyx_t_1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
     PyObject* sequence = __pyx_t_3;
@@ -22187,7 +22817,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 173, __pyx_L1_error)
+      __PYX_ERR(0, 212, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -22203,17 +22833,17 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_INCREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 173, __pyx_L1_error)
+    __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 212, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 173, __pyx_L1_error)
+    __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 212, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 173, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 212, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 173, __pyx_L1_error)
+    __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 212, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_8 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_7);
@@ -22223,7 +22853,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_GOTREF(__pyx_t_5);
     index = 2; __pyx_t_4 = __pyx_t_8(__pyx_t_7); if (unlikely(!__pyx_t_4)) goto __pyx_L5_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 173, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 212, __pyx_L1_error)
     __pyx_t_8 = NULL;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     goto __pyx_L6_unpacking_done;
@@ -22231,29 +22861,29 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_t_8 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 173, __pyx_L1_error)
+    __PYX_ERR(0, 212, __pyx_L1_error)
     __pyx_L6_unpacking_done:;
   }
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_x2 = __pyx_t_1;
   __pyx_v_y2 = __pyx_t_9;
   __pyx_v_z2 = __pyx_t_2;
 
-  /* "pyearth/gis/geometry/kernel.pyx":174
+  /* "pyearth/gis/geometry/kernel.pyx":213
  *     x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
  *     x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
  *     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)             # <<<<<<<<<<<<<<
  *     # Vectors in 3D space
  * 
  */
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude_degree3_in); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L1_error)
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude_degree3_in); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L1_error)
-  __pyx_t_3 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_t_2, __pyx_t_9, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_dLongitude_degree3_in); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_dLatitude_degree3_in); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_t_2, __pyx_t_9, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
     PyObject* sequence = __pyx_t_3;
@@ -22261,7 +22891,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 174, __pyx_L1_error)
+      __PYX_ERR(0, 213, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -22277,17 +22907,17 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_INCREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_t_6);
     #else
-    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 174, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 174, __pyx_L1_error)
+    __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 174, __pyx_L1_error)
+    __pyx_t_6 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     #endif
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 174, __pyx_L1_error)
+    __pyx_t_7 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_8 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_7);
@@ -22297,7 +22927,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_GOTREF(__pyx_t_5);
     index = 2; __pyx_t_6 = __pyx_t_8(__pyx_t_7); if (unlikely(!__pyx_t_6)) goto __pyx_L7_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_6);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 174, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 3) < 0) __PYX_ERR(0, 213, __pyx_L1_error)
     __pyx_t_8 = NULL;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     goto __pyx_L8_unpacking_done;
@@ -22305,20 +22935,20 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_t_8 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 174, __pyx_L1_error)
+    __PYX_ERR(0, 213, __pyx_L1_error)
     __pyx_L8_unpacking_done:;
   }
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_x3 = __pyx_t_9;
   __pyx_v_y3 = __pyx_t_2;
   __pyx_v_z3 = __pyx_t_1;
 
-  /* "pyearth/gis/geometry/kernel.pyx":177
+  /* "pyearth/gis/geometry/kernel.pyx":216
  *     # Vectors in 3D space
  * 
  *     x4 = x1 - x2             # <<<<<<<<<<<<<<
@@ -22327,7 +22957,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_x4 = (__pyx_v_x1 - __pyx_v_x2);
 
-  /* "pyearth/gis/geometry/kernel.pyx":178
+  /* "pyearth/gis/geometry/kernel.pyx":217
  * 
  *     x4 = x1 - x2
  *     y4 = y1 - y2             # <<<<<<<<<<<<<<
@@ -22336,7 +22966,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_y4 = (__pyx_v_y1 - __pyx_v_y2);
 
-  /* "pyearth/gis/geometry/kernel.pyx":179
+  /* "pyearth/gis/geometry/kernel.pyx":218
  *     x4 = x1 - x2
  *     y4 = y1 - y2
  *     z4 = z1 - z2             # <<<<<<<<<<<<<<
@@ -22345,7 +22975,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_z4 = (__pyx_v_z1 - __pyx_v_z2);
 
-  /* "pyearth/gis/geometry/kernel.pyx":181
+  /* "pyearth/gis/geometry/kernel.pyx":220
  *     z4 = z1 - z2
  *     #c3vec[i] = aCoordinate3[i] - aCoordinate2[i]
  *     x5 = x3 - x2             # <<<<<<<<<<<<<<
@@ -22354,7 +22984,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_x5 = (__pyx_v_x3 - __pyx_v_x2);
 
-  /* "pyearth/gis/geometry/kernel.pyx":182
+  /* "pyearth/gis/geometry/kernel.pyx":221
  *     #c3vec[i] = aCoordinate3[i] - aCoordinate2[i]
  *     x5 = x3 - x2
  *     y5 = y3 - y2             # <<<<<<<<<<<<<<
@@ -22363,7 +22993,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_y5 = (__pyx_v_y3 - __pyx_v_y2);
 
-  /* "pyearth/gis/geometry/kernel.pyx":183
+  /* "pyearth/gis/geometry/kernel.pyx":222
  *     x5 = x3 - x2
  *     y5 = y3 - y2
  *     z5 = z3 - z2             # <<<<<<<<<<<<<<
@@ -22372,20 +23002,20 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  */
   __pyx_v_z5 = (__pyx_v_z3 - __pyx_v_z2);
 
-  /* "pyearth/gis/geometry/kernel.pyx":185
+  /* "pyearth/gis/geometry/kernel.pyx":224
  *     z5 = z3 - z2
  * 
  *     angle3deg = calculate_angle_between_vectors_coordinates( x4, y4, z4, x5, y5, z5)             # <<<<<<<<<<<<<<
  *     return  angle3deg
  * 
  */
-  __pyx_t_3 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_vectors_coordinates(__pyx_v_x4, __pyx_v_y4, __pyx_v_z4, __pyx_v_x5, __pyx_v_y5, __pyx_v_z5, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_vectors_coordinates(__pyx_v_x4, __pyx_v_y4, __pyx_v_z4, __pyx_v_x5, __pyx_v_y5, __pyx_v_z5, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_angle3deg = __pyx_t_1;
 
-  /* "pyearth/gis/geometry/kernel.pyx":186
+  /* "pyearth/gis/geometry/kernel.pyx":225
  * 
  *     angle3deg = calculate_angle_between_vectors_coordinates( x4, y4, z4, x5, y5, z5)
  *     return  angle3deg             # <<<<<<<<<<<<<<
@@ -22393,13 +23023,13 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between
  * @cython.boundscheck(False)  # Disable bounds checking for performance
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_angle3deg); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_angle3deg); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 225, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":161
+  /* "pyearth/gis/geometry/kernel.pyx":200
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_point(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):             # <<<<<<<<<<<<<<
@@ -22490,7 +23120,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -22498,9 +23128,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 1); __PYX_ERR(0, 161, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 1); __PYX_ERR(0, 200, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -22508,9 +23138,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 2); __PYX_ERR(0, 161, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 2); __PYX_ERR(0, 200, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -22518,9 +23148,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 3); __PYX_ERR(0, 161, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 3); __PYX_ERR(0, 200, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -22528,9 +23158,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 4); __PYX_ERR(0, 161, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 4); __PYX_ERR(0, 200, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -22538,14 +23168,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 5); __PYX_ERR(0, 161, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, 5); __PYX_ERR(0, 200, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_angle_between_point") < 0)) __PYX_ERR(0, 161, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_angle_between_point") < 0)) __PYX_ERR(0, 200, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 6)) {
       goto __pyx_L5_argtuple_error;
@@ -22566,7 +23196,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 161, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("calculate_angle_between_point", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 200, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -22602,7 +23232,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_8calculate_angle_betwe
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_angle_between_point", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_point(__pyx_v_dLongitude_degree1_in, __pyx_v_dLatitude_degree1_in, __pyx_v_dLongitude_degree2_in, __pyx_v_dLatitude_degree2_in, __pyx_v_dLongitude_degree3_in, __pyx_v_dLatitude_degree3_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_calculate_angle_between_point(__pyx_v_dLongitude_degree1_in, __pyx_v_dLatitude_degree1_in, __pyx_v_dLongitude_degree2_in, __pyx_v_dLatitude_degree2_in, __pyx_v_dLongitude_degree3_in, __pyx_v_dLatitude_degree3_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -22619,7 +23249,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_8calculate_angle_betwe
   return __pyx_r;
 }
 
-/* "pyearth/gis/geometry/kernel.pyx":188
+/* "pyearth/gis/geometry/kernel.pyx":227
  *     return  angle3deg
  * 
  * @cython.boundscheck(False)  # Disable bounds checking for performance             # <<<<<<<<<<<<<<
@@ -22696,7 +23326,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -22704,9 +23334,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 1); __PYX_ERR(0, 188, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 1); __PYX_ERR(0, 227, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -22714,9 +23344,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 2); __PYX_ERR(0, 188, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 2); __PYX_ERR(0, 227, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -22724,9 +23354,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 3); __PYX_ERR(0, 188, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 3); __PYX_ERR(0, 227, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -22734,9 +23364,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 4); __PYX_ERR(0, 188, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 4); __PYX_ERR(0, 227, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -22744,14 +23374,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 5); __PYX_ERR(0, 188, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, 5); __PYX_ERR(0, 227, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_distance_to_plane") < 0)) __PYX_ERR(0, 188, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "calculate_distance_to_plane") < 0)) __PYX_ERR(0, 227, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 6)) {
       goto __pyx_L5_argtuple_error;
@@ -22763,16 +23393,16 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
       values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
     }
-    __pyx_v_dLongitude_degree1_in = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_dLongitude_degree1_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 190, __pyx_L3_error)
-    __pyx_v_dLatitude_degree1_in = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_dLatitude_degree1_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 190, __pyx_L3_error)
-    __pyx_v_dLongitude_degree2_in = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_dLongitude_degree2_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 191, __pyx_L3_error)
-    __pyx_v_dLatitude_degree2_in = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_dLatitude_degree2_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 191, __pyx_L3_error)
-    __pyx_v_dLongitude_degree3_in = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_dLongitude_degree3_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 192, __pyx_L3_error)
-    __pyx_v_dLatitude_degree3_in = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_dLatitude_degree3_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 192, __pyx_L3_error)
+    __pyx_v_dLongitude_degree1_in = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_dLongitude_degree1_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 229, __pyx_L3_error)
+    __pyx_v_dLatitude_degree1_in = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_dLatitude_degree1_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 229, __pyx_L3_error)
+    __pyx_v_dLongitude_degree2_in = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_dLongitude_degree2_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 230, __pyx_L3_error)
+    __pyx_v_dLatitude_degree2_in = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_dLatitude_degree2_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 230, __pyx_L3_error)
+    __pyx_v_dLongitude_degree3_in = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_dLongitude_degree3_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 231, __pyx_L3_error)
+    __pyx_v_dLatitude_degree3_in = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_dLatitude_degree3_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 231, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 188, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("calculate_distance_to_plane", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 227, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -22841,14 +23471,14 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("calculate_distance_to_plane", 1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":207
+  /* "pyearth/gis/geometry/kernel.pyx":246
  * 
  *     # Convert the three points to 3D coordinates
  *     x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)             # <<<<<<<<<<<<<<
  *     x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
  *     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
  */
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_v_dLongitude_degree1_in, __pyx_v_dLatitude_degree1_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_v_dLongitude_degree1_in, __pyx_v_dLatitude_degree1_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
     PyObject* sequence = __pyx_t_1;
@@ -22856,7 +23486,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 207, __pyx_L1_error)
+      __PYX_ERR(0, 246, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -22872,17 +23502,17 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 207, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 207, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 207, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 207, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
@@ -22892,7 +23522,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_GOTREF(__pyx_t_3);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 207, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 246, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -22900,27 +23530,27 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 207, __pyx_L1_error)
+    __PYX_ERR(0, 246, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
-  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_x1 = __pyx_t_7;
   __pyx_v_y1 = __pyx_t_8;
   __pyx_v_z1 = __pyx_t_9;
 
-  /* "pyearth/gis/geometry/kernel.pyx":208
+  /* "pyearth/gis/geometry/kernel.pyx":247
  *     # Convert the three points to 3D coordinates
  *     x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
  *     x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)             # <<<<<<<<<<<<<<
  *     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
  * 
  */
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_v_dLongitude_degree2_in, __pyx_v_dLatitude_degree2_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_v_dLongitude_degree2_in, __pyx_v_dLatitude_degree2_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
     PyObject* sequence = __pyx_t_1;
@@ -22928,7 +23558,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 208, __pyx_L1_error)
+      __PYX_ERR(0, 247, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -22944,17 +23574,17 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_2);
     #else
-    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 247, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 208, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 247, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     #endif
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 208, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 247, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
@@ -22964,7 +23594,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_GOTREF(__pyx_t_3);
     index = 2; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L5_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 247, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L6_unpacking_done;
@@ -22972,27 +23602,27 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 208, __pyx_L1_error)
+    __PYX_ERR(0, 247, __pyx_L1_error)
     __pyx_L6_unpacking_done:;
   }
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 208, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 208, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 208, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_x2 = __pyx_t_9;
   __pyx_v_y2 = __pyx_t_8;
   __pyx_v_z2 = __pyx_t_7;
 
-  /* "pyearth/gis/geometry/kernel.pyx":209
+  /* "pyearth/gis/geometry/kernel.pyx":248
  *     x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
  *     x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
  *     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)             # <<<<<<<<<<<<<<
  * 
  *     # Calculate two vectors on the plane
  */
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_v_dLongitude_degree3_in, __pyx_v_dLatitude_degree3_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8location_6kernel_convert_longitude_latitude_to_sphere_3d(__pyx_v_dLongitude_degree3_in, __pyx_v_dLatitude_degree3_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
     PyObject* sequence = __pyx_t_1;
@@ -23000,7 +23630,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 209, __pyx_L1_error)
+      __PYX_ERR(0, 248, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -23016,17 +23646,17 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
@@ -23036,7 +23666,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_GOTREF(__pyx_t_3);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L7_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 248, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L8_unpacking_done;
@@ -23044,20 +23674,20 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 209, __pyx_L1_error)
+    __PYX_ERR(0, 248, __pyx_L1_error)
     __pyx_L8_unpacking_done:;
   }
-  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_x3 = __pyx_t_7;
   __pyx_v_y3 = __pyx_t_8;
   __pyx_v_z3 = __pyx_t_9;
 
-  /* "pyearth/gis/geometry/kernel.pyx":212
+  /* "pyearth/gis/geometry/kernel.pyx":251
  * 
  *     # Calculate two vectors on the plane
  *     v1_x = x2 - x1             # <<<<<<<<<<<<<<
@@ -23066,7 +23696,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_v1_x = (__pyx_v_x2 - __pyx_v_x1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":213
+  /* "pyearth/gis/geometry/kernel.pyx":252
  *     # Calculate two vectors on the plane
  *     v1_x = x2 - x1
  *     v1_y = y2 - y1             # <<<<<<<<<<<<<<
@@ -23075,7 +23705,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_v1_y = (__pyx_v_y2 - __pyx_v_y1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":214
+  /* "pyearth/gis/geometry/kernel.pyx":253
  *     v1_x = x2 - x1
  *     v1_y = y2 - y1
  *     v1_z = z2 - z1             # <<<<<<<<<<<<<<
@@ -23084,7 +23714,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_v1_z = (__pyx_v_z2 - __pyx_v_z1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":216
+  /* "pyearth/gis/geometry/kernel.pyx":255
  *     v1_z = z2 - z1
  * 
  *     v2_x = x3 - x1             # <<<<<<<<<<<<<<
@@ -23093,7 +23723,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_v2_x = (__pyx_v_x3 - __pyx_v_x1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":217
+  /* "pyearth/gis/geometry/kernel.pyx":256
  * 
  *     v2_x = x3 - x1
  *     v2_y = y3 - y1             # <<<<<<<<<<<<<<
@@ -23102,7 +23732,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_v2_y = (__pyx_v_y3 - __pyx_v_y1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":218
+  /* "pyearth/gis/geometry/kernel.pyx":257
  *     v2_x = x3 - x1
  *     v2_y = y3 - y1
  *     v2_z = z3 - z1             # <<<<<<<<<<<<<<
@@ -23111,7 +23741,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_v2_z = (__pyx_v_z3 - __pyx_v_z1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":221
+  /* "pyearth/gis/geometry/kernel.pyx":260
  * 
  *     # Compute the normal vector using the cross product
  *     normal_x = v1_y * v2_z - v1_z * v2_y             # <<<<<<<<<<<<<<
@@ -23120,7 +23750,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_normal_x = ((__pyx_v_v1_y * __pyx_v_v2_z) - (__pyx_v_v1_z * __pyx_v_v2_y));
 
-  /* "pyearth/gis/geometry/kernel.pyx":222
+  /* "pyearth/gis/geometry/kernel.pyx":261
  *     # Compute the normal vector using the cross product
  *     normal_x = v1_y * v2_z - v1_z * v2_y
  *     normal_y = v1_z * v2_x - v1_x * v2_z             # <<<<<<<<<<<<<<
@@ -23129,7 +23759,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_normal_y = ((__pyx_v_v1_z * __pyx_v_v2_x) - (__pyx_v_v1_x * __pyx_v_v2_z));
 
-  /* "pyearth/gis/geometry/kernel.pyx":223
+  /* "pyearth/gis/geometry/kernel.pyx":262
  *     normal_x = v1_y * v2_z - v1_z * v2_y
  *     normal_y = v1_z * v2_x - v1_x * v2_z
  *     normal_z = v1_x * v2_y - v1_y * v2_x             # <<<<<<<<<<<<<<
@@ -23138,7 +23768,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_normal_z = ((__pyx_v_v1_x * __pyx_v_v2_y) - (__pyx_v_v1_y * __pyx_v_v2_x));
 
-  /* "pyearth/gis/geometry/kernel.pyx":226
+  /* "pyearth/gis/geometry/kernel.pyx":265
  * 
  *     # Check if the normal vector is zero (points are collinear)
  *     if abs(normal_x) < 1e-10 and abs(normal_y) < 1e-10 and abs(normal_z) < 1e-10:             # <<<<<<<<<<<<<<
@@ -23162,7 +23792,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
   __pyx_L10_bool_binop_done:;
   if (__pyx_t_10) {
 
-    /* "pyearth/gis/geometry/kernel.pyx":228
+    /* "pyearth/gis/geometry/kernel.pyx":267
  *     if abs(normal_x) < 1e-10 and abs(normal_y) < 1e-10 and abs(normal_z) < 1e-10:
  *         # Collinear points: return zero, but warn user in documentation
  *         return 0.0             # <<<<<<<<<<<<<<
@@ -23174,7 +23804,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
     __pyx_r = __pyx_float_0_0;
     goto __pyx_L0;
 
-    /* "pyearth/gis/geometry/kernel.pyx":226
+    /* "pyearth/gis/geometry/kernel.pyx":265
  * 
  *     # Check if the normal vector is zero (points are collinear)
  *     if abs(normal_x) < 1e-10 and abs(normal_y) < 1e-10 and abs(normal_z) < 1e-10:             # <<<<<<<<<<<<<<
@@ -23183,7 +23813,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   }
 
-  /* "pyearth/gis/geometry/kernel.pyx":231
+  /* "pyearth/gis/geometry/kernel.pyx":270
  * 
  *     # Calculate the plane equation coefficients (A, B, C, D)
  *     A = normal_x             # <<<<<<<<<<<<<<
@@ -23192,7 +23822,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_A = __pyx_v_normal_x;
 
-  /* "pyearth/gis/geometry/kernel.pyx":232
+  /* "pyearth/gis/geometry/kernel.pyx":271
  *     # Calculate the plane equation coefficients (A, B, C, D)
  *     A = normal_x
  *     B = normal_y             # <<<<<<<<<<<<<<
@@ -23201,7 +23831,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_B = __pyx_v_normal_y;
 
-  /* "pyearth/gis/geometry/kernel.pyx":233
+  /* "pyearth/gis/geometry/kernel.pyx":272
  *     A = normal_x
  *     B = normal_y
  *     C = normal_z             # <<<<<<<<<<<<<<
@@ -23210,7 +23840,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_C = __pyx_v_normal_z;
 
-  /* "pyearth/gis/geometry/kernel.pyx":234
+  /* "pyearth/gis/geometry/kernel.pyx":273
  *     B = normal_y
  *     C = normal_z
  *     D = -(A * x1 + B * y1 + C * z1)             # <<<<<<<<<<<<<<
@@ -23219,7 +23849,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  */
   __pyx_v_D = (-(((__pyx_v_A * __pyx_v_x1) + (__pyx_v_B * __pyx_v_y1)) + (__pyx_v_C * __pyx_v_z1)));
 
-  /* "pyearth/gis/geometry/kernel.pyx":237
+  /* "pyearth/gis/geometry/kernel.pyx":276
  * 
  *     # Calculate the distance of the second point to the plane
  *     distance = abs(A * x2 + B * y2 + C * z2 + D) / sqrt(A**2 + B**2 + C**2)             # <<<<<<<<<<<<<<
@@ -23230,11 +23860,11 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
   __pyx_t_8 = sqrt(((pow(__pyx_v_A, 2.0) + pow(__pyx_v_B, 2.0)) + pow(__pyx_v_C, 2.0)));
   if (unlikely(__pyx_t_8 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 237, __pyx_L1_error)
+    __PYX_ERR(0, 276, __pyx_L1_error)
   }
   __pyx_v_distance = (__pyx_t_9 / __pyx_t_8);
 
-  /* "pyearth/gis/geometry/kernel.pyx":239
+  /* "pyearth/gis/geometry/kernel.pyx":278
  *     distance = abs(A * x2 + B * y2 + C * z2 + D) / sqrt(A**2 + B**2 + C**2)
  * 
  *     return distance             # <<<<<<<<<<<<<<
@@ -23242,13 +23872,13 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
  * @cython.boundscheck(False)  # deactivate bnds checking
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_distance); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 239, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_distance); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":188
+  /* "pyearth/gis/geometry/kernel.pyx":227
  *     return  angle3deg
  * 
  * @cython.boundscheck(False)  # Disable bounds checking for performance             # <<<<<<<<<<<<<<
@@ -23271,7 +23901,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_10calculate_distance_t
   return __pyx_r;
 }
 
-/* "pyearth/gis/geometry/kernel.pyx":242
+/* "pyearth/gis/geometry/kernel.pyx":281
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef convert_360_to_180(double dLongitude_in):             # <<<<<<<<<<<<<<
@@ -23297,7 +23927,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_convert_360_to_180(doub
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("convert_360_to_180", 1);
 
-  /* "pyearth/gis/geometry/kernel.pyx":254
+  /* "pyearth/gis/geometry/kernel.pyx":293
  *     cdef int a
  *     cdef double dLongitude_out
  *     a = int(dLongitude_in /180.0)             # <<<<<<<<<<<<<<
@@ -23306,7 +23936,7 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_convert_360_to_180(doub
  */
   __pyx_v_a = ((int)(__pyx_v_dLongitude_in / 180.0));
 
-  /* "pyearth/gis/geometry/kernel.pyx":255
+  /* "pyearth/gis/geometry/kernel.pyx":294
  *     cdef double dLongitude_out
  *     a = int(dLongitude_in /180.0)
  *     dLongitude_out = dLongitude_in - a * 360.0             # <<<<<<<<<<<<<<
@@ -23314,19 +23944,19 @@ static PyObject *__pyx_f_7pyearth_3gis_8geometry_6kernel_convert_360_to_180(doub
  */
   __pyx_v_dLongitude_out = (__pyx_v_dLongitude_in - (__pyx_v_a * 360.0));
 
-  /* "pyearth/gis/geometry/kernel.pyx":256
+  /* "pyearth/gis/geometry/kernel.pyx":295
  *     a = int(dLongitude_in /180.0)
  *     dLongitude_out = dLongitude_in - a * 360.0
  *     return dLongitude_out             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_dLongitude_out); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 256, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_dLongitude_out); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":242
+  /* "pyearth/gis/geometry/kernel.pyx":281
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef convert_360_to_180(double dLongitude_in):             # <<<<<<<<<<<<<<
@@ -23399,23 +24029,23 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 242, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 281, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "convert_360_to_180") < 0)) __PYX_ERR(0, 242, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "convert_360_to_180") < 0)) __PYX_ERR(0, 281, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
     }
-    __pyx_v_dLongitude_in = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_dLongitude_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 242, __pyx_L3_error)
+    __pyx_v_dLongitude_in = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_dLongitude_in == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 281, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("convert_360_to_180", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 242, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("convert_360_to_180", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 281, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -23451,7 +24081,7 @@ static PyObject *__pyx_pf_7pyearth_3gis_8geometry_6kernel_12convert_360_to_180(C
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("convert_360_to_180", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_convert_360_to_180(__pyx_v_dLongitude_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyearth_3gis_8geometry_6kernel_convert_360_to_180(__pyx_v_dLongitude_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -24489,6 +25119,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_allocate_buffer, __pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 0, 1, 1},
     {&__pyx_kp_u_and, __pyx_k_and, sizeof(__pyx_k_and), 0, 1, 0, 0},
     {&__pyx_n_s_arcsin, __pyx_k_arcsin, sizeof(__pyx_k_arcsin), 0, 0, 1, 1},
+    {&__pyx_n_s_asarray, __pyx_k_asarray, sizeof(__pyx_k_asarray), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
     {&__pyx_n_s_bFlag_radian, __pyx_k_bFlag_radian, sizeof(__pyx_k_bFlag_radian), 0, 0, 1, 1},
     {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
@@ -24588,6 +25219,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
     {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
     {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
+    {&__pyx_n_u_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 1, 0, 1},
     {&__pyx_n_s_sin, __pyx_k_sin, sizeof(__pyx_k_sin), 0, 0, 1, 1},
     {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
     {&__pyx_n_s_spec, __pyx_k_spec, sizeof(__pyx_k_spec), 0, 0, 1, 1},
@@ -24629,12 +25261,12 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 83, __pyx_L1_error)
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 188, __pyx_L1_error)
   __pyx_builtin___import__ = __Pyx_GetBuiltinName(__pyx_n_s_import); if (!__pyx_builtin___import__) __PYX_ERR(1, 100, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 156, __pyx_L1_error)
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(1, 159, __pyx_L1_error)
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_AssertionError = __Pyx_GetBuiltinName(__pyx_n_s_AssertionError); if (!__pyx_builtin_AssertionError) __PYX_ERR(1, 373, __pyx_L1_error)
   __pyx_builtin_Ellipsis = __Pyx_GetBuiltinName(__pyx_n_s_Ellipsis); if (!__pyx_builtin_Ellipsis) __PYX_ERR(1, 408, __pyx_L1_error)
   __pyx_builtin_id = __Pyx_GetBuiltinName(__pyx_n_s_id); if (!__pyx_builtin_id) __PYX_ERR(1, 618, __pyx_L1_error)
@@ -24708,14 +25340,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "pyearth/gis/geometry/kernel.pyx":149
+  /* "pyearth/gis/geometry/kernel.pyx":188
  *     c = sqrt( x2*x2 + y2*y2 + z2*z2   )
  *     if b == 0 or c == 0:
  *         raise ValueError("Zero-length vector encountered. Cannot calculate angle.")             # <<<<<<<<<<<<<<
  *     d = a / (b* c)
  *     # Clamp d to [-1, 1] to avoid floating point errors outside acos domain
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_Zero_length_vector_encountered_C); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_Zero_length_vector_encountered_C); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
 
@@ -24823,92 +25455,92 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "pyearth/gis/geometry/kernel.pyx":17
  * 
  * @cython.boundscheck(False)
- * cpdef double calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
+ * cpdef calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
  */
   __pyx_tuple__23 = PyTuple_Pack(5, __pyx_n_s_dLongitude1_in, __pyx_n_s_dLatitude1_in, __pyx_n_s_dLongitude2_in, __pyx_n_s_dLatitude2_in, __pyx_n_s_bFlag_radian); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__23);
   __Pyx_GIVEREF(__pyx_tuple__23);
-  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_based_on_long, 17, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_based_on_long_2, 17, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 17, __pyx_L1_error)
   __pyx_tuple__25 = PyTuple_Pack(1, Py_False); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__25);
   __Pyx_GIVEREF(__pyx_tuple__25);
 
-  /* "pyearth/gis/geometry/kernel.pyx":57
+  /* "pyearth/gis/geometry/kernel.pyx":96
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(             # <<<<<<<<<<<<<<
  *     double[:] dLongitude1_in, double[:] dLatitude1_in,
  *     double[:] dLongitude2_in, double[:] dLatitude2_in,
  */
-  __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_based_on_long_2, 57, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 57, __pyx_L1_error)
-  __pyx_tuple__27 = PyTuple_Pack(1, Py_False); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_based_on_long_3, 96, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_tuple__27 = PyTuple_Pack(1, Py_False); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(0, 96, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__27);
   __Pyx_GIVEREF(__pyx_tuple__27);
 
-  /* "pyearth/gis/geometry/kernel.pyx":103
+  /* "pyearth/gis/geometry/kernel.pyx":142
  * 
  * # For compatibility, also provide a version that works with NumPy arrays directly
  * @cython.boundscheck(False)             # <<<<<<<<<<<<<<
  * @cython.wraparound(False)
  * def calculate_distance_based_on_longitude_latitude_numpy(
  */
-  __pyx_tuple__28 = PyTuple_Pack(13, __pyx_n_s_dLongitude1_in, __pyx_n_s_dLatitude1_in, __pyx_n_s_dLongitude2_in, __pyx_n_s_dLatitude2_in, __pyx_n_s_bFlag_radian, __pyx_n_s_dLongitude_radian1_in, __pyx_n_s_dLatitude_radian1_in, __pyx_n_s_dLongitude_radian2_in, __pyx_n_s_dLatitude_radian2_in, __pyx_n_s_dLongtitude_diff, __pyx_n_s_dLatitude_diff, __pyx_n_s_a, __pyx_n_s_c); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_tuple__28 = PyTuple_Pack(13, __pyx_n_s_dLongitude1_in, __pyx_n_s_dLatitude1_in, __pyx_n_s_dLongitude2_in, __pyx_n_s_dLatitude2_in, __pyx_n_s_bFlag_radian, __pyx_n_s_dLongitude_radian1_in, __pyx_n_s_dLatitude_radian1_in, __pyx_n_s_dLongitude_radian2_in, __pyx_n_s_dLatitude_radian2_in, __pyx_n_s_dLongtitude_diff, __pyx_n_s_dLatitude_diff, __pyx_n_s_a, __pyx_n_s_c); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__28);
   __Pyx_GIVEREF(__pyx_tuple__28);
-  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_based_on_long_3, 103, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __pyx_tuple__30 = PyTuple_Pack(1, ((PyObject *)Py_False)); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_based_on_long, 142, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_tuple__30 = PyTuple_Pack(1, ((PyObject *)Py_False)); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__30);
   __Pyx_GIVEREF(__pyx_tuple__30);
 
-  /* "pyearth/gis/geometry/kernel.pyx":140
+  /* "pyearth/gis/geometry/kernel.pyx":179
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z1, double x2, double y2, double z2):             # <<<<<<<<<<<<<<
  *     """Return the angle between two vectors in any dimension space,
  *     in degrees.
  */
-  __pyx_tuple__31 = PyTuple_Pack(6, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_z1, __pyx_n_s_x2, __pyx_n_s_y2, __pyx_n_s_z2); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_tuple__31 = PyTuple_Pack(6, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_z1, __pyx_n_s_x2, __pyx_n_s_y2, __pyx_n_s_z2); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(0, 179, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__31);
   __Pyx_GIVEREF(__pyx_tuple__31);
-  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_angle_between_vectors, 140, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_angle_between_vectors, 179, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) __PYX_ERR(0, 179, __pyx_L1_error)
 
-  /* "pyearth/gis/geometry/kernel.pyx":161
+  /* "pyearth/gis/geometry/kernel.pyx":200
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_point(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):             # <<<<<<<<<<<<<<
  *     #all in degree
  * 
  */
-  __pyx_tuple__33 = PyTuple_Pack(6, __pyx_n_s_dLongitude_degree1_in, __pyx_n_s_dLatitude_degree1_in, __pyx_n_s_dLongitude_degree2_in, __pyx_n_s_dLatitude_degree2_in, __pyx_n_s_dLongitude_degree3_in, __pyx_n_s_dLatitude_degree3_in); if (unlikely(!__pyx_tuple__33)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_tuple__33 = PyTuple_Pack(6, __pyx_n_s_dLongitude_degree1_in, __pyx_n_s_dLatitude_degree1_in, __pyx_n_s_dLongitude_degree2_in, __pyx_n_s_dLatitude_degree2_in, __pyx_n_s_dLongitude_degree3_in, __pyx_n_s_dLatitude_degree3_in); if (unlikely(!__pyx_tuple__33)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__33);
   __Pyx_GIVEREF(__pyx_tuple__33);
-  __pyx_codeobj__34 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__33, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_angle_between_point, 161, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__34)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_codeobj__34 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__33, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_angle_between_point, 200, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__34)) __PYX_ERR(0, 200, __pyx_L1_error)
 
-  /* "pyearth/gis/geometry/kernel.pyx":188
+  /* "pyearth/gis/geometry/kernel.pyx":227
  *     return  angle3deg
  * 
  * @cython.boundscheck(False)  # Disable bounds checking for performance             # <<<<<<<<<<<<<<
  * @cython.wraparound(False)   # Disable negative indexing for performance
  * def calculate_distance_to_plane(double dLongitude_degree1_in, double dLatitude_degree1_in,
  */
-  __pyx_tuple__35 = PyTuple_Pack(29, __pyx_n_s_dLongitude_degree1_in, __pyx_n_s_dLatitude_degree1_in, __pyx_n_s_dLongitude_degree2_in, __pyx_n_s_dLatitude_degree2_in, __pyx_n_s_dLongitude_degree3_in, __pyx_n_s_dLatitude_degree3_in, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_z1, __pyx_n_s_x2, __pyx_n_s_y2, __pyx_n_s_z2, __pyx_n_s_x3, __pyx_n_s_y3, __pyx_n_s_z3, __pyx_n_s_v1_x, __pyx_n_s_v1_y, __pyx_n_s_v1_z, __pyx_n_s_v2_x, __pyx_n_s_v2_y, __pyx_n_s_v2_z, __pyx_n_s_normal_x, __pyx_n_s_normal_y, __pyx_n_s_normal_z, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_C, __pyx_n_s_D, __pyx_n_s_distance); if (unlikely(!__pyx_tuple__35)) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_tuple__35 = PyTuple_Pack(29, __pyx_n_s_dLongitude_degree1_in, __pyx_n_s_dLatitude_degree1_in, __pyx_n_s_dLongitude_degree2_in, __pyx_n_s_dLatitude_degree2_in, __pyx_n_s_dLongitude_degree3_in, __pyx_n_s_dLatitude_degree3_in, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_z1, __pyx_n_s_x2, __pyx_n_s_y2, __pyx_n_s_z2, __pyx_n_s_x3, __pyx_n_s_y3, __pyx_n_s_z3, __pyx_n_s_v1_x, __pyx_n_s_v1_y, __pyx_n_s_v1_z, __pyx_n_s_v2_x, __pyx_n_s_v2_y, __pyx_n_s_v2_z, __pyx_n_s_normal_x, __pyx_n_s_normal_y, __pyx_n_s_normal_z, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_C, __pyx_n_s_D, __pyx_n_s_distance); if (unlikely(!__pyx_tuple__35)) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__35);
   __Pyx_GIVEREF(__pyx_tuple__35);
-  __pyx_codeobj__36 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 29, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__35, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_to_plane, 188, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__36)) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_codeobj__36 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 29, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__35, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_calculate_distance_to_plane, 227, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__36)) __PYX_ERR(0, 227, __pyx_L1_error)
 
-  /* "pyearth/gis/geometry/kernel.pyx":242
+  /* "pyearth/gis/geometry/kernel.pyx":281
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef convert_360_to_180(double dLongitude_in):             # <<<<<<<<<<<<<<
  *     """[This function is modified from
  *     http://www.idlcoyote.com/map_tips/lonconvert.html]
  */
-  __pyx_tuple__37 = PyTuple_Pack(1, __pyx_n_s_dLongitude_in); if (unlikely(!__pyx_tuple__37)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_tuple__37 = PyTuple_Pack(1, __pyx_n_s_dLongitude_in); if (unlikely(!__pyx_tuple__37)) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__37);
   __Pyx_GIVEREF(__pyx_tuple__37);
-  __pyx_codeobj__38 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__37, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_convert_360_to_180, 242, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__38)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_codeobj__38 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__37, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyearth_gis_geometry_kernel_pyx, __pyx_n_s_convert_360_to_180, 281, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__38)) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -26055,88 +26687,88 @@ if (!__Pyx_RefNanny) {
   /* "pyearth/gis/geometry/kernel.pyx":17
  * 
  * @cython.boundscheck(False)
- * cpdef double calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
- *     double dLongitude1_in, double dLatitude1_in,
- *     double dLongitude2_in, double dLatitude2_in,
+ * cpdef calculate_distance_based_on_longitude_latitude(             # <<<<<<<<<<<<<<
+ *     dLongitude1_in, dLatitude1_in,
+ *     dLongitude2_in, dLatitude2_in,
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_1calculate_distance_based_on_longitude_latitude, 0, __pyx_n_s_calculate_distance_based_on_long, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_1calculate_distance_based_on_longitude_latitude, 0, __pyx_n_s_calculate_distance_based_on_long_2, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_7, __pyx_tuple__25);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_based_on_long, __pyx_t_7) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_based_on_long_2, __pyx_t_7) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":57
+  /* "pyearth/gis/geometry/kernel.pyx":96
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(             # <<<<<<<<<<<<<<
  *     double[:] dLongitude1_in, double[:] dLatitude1_in,
  *     double[:] dLongitude2_in, double[:] dLatitude2_in,
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_3calculate_distance_based_on_longitude_latitude_array, 0, __pyx_n_s_calculate_distance_based_on_long_2, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_3calculate_distance_based_on_longitude_latitude_array, 0, __pyx_n_s_calculate_distance_based_on_long_3, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 96, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_7, __pyx_tuple__27);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_based_on_long_2, __pyx_t_7) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_based_on_long_3, __pyx_t_7) < 0) __PYX_ERR(0, 96, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":103
+  /* "pyearth/gis/geometry/kernel.pyx":142
  * 
  * # For compatibility, also provide a version that works with NumPy arrays directly
  * @cython.boundscheck(False)             # <<<<<<<<<<<<<<
  * @cython.wraparound(False)
  * def calculate_distance_based_on_longitude_latitude_numpy(
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_5calculate_distance_based_on_longitude_latitude_numpy, 0, __pyx_n_s_calculate_distance_based_on_long_3, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_5calculate_distance_based_on_longitude_latitude_numpy, 0, __pyx_n_s_calculate_distance_based_on_long, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_7, __pyx_tuple__30);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_based_on_long_3, __pyx_t_7) < 0) __PYX_ERR(0, 103, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_based_on_long, __pyx_t_7) < 0) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":140
+  /* "pyearth/gis/geometry/kernel.pyx":179
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z1, double x2, double y2, double z2):             # <<<<<<<<<<<<<<
  *     """Return the angle between two vectors in any dimension space,
  *     in degrees.
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_7calculate_angle_between_vectors_coordinates, 0, __pyx_n_s_calculate_angle_between_vectors, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__32)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_7calculate_angle_between_vectors_coordinates, 0, __pyx_n_s_calculate_angle_between_vectors, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__32)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 179, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_angle_between_vectors, __pyx_t_7) < 0) __PYX_ERR(0, 140, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_angle_between_vectors, __pyx_t_7) < 0) __PYX_ERR(0, 179, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":161
+  /* "pyearth/gis/geometry/kernel.pyx":200
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef calculate_angle_between_point(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):             # <<<<<<<<<<<<<<
  *     #all in degree
  * 
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_9calculate_angle_between_point, 0, __pyx_n_s_calculate_angle_between_point, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__34)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_9calculate_angle_between_point, 0, __pyx_n_s_calculate_angle_between_point, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__34)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_angle_between_point, __pyx_t_7) < 0) __PYX_ERR(0, 161, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_angle_between_point, __pyx_t_7) < 0) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":188
+  /* "pyearth/gis/geometry/kernel.pyx":227
  *     return  angle3deg
  * 
  * @cython.boundscheck(False)  # Disable bounds checking for performance             # <<<<<<<<<<<<<<
  * @cython.wraparound(False)   # Disable negative indexing for performance
  * def calculate_distance_to_plane(double dLongitude_degree1_in, double dLatitude_degree1_in,
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_11calculate_distance_to_plane, 0, __pyx_n_s_calculate_distance_to_plane, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__36)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_11calculate_distance_to_plane, 0, __pyx_n_s_calculate_distance_to_plane, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__36)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_to_plane, __pyx_t_7) < 0) __PYX_ERR(0, 188, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_calculate_distance_to_plane, __pyx_t_7) < 0) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "pyearth/gis/geometry/kernel.pyx":242
+  /* "pyearth/gis/geometry/kernel.pyx":281
  * 
  * @cython.boundscheck(False)  # deactivate bnds checking
  * cpdef convert_360_to_180(double dLongitude_in):             # <<<<<<<<<<<<<<
  *     """[This function is modified from
  *     http://www.idlcoyote.com/map_tips/lonconvert.html]
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_13convert_360_to_180, 0, __pyx_n_s_convert_360_to_180, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__38)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7pyearth_3gis_8geometry_6kernel_13convert_360_to_180, 0, __pyx_n_s_convert_360_to_180, NULL, __pyx_n_s_pyearth_gis_geometry_kernel, __pyx_d, ((PyObject *)__pyx_codeobj__38)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_convert_360_to_180, __pyx_t_7) < 0) __PYX_ERR(0, 242, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_convert_360_to_180, __pyx_t_7) < 0) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
   /* "pyearth/gis/geometry/kernel.pyx":2

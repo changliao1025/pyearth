@@ -106,6 +106,15 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6):
             mid2 = slerp(n1, n2, t2)
             pPoint_end_seg = mid2.toLatLon()
 
+        # Check for degenerate segments (same start and end points)
+        if pPoint_start_seg == pPoint_end_seg:
+            # Skip degenerate segments or use a small offset
+            print(f"Warning: Segment {i} has identical start and end points")
+            print(f"  Start: ({pPoint_start_seg.dLongitude_degree}, {pPoint_start_seg.dLatitude_degree})")
+            print(f"  End: ({pPoint_end_seg.dLongitude_degree}, {pPoint_end_seg.dLatitude_degree})")
+            print(f"  t1={t1}, t2={t2}, nSegments={nSegments}")
+            continue
+
         # Create line segment
         pLine = pyline(pPoint_start_seg, pPoint_end_seg)
         aLine_out.append(pLine)

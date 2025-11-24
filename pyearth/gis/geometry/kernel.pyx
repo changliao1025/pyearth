@@ -14,37 +14,76 @@ from pyearth.gis.location.kernel cimport convert_longitude_latitude_to_sphere_3d
 cdef double dRadius = 6378137.0
 
 @cython.boundscheck(False)
-cpdef double calculate_distance_based_on_longitude_latitude(
-    double dLongitude1_in, double dLatitude1_in,
-    double dLongitude2_in, double dLatitude2_in,
-    bint bFlag_radian=False
+cpdef calculate_distance_based_on_longitude_latitude(
+    dLongitude1_in, dLatitude1_in,
+    dLongitude2_in, dLatitude2_in,
+    bFlag_radian=False
 ):
     """
     Calculate the great circle distance between two points on the earth.
+    Automatically handles both scalar and array inputs.
 
     Parameters
     ----------
-    dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in : double
+    dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in : double or array-like
         Coordinates of the two points. In degrees by default, or radians if bFlag_radian=True.
+        Can be scalars or arrays.
     bFlag_radian : bint, optional
         If True, input coordinates are in radians. If False (default), input is in degrees.
 
     Returns
     -------
-    double
-        Great circle distance in meters.
+    double or np.ndarray
+        Great circle distance in meters. Returns scalar if inputs are scalars, array if inputs are arrays.
     """
+    # Check if inputs are arrays
+    try:
+        # Try to access shape attribute to detect arrays
+        if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or
+            hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):
+            # Convert to numpy arrays and use the numpy version
+            import numpy as np
+            lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+            lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+            lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+            lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+            return calculate_distance_based_on_longitude_latitude_numpy(
+                lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+
+        # If we can iterate over the inputs, they might be lists/tuples
+        try:
+            iter(dLongitude1_in)
+            # Convert to numpy arrays and use the numpy version
+            import numpy as np
+            lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+            lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+            lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+            lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+            return calculate_distance_based_on_longitude_latitude_numpy(
+                lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+        except TypeError:
+            pass  # Not iterable, proceed with scalar calculation
+
+    except:
+        pass  # Any error, proceed with scalar calculation
+
+    # Scalar calculation
     cdef double lon1, lat1, lon2, lat2
+    cdef double dLongitude1_scalar = <double>dLongitude1_in
+    cdef double dLatitude1_scalar = <double>dLatitude1_in
+    cdef double dLongitude2_scalar = <double>dLongitude2_in
+    cdef double dLatitude2_scalar = <double>dLatitude2_in
+
     if not bFlag_radian:
-        lon1 = dLongitude1_in / 180.0 * M_PI
-        lat1 = dLatitude1_in / 180.0 * M_PI
-        lon2 = dLongitude2_in / 180.0 * M_PI
-        lat2 = dLatitude2_in / 180.0 * M_PI
+        lon1 = dLongitude1_scalar / 180.0 * M_PI
+        lat1 = dLatitude1_scalar / 180.0 * M_PI
+        lon2 = dLongitude2_scalar / 180.0 * M_PI
+        lat2 = dLatitude2_scalar / 180.0 * M_PI
     else:
-        lon1 = dLongitude1_in
-        lat1 = dLatitude1_in
-        lon2 = dLongitude2_in
-        lat2 = dLatitude2_in
+        lon1 = dLongitude1_scalar
+        lat1 = dLatitude1_scalar
+        lon2 = dLongitude2_scalar
+        lat2 = dLatitude2_scalar
     cdef double dLongtitude_diff = lon2 - lon1
     cdef double dLatitude_diff = lat2 - lat1
     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)

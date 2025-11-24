@@ -355,7 +355,7 @@ class pyline:
         if self.dLength < dRadius * 2.0:
             aEdge = [self]
         else:
-            aEdge = self.split_by_length(dRadius)
+            aEdge = self.split_by_length(dRadius*2.0)
 
         aPoint_out = []
         aPoint_center = []

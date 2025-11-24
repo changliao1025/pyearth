@@ -190,7 +190,6 @@ class pypolyline:
         self.pPoint_start = self.aLine[0].pPoint_start
         self.pPoint_end = self.aLine[-1].pPoint_end
 
-
     def split_line_by_length(self, dDistance: float) -> "pypolyline":
         """
         Split line segments that exceed the length threshold.

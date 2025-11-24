@@ -26,6 +26,28 @@ class pynvector(object):
     def length(self):
         return np.sqrt(self.dX * self.dX + self.dY * self.dY + self.dZ * self.dZ)
 
+    def dot(self, other):
+        """Calculate dot product with another nvector."""
+        if not isinstance(other, pynvector):
+            raise TypeError(f"Cannot compute dot product with {type(other).__name__}")
+        return self.dX * other.dX + self.dY * other.dY + self.dZ * other.dZ
+
+    def __mul__(self, scalar):
+        """Scalar multiplication of nvector."""
+        return pynvector({'x': self.dX * scalar, 'y': self.dY * scalar, 'z': self.dZ * scalar})
+
+    def __rmul__(self, scalar):
+        """Right scalar multiplication of nvector."""
+        return self.__mul__(scalar)
+
+    def normalize(self):
+        """Normalize the nvector to unit length."""
+        length = self.length()
+        if length > 0:
+            return pynvector({'x': self.dX / length, 'y': self.dY / length, 'z': self.dZ / length})
+        else:
+            return pynvector({'x': 0.0, 'y': 0.0, 'z': 0.0})
+
     def __add__(self, other):
         if not isinstance(other, pynvector):
             return NotImplemented
