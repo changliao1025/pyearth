@@ -1,4 +1,3 @@
-
 import os
 import copy
 import json
@@ -110,12 +109,12 @@ class pypolyline:
 
     def __hash__(self) -> int:
         """
-        Generate hash for the polyline based on its endpoints.
+        Generate hash for the polyline based on all its points.
 
         Returns:
             int: Hash value for the polyline.
         """
-        return hash((self.pPoint_start, self.pPoint_end))
+        return hash(tuple(self.aPoint))
 
     def __repr__(self) -> str:
         """

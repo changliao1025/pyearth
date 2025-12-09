@@ -142,7 +142,7 @@ def remove_small_polygon(
     if verbose:
         logging.info(f"Input format: {sFormat_in}")
         logging.info(f"Output format: {sFormat_out}")
-        logging.info(f"Area threshold: {dThreshold} km²")
+        logging.info(f"Area threshold: {dThreshold} m²")
         logging.info(f"Area calculation algorithm: {'Geodesic' if iFlag_algorithm == 2 else 'Planar'}")
 
     # Set up spatial reference (WGS84 for geodesic calculations)
@@ -308,9 +308,9 @@ def _process_single_polygon(
 
         # Calculate area
         dArea = calculate_polygon_area(aCoords_outer[:, 0], aCoords_outer[:, 1], iFlag_algorithm)
-        dAreakm = dArea * 1.0E-6
+        dAreakm = dArea / 1e6  # Convert to square kilometers
 
-        if dAreakm <= dThreshold:
+        if dArea <= dThreshold:
             return False
 
         # Create output polygon with all rings

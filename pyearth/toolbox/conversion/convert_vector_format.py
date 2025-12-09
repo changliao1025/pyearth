@@ -377,7 +377,23 @@ def convert_vector_format(
         logger.warning(f"Geometry type mapping failed: {e}, using original type")
         iGeomType_out = iGeomType
 
-    # Create output layer with appropriate geometry type
+    # Check if the input geometry has Z-coordinates
+    if pGeometry.GetCoordinateDimension() == 3:
+        logger.info("Input geometry contains Z-coordinates (3D)")
+        # Update the output geometry type to 3D if necessary
+        if iGeomType == ogr.wkbLineString:
+            iGeomType_out = ogr.wkbLineString25D
+        elif iGeomType == ogr.wkbPolygon:
+            iGeomType_out = ogr.wkbPolygon25D
+        elif iGeomType == ogr.wkbPoint:
+            iGeomType_out = ogr.wkbPoint25D
+        # Add other geometry types as needed
+        sGeomType_out = ogr.GeometryTypeToName(iGeomType_out)
+        logger.info(f"Output geometry type updated to: {sGeomType_out} (3D)")
+    else:
+        logger.info("Input geometry is 2D")
+
+    # Create output layer with the appropriate geometry type
     pLayer_out = pDataset_out.CreateLayer('layer', pSrs_out, geom_type=iGeomType_out)
 
     if pLayer_out is None:

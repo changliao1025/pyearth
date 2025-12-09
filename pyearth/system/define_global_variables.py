@@ -164,9 +164,6 @@ earth_radius = 6378137.0  # Equatorial radius in meters
 # Python environment detection
 sConda_env_path, sConda_env_name, sConda_env_type = get_python_environment()
 
-# Python environment detection
-sConda_env_path, sConda_env_name, sConda_env_type = get_python_environment()
-
 
 def _configure_proj_lib() -> Optional[str]:
     """

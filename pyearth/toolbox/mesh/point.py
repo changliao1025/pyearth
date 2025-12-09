@@ -106,9 +106,9 @@ class pypoint(object):
         if not isinstance(other, pypoint):
             return NotImplemented
 
-        dThreshold_in = 10 ** (-1 * iPrecision_default)
-        return np.isclose(self.dLongitude_degree, other.dLongitude_degree, atol=dThreshold_in) and \
-               np.isclose(self.dLatitude_degree, other.dLatitude_degree, atol=dThreshold_in)
+        dThreshold_in = 10.0 ** (-1 * iPrecision_default)
+        return np.isclose(self.dLongitude_degree, other.dLongitude_degree, atol=dThreshold_in,rtol=0) and \
+               np.isclose(self.dLatitude_degree, other.dLatitude_degree, atol=dThreshold_in,rtol=0)
 
     def __ne__(self, other):
         """
