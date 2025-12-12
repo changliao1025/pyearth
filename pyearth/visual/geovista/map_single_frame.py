@@ -11,8 +11,9 @@ from pyearth.visual.geovista.utility import (
     add_geographic_context,
 )
 
-def map_single_frame(pMesh, sScalars: Optional[str], aValid_cell_indices: np.ndarray,
-                                     pConfig: VisualizationConfig,
+def map_single_frame(pMesh, aValid_cell_indices: np.ndarray,
+    pConfig: VisualizationConfig,
+                     sScalar: Optional[str],
                                      sUnit: Optional[str],
                                      sFilename_out: Optional[str]) -> bool:
     """
@@ -35,10 +36,10 @@ def map_single_frame(pMesh, sScalars: Optional[str], aValid_cell_indices: np.nda
     if pPlotter is None:
         return False
 
-    if sScalars:
+    if sScalar:
         # Configure scalar bar
         dSargs = {
-            "title": f"{sScalars} / {sUnit}" if sUnit else sScalars,
+            "title": f"{sScalar} / {sUnit}" if sUnit else sScalar,
             "shadow": True,
             "title_font_size": 12,
             "label_font_size": 10,
@@ -47,7 +48,7 @@ def map_single_frame(pMesh, sScalars: Optional[str], aValid_cell_indices: np.nda
         }
         # Add mesh with scalars to plotter
         pMesh_valid = pMesh.extract_cells(aValid_cell_indices)
-        pPlotter.add_mesh(pMesh_valid, scalars=sScalars, scalar_bar_args=dSargs, cmap=pConfig.colormap)
+        pPlotter.add_mesh(pMesh_valid, scalars=sScalar, scalar_bar_args=dSargs, cmap=pConfig.colormap)
     else:
         # Add mesh without scalars
         pMesh_valid = pMesh.extract_cells(aValid_cell_indices)

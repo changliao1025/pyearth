@@ -138,7 +138,9 @@ class AnimationConfig:
                  format: str = 'mp4',
                  amplitude_deg: float = 20.0,
                  cycles: float = 1.0,
-                 phase: float = 0.0):
+                 phase: float = 0.0,
+                 dLongitude_start: float = 0.0,
+                 dLatitude_start: float = 0.0):
         # Convert to int if string and validate
         try:
             frames_int = int(frames) if isinstance(frames, str) else frames
@@ -159,6 +161,8 @@ class AnimationConfig:
         self.amplitude_deg = amplitude_deg
         self.cycles = cycles
         self.phase = phase
+        self.dLongitude_start = dLongitude_start
+        self.dLatitude_start = dLatitude_start
 
         # Validate format
         if self.format not in VALID_ANIMATION_FORMATS:
