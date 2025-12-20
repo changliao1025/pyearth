@@ -209,7 +209,7 @@ class CameraController:
 
     @staticmethod
     def calculate_animation_camera_position(longitude: float, latitude: float,
-                                          frame_idx: int, config: 'AnimationConfig') -> CameraPosition:
+                                          frame_idx: int, pConfig_anima: 'AnimationConfig') -> CameraPosition:
         """
         Calculate camera position for animation frame with enhanced latitude movement.
 
@@ -223,15 +223,15 @@ class CameraController:
             CameraPosition: Camera position for this frame
         """
         # Calculate current longitude with rotation
-        longitude_current = config.longitude_start + (frame_idx * config.speed)
+        longitude_current = pConfig_anima.longitude_start + (frame_idx * pConfig_anima.speed)
         longitude_current = longitude_current % 360.0  # Keep within [0, 360)
         if longitude_current > 180.0:
             longitude_current -= 360.0  # Convert to [-180, 180]
 
         # Enhanced latitude movement: sine-wave oscillation for dynamic viewing
-        frames_div = float(config.frames) if config.frames > 0 else 1.0
-        theta = 2.0 * math.pi * (float(frame_idx) / frames_div) * config.cycles + config.phase
-        latitude_current = float(config.latitude_start) + config.amplitude_deg * math.sin(theta)
+        frames_div = float(pConfig_anima.frames) if pConfig_anima.frames > 0 else 1.0
+        theta = 2.0 * math.pi * (float(frame_idx) / frames_div) * pConfig_anima.cycles + pConfig_anima.phase
+        latitude_current = float(pConfig_anima.latitude_start) + pConfig_anima.amplitude_deg * math.sin(theta)
 
         # Clamp latitude to avoid pole singularities
         latitude_current = max(-89.9, min(89.9, latitude_current))
@@ -852,8 +852,13 @@ def configure_camera_enhanced(plotter, config: VisualizationConfig,
 def add_mesh_to_plotter(plotter, mesh, valid_indices: np.ndarray,
                        scalar_name: Optional[str] = None,
                        scalar_config: Optional[ScalarBarConfig] = None,
+                       style: str = 'surface',
+                       color: str = 'white',
                        colormap: str = 'viridis',
                        unit: str = "",
+                       opacity: float = 1.0,
+                       show_edges: bool = False,
+                       edge_color: str = 'black',
                        validate_data: bool = True) -> bool:
     """
     Add mesh to plotter with comprehensive validation and error handling.
@@ -864,8 +869,13 @@ def add_mesh_to_plotter(plotter, mesh, valid_indices: np.ndarray,
         valid_indices: Indices of valid cells
         scalar_name: Name of scalar field to visualize
         scalar_config: Scalar bar configuration
-        colormap: Colormap name
+        style: Mesh rendering style ('surface', 'wireframe', 'points')
+        color: Mesh color (used when no scalars)
+        colormap: Colormap name for scalar visualization
         unit: Unit string for scalar bar
+        opacity: Mesh opacity (0.0 to 1.0)
+        show_edges: Whether to show mesh edges
+        edge_color: Color of mesh edges
         validate_data: Whether to validate mesh data before processing
 
     Returns:
@@ -900,13 +910,22 @@ def add_mesh_to_plotter(plotter, mesh, valid_indices: np.ndarray,
 
             # Add mesh with scalars
             plotter.add_mesh(mesh_valid, scalars=scalar_name,
-                           scalar_bar_args=scalar_args, cmap=colormap)
+                             style=style,
+                             scalar_bar_args=scalar_args,
+                             cmap=colormap,
+                             opacity=opacity,
+                             show_edges=show_edges,
+                             edge_color=edge_color)
 
             if scalar_info['has_nan']:
                 logger.warning(f"Scalar field '{scalar_name}' contains NaN values")
         else:
             # Add mesh without scalars
-            plotter.add_mesh(mesh_valid)
+            plotter.add_mesh(mesh_valid, style=style,
+                             color=color,
+                             opacity=opacity,
+                             show_edges=show_edges,
+                             edge_color=edge_color)
 
         return True
 

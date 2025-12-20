@@ -233,12 +233,10 @@ def map_single_frame(
             try:
                 # Apply image scaling if specified
                 if hasattr(pConfig, 'image_scale') and pConfig.image_scale != 1.0:
-                    current_size = plotter.window_size
-                    new_size = (int(current_size[0] * pConfig.image_scale),
-                               int(current_size[1] * pConfig.image_scale))
-                    plotter.window_size = new_size
+                    plotter.image_scale = pConfig.image_scale
 
-                plotter.screenshot(sFilename_out)
+                #plotter.screenshot(sFilename_out)
+                plotter.save_graphic(sFilename_out, raster = False)
                 result_info['output_saved'] = True
 
                 # Verify and collect file information
