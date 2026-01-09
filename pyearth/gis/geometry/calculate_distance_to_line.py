@@ -5,11 +5,14 @@ This module provides functionality to calculate the shortest perpendicular dista
 from a geographic point to a line segment defined by two endpoints, using 3D
 spherical geometry for accuracy.
 """
+
 import numpy as np
 from typing import Union
 
 from pyearth.system.define_global_variables import earth_radius
-from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
+from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
+    convert_longitude_latitude_to_sphere_3d,
+)
 
 
 def calculate_distance_to_line(
@@ -19,7 +22,7 @@ def calculate_distance_to_line(
     dLatitude2_in: float,
     dLongitude3_in: float,
     dLatitude3_in: float,
-    iFlag_radian: bool = False
+    iFlag_radian: bool = False,
 ) -> float:
     """
     Calculate the shortest distance from a point to a line segment on Earth's surface.
@@ -84,8 +87,12 @@ def calculate_distance_to_line(
         lon3_rad, lat3_rad = np.radians([dLongitude3_in, dLatitude3_in])
 
     # Convert geographic coordinates to 3D Cartesian coordinates on unit sphere
-    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(lon1_rad, lat1_rad)  # Line start
-    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(lon2_rad, lat2_rad)  # Query point
+    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(
+        lon1_rad, lat1_rad
+    )  # Line start
+    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(
+        lon2_rad, lat2_rad
+    )  # Query point
     x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(lon3_rad, lat3_rad)  # Line end
 
     # Create vectors for distance calculation
@@ -111,7 +118,9 @@ def calculate_distance_to_line(
 
         # Find the actual projection point on the line segment
         line_start_point = np.array([x1, y1, z1])
-        projection_point = line_start_point + projection_length_clamped * line_unit_vector
+        projection_point = (
+            line_start_point + projection_length_clamped * line_unit_vector
+        )
 
         # Calculate Euclidean distance from query point to projection point
         query_point = np.array([x2, y2, z2])

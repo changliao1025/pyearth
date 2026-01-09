@@ -66,7 +66,7 @@ from osgeo import ogr, osr
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_format_from_extension,
 )
 
 # Configure logging
@@ -77,7 +77,7 @@ def convert_polygon_to_polyline_file(
     sFilename_polygon_in: str,
     sFilename_polyline_out: str,
     target_epsg: Optional[int] = None,
-    iFlag_copy_attributes: int = 0
+    iFlag_copy_attributes: int = 0,
 ) -> bool:
     """
     Convert polygon geometries to polyline geometries by extracting exterior rings.
@@ -248,10 +248,10 @@ def convert_polygon_to_polyline_file(
 
     # Remove existing output file
     if os.path.exists(sFilename_polyline_out):
-        if format_out == 'ESRI Shapefile':
+        if format_out == "ESRI Shapefile":
             # Remove all shapefile component files
             base_name = os.path.splitext(sFilename_polyline_out)[0]
-            for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.shp.xml']:
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg", ".shp.xml"]:
                 component_file = base_name + ext
                 if os.path.exists(component_file):
                     os.remove(component_file)
@@ -292,7 +292,7 @@ def convert_polygon_to_polyline_file(
         pSrs_out.ImportFromEPSG(target_epsg)
         logger.info(f"Target CRS: EPSG:{target_epsg} (explicit)")
         iFlag_force_transform = 1
-    elif format_out.lower() in ['geojson', 'json']:
+    elif format_out.lower() in ["geojson", "json"]:
         # GeoJSON format - always use WGS84
         pSrs_out = osr.SpatialReference()
         pSrs_out.ImportFromEPSG(4326)
@@ -340,7 +340,9 @@ def convert_polygon_to_polyline_file(
             logger.info("No coordinate transformation needed (same CRS)")
 
     # Create output layer for polylines
-    pLayer_out = pDataset_out.CreateLayer('polyline', pSrs_out, geom_type=ogr.wkbLineString)
+    pLayer_out = pDataset_out.CreateLayer(
+        "polyline", pSrs_out, geom_type=ogr.wkbLineString
+    )
     if pLayer_out is None:
         logger.error("Could not create output layer")
         pDataset_in = None
@@ -348,7 +350,7 @@ def convert_polygon_to_polyline_file(
         return False
 
     # Add ID field to output layer
-    pLayer_out.CreateField(ogr.FieldDefn('id', ogr.OFTInteger64))
+    pLayer_out.CreateField(ogr.FieldDefn("id", ogr.OFTInteger64))
 
     # Copy field definitions from input if requested
     if iFlag_copy_attributes == 1:
@@ -431,7 +433,9 @@ def convert_polygon_to_polyline_file(
                 pRing = pPolygon.GetGeometryRef(0)
 
                 if pRing is None:
-                    logger.warning(f"Feature {fid}, polygon {j}: Could not extract exterior ring")
+                    logger.warning(
+                        f"Feature {fid}, polygon {j}: Could not extract exterior ring"
+                    )
                     continue
 
                 # Create linestring from exterior ring
@@ -445,7 +449,9 @@ def convert_polygon_to_polyline_file(
                     try:
                         pLineString.Transform(transform)
                     except Exception as e:
-                        logger.warning(f"Failed to transform feature {fid}, polygon {j}: {e}")
+                        logger.warning(
+                            f"Failed to transform feature {fid}, polygon {j}: {e}"
+                        )
                         continue
 
                 # Create output feature
@@ -467,7 +473,9 @@ def convert_polygon_to_polyline_file(
         else:
             # Skip non-polygon geometries
             geom_name = ogr.GeometryTypeToName(geom_type)
-            logger.warning(f"Feature {fid}: Skipping non-polygon geometry ({geom_name})")
+            logger.warning(
+                f"Feature {fid}: Skipping non-polygon geometry ({geom_name})"
+            )
             nSkipped += 1
             continue
 
@@ -488,4 +496,3 @@ def convert_polygon_to_polyline_file(
     logger.info(f"Output: {sFilename_polyline_out} ({nPolylines_created} features)")
 
     return True
-

@@ -1,6 +1,9 @@
 import numpy as np
 
-def calculate_angle_between_vectors_degrees(vector1: np.ndarray, vector2: np.ndarray) -> float:
+
+def calculate_angle_between_vectors_degrees(
+    vector1: np.ndarray, vector2: np.ndarray
+) -> float:
     """
     Return the angle between two vectors in any dimension space, in degrees.
 

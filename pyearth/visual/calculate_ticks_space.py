@@ -17,7 +17,7 @@ def calculate_ticks_space(aData, nstep_in=5, iFlag_small_in=None):
     if iFlag_small == 1:
         xMax = np.nanmax(aData)
         xMin = np.nanmin(aData)
-        dSpace = (xMax - xMin) / (nstep_in-2)
+        dSpace = (xMax - xMin) / (nstep_in - 2)
         dMax = xMax * 1.2
         dMin = xMin * 0.8
 
@@ -26,7 +26,7 @@ def calculate_ticks_space(aData, nstep_in=5, iFlag_small_in=None):
         xMax = Math.ceil(np.nanmax(aData))
         xMin = Math.floor(np.nanmin(aData))
 
-        dSpace = (xMax - xMin) / (nstep_in-2)
+        dSpace = (xMax - xMin) / (nstep_in - 2)
 
         dMax = xMax + Math.ceil(dSpace)
         dMin = Math.floor(xMin - dSpace)

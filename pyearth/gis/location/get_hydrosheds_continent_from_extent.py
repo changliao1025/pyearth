@@ -5,6 +5,7 @@ This module provides utilities for identifying which HydroSHEDS continent region
 overlap with a given geographic bounding box. HydroSHEDS uses 2-letter continent
 codes (af, as, au, etc.) for organizing global hydrological datasets.
 """
+
 from typing import Tuple, List, Optional, Union
 
 
@@ -33,8 +34,7 @@ def _box_area(box: Tuple[float, float, float, float]) -> float:
 
 
 def _intersection_area(
-    b1: Tuple[float, float, float, float],
-    b2: Tuple[float, float, float, float]
+    b1: Tuple[float, float, float, float], b2: Tuple[float, float, float, float]
 ) -> float:
     """Compute intersection area of two axis-aligned bounding boxes.
 
@@ -69,7 +69,7 @@ def _intersection_area(
 def get_hydrosheds_continent_from_extent(
     aExtent: Tuple[float, float, float, float],
     threshold_fraction: float = 0.10,
-    return_all: bool = False
+    return_all: bool = False,
 ) -> Optional[Union[str, List[str]]]:
     """Determine HydroSHEDS continent code(s) overlapping a geographic extent.
 
@@ -173,9 +173,7 @@ def get_hydrosheds_continent_from_extent(
     if not -90.0 <= max_lat <= 90.0:
         raise ValueError(f"max_lat must be in range [-90, 90]. Got {max_lat}")
     if min_lat > max_lat:
-        raise ValueError(
-            f"min_lat ({min_lat}) must be <= max_lat ({max_lat})"
-        )
+        raise ValueError(f"min_lat ({min_lat}) must be <= max_lat ({max_lat})")
 
     # Normalize longitudes to [-180, 180]
     def _norm_lon(lon: float) -> float:
@@ -197,8 +195,8 @@ def get_hydrosheds_continent_from_extent(
     else:
         # Crosses dateline: split into western and eastern boxes
         input_boxes = [
-            (min_lon, min_lat, 180.0, max_lat),    # Western box
-            (-180.0, min_lat, max_lon, max_lat)    # Eastern box
+            (min_lon, min_lat, 180.0, max_lat),  # Western box
+            (-180.0, min_lat, max_lon, max_lat),  # Eastern box
         ]
 
     # Calculate total input area
@@ -235,8 +233,7 @@ def get_hydrosheds_continent_from_extent(
 
     # Convert continent boxes to standard format (minx, miny, maxx, maxy)
     cont_boxes_conv = {
-        name: (box[0], box[2], box[1], box[3])
-        for name, box in continent_boxes.items()
+        name: (box[0], box[2], box[1], box[3]) for name, box in continent_boxes.items()
     }
 
     # Calculate overlap scores for each continent
@@ -267,4 +264,3 @@ def get_hydrosheds_continent_from_extent(
         # Return only the continent with largest overlap
         best_continent = sorted_scores[0][0]
         return continent_abbrev.get(best_continent, best_continent)
-

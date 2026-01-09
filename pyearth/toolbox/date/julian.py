@@ -1,6 +1,6 @@
-
 import math
 from datetime import datetime
+
 
 def __to_format(jd: float, fmt: str) -> float:
     """
@@ -15,14 +15,14 @@ def __to_format(jd: float, fmt: str) -> float:
     -------
     jd: float
     """
-    if fmt.lower() == 'jd':
+    if fmt.lower() == "jd":
         return jd
-    elif fmt.lower() == 'mjd':
+    elif fmt.lower() == "mjd":
         return jd - 2400000.5
-    elif fmt.lower() == 'rjd':
+    elif fmt.lower() == "rjd":
         return jd - 2400000
     else:
-        raise ValueError('Invalid Format')
+        raise ValueError("Invalid Format")
 
 
 def __from_format(jd: float, fmt: str):
@@ -42,19 +42,19 @@ def __from_format(jd: float, fmt: str):
          day.  A fractional component of 0.5 represents noon.  Therefore
          the standard julian day would be (jd + fractional + 0.5)
     """
-    if fmt.lower() == 'jd':
+    if fmt.lower() == "jd":
         # If jd has a fractional component of 0, then we are 12 hours into
         # the day
         return math.floor(jd + 0.5), jd + 0.5 - math.floor(jd + 0.5)
-    elif fmt.lower() == 'mjd':
-        return __from_format(jd + 2400000.5, 'jd')
-    elif fmt.lower() == 'rjd':
-        return __from_format(jd + 2400000, 'jd')
+    elif fmt.lower() == "mjd":
+        return __from_format(jd + 2400000.5, "jd")
+    elif fmt.lower() == "rjd":
+        return __from_format(jd + 2400000, "jd")
     else:
-        raise ValueError('Invalid Format')
+        raise ValueError("Invalid Format")
 
 
-def to_jd(dt: datetime, fmt: str = 'jd') -> float:
+def to_jd(dt: datetime, fmt: str = "jd") -> float:
     """
     Converts a given datetime object to Julian date.
     Algorithm is copied from https://en.wikipedia.org/wiki/Julian_day
@@ -70,18 +70,32 @@ def to_jd(dt: datetime, fmt: str = 'jd') -> float:
     -------
     jd: float
     """
-    a = math.floor((14-dt.month)/12)
+    a = math.floor((14 - dt.month) / 12)
     y = dt.year + 4800 - a
-    m = dt.month + 12*a - 3
+    m = dt.month + 12 * a - 3
 
-    jdn = dt.day + math.floor((153*m + 2)/5) + 365*y + math.floor(y/4) - math.floor(y/100) + math.floor(y/400) - 32045
+    jdn = (
+        dt.day
+        + math.floor((153 * m + 2) / 5)
+        + 365 * y
+        + math.floor(y / 4)
+        - math.floor(y / 100)
+        + math.floor(y / 400)
+        - 32045
+    )
 
-    jd = jdn + (dt.hour - 12) / 24 + dt.minute / 1440 + dt.second / 86400 + dt.microsecond / 86400000000
+    jd = (
+        jdn
+        + (dt.hour - 12) / 24
+        + dt.minute / 1440
+        + dt.second / 86400
+        + dt.microsecond / 86400000000
+    )
 
     return __to_format(jd, fmt)
 
 
-def from_jd(jd: float, fmt: str = 'jd') -> datetime:
+def from_jd(jd: float, fmt: str = "jd") -> datetime:
     """
     Converts a Julian Date to a datetime object.
     Algorithm is from Fliegel and van Flandern (1968)
@@ -100,35 +114,42 @@ def from_jd(jd: float, fmt: str = 'jd') -> datetime:
     """
     jd, jdf = __from_format(jd, fmt)
 
-    l = jd+68569
-    n = 4*l//146097
-    l = l-(146097*n+3)//4
-    i = 4000*(l+1)//1461001
-    l = l-1461*i//4+31
-    j = 80*l//2447
-    k = l-2447*j//80
-    l = j//11
-    j = j+2-12*l
-    i = 100*(n-49)+i+l
+    l = jd + 68569
+    n = 4 * l // 146097
+    l = l - (146097 * n + 3) // 4
+    i = 4000 * (l + 1) // 1461001
+    l = l - 1461 * i // 4 + 31
+    j = 80 * l // 2447
+    k = l - 2447 * j // 80
+    l = j // 11
+    j = j + 2 - 12 * l
+    i = 100 * (n - 49) + i + l
 
     year = int(i)
     month = int(j)
     day = int(k)
 
     # in microseconds
-    frac_component = int(jdf * (1e6*24*3600))
+    frac_component = int(jdf * (1e6 * 24 * 3600))
 
-    hours = int(frac_component // (1e6*3600))
-    frac_component -= hours * 1e6*3600
+    hours = int(frac_component // (1e6 * 3600))
+    frac_component -= hours * 1e6 * 3600
 
-    minutes = int(frac_component // (1e6*60))
-    frac_component -= minutes * 1e6*60
+    minutes = int(frac_component // (1e6 * 60))
+    frac_component -= minutes * 1e6 * 60
 
     seconds = int(frac_component // 1e6)
-    frac_component -= seconds*1e6
+    frac_component -= seconds * 1e6
 
     frac_component = int(frac_component)
 
-    dt = datetime(year=year, month=month, day=day,
-                  hour=hours, minute=minutes, second=seconds, microsecond=frac_component)
+    dt = datetime(
+        year=year,
+        month=month,
+        day=day,
+        hour=hours,
+        minute=minutes,
+        second=seconds,
+        microsecond=frac_component,
+    )
     return dt

@@ -116,7 +116,7 @@ def convert_time_series_daily_to_monthly(
     iYear_end_in: int,
     iMonth_end_in: int,
     iDay_end_in: int,
-    sType_in: Optional[Literal['mean', 'sum']] = None,
+    sType_in: Optional[Literal["mean", "sum"]] = None,
 ) -> np.ndarray:
     """
     Convert daily time series data to monthly aggregated values.
@@ -392,12 +392,10 @@ def convert_time_series_daily_to_monthly(
     if sType_in is not None:
         sType = sType_in
     else:
-        sType = 'mean'
+        sType = "mean"
 
-    if sType not in ['mean', 'sum']:
-        raise ValueError(
-            f"sType_in must be 'mean' or 'sum', got '{sType}'"
-        )
+    if sType not in ["mean", "sum"]:
+        raise ValueError(f"sType_in must be 'mean' or 'sum', got '{sType}'")
 
     # Validate date components
     if not isinstance(iYear_start_in, int):
@@ -406,22 +404,14 @@ def convert_time_series_daily_to_monthly(
         raise TypeError(f"iYear_end_in must be int, got {type(iYear_end_in)}")
 
     if not (1 <= iMonth_start_in <= 12):
-        raise ValueError(
-            f"iMonth_start_in must be 1-12, got {iMonth_start_in}"
-        )
+        raise ValueError(f"iMonth_start_in must be 1-12, got {iMonth_start_in}")
     if not (1 <= iMonth_end_in <= 12):
-        raise ValueError(
-            f"iMonth_end_in must be 1-12, got {iMonth_end_in}"
-        )
+        raise ValueError(f"iMonth_end_in must be 1-12, got {iMonth_end_in}")
 
     if not (1 <= iDay_start_in <= 31):
-        raise ValueError(
-            f"iDay_start_in must be 1-31, got {iDay_start_in}"
-        )
+        raise ValueError(f"iDay_start_in must be 1-31, got {iDay_start_in}")
     if not (1 <= iDay_end_in <= 31):
-        raise ValueError(
-            f"iDay_end_in must be 1-31, got {iDay_end_in}"
-        )
+        raise ValueError(f"iDay_end_in must be 1-31, got {iDay_end_in}")
 
     # Validate year order
     if iYear_end_in < iYear_start_in:
@@ -469,9 +459,7 @@ def convert_time_series_daily_to_monthly(
         ) from e
 
     if aData_daily.ndim != 1:
-        raise ValueError(
-            f"Input data must be 1D array, got {aData_daily.ndim}D"
-        )
+        raise ValueError(f"Input data must be 1D array, got {aData_daily.ndim}D")
 
     if aData_daily.size == 0:
         raise ValueError("Input data array is empty")
@@ -500,7 +488,7 @@ def convert_time_series_daily_to_monthly(
     # Initialize Julian date reference
     # ========================================================================
 
-    lJulian_start = julian.to_jd(date_start, fmt='jd')
+    lJulian_start = julian.to_jd(date_start, fmt="jd")
 
     logger.debug(f"Julian start date: {lJulian_start}")
 
@@ -550,7 +538,7 @@ def convert_time_series_daily_to_monthly(
                 for iDay in range(iDay_start, iDay_end + 1):
                     # Calculate Julian date for this day
                     current_date = datetime.datetime(iYear, iMonth, iDay)
-                    lJulian = julian.to_jd(current_date, fmt='jd')
+                    lJulian = julian.to_jd(current_date, fmt="jd")
 
                     # Calculate index into daily data array
                     daily_index = int(lJulian - lJulian_start)
@@ -573,9 +561,7 @@ def convert_time_series_daily_to_monthly(
                 if valid_count == 0:
                     # All values were NaN
                     monthly_value = np.nan
-                    logger.warning(
-                        f"All days in {iYear}-{iMonth:02d} are NaN"
-                    )
+                    logger.warning(f"All days in {iYear}-{iMonth:02d} are NaN")
                 else:
                     monthly_value = monthly_sum / valid_count
 
@@ -590,13 +576,13 @@ def convert_time_series_daily_to_monthly(
 
                 aData_monthly_out.append(monthly_value)
 
-            elif sType == 'sum':
+            elif sType == "sum":
                 monthly_sum = 0.0
 
                 for iDay in range(iDay_start, iDay_end + 1):
                     # Calculate Julian date for this day
                     current_date = datetime.datetime(iYear, iMonth, iDay)
-                    lJulian = julian.to_jd(current_date, fmt='jd')
+                    lJulian = julian.to_jd(current_date, fmt="jd")
 
                     # Calculate index into daily data array
                     daily_index = int(lJulian - lJulian_start)

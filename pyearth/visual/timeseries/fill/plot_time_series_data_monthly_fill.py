@@ -6,20 +6,23 @@ import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 from pyearth.visual.calculate_ticks_space import calculate_ticks_space
 
-def plot_time_series_data_monthly_fill(aTime,
-                                       aData,
-                                       sFilename_out,
-                                       iDPI_in=None,
-                                       iFlag_trend_in=None,
-                                       iReverse_Y_in=None,
-                                       iSize_X_in=None,
-                                       iSize_Y_in=None,
-                                       dMax_Y_in=None,
-                                       dMin_Y_in=None,
-                                       sMarker_in=None,
-                                       sLabel_Y_in=None,
-                                       sLabel_legend_in=None,
-                                       sTitle_in=None):
+
+def plot_time_series_data_monthly_fill(
+    aTime,
+    aData,
+    sFilename_out,
+    iDPI_in=None,
+    iFlag_trend_in=None,
+    iReverse_Y_in=None,
+    iSize_X_in=None,
+    iSize_Y_in=None,
+    dMax_Y_in=None,
+    dMin_Y_in=None,
+    sMarker_in=None,
+    sLabel_Y_in=None,
+    sLabel_legend_in=None,
+    sTitle_in=None,
+):
 
     if iDPI_in is not None:
         iDPI = iDPI_in
@@ -48,20 +51,20 @@ def plot_time_series_data_monthly_fill(aTime,
     if sLabel_Y_in is not None:
         sLabel_Y = sLabel_Y_in
     else:
-        sLabel_Y = ''
+        sLabel_Y = ""
     if sLabel_legend_in is not None:
         sLabel_legend = sLabel_legend_in
     else:
-        sLabel_legend = ''
+        sLabel_legend = ""
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
-        sTitle = ''
+        sTitle = ""
 
     if sMarker_in is not None:
         sMarker = sMarker_in
     else:
-        sMarker = '+'
+        sMarker = "+"
 
     nstress = len(aTime)
     nan_index = np.where(aData == missing_value)
@@ -76,25 +79,30 @@ def plot_time_series_data_monthly_fill(aTime,
         dMin_Y = dMin_Y_in
     else:
         dMin_Y = np.nanmin(aData)  # if it has negative value, change here
-    if (dMax_Y <= dMin_Y):
+    if dMax_Y <= dMin_Y:
         return
 
     fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_X)
     fig.set_figheight(iSize_Y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
-    pYear = mpl.dates.YearLocator(5)   # every year
+    pYear = mpl.dates.YearLocator(5)  # every year
     pMonth = mpl.dates.MonthLocator()  # every month
-    sYear_format = mpl.dates.DateFormatter('%Y')
+    sYear_format = mpl.dates.DateFormatter("%Y")
     x1 = aTime
     y1 = (aData[1])[0]
     y_top = (aData[0])[0]
     y_bot = (aData[2])[0]
-    ax.fill_between(x1, y_top, y_bot,  facecolor='cornflowerblue')
-    ax.plot(x1, y1,
-            color='red', linestyle='--',
-            marker=sMarker, markeredgecolor='blue',
-            label=sLabel_legend)
+    ax.fill_between(x1, y_top, y_bot, facecolor="cornflowerblue")
+    ax.plot(
+        x1,
+        y1,
+        color="red",
+        linestyle="--",
+        marker=sMarker,
+        markeredgecolor="blue",
+        label=sLabel_legend,
+    )
 
     # calculate linear regression
     if iFlag_trend == 1:
@@ -108,10 +116,10 @@ def plot_time_series_data_monthly_fill(aTime,
         x2 = [mn, mx]
         y2 = poly1d_fn(x2)
         x2 = [datetime.fromtimestamp(i) for i in x2]
-        ax.plot(x2, y2, color='orange', linestyle='-.',  linewidth=0.5)
+        ax.plot(x2, y2, color="orange", linestyle="-.", linewidth=0.5)
 
-    ax.axis('on')
-    ax.grid(which='major', color='grey', linestyle='--', axis='y')
+    ax.axis("on")
+    ax.grid(which="major", color="grey", linestyle="--", axis="y")
     # ax.grid(which='minor', color='#CCCCCC', linestyle=':') #only y axis grid is
 
     # ax.set_aspect(dRatio)  #this one set the y / x ratio
@@ -124,34 +132,33 @@ def plot_time_series_data_monthly_fill(aTime,
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.15)
 
-    ax.set_xlabel('Year', fontsize=12)
+    ax.set_xlabel("Year", fontsize=12)
     ax.set_ylabel(sLabel_Y, fontsize=12)
-    ax.set_title(sTitle, loc='center', fontsize=15)
+    ax.set_title(sTitle, loc="center", fontsize=15)
     # round to nearest years...
-    x_min = np.datetime64(aTime[0], 'Y')
-    x_max = np.datetime64(aTime[nstress-1], 'Y') + np.timedelta64(1, 'Y')
+    x_min = np.datetime64(aTime[0], "Y")
+    x_max = np.datetime64(aTime[nstress - 1], "Y") + np.timedelta64(1, "Y")
     ax.set_xlim(x_min, x_max)
     if dMax_Y < 1000 and dMax_Y > 0.1:
-        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%.1f"))
     else:
-        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))
-    dummy = calculate_ticks_space(
-        [y1, y_top, y_bot], nstep_in=5, iFlag_small_in=1)
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%.1e"))
+    dummy = calculate_ticks_space([y1, y_top, y_bot], nstep_in=5, iFlag_small_in=1)
     dSpace = dummy[0]
-    if (dSpace <= 0):
+    if dSpace <= 0:
         ax.invert_yaxis()
 
     else:
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace))
         dMin_Y = dummy[1]
         dMax_Y = dummy[2]
-        if (iReverse_Y == 1):
+        if iReverse_Y == 1:
             ax.set_ylim(dMax_Y, dMin_Y)
         else:
             ax.set_ylim(dMin_Y, dMax_Y)
     ax.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches="tight")
 
-    plt.close('all')
+    plt.close("all")
     plt.clf()
     # print('finished plotting')

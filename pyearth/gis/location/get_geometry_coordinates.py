@@ -5,12 +5,16 @@ This module provides utilities for extracting coordinate arrays from various
 OGR geometry types. For polygon geometries, coordinates are automatically
 enforced to be in counter-clockwise (CCW) order following the right-hand rule.
 """
+
 from typing import List, Union
 import numpy as np
 from osgeo import ogr
 from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
 
-def get_geometry_coordinates(geometry: ogr.Geometry) -> Union[np.ndarray, List[np.ndarray]]:
+
+def get_geometry_coordinates(
+    geometry: ogr.Geometry,
+) -> Union[np.ndarray, List[np.ndarray]]:
     """Extract coordinates from an OGR geometry object.
 
     Dispatches to appropriate handler based on geometry type. For polygon
@@ -73,15 +77,15 @@ def get_geometry_coordinates(geometry: ogr.Geometry) -> Union[np.ndarray, List[n
         raise ValueError(f"Invalid geometry object: {e}")
 
     # Dispatch to appropriate handler
-    if geometry_type == 'POINT':
+    if geometry_type == "POINT":
         return get_point_coords(geometry)
-    elif geometry_type == 'LINESTRING':
+    elif geometry_type == "LINESTRING":
         return get_linestring_coords(geometry)
-    elif geometry_type == 'POLYGON':
+    elif geometry_type == "POLYGON":
         return get_polygon_exterior_coords(geometry)
-    elif geometry_type == 'LINEARRING':
+    elif geometry_type == "LINEARRING":
         return get_linearring_coords(geometry)
-    elif geometry_type == 'MULTIPOLYGON':
+    elif geometry_type == "MULTIPOLYGON":
         return get_multipolygon_exterior_coords(geometry)
     else:
         raise ValueError(
@@ -165,7 +169,9 @@ def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
     return coords_array
 
 
-def get_multipolygon_exterior_coords(multipolygon_geometry: ogr.Geometry) -> List[np.ndarray]:
+def get_multipolygon_exterior_coords(
+    multipolygon_geometry: ogr.Geometry,
+) -> List[np.ndarray]:
     """Extract exterior ring coordinates from all parts of a multipolygon.
 
     Each polygon part's coordinates are enforced to be in counter-clockwise order.
@@ -218,10 +224,8 @@ def get_multipolygon_exterior_coords(multipolygon_geometry: ogr.Geometry) -> Lis
     # Validate geometry type
     try:
         geometry_type = multipolygon_geometry.GetGeometryName()
-        if geometry_type != 'MULTIPOLYGON':
-            raise ValueError(
-                f"Expected MULTIPOLYGON geometry, got '{geometry_type}'"
-            )
+        if geometry_type != "MULTIPOLYGON":
+            raise ValueError(f"Expected MULTIPOLYGON geometry, got '{geometry_type}'")
     except Exception as e:
         raise ValueError(f"Invalid geometry object: {e}")
 

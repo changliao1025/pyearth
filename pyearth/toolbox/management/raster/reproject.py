@@ -68,7 +68,7 @@ def reproject_raster(
     pProjection_target,
     xRes=None,
     yRes=None,
-    sResampleAlg='near',
+    sResampleAlg="near",
     iFlag_force_resolution_in=0,
     iData_type=None,
     iFlag_overwrite=True,
@@ -140,15 +140,19 @@ def reproject_raster(
     """
     logger = logging.getLogger(__name__)
     if iFlag_verbose:
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
 
     # validation
-    if not isinstance(sFilename_raster_in, str) or not os.path.exists(sFilename_raster_in):
-        raise FileNotFoundError(f'Input raster not found: {sFilename_raster_in}')
+    if not isinstance(sFilename_raster_in, str) or not os.path.exists(
+        sFilename_raster_in
+    ):
+        raise FileNotFoundError(f"Input raster not found: {sFilename_raster_in}")
     if not isinstance(sFilename_raster_out, str):
-        raise TypeError('sFilename_raster_out must be a string')
+        raise TypeError("sFilename_raster_out must be a string")
     if not isinstance(pProjection_target, str):
-        raise TypeError('pProjection_target must be a WKT or EPSG string')
+        raise TypeError("pProjection_target must be a WKT or EPSG string")
 
     # handle overwrite
     if os.path.exists(sFilename_raster_out):
@@ -156,14 +160,14 @@ def reproject_raster(
             try:
                 os.remove(sFilename_raster_out)
             except Exception as e:
-                raise OSError(f'Failed to remove existing output: {e}')
+                raise OSError(f"Failed to remove existing output: {e}")
         else:
-            raise FileExistsError(f'Output exists: {sFilename_raster_out}')
+            raise FileExistsError(f"Output exists: {sFilename_raster_out}")
 
     # open source
     src_ds = gdal.Open(sFilename_raster_in, gdal.GA_ReadOnly)
     if src_ds is None:
-        raise RuntimeError(f'GDAL cannot open input raster: {sFilename_raster_in}')
+        raise RuntimeError(f"GDAL cannot open input raster: {sFilename_raster_in}")
 
     src_band1 = src_ds.GetRasterBand(1)
     src_nodata = src_band1.GetNoDataValue()
@@ -179,27 +183,31 @@ def reproject_raster(
 
     # prepare target SRS
     target_srs = osr.SpatialReference()
-    if isinstance(pProjection_target, str) and pProjection_target.upper().startswith('EPSG:'):
-        target_srs.ImportFromEPSG(int(pProjection_target.split(':', 1)[1]))
+    if isinstance(pProjection_target, str) and pProjection_target.upper().startswith(
+        "EPSG:"
+    ):
+        target_srs.ImportFromEPSG(int(pProjection_target.split(":", 1)[1]))
     else:
         target_srs.ImportFromWkt(pProjection_target)
     if int(osgeo.__version__[0]) >= 3:
         target_srs.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     # build warp options
-    resample = sResampleAlg if isinstance(sResampleAlg, str) else 'near'
-    warp_kwargs = dict(dstSRS=target_srs.ExportToWkt(), format='MEM', resampleAlg=resample)
+    resample = sResampleAlg if isinstance(sResampleAlg, str) else "near"
+    warp_kwargs = dict(
+        dstSRS=target_srs.ExportToWkt(), format="MEM", resampleAlg=resample
+    )
     if iFlag_force_resolution_in == 1 and xRes is not None and yRes is not None:
-        warp_kwargs['xRes'] = float(xRes)
-        warp_kwargs['yRes'] = float(yRes)
+        warp_kwargs["xRes"] = float(xRes)
+        warp_kwargs["yRes"] = float(yRes)
 
     if iFlag_verbose:
-        logger.info('Starting gdal.Warp with options: %s', warp_kwargs)
+        logger.info("Starting gdal.Warp with options: %s", warp_kwargs)
 
     warp_opts = gdal.WarpOptions(**warp_kwargs)
-    warped = gdal.Warp('', src_ds, options=warp_opts)
+    warped = gdal.Warp("", src_ds, options=warp_opts)
     if warped is None:
-        raise RuntimeError('GDAL warp failed')
+        raise RuntimeError("GDAL warp failed")
 
     out_x = warped.RasterXSize
     out_y = warped.RasterYSize
@@ -209,14 +217,21 @@ def reproject_raster(
     try:
         driver = get_raster_driver_from_filename(sFilename_raster_out)
     except Exception:
-        driver = gdal.GetDriverByName('GTiff')
+        driver = gdal.GetDriverByName("GTiff")
         if driver is None:
-            raise RuntimeError('Cannot find a suitable GDAL driver for output')
+            raise RuntimeError("Cannot find a suitable GDAL driver for output")
 
-    creation_options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
-    out_ds = driver.Create(sFilename_raster_out, out_x, out_y, out_bands, eType=iData_type_out, options=creation_options)
+    creation_options = ["COMPRESS=DEFLATE", "PREDICTOR=2"]
+    out_ds = driver.Create(
+        sFilename_raster_out,
+        out_x,
+        out_y,
+        out_bands,
+        eType=iData_type_out,
+        options=creation_options,
+    )
     if out_ds is None:
-        raise RuntimeError('Failed to create output dataset')
+        raise RuntimeError("Failed to create output dataset")
 
     out_ds.SetGeoTransform(warped.GetGeoTransform())
     out_ds.SetProjection(target_srs.ExportToWkt())
@@ -225,7 +240,7 @@ def reproject_raster(
     for ib in range(1, out_bands + 1):
         arr = warped.GetRasterBand(ib).ReadAsArray()
         if arr is None:
-            raise RuntimeError(f'Failed to read band {ib} from warped dataset')
+            raise RuntimeError(f"Failed to read band {ib} from warped dataset")
         # handle nodata mapping
         try:
             np_dtype = gdal_to_numpy_datatype(iData_type_out)
@@ -239,9 +254,9 @@ def reproject_raster(
                 if np.issubdtype(arr.dtype, np.floating):
                     mask = np.isclose(arr, src_nodata, rtol=1e-9, atol=1e-9)
                 else:
-                    mask = (arr == src_nodata)
+                    mask = arr == src_nodata
             except Exception:
-                mask = (arr == src_nodata)
+                mask = arr == src_nodata
             # write target nodata same as source nodata
             out_nodata = src_nodata
             arr[mask] = out_nodata
@@ -263,12 +278,12 @@ def reproject_raster(
     src_ds = None
 
     return {
-        'success': True,
-        'output_file': sFilename_raster_out,
-        'output_width': out_x,
-        'output_height': out_y,
-        'output_bands': out_bands,
-        'output_projection': target_srs.ExportToWkt(),
-        'resampling_algorithm': resample,
-        'driver': driver.ShortName if hasattr(driver, 'ShortName') else None,
+        "success": True,
+        "output_file": sFilename_raster_out,
+        "output_width": out_x,
+        "output_height": out_y,
+        "output_bands": out_bands,
+        "output_projection": target_srs.ExportToWkt(),
+        "resampling_algorithm": resample,
+        "driver": driver.ShortName if hasattr(driver, "ShortName") else None,
     }

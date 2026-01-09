@@ -6,21 +6,33 @@ import importlib.util
 from typing import List, Tuple, Optional
 from pyearth.toolbox.mesh.point import pypoint
 from pyearth.toolbox.mesh.circle import pycircle
-from pyearth.gis.geometry.calculate_intersect_on_great_circle import calculate_intersect_on_great_circle
-from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import export_point_as_polygon_file
+from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
+    calculate_intersect_on_great_circle,
+)
+from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
+    export_point_as_polygon_file,
+)
 from pyearth.toolbox.mesh.algorithm.split_by_length import split_line_by_length
-from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import find_minimal_enclosing_polygon
-from pyearth.gis.geometry.calculate_angle_between_point import calculate_angle_between_point
+from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import (
+    find_minimal_enclosing_polygon,
+)
+from pyearth.gis.geometry.calculate_angle_between_point import (
+    calculate_angle_between_point,
+)
 
 iFlag_cython = importlib.util.find_spec("cython")
 if iFlag_cython is not None:
     from pyearth.gis.geometry.kernel import calculate_distance_to_plane
 else:
-    from pyearth.gis.geometry.calculate_distance_to_plane import calculate_distance_to_plane
+    from pyearth.gis.geometry.calculate_distance_to_plane import (
+        calculate_distance_to_plane,
+    )
 
 
 # Constants for geometric calculations
-ANGLE_THRESHOLD_COLLINEAR = 178.0  # Degrees - threshold for considering points collinear
+ANGLE_THRESHOLD_COLLINEAR = (
+    178.0  # Degrees - threshold for considering points collinear
+)
 ANGLE_THRESHOLD_PERPENDICULAR = 90.0  # Degrees - threshold for perpendicular check
 DISTANCE_TOLERANCE = 1.0  # Meters - tolerance for point-on-line check
 DISTANCE_PLANE_INITIAL = 9999.0  # Meters - initial large distance value
@@ -28,6 +40,7 @@ DISTANCE_PLANE_INITIAL = 9999.0  # Meters - initial large distance value
 
 class LineClassEncoder(JSONEncoder):
     """Custom JSON encoder for pyline objects and their dependencies."""
+
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -38,6 +51,7 @@ class LineClassEncoder(JSONEncoder):
         if isinstance(obj, pypoint):
             return json.loads(obj.tojson())
         return super().default(obj)
+
 
 class pyline:
     """
@@ -75,7 +89,9 @@ class pyline:
             ValueError: If the two points are identical.
             TypeError: If inputs are not pypoint objects.
         """
-        if not isinstance(pPoint_start_in, pypoint) or not isinstance(pPoint_end_in, pypoint):
+        if not isinstance(pPoint_start_in, pypoint) or not isinstance(
+            pPoint_end_in, pypoint
+        ):
             raise TypeError("Both inputs must be pypoint objects.")
 
         if pPoint_start_in == pPoint_end_in:
@@ -87,7 +103,6 @@ class pyline:
         self.pBound: Tuple[float, float, float, float] = self.calculate_line_bound()
         self.lLineID: int = -1
         self.lLineIndex: int = -1
-
 
     @classmethod
     def create(cls, pPoint_start_in: pypoint, pPoint_end_in: pypoint) -> "pyline":
@@ -110,10 +125,18 @@ class pyline:
         Returns:
             Tuple[float, float, float, float]: (lon_min, lat_min, lon_max, lat_max) in degrees.
         """
-        dLon_max = max(self.pPoint_start.dLongitude_degree, self.pPoint_end.dLongitude_degree)
-        dLon_min = min(self.pPoint_start.dLongitude_degree, self.pPoint_end.dLongitude_degree)
-        dLat_max = max(self.pPoint_start.dLatitude_degree, self.pPoint_end.dLatitude_degree)
-        dLat_min = min(self.pPoint_start.dLatitude_degree, self.pPoint_end.dLatitude_degree)
+        dLon_max = max(
+            self.pPoint_start.dLongitude_degree, self.pPoint_end.dLongitude_degree
+        )
+        dLon_min = min(
+            self.pPoint_start.dLongitude_degree, self.pPoint_end.dLongitude_degree
+        )
+        dLat_max = max(
+            self.pPoint_start.dLatitude_degree, self.pPoint_end.dLatitude_degree
+        )
+        dLat_min = min(
+            self.pPoint_start.dLatitude_degree, self.pPoint_end.dLatitude_degree
+        )
         self.pBound = (dLon_min, dLat_min, dLon_max, dLat_max)
         return self.pBound
 
@@ -137,8 +160,10 @@ class pyline:
         Returns:
             bool: True if lines share at least one point, False otherwise.
         """
-        return self.pPoint_start in (other.pPoint_start, other.pPoint_end) or \
-               self.pPoint_end in (other.pPoint_start, other.pPoint_end)
+        return self.pPoint_start in (
+            other.pPoint_start,
+            other.pPoint_end,
+        ) or self.pPoint_end in (other.pPoint_start, other.pPoint_end)
 
     def check_upstream(self, other: "pyline") -> bool:
         """
@@ -207,8 +232,13 @@ class pyline:
         Returns:
             bool: True if lines have same endpoints (in any order), False otherwise.
         """
-        return (self.pPoint_start == pLine_in.pPoint_start and self.pPoint_end == pLine_in.pPoint_end) or \
-               (self.pPoint_start == pLine_in.pPoint_end and self.pPoint_end == pLine_in.pPoint_start)
+        return (
+            self.pPoint_start == pLine_in.pPoint_start
+            and self.pPoint_end == pLine_in.pPoint_end
+        ) or (
+            self.pPoint_start == pLine_in.pPoint_end
+            and self.pPoint_end == pLine_in.pPoint_start
+        )
 
     def check_point_on_line(self, pPoint_in: pypoint) -> Tuple[bool, float, float]:
         """
@@ -232,14 +262,22 @@ class pyline:
             d2 = self.pPoint_end.calculate_distance(pPoint_in)
             d3 = d1 + d2 - self.dLength
             angle3deg = calculate_angle_between_point(
-                self.pPoint_start.dLongitude_degree, self.pPoint_start.dLatitude_degree,
-                pPoint_in.dLongitude_degree, pPoint_in.dLatitude_degree,
-                self.pPoint_end.dLongitude_degree, self.pPoint_end.dLatitude_degree)
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                pPoint_in.dLongitude_degree,
+                pPoint_in.dLatitude_degree,
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+            )
 
             dDistance_plane = calculate_distance_to_plane(
-                self.pPoint_start.dLongitude_degree, self.pPoint_start.dLatitude_degree,
-                pPoint_in.dLongitude_degree, pPoint_in.dLatitude_degree,
-                self.pPoint_end.dLongitude_degree, self.pPoint_end.dLatitude_degree)
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                pPoint_in.dLongitude_degree,
+                pPoint_in.dLatitude_degree,
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+            )
 
             if angle3deg > ANGLE_THRESHOLD_COLLINEAR and d3 < DISTANCE_TOLERANCE:
                 on_edge = True
@@ -263,23 +301,42 @@ class pyline:
         d2 = self.pPoint_end.calculate_distance(pPoint_in)
 
         angle3deg = calculate_angle_between_point(
-            self.pPoint_start.dLongitude_degree, self.pPoint_start.dLatitude_degree,
-            pPoint_in.dLongitude_degree, pPoint_in.dLatitude_degree,
-            self.pPoint_end.dLongitude_degree, self.pPoint_end.dLatitude_degree)
+            self.pPoint_start.dLongitude_degree,
+            self.pPoint_start.dLatitude_degree,
+            pPoint_in.dLongitude_degree,
+            pPoint_in.dLatitude_degree,
+            self.pPoint_end.dLongitude_degree,
+            self.pPoint_end.dLatitude_degree,
+        )
 
         if angle3deg > ANGLE_THRESHOLD_PERPENDICULAR:
             dDistance_plane = calculate_distance_to_plane(
-                self.pPoint_start.dLongitude_degree, self.pPoint_start.dLatitude_degree,
-                pPoint_in.dLongitude_degree, pPoint_in.dLatitude_degree,
-                self.pPoint_end.dLongitude_degree, self.pPoint_end.dLatitude_degree)
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                pPoint_in.dLongitude_degree,
+                pPoint_in.dLatitude_degree,
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+            )
 
             if dDistance_plane < d1 and dDistance_plane < d2:
-                dLongitude_intersect, dLatitude_intersect = calculate_intersect_on_great_circle(
-                    self.pPoint_start.dLongitude_degree, self.pPoint_start.dLatitude_degree,
-                    pPoint_in.dLongitude_degree, pPoint_in.dLatitude_degree,
-                    self.pPoint_end.dLongitude_degree, self.pPoint_end.dLatitude_degree)
+                dLongitude_intersect, dLatitude_intersect = (
+                    calculate_intersect_on_great_circle(
+                        self.pPoint_start.dLongitude_degree,
+                        self.pPoint_start.dLatitude_degree,
+                        pPoint_in.dLongitude_degree,
+                        pPoint_in.dLatitude_degree,
+                        self.pPoint_end.dLongitude_degree,
+                        self.pPoint_end.dLatitude_degree,
+                    )
+                )
 
-                pPoint_out = pypoint({'dLongitude_degree': dLongitude_intersect, 'dLatitude_degree': dLatitude_intersect})
+                pPoint_out = pypoint(
+                    {
+                        "dLongitude_degree": dLongitude_intersect,
+                        "dLatitude_degree": dLatitude_intersect,
+                    }
+                )
                 dDistance_min = pPoint_out.calculate_distance(pPoint_in)
 
                 if dDistance_min < d1 and dDistance_min < d2:
@@ -315,10 +372,14 @@ class pyline:
             raise TypeError(f"Expected pyline, got {type(other)}")
 
         return calculate_angle_between_point(
-            self.pPoint_start.dLongitude_degree, self.pPoint_start.dLatitude_degree,
-            self.pPoint_end.dLongitude_degree, self.pPoint_end.dLatitude_degree,
-            other.pPoint_start.dLongitude_degree, other.pPoint_start.dLatitude_degree,
-            other.pPoint_end.dLongitude_degree, other.pPoint_end.dLatitude_degree
+            self.pPoint_start.dLongitude_degree,
+            self.pPoint_start.dLatitude_degree,
+            self.pPoint_end.dLongitude_degree,
+            self.pPoint_end.dLatitude_degree,
+            other.pPoint_start.dLongitude_degree,
+            other.pPoint_start.dLatitude_degree,
+            other.pPoint_end.dLongitude_degree,
+            other.pPoint_end.dLatitude_degree,
         )
 
     def calculate_buffer_zone_polygon(
@@ -326,7 +387,7 @@ class pyline:
         dRadius: float,
         nPoint: int = 36,
         sFilename_out: Optional[str] = None,
-        sFolder_out: Optional[str] = None
+        sFolder_out: Optional[str] = None,
     ) -> Tuple[List[pypoint], List[pypoint], List[pypoint], List[pycircle]]:
         """
         Calculate a buffer zone polygon around this line.
@@ -355,7 +416,7 @@ class pyline:
         if self.dLength < dRadius * 2.0:
             aEdge = [self]
         else:
-            aEdge = self.split_by_length(dRadius*2.0)
+            aEdge = self.split_by_length(dRadius * 2.0)
 
         aPoint_out = []
         aPoint_center = []
@@ -368,7 +429,9 @@ class pyline:
 
             aPoint_center.extend([pPoint_start, pPoint_end])
 
-            aPoint_start_buffer = pPoint_start.calculate_buffer_zone_circle(dRadius, nPoint)
+            aPoint_start_buffer = pPoint_start.calculate_buffer_zone_circle(
+                dRadius, nPoint
+            )
             pEdge.pCircle_start = pycircle(pPoint_start, aPoint_start_buffer)
             aPoint_circle.extend(aPoint_start_buffer)
 
@@ -377,17 +440,28 @@ class pyline:
             aPoint_circle.extend(aPoint_end_buffer)
 
             if sFolder_out:
-                export_point_as_polygon_file(aPoint_start_buffer, os.path.join(sFolder_out, f'buffer_zone_start_{i}.geojson'))
-                export_point_as_polygon_file(aPoint_end_buffer, os.path.join(sFolder_out, f'buffer_zone_end_{i}.geojson'))
+                export_point_as_polygon_file(
+                    aPoint_start_buffer,
+                    os.path.join(sFolder_out, f"buffer_zone_start_{i}.geojson"),
+                )
+                export_point_as_polygon_file(
+                    aPoint_end_buffer,
+                    os.path.join(sFolder_out, f"buffer_zone_end_{i}.geojson"),
+                )
 
             aCircle.extend([pEdge.pCircle_start, pEdge.pCircle_end])
 
         aLongitude_degree = [v.dLongitude_degree for v in aPoint_circle]
         aLatitude_degree = [v.dLatitude_degree for v in aPoint_circle]
 
-        pPolygon_out = find_minimal_enclosing_polygon(aLongitude_degree, aLatitude_degree)
+        pPolygon_out = find_minimal_enclosing_polygon(
+            aLongitude_degree, aLatitude_degree
+        )
 
-        aPoint_out = [pypoint({'dLongitude_degree': p[0], 'dLatitude_degree': p[1]}) for p in pPolygon_out]
+        aPoint_out = [
+            pypoint({"dLongitude_degree": p[0], "dLatitude_degree": p[1]})
+            for p in pPolygon_out
+        ]
 
         if sFilename_out:
             export_point_as_polygon_file(aPoint_out, sFilename_out)
@@ -406,7 +480,10 @@ class pyline:
         """
         if not isinstance(other, pyline):
             return NotImplemented
-        return self.pPoint_start == other.pPoint_start and self.pPoint_end == other.pPoint_end
+        return (
+            self.pPoint_start == other.pPoint_start
+            and self.pPoint_end == other.pPoint_end
+        )
 
     def __ne__(self, other: object) -> bool:
         """
@@ -439,11 +516,13 @@ class pyline:
         Returns:
             str: Developer-friendly representation.
         """
-        return (f"pyline(start=({self.pPoint_start.dLongitude_degree:.6f}, "
-                f"{self.pPoint_start.dLatitude_degree:.6f}), "
-                f"end=({self.pPoint_end.dLongitude_degree:.6f}, "
-                f"{self.pPoint_end.dLatitude_degree:.6f}), "
-                f"length={self.dLength:.2f}m)")
+        return (
+            f"pyline(start=({self.pPoint_start.dLongitude_degree:.6f}, "
+            f"{self.pPoint_start.dLatitude_degree:.6f}), "
+            f"end=({self.pPoint_end.dLongitude_degree:.6f}, "
+            f"{self.pPoint_end.dLatitude_degree:.6f}), "
+            f"length={self.dLength:.2f}m)"
+        )
 
     def __str__(self) -> str:
         """
@@ -452,10 +531,12 @@ class pyline:
         Returns:
             str: Human-readable description.
         """
-        return (f"Line from ({self.pPoint_start.dLongitude_degree:.4f}°, "
-                f"{self.pPoint_start.dLatitude_degree:.4f}°) to "
-                f"({self.pPoint_end.dLongitude_degree:.4f}°, "
-                f"{self.pPoint_end.dLatitude_degree:.4f}°)")
+        return (
+            f"Line from ({self.pPoint_start.dLongitude_degree:.4f}°, "
+            f"{self.pPoint_start.dLatitude_degree:.4f}°) to "
+            f"({self.pPoint_end.dLongitude_degree:.4f}°, "
+            f"{self.pPoint_end.dLatitude_degree:.4f}°)"
+        )
 
     def tojson(self) -> str:
         """

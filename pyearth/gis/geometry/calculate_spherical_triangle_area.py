@@ -41,17 +41,20 @@ References
 .. [2] https://mathworld.wolfram.com/SphericalTriangle.html
 .. [3] https://mathworld.wolfram.com/LHuiliersTheorem.html
 """
+
 import numpy as np
 from typing import Union, List, Optional
 from pyearth.system.define_global_variables import earth_radius
-from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
+from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import (
+    calculate_distance_based_on_longitude_latitude,
+)
 
 
 def calculate_spherical_triangle_area(
     aLongitude_in: Union[List[float], np.ndarray],
     aLatitude_in: Union[List[float], np.ndarray],
     iFlag_radian: bool = False,
-    dRadius_in: Optional[float] = None
+    dRadius_in: Optional[float] = None,
 ) -> float:
     """Calculate the area of a spherical triangle using L'Huilier's theorem.
 
@@ -178,23 +181,29 @@ def calculate_spherical_triangle_area(
     # Calculate the three great circle arc lengths (edges of the triangle)
     # Edge a: from point 0 to point 1
     a = calculate_distance_based_on_longitude_latitude(
-        aLongitude_radian[0], aLatitude_radian[0],
-        aLongitude_radian[1], aLatitude_radian[1],
-        iFlag_radian=True
+        aLongitude_radian[0],
+        aLatitude_radian[0],
+        aLongitude_radian[1],
+        aLatitude_radian[1],
+        iFlag_radian=True,
     )
 
     # Edge b: from point 1 to point 2
     b = calculate_distance_based_on_longitude_latitude(
-        aLongitude_radian[1], aLatitude_radian[1],
-        aLongitude_radian[2], aLatitude_radian[2],
-        iFlag_radian=True
+        aLongitude_radian[1],
+        aLatitude_radian[1],
+        aLongitude_radian[2],
+        aLatitude_radian[2],
+        iFlag_radian=True,
     )
 
     # Edge c: from point 2 to point 0
     c = calculate_distance_based_on_longitude_latitude(
-        aLongitude_radian[2], aLatitude_radian[2],
-        aLongitude_radian[0], aLatitude_radian[0],
-        iFlag_radian=True
+        aLongitude_radian[2],
+        aLatitude_radian[2],
+        aLongitude_radian[0],
+        aLatitude_radian[0],
+        iFlag_radian=True,
     )
 
     # Check for degenerate triangle (collinear points)
@@ -210,10 +219,10 @@ def calculate_spherical_triangle_area(
     # L'Huilier's formula for spherical excess
     # tan(E/4) = sqrt(tan(s/2) * tan((s-a)/2) * tan((s-b)/2) * tan((s-c)/2))
     tan_quarter_excess = np.sqrt(
-        np.tan(0.5 * s) *
-        np.tan(0.5 * (s - a)) *
-        np.tan(0.5 * (s - b)) *
-        np.tan(0.5 * (s - c))
+        np.tan(0.5 * s)
+        * np.tan(0.5 * (s - a))
+        * np.tan(0.5 * (s - b))
+        * np.tan(0.5 * (s - c))
     )
 
     # Spherical excess in radians
@@ -231,4 +240,3 @@ def calculate_spherical_triangle_area(
             area = spherical_excess * earth_radius**2
 
         return float(area)
-

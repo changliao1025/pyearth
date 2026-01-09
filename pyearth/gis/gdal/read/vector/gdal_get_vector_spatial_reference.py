@@ -1,6 +1,7 @@
 import os
 from osgeo import ogr
 
+
 def gdal_get_vector_spatial_reference_wkt(sFilename_in: str) -> str:
     """Return the spatial reference of a vector file as a WKT string.
 
@@ -39,7 +40,9 @@ def gdal_get_vector_spatial_reference_wkt(sFilename_in: str) -> str:
 
         spatial_ref = layer.GetSpatialRef()
         if spatial_ref is None:
-            raise ValueError(f"Vector file {sFilename_in} does not define spatial reference metadata.")
+            raise ValueError(
+                f"Vector file {sFilename_in} does not define spatial reference metadata."
+            )
 
         try:
             projection_wkt = spatial_ref.ExportToWkt()
@@ -47,10 +50,11 @@ def gdal_get_vector_spatial_reference_wkt(sFilename_in: str) -> str:
             raise ValueError(f"Unable to export spatial reference to WKT: {str(e)}")
 
         if not projection_wkt:
-            raise ValueError(f"Vector file {sFilename_in} contains empty spatial reference metadata.")
+            raise ValueError(
+                f"Vector file {sFilename_in} contains empty spatial reference metadata."
+            )
 
         return projection_wkt
 
     finally:
         dataset = None
-

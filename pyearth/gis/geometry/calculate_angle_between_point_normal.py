@@ -1,5 +1,3 @@
-
-
 """
 Calculate angle between point normal for geographic coordinates.
 
@@ -7,10 +5,14 @@ This module provides functionality to calculate the angle at a point (middle poi
 formed by three points on a sphere, useful for geographic calculations involving
 lines and polygons on Earth's surface.
 """
+
 import numpy as np
 from typing import Union
 
-from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
+from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
+    convert_longitude_latitude_to_sphere_3d,
+)
+
 
 def calculate_angle_between_point_normal(
     dLongitude1_in: float,
@@ -19,7 +21,7 @@ def calculate_angle_between_point_normal(
     dLatitude2_in: float,
     dLongitude3_in: float,
     dLatitude3_in: float,
-    iFlag_radian: bool = False
+    iFlag_radian: bool = False,
 ) -> float:
     """
     Calculate the angle at point (point 2) formed by three points on a sphere.
@@ -73,14 +75,26 @@ def calculate_angle_between_point_normal(
         dLongitude3_radian = dLongitude3_in
         dLatitude3_radian = dLatitude3_in
     else:
-        dLongitude1_radian, dLatitude1_radian = np.radians([dLongitude1_in, dLatitude1_in])
-        dLongitude2_radian, dLatitude2_radian = np.radians([dLongitude2_in, dLatitude2_in])
-        dLongitude3_radian, dLatitude3_radian = np.radians([dLongitude3_in, dLatitude3_in])
+        dLongitude1_radian, dLatitude1_radian = np.radians(
+            [dLongitude1_in, dLatitude1_in]
+        )
+        dLongitude2_radian, dLatitude2_radian = np.radians(
+            [dLongitude2_in, dLatitude2_in]
+        )
+        dLongitude3_radian, dLatitude3_radian = np.radians(
+            [dLongitude3_in, dLatitude3_in]
+        )
 
     # Convert geographic coordinates to 3D Cartesian coordinates on unit sphere
-    point1_3d = convert_longitude_latitude_to_sphere_3d(dLongitude1_radian, dLatitude1_radian)
-    point2_3d = convert_longitude_latitude_to_sphere_3d(dLongitude2_radian, dLatitude2_radian)  # Middle point
-    point3_3d = convert_longitude_latitude_to_sphere_3d(dLongitude3_radian, dLatitude3_radian)
+    point1_3d = convert_longitude_latitude_to_sphere_3d(
+        dLongitude1_radian, dLatitude1_radian
+    )
+    point2_3d = convert_longitude_latitude_to_sphere_3d(
+        dLongitude2_radian, dLatitude2_radian
+    )  # Middle point
+    point3_3d = convert_longitude_latitude_to_sphere_3d(
+        dLongitude3_radian, dLatitude3_radian
+    )
 
     # Create vectors from point (point 2) to the other two points
     vector_to_point1 = point1_3d - point2_3d
@@ -102,5 +116,3 @@ def calculate_angle_between_point_normal(
         angle_degrees += 360.0
 
     return angle_degrees
-
-

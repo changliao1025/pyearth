@@ -4,6 +4,7 @@ Calculate ground resolution for Google Maps/Web Mercator tile pyramids.
 This module provides utilities for calculating the meters per pixel (ground resolution)
 at different zoom levels in the Google Maps tiling scheme (Web Mercator projection).
 """
+
 import numpy as np
 
 from pyearth.system.define_global_variables import earth_radius
@@ -94,15 +95,11 @@ def Google_MetersPerPixel(zoomLevel: int) -> float:
     try:
         zoom = int(zoomLevel)
     except (TypeError, ValueError) as e:
-        raise TypeError(
-            f"Zoom level must be an integer. Got {zoomLevel}. Error: {e}"
-        )
+        raise TypeError(f"Zoom level must be an integer. Got {zoomLevel}. Error: {e}")
 
     # Validate zoom level range
     if zoom < 0:
-        raise ValueError(
-            f"Zoom level must be non-negative. Got {zoom}"
-        )
+        raise ValueError(f"Zoom level must be non-negative. Got {zoom}")
 
     if zoom > 30:
         raise ValueError(
@@ -116,9 +113,8 @@ def Google_MetersPerPixel(zoomLevel: int) -> float:
     # Calculate meters per pixel at equator
     # Formula: (2π × Earth_radius) / (tile_size × 2^zoom)
     # This is the circumference of Earth divided by total pixels at this zoom level
-    meters_per_pixel = (
-        (2 * np.pi * earth_radius) /
-        (TILE_SIZE_PIXELS * np.power(2, zoom))
+    meters_per_pixel = (2 * np.pi * earth_radius) / (
+        TILE_SIZE_PIXELS * np.power(2, zoom)
     )
 
     return float(meters_per_pixel)

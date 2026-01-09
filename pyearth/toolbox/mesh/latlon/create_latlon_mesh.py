@@ -5,12 +5,15 @@ This module creates mesh cells representing edges instead of centers, using GDAL
 for most GIS operations. The mesh is defined by longitude left, latitude bottom,
 number of rows/columns, and resolution.
 """
+
 import os
 from typing import List, Optional, Tuple, Union
 import numpy as np
 from osgeo import ogr, osr
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
-from pyearth.toolbox.mesh.algorithm.convert_coordinates import convert_gcs_coordinates_to_meshcell
+from pyearth.toolbox.mesh.algorithm.convert_coordinates import (
+    convert_gcs_coordinates_to_meshcell,
+)
 
 # Constants
 DEFAULT_EPSG_CODE = 4326  # WGS84 lat/lon
@@ -19,9 +22,14 @@ DEFAULT_FIELD_WIDTH = 20
 COORDINATE_FILL_VALUE = -9999.0
 
 
-def _validate_mesh_parameters(longitude_left: float, latitude_bottom: float,
-                            resolution_degrees: float, num_columns: int,
-                            num_rows: int, output_filename: str) -> None:
+def _validate_mesh_parameters(
+    longitude_left: float,
+    latitude_bottom: float,
+    resolution_degrees: float,
+    num_columns: int,
+    num_rows: int,
+    output_filename: str,
+) -> None:
     """
     Validate input parameters for mesh creation.
 
@@ -38,16 +46,22 @@ def _validate_mesh_parameters(longitude_left: float, latitude_bottom: float,
         FileNotFoundError: If output directory doesn't exist
     """
     if not (-180.0 <= longitude_left <= 180.0):
-        raise ValueError(f"Longitude must be between -180 and 180 degrees, got {longitude_left}")
+        raise ValueError(
+            f"Longitude must be between -180 and 180 degrees, got {longitude_left}"
+        )
 
     if not (-90.0 <= latitude_bottom <= 90.0):
-        raise ValueError(f"Latitude must be between -90 and 90 degrees, got {latitude_bottom}")
+        raise ValueError(
+            f"Latitude must be between -90 and 90 degrees, got {latitude_bottom}"
+        )
 
     if resolution_degrees <= 0:
         raise ValueError(f"Resolution must be positive, got {resolution_degrees}")
 
     if num_columns <= 0 or num_rows <= 0:
-        raise ValueError(f"Columns and rows must be positive integers, got columns={num_columns}, rows={num_rows}")
+        raise ValueError(
+            f"Columns and rows must be positive integers, got columns={num_columns}, rows={num_rows}"
+        )
 
     if not isinstance(output_filename, str) or not output_filename.strip():
         raise ValueError("Output filename must be a non-empty string")
@@ -58,9 +72,13 @@ def _validate_mesh_parameters(longitude_left: float, latitude_bottom: float,
         raise FileNotFoundError(f"Output directory does not exist: {output_dir}")
 
 
-def _create_boundary_geometry(longitude_left: float, latitude_bottom: float,
-                            num_columns: int, num_rows: int,
-                            resolution_degrees: float) -> ogr.Geometry:
+def _create_boundary_geometry(
+    longitude_left: float,
+    latitude_bottom: float,
+    num_columns: int,
+    num_rows: int,
+    resolution_degrees: float,
+) -> ogr.Geometry:
     """
     Create a boundary geometry for the mesh using bounding box.
 
@@ -94,13 +112,16 @@ def _create_boundary_geometry(longitude_left: float, latitude_bottom: float,
     boundary.AddGeometry(ring)
     return boundary
 
-def create_latlon_mesh(dLongitude_left_in: float,
-                       dLatitude_bot_in: float,
-                       dResolution_degree_in: float,
-                       ncolumn_in: int,
-                       nrow_in: int,
-                       sFilename_output_in: str,
-                       pBoundary_in: Optional[str] = None) -> List:
+
+def create_latlon_mesh(
+    dLongitude_left_in: float,
+    dLatitude_bot_in: float,
+    dResolution_degree_in: float,
+    ncolumn_in: int,
+    nrow_in: int,
+    sFilename_output_in: str,
+    pBoundary_in: Optional[str] = None,
+) -> List:
     """
     Create a rectangular latitude/longitude based mesh with cell topology and neighbor relationships.
 
@@ -153,16 +174,22 @@ def create_latlon_mesh(dLongitude_left_in: float,
     """
     # Input validation
     if not (-180.0 <= dLongitude_left_in <= 180.0):
-        raise ValueError(f"Longitude must be between -180 and 180 degrees, got {dLongitude_left_in}")
+        raise ValueError(
+            f"Longitude must be between -180 and 180 degrees, got {dLongitude_left_in}"
+        )
 
     if not (-90.0 <= dLatitude_bot_in <= 90.0):
-        raise ValueError(f"Latitude must be between -90 and 90 degrees, got {dLatitude_bot_in}")
+        raise ValueError(
+            f"Latitude must be between -90 and 90 degrees, got {dLatitude_bot_in}"
+        )
 
     if dResolution_degree_in <= 0:
         raise ValueError(f"Resolution must be positive, got {dResolution_degree_in}")
 
     if ncolumn_in <= 0 or nrow_in <= 0:
-        raise ValueError(f"Columns and rows must be positive integers, got columns={ncolumn_in}, rows={nrow_in}")
+        raise ValueError(
+            f"Columns and rows must be positive integers, got columns={ncolumn_in}, rows={nrow_in}"
+        )
 
     if not isinstance(sFilename_output_in, str) or not sFilename_output_in.strip():
         raise ValueError("Output filename must be a non-empty string")
@@ -175,10 +202,14 @@ def create_latlon_mesh(dLongitude_left_in: float,
     # For geometry objects, WKT strings are used to avoid crashes when datasets are closed
     # Reference: https://gdal.org/api/python_gotchas.html
     if pBoundary_in is None:
-        print('Creating mesh with automatic bounding box boundary')
+        print("Creating mesh with automatic bounding box boundary")
         try:
             pBoundary = _create_boundary_geometry(
-                dLongitude_left_in, dLatitude_bot_in, ncolumn_in, nrow_in, dResolution_degree_in
+                dLongitude_left_in,
+                dLatitude_bot_in,
+                ncolumn_in,
+                nrow_in,
+                dResolution_degree_in,
             )
         except Exception as e:
             raise RuntimeError(f"Failed to create boundary geometry: {e}")
@@ -205,7 +236,9 @@ def create_latlon_mesh(dLongitude_left_in: float,
 
         pDataset = pDriver.CreateDataSource(sFilename_output_in)
         if pDataset is None:
-            raise RuntimeError(f"Failed to create output dataset: {sFilename_output_in}")
+            raise RuntimeError(
+                f"Failed to create output dataset: {sFilename_output_in}"
+            )
 
         # Setup spatial reference system (WGS84)
         pSpatial_reference_gcs = osr.SpatialReference()
@@ -213,16 +246,18 @@ def create_latlon_mesh(dLongitude_left_in: float,
         pSpatial_reference_gcs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
         # Create layer with attributes
-        pLayer = pDataset.CreateLayer('cell', pSpatial_reference_gcs, ogr.wkbPolygon)
+        pLayer = pDataset.CreateLayer("cell", pSpatial_reference_gcs, ogr.wkbPolygon)
         if pLayer is None:
             raise RuntimeError("Failed to create layer")
 
         # Define attribute fields
-        pLayer.CreateField(ogr.FieldDefn('cellid', ogr.OFTInteger64)) # 64-bit for high resolution
-        pLayer.CreateField(ogr.FieldDefn('longitude', ogr.OFTReal))
-        pLayer.CreateField(ogr.FieldDefn('latitude', ogr.OFTReal))
+        pLayer.CreateField(
+            ogr.FieldDefn("cellid", ogr.OFTInteger64)
+        )  # 64-bit for high resolution
+        pLayer.CreateField(ogr.FieldDefn("longitude", ogr.OFTReal))
+        pLayer.CreateField(ogr.FieldDefn("latitude", ogr.OFTReal))
 
-        pArea_field = ogr.FieldDefn('area', ogr.OFTReal)
+        pArea_field = ogr.FieldDefn("area", ogr.OFTReal)
         pArea_field.SetWidth(DEFAULT_FIELD_WIDTH)
         pArea_field.SetPrecision(DEFAULT_PRECISION)
         pLayer.CreateField(pArea_field)
@@ -233,93 +268,106 @@ def create_latlon_mesh(dLongitude_left_in: float,
     except Exception as e:
         raise RuntimeError(f"Failed to setup output layer: {e}")
     xleft = dLongitude_left_in
-    xspacing= dResolution_degree_in
+    xspacing = dResolution_degree_in
     ybottom = dLatitude_bot_in
     yspacing = dResolution_degree_in
     aLatlon = list()
     aLatlon_dict = dict()
     lCellIndex = 0
-    def add_cell_into_list(aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords):
-        pLatlon = convert_gcs_coordinates_to_meshcell(2, dLongitude_center, dLatitude_center, aCoords)
+
+    def add_cell_into_list(
+        aList, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords
+    ):
+        pLatlon = convert_gcs_coordinates_to_meshcell(
+            2, dLongitude_center, dLatitude_center, aCoords
+        )
         pLatlon.lCellID = lCellID
         dArea = pLatlon.calculate_polygon_area()
         pLatlon.calculate_line_length()
-        #build topoloy
-        aNeighbor=list()
-        aNeighbor_distance=list()
-        #lCellID_center = lCellID
-        #counter-clock wise direction to add the neighbor
-        if iRow > 1:#under
+        # build topoloy
+        aNeighbor = list()
+        aNeighbor_distance = list()
+        # lCellID_center = lCellID
+        # counter-clock wise direction to add the neighbor
+        if iRow > 1:  # under
             iRow_dummy = iRow - 1
             if iColumn > 1:
                 iColumn_dummy = iColumn - 1
-                lCellID2 = (iRow_dummy-1) * ncolumn_in + iColumn_dummy #lCellID0 - nrow_in
+                lCellID2 = (
+                    iRow_dummy - 1
+                ) * ncolumn_in + iColumn_dummy  # lCellID0 - nrow_in
                 aNeighbor.append(lCellID2)
 
-            lCellID0 =  (iRow_dummy-1) * ncolumn_in + iColumn
+            lCellID0 = (iRow_dummy - 1) * ncolumn_in + iColumn
             aNeighbor.append(lCellID0)
-        if iColumn  < ncolumn_in  : #right
+        if iColumn < ncolumn_in:  # right
             iColumn_dummy = iColumn + 1
             if iRow > 1:
                 iRow_dummy = iRow - 1
-                lCellID7 = (iRow_dummy-1) * ncolumn_in + iColumn_dummy# lCellID5 -1
+                lCellID7 = (iRow_dummy - 1) * ncolumn_in + iColumn_dummy  # lCellID5 -1
                 aNeighbor.append(lCellID7)
-            lCellID5 = (iRow-1) * ncolumn_in + iColumn_dummy #nrow_in * iColumn + iRow
+            lCellID5 = (
+                iRow - 1
+            ) * ncolumn_in + iColumn_dummy  # nrow_in * iColumn + iRow
             aNeighbor.append(lCellID5)
-        if iRow < nrow_in:#top
+        if iRow < nrow_in:  # top
             iRow_dummy = iRow + 1
             if iColumn < ncolumn_in:
                 iColumn_dummy = iColumn + 1
-                lCellID6 = (iRow_dummy-1) * ncolumn_in + iColumn_dummy #lCellID3 + nrow_in
+                lCellID6 = (
+                    iRow_dummy - 1
+                ) * ncolumn_in + iColumn_dummy  # lCellID3 + nrow_in
                 aNeighbor.append(lCellID6)
-            lCellID3 = (iRow_dummy-1) * ncolumn_in + iColumn #lCellID_center + 1
+            lCellID3 = (iRow_dummy - 1) * ncolumn_in + iColumn  # lCellID_center + 1
             aNeighbor.append(lCellID3)
 
-        if iColumn> 1:#left
+        if iColumn > 1:  # left
             iColumn_dummy = iColumn - 1
             if iRow < nrow_in:
                 iRow_dummy = iRow + 1
-                lCellID4 = (iRow_dummy-1) * ncolumn_in + iColumn_dummy #lCellID1 + 1
+                lCellID4 = (iRow_dummy - 1) * ncolumn_in + iColumn_dummy  # lCellID1 + 1
                 aNeighbor.append(lCellID4)
-            lCellID1 = (iRow-1) * ncolumn_in + iColumn_dummy #nrow_in * (iColumn-2) + iRow
+            lCellID1 = (
+                iRow - 1
+            ) * ncolumn_in + iColumn_dummy  # nrow_in * (iColumn-2) + iRow
             aNeighbor.append(lCellID1)
 
         pLatlon.aNeighbor = aNeighbor
         pLatlon.nNeighbor = len(aNeighbor)
-        pLatlon.aNeighbor_land= aNeighbor
-        pLatlon.nNeighbor_land= pLatlon.nNeighbor
+        pLatlon.aNeighbor_land = aNeighbor
+        pLatlon.nNeighbor_land = pLatlon.nNeighbor
         aList.append(pLatlon)
 
         return aList, dArea
 
-    #change the order because mpas uses counter-clock wise to store the vertices
-    #we will also start from the lower-left corner, and then go to the right and then go up
-    #so the final index will be like this
-    #3 4
-    #1 2
-    #lCellID = 1
-    #.........
-    #(x4,y4)-----(x3,y3)
+    # change the order because mpas uses counter-clock wise to store the vertices
+    # we will also start from the lower-left corner, and then go to the right and then go up
+    # so the final index will be like this
+    # 3 4
+    # 1 2
+    # lCellID = 1
+    # .........
+    # (x4,y4)-----(x3,y3)
     #   |           |
-    #(x1,y1)-----(x2,y2)
-    #...............
+    # (x1,y1)-----(x2,y2)
+    # ...............
 
     try:
-        for iRow in range(1, nrow_in+1):
-            for iColumn in range(1, ncolumn_in+1):
-                lCellID = (iRow-1) * ncolumn_in + iColumn
-                #define a polygon here
-                x1 = xleft + ((iColumn-1) * xspacing)
-                y1 = ybottom + ((iRow-1) * yspacing)
+        for iRow in range(1, nrow_in + 1):
+            for iColumn in range(1, ncolumn_in + 1):
+                lCellID = (iRow - 1) * ncolumn_in + iColumn
+                # define a polygon here
+                x1 = xleft + ((iColumn - 1) * xspacing)
+                y1 = ybottom + ((iRow - 1) * yspacing)
 
-                x2 = xleft + ((iColumn ) * xspacing)
-                y2 = ybottom + ((iRow-1) * yspacing)
+                x2 = xleft + ((iColumn) * xspacing)
+                y2 = ybottom + ((iRow - 1) * yspacing)
 
-                x3 = xleft + ((iColumn ) * xspacing)
-                y3 = ybottom + ((iRow ) * yspacing)
+                x3 = xleft + ((iColumn) * xspacing)
+                y3 = ybottom + ((iRow) * yspacing)
 
-                x4 = xleft + ((iColumn-1) * xspacing)
-                y4 = ybottom + ((iRow ) * yspacing)
+                x4 = xleft + ((iColumn - 1) * xspacing)
+                y4 = ybottom + ((iRow) * yspacing)
 
                 coordinates = [(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x1, y1)]
 
@@ -333,7 +381,7 @@ def create_latlon_mesh(dLongitude_left_in: float,
 
                 pPolygon = ogr.Geometry(ogr.wkbPolygon)
                 pPolygon.AddGeometry(ring)
-                aCoords_gcs = np.full((5,2), -9999.0, dtype=float)
+                aCoords_gcs = np.full((5, 2), -9999.0, dtype=float)
                 try:
                     for i, (x, y) in enumerate(coordinates):
                         aCoords_gcs[i, 0] = x
@@ -342,29 +390,37 @@ def create_latlon_mesh(dLongitude_left_in: float,
                     print(f"Error setting coordinate arrays: {e}")
                     raise
 
-                dLongitude_center = np.mean(aCoords_gcs[0:4,0])
-                dLatitude_center = np.mean(aCoords_gcs[0:4,1])
+                dLongitude_center = np.mean(aCoords_gcs[0:4, 0])
+                dLatitude_center = np.mean(aCoords_gcs[0:4, 1])
 
                 iFlag = False
                 if pPolygon.Within(pBoundary):
                     iFlag = True
                 else:
-                    #then check intersection
+                    # then check intersection
                     if pPolygon.Intersects(pBoundary):
                         iFlag = True
                     else:
                         pass
 
-                if ( iFlag == True ):
-                    aLatlon, dArea = add_cell_into_list(aLatlon, lCellID, iRow, iColumn, dLongitude_center, dLatitude_center, aCoords_gcs )
-                    #save feature
+                if iFlag == True:
+                    aLatlon, dArea = add_cell_into_list(
+                        aLatlon,
+                        lCellID,
+                        iRow,
+                        iColumn,
+                        dLongitude_center,
+                        dLatitude_center,
+                        aCoords_gcs,
+                    )
+                    # save feature
                     pFeature.SetGeometry(pPolygon)
                     pFeature.SetField("cellid", lCellID)
-                    pFeature.SetField("longitude", dLongitude_center )
-                    pFeature.SetField("latitude", dLatitude_center )
-                    pFeature.SetField("area", dArea )
+                    pFeature.SetField("longitude", dLongitude_center)
+                    pFeature.SetField("latitude", dLatitude_center)
+                    pFeature.SetField("area", dArea)
                     pLayer.CreateFeature(pFeature)
-                    #add to dictionary
+                    # add to dictionary
                     aLatlon_dict[lCellID] = lCellIndex
                     lCellIndex = lCellIndex + 1
                     pass
@@ -372,8 +428,7 @@ def create_latlon_mesh(dLongitude_left_in: float,
         print(f"Error processing mesh grid rows and columns: {e}")
         raise
 
-    pDataset = pLayer = pFeature  = None
-
+    pDataset = pLayer = pFeature = None
 
     aLatlon_out = list()
     try:
@@ -387,28 +442,30 @@ def create_latlon_mesh(dLongitude_left_in: float,
             except Exception as e:
                 print(f"Error processing neighbor list: {e}")
                 raise
-            #for latlon, there is no ocean concept
+            # for latlon, there is no ocean concept
             pCell.aNeighbor = aNeighbor_land_update
-            pCell.nNeighbor= len(aNeighbor_land_update)
+            pCell.nNeighbor = len(aNeighbor_land_update)
             pCell.aNeighbor_land = aNeighbor_land_update
-            pCell.nNeighbor_land= len(aNeighbor_land_update)
+            pCell.nNeighbor_land = len(aNeighbor_land_update)
             pCell.nNeighbor_ocean = pCell.nPoint - pCell.nNeighbor_land
             aLatlon_out.append(pCell)
     except Exception as e:
         print(f"Error updating cell neighbors: {e}")
         raise
 
-    #calculate neighbor distance
+    # calculate neighbor distance
     try:
         for pLatlon in aLatlon_out:
             aNeighbor = pLatlon.aNeighbor
-            pLatlon.aNeighbor_distance=list()
+            pLatlon.aNeighbor_distance = list()
             try:
                 for lCellID1 in aNeighbor:
-                    #use dictionary to get index
+                    # use dictionary to get index
                     lIndex = aLatlon_dict[lCellID1]
                     pLatlon1 = aLatlon_out[lIndex]
-                    dDistance = pLatlon.pPoint_center.calculate_distance( pLatlon1.pPoint_center )
+                    dDistance = pLatlon.pPoint_center.calculate_distance(
+                        pLatlon1.pPoint_center
+                    )
                     pLatlon.aNeighbor_distance.append(dDistance)
             except Exception as e:
                 print(f"Error calculating neighbor distances: {e}")
@@ -416,6 +473,5 @@ def create_latlon_mesh(dLongitude_left_in: float,
     except Exception as e:
         print(f"Error processing neighbor distance calculation: {e}")
         raise
-
 
     return aLatlon_out

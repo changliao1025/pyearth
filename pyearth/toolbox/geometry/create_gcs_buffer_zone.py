@@ -71,9 +71,7 @@ from osgeo import ogr, gdal, osr
 
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
-from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_format_from_filename
-)
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
 from pyearth.toolbox.mesh.point import pypoint
 from pyearth.toolbox.mesh.line import pyline
 from pyearth.toolbox.mesh.polyline import pypolyline
@@ -216,7 +214,9 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
     try:
         dBuffer_distance_in = float(dBuffer_distance_in)
     except (ValueError, TypeError):
-        error_msg = f"Buffer distance must be numeric, got {type(dBuffer_distance_in).__name__}"
+        error_msg = (
+            f"Buffer distance must be numeric, got {type(dBuffer_distance_in).__name__}"
+        )
         logger.error(error_msg)
         raise TypeError(error_msg)
 
@@ -240,10 +240,12 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
 
     # Validate geometry type
     sGeometry_type = pGeometry.GetGeometryName()
-    if sGeometry_type != 'POINT':
-        error_msg = f"Input geometry must be a POINT for buffer creation, got {sGeometry_type}"
+    if sGeometry_type != "POINT":
+        error_msg = (
+            f"Input geometry must be a POINT for buffer creation, got {sGeometry_type}"
+        )
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return None
 
     # Extract coordinates
@@ -257,7 +259,7 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
     if len(aCoords_gcs) != 1:
         error_msg = f"Input geometry must be a single point for buffer creation, got {len(aCoords_gcs)} points"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return None
 
     # Validate coordinate values
@@ -271,12 +273,8 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
         logger.error(error_msg)
         raise ValueError(error_msg)
 
-
     # Create point object
-    point = {
-        'dLongitude_degree': lon,
-        'dLatitude_degree': lat
-    }
+    point = {"dLongitude_degree": lon, "dLatitude_degree": lat}
 
     try:
         pPoint = pypoint(point)
@@ -284,7 +282,6 @@ def create_point_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Optional[
         error_msg = f"Failed to create point: {str(e)}"
         logger.error(error_msg)
         return None
-
 
     # Calculate buffer zone
     try:
@@ -466,7 +463,9 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
     try:
         dBuffer_distance_in = float(dBuffer_distance_in)
     except (ValueError, TypeError):
-        error_msg = f"Buffer distance must be numeric, got {type(dBuffer_distance_in).__name__}"
+        error_msg = (
+            f"Buffer distance must be numeric, got {type(dBuffer_distance_in).__name__}"
+        )
         logger.error(error_msg)
         raise TypeError(error_msg)
 
@@ -486,15 +485,15 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
     if pGeometry is None:
         error_msg = f"Invalid WKT input for polyline buffer creation: {sWkt}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return None
 
     # Validate geometry type
     sGeometry_type = pGeometry.GetGeometryName()
-    if sGeometry_type != 'LINESTRING':
+    if sGeometry_type != "LINESTRING":
         error_msg = f"Input geometry must be a LINESTRING for buffer creation, got {sGeometry_type}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return None
 
     # Extract coordinates
@@ -510,9 +509,8 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
     if nPoint < 2:
         error_msg = f"LINESTRING must have at least 2 points, got {nPoint}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return None
-
 
     # Create point objects from coordinates
     aPoint = []
@@ -521,7 +519,9 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
 
         # Validate coordinate ranges
         if not (-180 <= lon <= 180):
-            error_msg = f"Longitude at point {i} must be in range [-180, 180], got {lon}"
+            error_msg = (
+                f"Longitude at point {i} must be in range [-180, 180], got {lon}"
+            )
             logger.warning(error_msg)
 
         if not (-90 <= lat <= 90):
@@ -529,10 +529,7 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        point = {
-            'dLongitude_degree': lon,
-            'dLatitude_degree': lat
-        }
+        point = {"dLongitude_degree": lon, "dLatitude_degree": lat}
 
         try:
             pPoint = pypoint(point)
@@ -544,7 +541,6 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
 
     nPoint = len(aPoint)
 
-
     # Build edges between consecutive points, skipping duplicates
     aEdge = []
     for i in range(nPoint - 1):
@@ -553,7 +549,9 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
                 pEdge = pyline(aPoint[i], aPoint[i + 1])
                 aEdge.append(pEdge)
             except Exception as e:
-                error_msg = f"Failed to create edge between points {i} and {i+1}: {str(e)}"
+                error_msg = (
+                    f"Failed to create edge between points {i} and {i+1}: {str(e)}"
+                )
                 logger.warning(error_msg)
                 # Continue processing other edges
         else:
@@ -562,9 +560,8 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
     if len(aEdge) == 0:
         error_msg = "No valid edges created (all points may be duplicates)"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return None
-
 
     # Create polyline from edges
     try:
@@ -574,10 +571,11 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
         logger.error(error_msg)
         return None
 
-
     # Calculate buffer zone
     try:
-        sWkt_buffer_polygon, _ , _ = pPolyline.calculate_buffer_zone_polygon(dBuffer_distance_in)
+        sWkt_buffer_polygon, _, _ = pPolyline.calculate_buffer_zone_polygon(
+            dBuffer_distance_in
+        )
     except Exception as e:
         error_msg = f"Failed to calculate buffer zone: {str(e)}"
         logger.error(error_msg)
@@ -592,9 +590,9 @@ def create_polyline_buffer_zone(sWkt: str, dBuffer_distance_in: float) -> Option
 def create_buffer_zone_polygon_file(
     sFilename_polygon_in: str,
     sFilename_polygon_out: str,
-    dThreshold_in: Optional[float] = 1.0E9,
+    dThreshold_in: Optional[float] = 1.0e9,
     dBuffer_distance_in: float = 5000.0,
-    verbose: bool = True
+    verbose: bool = True,
 ) -> None:
     """
     Create geodesic buffer zones for all polygons in a vector file with batch processing.
@@ -802,9 +800,9 @@ def create_buffer_zone_polygon_file(
 
     # Check input file exists
     if not os.path.exists(sFilename_polygon_in):
-        error_msg = f'Input file does not exist: {sFilename_polygon_in}'
+        error_msg = f"Input file does not exist: {sFilename_polygon_in}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         raise FileNotFoundError(error_msg)
 
     # Auto-detect formats from file extensions
@@ -816,120 +814,122 @@ def create_buffer_zone_polygon_file(
         output_driver_name = get_vector_format_from_filename(sFilename_polygon_out)
     except ValueError as e:
         # Fall back to GeoJSON if format is not supported
-        logger.warning(f'Unsupported output format {output_ext}, using GeoJSON: {str(e)}')
-        output_driver_name = 'GeoJSON'
-        output_ext = '.geojson'
+        logger.warning(
+            f"Unsupported output format {output_ext}, using GeoJSON: {str(e)}"
+        )
+        output_driver_name = "GeoJSON"
+        output_ext = ".geojson"
 
     if verbose:
-        print(f'Input format: {input_ext}')
-        print(f'Output format: {output_ext} -> {output_driver_name}')
-        print(f'Buffer distance: {dBuffer_distance_in} meters')
+        print(f"Input format: {input_ext}")
+        print(f"Output format: {output_ext} -> {output_driver_name}")
+        print(f"Buffer distance: {dBuffer_distance_in} meters")
         if dThreshold_in is not None and dThreshold_in > 0:
-            print(f'Area threshold: {dThreshold_in} m²')
+            print(f"Area threshold: {dThreshold_in} m²")
         else:
-            print('Area threshold: None (processing all polygons)')
+            print("Area threshold: None (processing all polygons)")
 
     # Open input dataset (auto-detect format)
     try:
         pDataSource = ogr.Open(sFilename_polygon_in, 0)
     except Exception as e:
-        error_msg = f'Failed to open input file: {str(e)}'
+        error_msg = f"Failed to open input file: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         raise RuntimeError(error_msg)
 
     if pDataSource is None:
-        error_msg = f'Could not open input file: {sFilename_polygon_in}'
+        error_msg = f"Could not open input file: {sFilename_polygon_in}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         raise RuntimeError(error_msg)
 
     # Get layer
     pLayer = pDataSource.GetLayer()
     if pLayer is None:
-        error_msg = 'No layer found in input file'
+        error_msg = "No layer found in input file"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         pDataSource = None
         raise RuntimeError(error_msg)
 
     # Get total feature count for progress tracking
     nTotal_features = pLayer.GetFeatureCount()
     if verbose:
-        print(f'Processing {nTotal_features} features...')
+        print(f"Processing {nTotal_features} features...")
 
     # Get output driver
     pDriver_out = ogr.GetDriverByName(output_driver_name)
     if pDriver_out is None:
-        error_msg = f'Driver {output_driver_name} not available!'
+        error_msg = f"Driver {output_driver_name} not available!"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
-        print(f'Hint: Check GDAL installation or try a different output format')
+        print(f"Error: {error_msg}")
+        print(f"Hint: Check GDAL installation or try a different output format")
         pDataSource = None
         raise RuntimeError(error_msg)
 
     # Prepare output (overwrite if exists)
     if os.path.exists(sFilename_polygon_out):
         if verbose:
-            print(f'Removing existing output file: {sFilename_polygon_out}')
+            print(f"Removing existing output file: {sFilename_polygon_out}")
         try:
             pDriver_out.DeleteDataSource(sFilename_polygon_out)
         except Exception as e:
-            logger.warning(f'Could not delete existing file: {str(e)}')
+            logger.warning(f"Could not delete existing file: {str(e)}")
 
     # Create output datasource
     try:
         pOutDataSource = pDriver_out.CreateDataSource(sFilename_polygon_out)
     except Exception as e:
-        error_msg = f'Failed to create output file: {str(e)}'
+        error_msg = f"Failed to create output file: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         pDataSource = None
         raise RuntimeError(error_msg)
 
     if pOutDataSource is None:
-        error_msg = f'Could not create output file: {sFilename_polygon_out}'
+        error_msg = f"Could not create output file: {sFilename_polygon_out}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         pDataSource = None
         raise RuntimeError(error_msg)
 
     # Handle layer creation based on output format
     try:
-        if output_driver_name == 'ESRI Shapefile':
+        if output_driver_name == "ESRI Shapefile":
             # Shapefile requires simpler layer name
             layer_name = os.path.splitext(os.path.basename(sFilename_polygon_out))[0]
             pOutLayer = pOutDataSource.CreateLayer(layer_name, geom_type=ogr.wkbPolygon)
         else:
             pOutLayer = pOutDataSource.CreateLayer("buffer", geom_type=ogr.wkbPolygon)
     except Exception as e:
-        error_msg = f'Failed to create output layer: {str(e)}'
+        error_msg = f"Failed to create output layer: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         pDataSource = None
         pOutDataSource = None
         raise RuntimeError(error_msg)
 
     if pOutLayer is None:
-        error_msg = 'Could not create output layer'
+        error_msg = "Could not create output layer"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         pDataSource = None
         pOutDataSource = None
         raise RuntimeError(error_msg)
 
     # Add fields for statistics
     try:
-        pFieldDefn = ogr.FieldDefn('id', ogr.OFTInteger)
+        pFieldDefn = ogr.FieldDefn("id", ogr.OFTInteger)
         pOutLayer.CreateField(pFieldDefn)
-        pFieldDefn = ogr.FieldDefn('orig_area', ogr.OFTReal)
+        pFieldDefn = ogr.FieldDefn("orig_area", ogr.OFTReal)
         pOutLayer.CreateField(pFieldDefn)
-        pFieldDefn = ogr.FieldDefn('buffer_dist', ogr.OFTReal)
+        pFieldDefn = ogr.FieldDefn("buffer_dist", ogr.OFTReal)
         pOutLayer.CreateField(pFieldDefn)
     except Exception as e:
-        error_msg = f'Failed to create output fields: {str(e)}'
+        error_msg = f"Failed to create output fields: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         pDataSource = None
         pOutDataSource = None
         raise RuntimeError(error_msg)
@@ -947,11 +947,13 @@ def create_buffer_zone_polygon_file(
     while pFeature:
         nProcessed += 1
         if verbose and nProcessed % 100 == 0:
-            print(f'Processed {nProcessed}/{nTotal_features} features, created {nBuffered} buffers')
+            print(
+                f"Processed {nProcessed}/{nTotal_features} features, created {nBuffered} buffers"
+            )
 
         pGeometry = pFeature.GetGeometryRef()
         if pGeometry is None:
-            logger.warning(f'Feature {nProcessed} has no geometry')
+            logger.warning(f"Feature {nProcessed} has no geometry")
             pFeature = pLayer.GetNextFeature()
             nSkipped_degenerate += 1
             continue
@@ -959,28 +961,34 @@ def create_buffer_zone_polygon_file(
         sGeometry_type = pGeometry.GetGeometryName()
 
         # Handle POLYGON and MULTIPOLYGON
-        if sGeometry_type == 'MULTIPOLYGON':
+        if sGeometry_type == "MULTIPOLYGON":
             try:
                 aaCoords_gcs = get_geometry_coordinates(pGeometry)
                 nPart = len(aaCoords_gcs)
             except Exception as e:
-                logger.warning(f'Failed to extract coordinates from feature {nProcessed}: {str(e)}')
+                logger.warning(
+                    f"Failed to extract coordinates from feature {nProcessed}: {str(e)}"
+                )
                 pFeature = pLayer.GetNextFeature()
                 nFailed += 1
                 continue
-        elif sGeometry_type == 'POLYGON':
+        elif sGeometry_type == "POLYGON":
             try:
                 aCoords_gcs = get_geometry_coordinates(pGeometry)
                 aaCoords_gcs = [aCoords_gcs]
                 nPart = 1
             except Exception as e:
-                logger.warning(f'Failed to extract coordinates from feature {nProcessed}: {str(e)}')
+                logger.warning(
+                    f"Failed to extract coordinates from feature {nProcessed}: {str(e)}"
+                )
                 pFeature = pLayer.GetNextFeature()
                 nFailed += 1
                 continue
         else:
             if verbose:
-                logger.debug(f'Skipping non-polygon geometry type {sGeometry_type} in feature {nProcessed}')
+                logger.debug(
+                    f"Skipping non-polygon geometry type {sGeometry_type} in feature {nProcessed}"
+                )
             pFeature = pLayer.GetNextFeature()
             nSkipped_type += 1
             continue
@@ -989,10 +997,11 @@ def create_buffer_zone_polygon_file(
         for i in range(nPart):
             aCoords_gcs = aaCoords_gcs[i]
 
-
             # Skip degenerate polygons
             if len(aCoords_gcs) < 3:
-                logger.debug(f'Skipping degenerate polygon with {len(aCoords_gcs)} points')
+                logger.debug(
+                    f"Skipping degenerate polygon with {len(aCoords_gcs)} points"
+                )
                 nSkipped_degenerate += 1
                 continue
 
@@ -1003,19 +1012,26 @@ def create_buffer_zone_polygon_file(
                 dArea = calculate_polygon_area(
                     aCoords_gcs[:, 0],
                     aCoords_gcs[:, 1],
-                    iFlag_algorithm=2  # Geodesic algorithm
+                    iFlag_algorithm=2,  # Geodesic algorithm
                 )
             except Exception as e:
-                logger.warning(f'Failed to calculate area for feature {nProcessed} part {i}: {str(e)}')
+                logger.warning(
+                    f"Failed to calculate area for feature {nProcessed} part {i}: {str(e)}"
+                )
                 nFailed += 1
                 continue
 
             # Filter by area threshold
-            if dThreshold_in is not None and dThreshold_in > 0 and dArea < dThreshold_in:
-                logger.debug(f'Skipping polygon with area {dArea:.2f} m² < threshold {dThreshold_in} m²')
+            if (
+                dThreshold_in is not None
+                and dThreshold_in > 0
+                and dArea < dThreshold_in
+            ):
+                logger.debug(
+                    f"Skipping polygon with area {dArea:.2f} m² < threshold {dThreshold_in} m²"
+                )
                 nSkipped_area += 1
                 continue
-
 
             # Remove the last point which is the same as the first point
             nPoint = len(aCoords_gcs) - 1
@@ -1024,17 +1040,19 @@ def create_buffer_zone_polygon_file(
             # Create point objects
             for j in range(nPoint):
                 point = {
-                    'dLongitude_degree': aCoords_gcs[j, 0],
-                    'dLatitude_degree': aCoords_gcs[j, 1]
+                    "dLongitude_degree": aCoords_gcs[j, 0],
+                    "dLatitude_degree": aCoords_gcs[j, 1],
                 }
                 try:
                     pPoint = pypoint(point)
                     aPoint.append(pPoint)
                 except Exception as e:
-                    logger.warning(f'Failed to create point {j} for feature {nProcessed}: {str(e)}')
+                    logger.warning(
+                        f"Failed to create point {j} for feature {nProcessed}: {str(e)}"
+                    )
 
             if len(aPoint) < 3:
-                logger.debug(f'Not enough valid points ({len(aPoint)}) for polygon')
+                logger.debug(f"Not enough valid points ({len(aPoint)}) for polygon")
                 nSkipped_degenerate += 1
                 continue
 
@@ -1048,7 +1066,9 @@ def create_buffer_zone_polygon_file(
                         pEdge = pyline(aPoint[j], aPoint[j + 1])
                         aEdge.append(pEdge)
                     except Exception as e:
-                        logger.warning(f'Failed to create edge {j} for feature {nProcessed}: {str(e)}')
+                        logger.warning(
+                            f"Failed to create edge {j} for feature {nProcessed}: {str(e)}"
+                        )
 
             # Close the polygon
             if nPoint2 > 0:
@@ -1056,10 +1076,12 @@ def create_buffer_zone_polygon_file(
                     pEdge = pyline(aPoint[nPoint2 - 1], aPoint[0])
                     aEdge.append(pEdge)
                 except Exception as e:
-                    logger.warning(f'Failed to close polygon for feature {nProcessed}: {str(e)}')
+                    logger.warning(
+                        f"Failed to close polygon for feature {nProcessed}: {str(e)}"
+                    )
 
                 if len(aEdge) < 3:
-                    logger.debug(f'Not enough valid edges ({len(aEdge)}) for polygon')
+                    logger.debug(f"Not enough valid edges ({len(aEdge)}) for polygon")
                     nSkipped_degenerate += 1
                     continue
 
@@ -1074,22 +1096,30 @@ def create_buffer_zone_polygon_file(
                             # Create output feature
                             outFeature = ogr.Feature(pOutLayer.GetLayerDefn())
                             outFeature.SetGeometry(buffer_geom)
-                            outFeature.SetField('id', feature_id)
-                            outFeature.SetField('orig_area', float(dArea))
-                            outFeature.SetField('buffer_dist', float(dBuffer_distance_in))
+                            outFeature.SetField("id", feature_id)
+                            outFeature.SetField("orig_area", float(dArea))
+                            outFeature.SetField(
+                                "buffer_dist", float(dBuffer_distance_in)
+                            )
                             pOutLayer.CreateFeature(outFeature)
                             outFeature = None  # Free feature
                             nBuffered += 1
                             feature_id += 1
                         else:
-                            logger.warning(f'Failed to create geometry from WKT for feature {nProcessed}')
+                            logger.warning(
+                                f"Failed to create geometry from WKT for feature {nProcessed}"
+                            )
                             nFailed += 1
                     else:
-                        logger.warning(f'Buffer calculation returned None for feature {nProcessed}')
+                        logger.warning(
+                            f"Buffer calculation returned None for feature {nProcessed}"
+                        )
                         nFailed += 1
                 except Exception as e:
                     if verbose:
-                        logger.warning(f'Failed to create buffer for polygon part {i} in feature {nProcessed}: {str(e)}')
+                        logger.warning(
+                            f"Failed to create buffer for polygon part {i} in feature {nProcessed}: {str(e)}"
+                        )
                     nFailed += 1
 
         pFeature = pLayer.GetNextFeature()
@@ -1101,21 +1131,19 @@ def create_buffer_zone_polygon_file(
     # Report final statistics
     if verbose:
         print(f'\n{"="*60}')
-        print(f'Processing complete!')
+        print(f"Processing complete!")
         print(f'{"="*60}')
-        print(f'Total features processed: {nProcessed}')
-        print(f'Buffer zones created: {nBuffered}')
-        print(f'Skipped (below area threshold): {nSkipped_area}')
-        print(f'Skipped (degenerate geometry): {nSkipped_degenerate}')
-        print(f'Skipped (wrong geometry type): {nSkipped_type}')
-        print(f'Failed (errors): {nFailed}')
-        print(f'Output saved to: {sFilename_polygon_out}')
+        print(f"Total features processed: {nProcessed}")
+        print(f"Buffer zones created: {nBuffered}")
+        print(f"Skipped (below area threshold): {nSkipped_area}")
+        print(f"Skipped (degenerate geometry): {nSkipped_degenerate}")
+        print(f"Skipped (wrong geometry type): {nSkipped_type}")
+        print(f"Failed (errors): {nFailed}")
+        print(f"Output saved to: {sFilename_polygon_out}")
         print(f'{"="*60}')
 
-    logger.info(f'Buffer zone processing complete: {nBuffered} buffers created from {nProcessed} features')
+    logger.info(
+        f"Buffer zone processing complete: {nBuffered} buffers created from {nProcessed} features"
+    )
 
     return
-
-
-
-

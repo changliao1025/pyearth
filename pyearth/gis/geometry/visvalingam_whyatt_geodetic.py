@@ -103,6 +103,7 @@ from typing import List, Tuple
 
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
+
 def visvalingam_whyatt_geodetic(aCoords_gcs, tolerance):
     """
     Simplify a polyline or polygon using the Visvalingam-Whyatt algorithm with geodesic areas.
@@ -354,7 +355,7 @@ def remove(s, i):
     the space. This is acceptable for the V-W algorithm since we track actual
     length separately and the duplicated inf value doesn't affect argmin.
     """
-    s[i:-1] = s[i+1:]
+    s[i:-1] = s[i + 1 :]
 
 
 class VWSimplifier(object):
@@ -426,9 +427,9 @@ class VWSimplifier(object):
 
         # Calculate initial effective area for each interior vertex
         # Endpoints (i=0 and i=nmax-1) remain at infinity (never removed)
-        for i in range(1, nmax-1):
-            aLon = array([pts[i-1][0], pts[i][0], pts[i+1][0]])
-            aLat = array([pts[i-1][1], pts[i][1], pts[i+1][1]])
+        for i in range(1, nmax - 1):
+            aLon = array([pts[i - 1][0], pts[i][0], pts[i + 1][0]])
+            aLat = array([pts[i - 1][1], pts[i][1], pts[i + 1][1]])
             # Use geodesic area calculation (iFlag_algorithm=2)
             real_areas[i] = calculate_polygon_area(aLon, aLat, iFlag_algorithm=2)
 
@@ -460,8 +461,20 @@ class VWSimplifier(object):
 
             # Update area of vertex to the right of removed vertex
             try:
-                aLon = array([pts[i[min_vert-1]][0], pts[i[min_vert]][0], pts[i[min_vert+1]][0]])
-                aLat = array([pts[i[min_vert-1]][1], pts[i[min_vert]][1], pts[i[min_vert+1]][1]])
+                aLon = array(
+                    [
+                        pts[i[min_vert - 1]][0],
+                        pts[i[min_vert]][0],
+                        pts[i[min_vert + 1]][0],
+                    ]
+                )
+                aLat = array(
+                    [
+                        pts[i[min_vert - 1]][1],
+                        pts[i[min_vert]][1],
+                        pts[i[min_vert + 1]][1],
+                    ]
+                )
                 right_area = calculate_polygon_area(aLon, aLat, iFlag_algorithm=2)
             except IndexError:
                 # Trying to update endpoint - skip
@@ -483,15 +496,27 @@ class VWSimplifier(object):
             # Update area of vertex to the left of removed vertex
             if min_vert > 1:
                 # Can't use try/except here because index 0-1=-1 is valid in Python
-                aLon = array([pts[i[min_vert-2]][0], pts[i[min_vert-1]][0], pts[i[min_vert]][0]])
-                aLat = array([pts[i[min_vert-2]][1], pts[i[min_vert-1]][1], pts[i[min_vert]][1]])
+                aLon = array(
+                    [
+                        pts[i[min_vert - 2]][0],
+                        pts[i[min_vert - 1]][0],
+                        pts[i[min_vert]][0],
+                    ]
+                )
+                aLat = array(
+                    [
+                        pts[i[min_vert - 2]][1],
+                        pts[i[min_vert - 1]][1],
+                        pts[i[min_vert]][1],
+                    ]
+                )
                 left_area = calculate_polygon_area(aLon, aLat, iFlag_algorithm=2)
                 if left_area <= this_area:
                     # Same monotonic increase logic as above
                     left_area = this_area
                     skip = min_vert - 1
-                real_areas[i[min_vert-1]] = left_area
-                areas[min_vert-1] = left_area
+                real_areas[i[min_vert - 1]] = left_area
+                areas[min_vert - 1] = left_area
 
             # Find next minimum vertex
             # Use skip if we already know which vertex is minimum (optimization)
@@ -563,7 +588,3 @@ class VWSimplifier(object):
             raise ValueError("Ratio must be 0<r<=1")
         else:
             return self.from_number(r * len(self.thresholds))
-
-
-
-

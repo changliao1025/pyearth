@@ -73,7 +73,7 @@ from osgeo import ogr, osr, gdal
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_filename,
-    get_vector_format_from_filename
+    get_vector_format_from_filename,
 )
 from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
 
@@ -84,7 +84,7 @@ logger = logging.getLogger(__name__)
 def convert_vector_format(
     sFilename_vector_in: str,
     sFilename_vector_out: str,
-    target_epsg: Optional[int] = None
+    target_epsg: Optional[int] = None,
 ) -> bool:
     """
     Convert vector dataset between formats with conditional coordinate transformation.
@@ -258,10 +258,10 @@ def convert_vector_format(
 
     # Remove existing output file
     if os.path.exists(sFilename_vector_out):
-        if format_out == 'ESRI Shapefile':
+        if format_out == "ESRI Shapefile":
             # Remove all shapefile component files
             base_name = os.path.splitext(sFilename_vector_out)[0]
-            for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.shp.xml']:
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg", ".shp.xml"]:
                 component_file = base_name + ext
                 if os.path.exists(component_file):
                     os.remove(component_file)
@@ -302,7 +302,7 @@ def convert_vector_format(
         pSrs_out.ImportFromEPSG(target_epsg)
         logger.info(f"Target CRS: EPSG:{target_epsg} (explicit)")
         iFlag_force_transform = 1
-    elif format_out.lower() in ['geojson', 'json']:
+    elif format_out.lower() in ["geojson", "json"]:
         # GeoJSON format - always use WGS84
         pSrs_out = osr.SpatialReference()
         pSrs_out.ImportFromEPSG(4326)
@@ -370,7 +370,9 @@ def convert_vector_format(
         iGeomType_out = get_output_geometry_type(iGeomType)
         sGeomType_out = ogr.GeometryTypeToName(iGeomType_out)
         if iGeomType_out != iGeomType:
-            logger.info(f"Output geometry type: {sGeomType_out} (normalized from {sGeomType})")
+            logger.info(
+                f"Output geometry type: {sGeomType_out} (normalized from {sGeomType})"
+            )
         else:
             logger.info(f"Output geometry type: {sGeomType_out}")
     except ValueError as e:
@@ -394,7 +396,7 @@ def convert_vector_format(
         logger.info("Input geometry is 2D")
 
     # Create output layer with the appropriate geometry type
-    pLayer_out = pDataset_out.CreateLayer('layer', pSrs_out, geom_type=iGeomType_out)
+    pLayer_out = pDataset_out.CreateLayer("layer", pSrs_out, geom_type=iGeomType_out)
 
     if pLayer_out is None:
         logger.error("Could not create output layer")
@@ -459,6 +461,3 @@ def convert_vector_format(
     logger.info(f"Output: {sFilename_vector_out} ({nProcessed} features)")
 
     return True
-
-
-

@@ -79,7 +79,10 @@ import os
 from osgeo import osr, ogr
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
 
-def filter_vector_by_attribute(sFilename_input, sFilename_output, sAttribute_name, dValue_filter):
+
+def filter_vector_by_attribute(
+    sFilename_input, sFilename_output, sAttribute_name, dValue_filter
+):
     """
     Filter vector dataset features by attribute value and save to a new file.
 
@@ -250,7 +253,9 @@ def filter_vector_by_attribute(sFilename_input, sFilename_output, sAttribute_nam
     # Layer name: 'filtered' (arbitrary, doesn't affect file access)
     # Geometry type: wkbPolygon (assumes input contains polygon features)
     # SRS: Inherited from input to maintain coordinate system consistency
-    pLayer_out = pDataSource_out.CreateLayer('filtered', geom_type=ogr.wkbPolygon, srs=pSpatialRef)
+    pLayer_out = pDataSource_out.CreateLayer(
+        "filtered", geom_type=ogr.wkbPolygon, srs=pSpatialRef
+    )
 
     # Copy all field definitions from input layer to output layer
     # This preserves the attribute table schema (field names, types, widths)
@@ -279,4 +284,4 @@ def filter_vector_by_attribute(sFilename_input, sFilename_output, sAttribute_nam
     pDataSource_in = pDataSource_out = None
 
     # Print confirmation message indicating successful completion
-    print('filter_vector_by_attribute is done', sFilename_output)
+    print("filter_vector_by_attribute is done", sFilename_output)

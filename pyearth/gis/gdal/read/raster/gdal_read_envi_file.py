@@ -4,7 +4,9 @@ import numpy as np
 from osgeo import gdal, osr
 
 
-def gdal_read_envi_file(sFilename_in: str) -> Tuple[Any, float, float, float, int, int, Optional[float], Tuple[float, ...], str]:
+def gdal_read_envi_file(
+    sFilename_in: str,
+) -> Tuple[Any, float, float, float, int, int, Optional[float], Tuple[float, ...], str]:
     """Read a single-band ENVI raster and return data with metadata.
 
     Parameters
@@ -38,7 +40,9 @@ def gdal_read_envi_file(sFilename_in: str) -> Tuple[Any, float, float, float, in
     try:
         geotransform = dataset.GetGeoTransform()
         if not geotransform:
-            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
+            raise ValueError(
+                f"Raster {sFilename_in} does not provide geotransform metadata."
+            )
 
         origin_x = geotransform[0]
         origin_y = geotransform[3]
@@ -58,8 +62,9 @@ def gdal_read_envi_file(sFilename_in: str) -> Tuple[Any, float, float, float, in
 
         projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
         if not projection_wkt:
-            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
-
+            raise ValueError(
+                f"Raster {sFilename_in} does not define spatial reference metadata."
+            )
 
         return (
             data,
@@ -77,7 +82,20 @@ def gdal_read_envi_file(sFilename_in: str) -> Tuple[Any, float, float, float, in
         dataset = None
 
 
-def gdal_read_envi_file_multiple_band(sFilename_in: str) -> Tuple[np.ndarray, float, float, float, int, int, int, Optional[float], Tuple[float, ...], str]:
+def gdal_read_envi_file_multiple_band(
+    sFilename_in: str,
+) -> Tuple[
+    np.ndarray,
+    float,
+    float,
+    float,
+    int,
+    int,
+    int,
+    Optional[float],
+    Tuple[float, ...],
+    str,
+]:
     """Read a multi-band ENVI raster and return stacked data with metadata.
 
     Parameters
@@ -111,7 +129,9 @@ def gdal_read_envi_file_multiple_band(sFilename_in: str) -> Tuple[np.ndarray, fl
     try:
         geotransform = dataset.GetGeoTransform()
         if not geotransform:
-            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
+            raise ValueError(
+                f"Raster {sFilename_in} does not provide geotransform metadata."
+            )
 
         origin_x = geotransform[0]
         origin_y = geotransform[3]
@@ -143,15 +163,17 @@ def gdal_read_envi_file_multiple_band(sFilename_in: str) -> Tuple[np.ndarray, fl
 
             band_data = band.ReadAsArray(0, 0, ncolumn, nrow)
             if band_data is None:
-                raise RuntimeError(f"Failed to read raster data from band {i_band + 1} of {sFilename_in}.")
+                raise RuntimeError(
+                    f"Failed to read raster data from band {i_band + 1} of {sFilename_in}."
+                )
 
             data[i_band, :, :] = band_data
 
         projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
         if not projection_wkt:
-            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
-
-
+            raise ValueError(
+                f"Raster {sFilename_in} does not define spatial reference metadata."
+            )
 
         return (
             data,

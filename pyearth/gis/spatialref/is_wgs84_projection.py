@@ -1,5 +1,6 @@
 from osgeo import osr
 
+
 def is_wgs84_projection(projection_wkt: str) -> bool:
     _SPATIAL_REF_WGS84 = osr.SpatialReference()
     _SPATIAL_REF_WGS84.ImportFromEPSG(4326)

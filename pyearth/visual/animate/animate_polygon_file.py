@@ -15,6 +15,7 @@ pProjection = ccrs.PlateCarree()  # for latlon data only
 iFigwidth_default = 8
 iFigheight_default = 6
 
+
 def animate_vector_polygon_data(
     sFilename_mesh_in,
     sFilename_animation_json_in,
@@ -23,8 +24,9 @@ def animate_vector_polygon_data(
     iFigwidth_in=None,
     iFigheight_in=None,
     aExtent_in=None,
-    sTitle_in = None,
-    pProjection_map_in=None):
+    sTitle_in=None,
+    pProjection_map_in=None,
+):
 
     if iFigwidth_in is None:
         iFigwidth_in = iFigwidth_default
@@ -46,7 +48,7 @@ def animate_vector_polygon_data(
     aLongitude = list()
     aLatitude = list()
     aAVertex = list()
-    #get domain range
+    # get domain range
     pDriver = ogr.GetDriverByName("GeoJSON")
     pDataset = pDriver.Open(sFilename_mesh_in, gdal.GA_ReadOnly)
     pLayer = pDataset.GetLayer(0)
@@ -107,7 +109,7 @@ def animate_vector_polygon_data(
     cmap = cm.get_cmap("Spectral")
     if sTitle_in is not None:
         # setting a title for the plot
-        #sText = "Priority flood in HexWatershed"
+        # sText = "Priority flood in HexWatershed"
         ax.text(
             0.5,
             1.08,
@@ -120,20 +122,20 @@ def animate_vector_polygon_data(
         )
     cmap_reversed = cmap.reversed()
 
-    #get dataset
+    # get dataset
     with open(sFilename_animation_json_in) as json_file:
         aCell_animation = json.load(json_file)
         ncell_animation = len(aCell_animation)
 
     for i in range(ncell_animation):
         pCell_animation = aCell_animation[i]
-        aData.append( float(pCell_animation["dElevation"]))
+        aData.append(float(pCell_animation["dElevation"]))
         aData_raw.append(float(pCell_animation["dElevation_raw"]))
         aLongitude.append(float(pCell_animation["dLongitude_center_degree"]))
         aLatitude.append(float(pCell_animation["dLatitude_center_degree"]))
         aAVertex.append(pCell_animation["vVertex"])
 
-    #convert to numpy array
+    # convert to numpy array
     aData = np.array(aData)
     aData_raw = np.array(aData_raw)
     aLongitude = np.array(aLongitude)
@@ -169,13 +171,13 @@ def animate_vector_polygon_data(
 
     # trasform data
     norm = plt.Normalize(dData_min, dData_max)
-    sm = plt.cm.ScalarMappable(cmap = cmap_reversed, norm=norm)
+    sm = plt.cm.ScalarMappable(cmap=cmap_reversed, norm=norm)
     sm.set_array(aData)
     fig.canvas.draw()
     # Section 2
-    ax_pos = ax.get_position() # get the original position
-    #use this ax to set the colorbar ax position
-    ax_cb = fig.add_axes([ax_pos.x1+0.06, ax_pos.y0, 0.02, ax_pos.height])
+    ax_pos = ax.get_position()  # get the original position
+    # use this ax to set the colorbar ax position
+    ax_cb = fig.add_axes([ax_pos.x1 + 0.06, ax_pos.y0, 0.02, ax_pos.height])
     cb = fig.colorbar(sm, cax=ax_cb)
     sUnit = r"Unit: m"
     cb.ax.get_yaxis().set_ticks_position("right")
@@ -184,18 +186,23 @@ def animate_vector_polygon_data(
     cb.ax.get_yaxis().set_label_position("left")
     cb.ax.tick_params(labelsize=6)
 
-    #calculate ahead
+    # calculate ahead
     aColor_index = (aData - dData_min) / (dData_max - dData_min)
     aColors = [cmap_reversed(aColor_index[i]) for i in range(ncell_animation)]
 
     # Precompute polygon locations and add them to the axes
     aPolygon = [
         mpatches.Polygon(
-        np.array([[vertex["dLongitude_degree"], vertex["dLatitude_degree"]] for vertex in aVertex]),
-        closed=True,
-        transform=ccrs.Geodetic(),
-        facecolor='none',  # Initially invisible
-        edgecolor="none",  # Optional: no border
+            np.array(
+                [
+                    [vertex["dLongitude_degree"], vertex["dLatitude_degree"]]
+                    for vertex in aVertex
+                ]
+            ),
+            closed=True,
+            transform=ccrs.Geodetic(),
+            facecolor="none",  # Initially invisible
+            edgecolor="none",  # Optional: no border
         )
         for aVertex in aAVertex
     ]
@@ -207,10 +214,22 @@ def animate_vector_polygon_data(
     # Initialize artists
     pArtist0 = ax.add_patch(aPolygon[0])
     pArtist1 = ax.text(
-        0.0, 0.0, "", verticalalignment="center", horizontalalignment="right", transform=ax.transAxes, fontsize=12
+        0.0,
+        0.0,
+        "",
+        verticalalignment="center",
+        horizontalalignment="right",
+        transform=ax.transAxes,
+        fontsize=12,
     )
     pArtist2 = ax.text(
-        0.0, 0.0, "", verticalalignment="center", horizontalalignment="left", transform=ax.transAxes, fontsize=12
+        0.0,
+        0.0,
+        "",
+        verticalalignment="center",
+        horizontalalignment="left",
+        transform=ax.transAxes,
+        fontsize=12,
     )
 
     def animate(i):
@@ -228,25 +247,31 @@ def animate_vector_polygon_data(
 
         return pArtist0, pArtist1, pArtist2
 
-    #remove if already exist
-    #check output file extension
+    # remove if already exist
+    # check output file extension
     if os.path.exists(sFilename_animation_out):
         os.remove(sFilename_animation_out)
-    if sFilename_animation_out.endswith('.gif'):
-        plt.rcParams[
-            "animation.convert_path"
-        ] = "/share/apps/ImageMagick/7.1.0-52/bin/convert"
-        writer = 'imagemagick'
-        anim = animation.FuncAnimation(fig, animate, frames=ncell_animation, interval=400, blit=False)
-        anim.save(sFilename_animation_out, writer= writer)
+    if sFilename_animation_out.endswith(".gif"):
+        plt.rcParams["animation.convert_path"] = (
+            "/share/apps/ImageMagick/7.1.0-52/bin/convert"
+        )
+        writer = "imagemagick"
+        anim = animation.FuncAnimation(
+            fig, animate, frames=ncell_animation, interval=400, blit=False
+        )
+        anim.save(sFilename_animation_out, writer=writer)
 
-    else: #use video instead
-        plt.rcParams[
-            "animation.ffmpeg_path"
-        ] = '/people/liao313/.conda/envs/pyflowline/bin/ffmpeg' #'/share/apps/ffmpeg/6.1.1/bin/ffmpeg
-        #Writer = animation.writers['ffmpeg']
-        #writer = Writer(fps=5, metadata=dict(artist='Chang Liao'), bitrate=-1)
-        writer=animation.FFMpegWriter(fps=5, metadata=dict(artist='Chang Liao'), bitrate=-1)
-        anim = animation.FuncAnimation(fig, animate, frames=ncell_animation, interval=1, blit=True)
+    else:  # use video instead
+        plt.rcParams["animation.ffmpeg_path"] = (
+            "/people/liao313/.conda/envs/pyflowline/bin/ffmpeg"  #'/share/apps/ffmpeg/6.1.1/bin/ffmpeg
+        )
+        # Writer = animation.writers['ffmpeg']
+        # writer = Writer(fps=5, metadata=dict(artist='Chang Liao'), bitrate=-1)
+        writer = animation.FFMpegWriter(
+            fps=5, metadata=dict(artist="Chang Liao"), bitrate=-1
+        )
+        anim = animation.FuncAnimation(
+            fig, animate, frames=ncell_animation, interval=1, blit=True
+        )
         anim.save(sFilename_animation_out, writer=writer)
     return

@@ -63,8 +63,9 @@ import cartopy.feature as cfeature
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_filename,
-    get_vector_format_from_filename
+    get_vector_format_from_filename,
 )
+
 # Configure module logger
 logger = logging.getLogger(__name__)
 
@@ -73,7 +74,7 @@ logger = logging.getLogger(__name__)
 
 def create_land_ocean_vector_mask_naturalearth(
     sFilename_out: str,
-    sResolution_coastal: Literal['10m', '50m', '110m'] = '10m',
+    sResolution_coastal: Literal["10m", "50m", "110m"] = "10m",
     sWorkspace_out: Optional[str] = None,
     sFormat: Optional[str] = None,
     iFlag_exclude_antarctica: bool = True,
@@ -406,15 +407,13 @@ def create_land_ocean_vector_mask_naturalearth(
 
     # Validate output filename
     if not isinstance(sFilename_out, str):
-        raise TypeError(
-            f"sFilename_out must be a string, got {type(sFilename_out)}"
-        )
+        raise TypeError(f"sFilename_out must be a string, got {type(sFilename_out)}")
 
     if not sFilename_out or sFilename_out.isspace():
         raise ValueError("sFilename_out cannot be empty")
 
     # Validate resolution
-    valid_resolutions = ['10m', '50m', '110m']
+    valid_resolutions = ["10m", "50m", "110m"]
     if sResolution_coastal not in valid_resolutions:
         raise ValueError(
             f"sResolution_coastal must be one of {valid_resolutions}, "
@@ -472,7 +471,9 @@ def create_land_ocean_vector_mask_naturalearth(
                 )
     except Exception as e:
         # Fallback to getting driver by name
-        logger.debug(f"get_vector_driver_from_extension failed: {e}, using GetDriverByName")
+        logger.debug(
+            f"get_vector_driver_from_extension failed: {e}, using GetDriverByName"
+        )
         pDriver_out = ogr.GetDriverByName(sFormat)
         if pDriver_out is None:
             raise RuntimeError(
@@ -481,7 +482,7 @@ def create_land_ocean_vector_mask_naturalearth(
             )
 
     # Keep GeoJSON driver for intermediate files
-    pDriver_geojson = ogr.GetDriverByName('GeoJSON')
+    pDriver_geojson = ogr.GetDriverByName("GeoJSON")
     if pDriver_geojson is None:
         raise RuntimeError(
             "GeoJSON driver not available. Required for intermediate files."
@@ -499,7 +500,7 @@ def create_land_ocean_vector_mask_naturalearth(
     try:
         # Create a land feature from Natural Earth
         land_feature = cfeature.NaturalEarthFeature(
-            'physical', 'land', sResolution_coastal
+            "physical", "land", sResolution_coastal
         )
         land_geometries = list(land_feature.geometries())
     except Exception as e:
@@ -520,10 +521,10 @@ def create_land_ocean_vector_mask_naturalearth(
         logger.debug(f"Removing existing output file: {sFilename_out}")
 
         # For shapefiles, we need to delete all associated files
-        if sFormat == 'ESRI Shapefile':
+        if sFormat == "ESRI Shapefile":
             base_name = os.path.splitext(sFilename_out)[0]
             # Delete all shapefile components
-            for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.qpj', '.sbn', '.sbx']:
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg", ".qpj", ".sbn", ".sbx"]:
                 file_to_delete = base_name + ext
                 if os.path.exists(file_to_delete):
                     os.remove(file_to_delete)
@@ -538,9 +539,7 @@ def create_land_ocean_vector_mask_naturalearth(
             os.makedirs(output_dir, exist_ok=True)
             logger.debug(f"Created output directory: {output_dir}")
         except OSError as e:
-            raise OSError(
-                f"Cannot create output directory '{output_dir}': {e}"
-            ) from e
+            raise OSError(f"Cannot create output directory '{output_dir}': {e}") from e
 
     # Create output dataset
     try:
@@ -557,9 +556,7 @@ def create_land_ocean_vector_mask_naturalearth(
     pSpatialRef.ImportFromEPSG(4326)  # WGS84
 
     pLayer_out = pDataset_out.CreateLayer(
-        'land_ocean_mask',
-        srs=pSpatialRef,
-        geom_type=ogr.wkbPolygon
+        "land_ocean_mask", srs=pSpatialRef, geom_type=ogr.wkbPolygon
     )
 
     if pLayer_out is None:
@@ -567,10 +564,10 @@ def create_land_ocean_vector_mask_naturalearth(
         raise RuntimeError("Failed to create output layer")
 
     # Add fields to the output layer
-    pField_id = ogr.FieldDefn('id', ogr.OFTInteger)
+    pField_id = ogr.FieldDefn("id", ogr.OFTInteger)
     pLayer_out.CreateField(pField_id)
 
-    pField_part_type = ogr.FieldDefn('part_type', ogr.OFTString)
+    pField_part_type = ogr.FieldDefn("part_type", ogr.OFTString)
     pField_part_type.SetWidth(20)  # Set field width
     pLayer_out.CreateField(pField_part_type)
 
@@ -625,11 +622,14 @@ def create_land_ocean_vector_mask_naturalearth(
         # Handle POLYGON geometries
         # ====================================================================
 
-        if sGeometry_name == 'POLYGON':
+        if sGeometry_name == "POLYGON":
             n_polygons += 1
 
             # Check Antarctica filter
-            if iFlag_exclude_antarctica and envelope[2] < dLatitude_threshold_antarctica:
+            if (
+                iFlag_exclude_antarctica
+                and envelope[2] < dLatitude_threshold_antarctica
+            ):
                 n_excluded_antarctica += 1
                 logger.debug(
                     f"Excluding polygon {idx} (min_lat={envelope[2]:.2f} < "
@@ -640,8 +640,8 @@ def create_land_ocean_vector_mask_naturalearth(
             # Add to output layer
             pFeature_out = ogr.Feature(pLayer_out.GetLayerDefn())
             pFeature_out.SetGeometry(pGeometry_mesh)
-            pFeature_out.SetField('id', iCount)
-            pFeature_out.SetField('part_type', 'polygon')
+            pFeature_out.SetField("id", iCount)
+            pFeature_out.SetField("part_type", "polygon")
 
             if pLayer_out.CreateFeature(pFeature_out) != 0:
                 logger.warning(f"Failed to create feature for polygon {idx}")
@@ -651,7 +651,7 @@ def create_land_ocean_vector_mask_naturalearth(
             # Save individual part if workspace specified
             if sWorkspace_out is not None:
                 sFilename_part = os.path.join(
-                    sWorkspace_out, f'land_geometry_{iCount}.geojson'
+                    sWorkspace_out, f"land_geometry_{iCount}.geojson"
                 )
 
                 try:
@@ -660,7 +660,7 @@ def create_land_ocean_vector_mask_naturalearth(
 
                     pDataset_part = pDriver_geojson.CreateDataSource(sFilename_part)
                     pLayer_part = pDataset_part.CreateLayer(
-                        'part', geom_type=ogr.wkbPolygon
+                        "part", geom_type=ogr.wkbPolygon
                     )
                     pFeature_part = ogr.Feature(pLayer_part.GetLayerDefn())
                     pFeature_part.SetGeometry(pGeometry_mesh)
@@ -668,9 +668,7 @@ def create_land_ocean_vector_mask_naturalearth(
                     pFeature_part.Destroy()
                     pDataset_part.Destroy()
                 except Exception as e:
-                    logger.warning(
-                        f"Failed to save individual part {iCount}: {e}"
-                    )
+                    logger.warning(f"Failed to save individual part {iCount}: {e}")
 
             iCount += 1
 
@@ -678,13 +676,11 @@ def create_land_ocean_vector_mask_naturalearth(
         # Handle MULTIPOLYGON geometries
         # ====================================================================
 
-        elif sGeometry_name == 'MULTIPOLYGON':
+        elif sGeometry_name == "MULTIPOLYGON":
             n_multipolygons += 1
             nPart1 = pGeometry_mesh.GetGeometryCount()
 
-            logger.debug(
-                f"Processing multipolygon {idx} with {nPart1} parts"
-            )
+            logger.debug(f"Processing multipolygon {idx} with {nPart1} parts")
 
             for iPart in range(nPart1):
                 pGeometry_part = pGeometry_mesh.GetGeometryRef(iPart)
@@ -699,7 +695,10 @@ def create_land_ocean_vector_mask_naturalearth(
                 envelope_part = pGeometry_part.GetEnvelope()
 
                 # Check Antarctica filter
-                if iFlag_exclude_antarctica and envelope_part[2] < dLatitude_threshold_antarctica:
+                if (
+                    iFlag_exclude_antarctica
+                    and envelope_part[2] < dLatitude_threshold_antarctica
+                ):
                     n_excluded_antarctica += 1
                     logger.debug(
                         f"Excluding multipolygon part {iPart}/{nPart1} "
@@ -710,8 +709,8 @@ def create_land_ocean_vector_mask_naturalearth(
                 # Add to output layer
                 pFeature_out = ogr.Feature(pLayer_out.GetLayerDefn())
                 pFeature_out.SetGeometry(pGeometry_part)
-                pFeature_out.SetField('id', iCount)
-                pFeature_out.SetField('part_type', 'multipolygon_part')
+                pFeature_out.SetField("id", iCount)
+                pFeature_out.SetField("part_type", "multipolygon_part")
 
                 if pLayer_out.CreateFeature(pFeature_out) != 0:
                     logger.warning(
@@ -723,7 +722,7 @@ def create_land_ocean_vector_mask_naturalearth(
                 # Save individual part if workspace specified
                 if sWorkspace_out is not None:
                     sFilename_part = os.path.join(
-                        sWorkspace_out, f'land_geometry_{iCount}.geojson'
+                        sWorkspace_out, f"land_geometry_{iCount}.geojson"
                     )
 
                     try:
@@ -732,7 +731,7 @@ def create_land_ocean_vector_mask_naturalearth(
 
                         pDataset_part = pDriver_geojson.CreateDataSource(sFilename_part)
                         pLayer_part = pDataset_part.CreateLayer(
-                            'part', geom_type=ogr.wkbPolygon
+                            "part", geom_type=ogr.wkbPolygon
                         )
                         pFeature_part = ogr.Feature(pLayer_part.GetLayerDefn())
                         pFeature_part.SetGeometry(pGeometry_part)
@@ -740,9 +739,7 @@ def create_land_ocean_vector_mask_naturalearth(
                         pFeature_part.Destroy()
                         pDataset_part.Destroy()
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to save individual part {iCount}: {e}"
-                        )
+                        logger.warning(f"Failed to save individual part {iCount}: {e}")
 
                 iCount += 1
 
@@ -778,9 +775,6 @@ def create_land_ocean_vector_mask_naturalearth(
         logger.info(f"  Individual parts saved to: {sWorkspace_out}")
 
     if iCount == 0:
-        logger.warning(
-            "No features were created! Check Antarctica filter settings."
-        )
+        logger.warning("No features were created! Check Antarctica filter settings.")
 
     return iCount
-

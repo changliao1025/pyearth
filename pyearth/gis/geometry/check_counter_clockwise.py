@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Union
 
+
 def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     x, y = coords[:, 0], coords[:, 1]
 
@@ -11,6 +12,7 @@ def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
 
     signed_area = 0.5 * np.sum(x * y_rolled - x_rolled * y)
     return signed_area
+
 
 def check_counter_clockwise(coords: np.ndarray) -> bool:
     """Check if polygon coordinates are in counter-clockwise order.
@@ -25,7 +27,10 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     bool
         True if vertices are in counter-clockwise order, False otherwise.
     """
-    from pyearth.gis.geometry.international_date_line_utility import check_cross_international_date_line_polygon, unwrap_longitudes
+    from pyearth.gis.geometry.international_date_line_utility import (
+        check_cross_international_date_line_polygon,
+        unwrap_longitudes,
+    )
 
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
@@ -43,6 +48,7 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
         # Standard case: calculate signed area directly
         signed_area = calculate_signed_area_shoelace(coords)
     return signed_area > 0
+
 
 def get_polygon_orientation(coords: np.ndarray) -> str:
     """Get the orientation of polygon coordinates as a string.

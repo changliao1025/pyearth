@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def slerp(n1, n2, t):
     """
     Spherical linear interpolation between two n-vectors.
@@ -29,9 +30,10 @@ def slerp(n1, n2, t):
 
     return n1 * factor1 + n2 * factor2
 
+
 def split_polyline_by_length(aFlowline_in, dDistance):
 
-    aPolyline_out=list()
+    aPolyline_out = list()
     nPolyline = len(aFlowline_in)
     for i in range(nPolyline):
         pPolyline = aFlowline_in[i]
@@ -66,7 +68,7 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6):
     if dLength_in <= 0:
         raise ValueError("Length threshold must be positive")
 
-    if not hasattr(pLine_in, 'dLength'):
+    if not hasattr(pLine_in, "dLength"):
         raise AttributeError("Line must have dLength attribute")
 
     dLength_total = pLine_in.dLength
@@ -77,7 +79,6 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6):
 
     # Calculate optimal number of segments
     nSegments = int(np.ceil(dLength_total / dLength_in))
-
 
     pPoint_start = pLine_in.pPoint_start
     pPoint_end = pLine_in.pPoint_end
@@ -110,8 +111,12 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6):
         if pPoint_start_seg == pPoint_end_seg:
             # Skip degenerate segments or use a small offset
             print(f"Warning: Segment {i} has identical start and end points")
-            print(f"  Start: ({pPoint_start_seg.dLongitude_degree}, {pPoint_start_seg.dLatitude_degree})")
-            print(f"  End: ({pPoint_end_seg.dLongitude_degree}, {pPoint_end_seg.dLatitude_degree})")
+            print(
+                f"  Start: ({pPoint_start_seg.dLongitude_degree}, {pPoint_start_seg.dLatitude_degree})"
+            )
+            print(
+                f"  End: ({pPoint_end_seg.dLongitude_degree}, {pPoint_end_seg.dLatitude_degree})"
+            )
             print(f"  t1={t1}, t2={t2}, nSegments={nSegments}")
             continue
 
@@ -120,4 +125,3 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6):
         aLine_out.append(pLine)
 
     return aLine_out
-

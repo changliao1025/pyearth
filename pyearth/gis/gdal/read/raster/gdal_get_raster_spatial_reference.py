@@ -1,6 +1,7 @@
 import os
 from osgeo import gdal
 
+
 def gdal_get_raster_spatial_reference_wkt(sFilename_in: str) -> str:
     """Return the spatial reference of a raster as a WKT string.
 
@@ -46,6 +47,8 @@ def gdal_get_raster_spatial_reference_wkt(sFilename_in: str) -> str:
         if wkt_fallback:
             return wkt_fallback
 
-        raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
+        raise ValueError(
+            f"Raster {sFilename_in} does not define spatial reference metadata."
+        )
     finally:
         dataset = None

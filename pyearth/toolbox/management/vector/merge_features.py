@@ -10,11 +10,17 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
     print_supported_vector_formats,
     get_vector_driver_from_format,
-    get_vector_driver_from_filename
+    get_vector_driver_from_filename,
 )
 
 
-def create_spatial_index(geometries: List[Optional[Any]], verbose: bool = False) -> Tuple[Union[Any, Dict[int, Tuple[float, float, float, float]]], Optional[Dict[int, Tuple[float, float, float, float]]], bool]:
+def create_spatial_index(
+    geometries: List[Optional[Any]], verbose: bool = False
+) -> Tuple[
+    Union[Any, Dict[int, Tuple[float, float, float, float]]],
+    Optional[Dict[int, Tuple[float, float, float, float]]],
+    bool,
+]:
     """
     Create a spatial index for geometries to speed up intersection queries.
 
@@ -53,7 +59,12 @@ def create_spatial_index(geometries: List[Optional[Any]], verbose: bool = False)
 
     return spatial_index, geometry_map
 
-def geometries_bbox_overlap(bbox1: Tuple[float, float, float, float], bbox2: Tuple[float, float, float, float], tolerance: float = 1e-10) -> bool:
+
+def geometries_bbox_overlap(
+    bbox1: Tuple[float, float, float, float],
+    bbox2: Tuple[float, float, float, float],
+    tolerance: float = 1e-10,
+) -> bool:
     """
     Check if two bounding boxes overlap with optional tolerance.
 
@@ -77,12 +88,17 @@ def geometries_bbox_overlap(bbox1: Tuple[float, float, float, float], bbox2: Tup
     they overlap on both X and Y axes. Touching edges are considered overlapping
     when tolerance is applied.
     """
-    return not (bbox1[1] + tolerance < bbox2[0] or  # bbox1.maxX < bbox2.minX
-                bbox2[1] + tolerance < bbox1[0] or  # bbox2.maxX < bbox1.minX
-                bbox1[3] + tolerance < bbox2[2] or  # bbox1.maxY < bbox2.minY
-                bbox2[3] + tolerance < bbox1[2])    # bbox2.maxY < bbox1.minY
+    return not (
+        bbox1[1] + tolerance < bbox2[0]  # bbox1.maxX < bbox2.minX
+        or bbox2[1] + tolerance < bbox1[0]  # bbox2.maxX < bbox1.minX
+        or bbox1[3] + tolerance < bbox2[2]  # bbox1.maxY < bbox2.minY
+        or bbox2[3] + tolerance < bbox1[2]
+    )  # bbox2.maxY < bbox1.minY
 
-def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose: bool = False) -> List[List[Any]]:
+
+def find_connectivity_groups_optimized(
+    aGeometries: List[Optional[Any]], verbose: bool = False
+) -> List[List[Any]]:
     """
     Find groups of connected geometries using optimized spatial indexing.
 
@@ -120,7 +136,7 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
     >>> print(f"Found {len(groups)} connected groups")
     """
     if verbose:
-        print(f'Finding connectivity groups for {len(aGeometries)} geometries...')
+        print(f"Finding connectivity groups for {len(aGeometries)} geometries...")
 
     start_time = time.time()
 
@@ -153,7 +169,12 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
             # Get candidates using rtree spatial index
             current_envelope = current_geom.GetEnvelope()
             # RTree expects (minX, minY, maxX, maxY)
-            query_bbox = (current_envelope[0], current_envelope[2], current_envelope[1], current_envelope[3])
+            query_bbox = (
+                current_envelope[0],
+                current_envelope[2],
+                current_envelope[1],
+                current_envelope[3],
+            )
 
             # Add small tolerance for near-touching geometries
             tolerance = 1e-8
@@ -161,7 +182,7 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
                 query_bbox[0] - tolerance,
                 query_bbox[1] - tolerance,
                 query_bbox[2] + tolerance,
-                query_bbox[3] + tolerance
+                query_bbox[3] + tolerance,
             )
 
             candidate_indices = list(spatial_index.intersection(expanded_bbox))
@@ -184,20 +205,27 @@ def find_connectivity_groups_optimized(aGeometries: List[Optional[Any]], verbose
                         queue.append(j)
                 except Exception as e:
                     if verbose:
-                        print(f'Warning: Failed to check geometry relationship: {str(e)}')
+                        print(
+                            f"Warning: Failed to check geometry relationship: {str(e)}"
+                        )
                     continue
 
         groups.append(current_group)
 
         if verbose and len(groups) % 100 == 0:
             elapsed = time.time() - start_time
-            print(f'Processed {len(processed)}/{len(aGeometries)} geometries, found {len(groups)} groups (elapsed: {elapsed:.1f}s)')
+            print(
+                f"Processed {len(processed)}/{len(aGeometries)} geometries, found {len(groups)} groups (elapsed: {elapsed:.1f}s)"
+            )
 
     if verbose:
         elapsed = time.time() - start_time
-        print(f'Connectivity grouping completed in {elapsed:.1f}s using RTree, found {len(groups)} groups')
+        print(
+            f"Connectivity grouping completed in {elapsed:.1f}s using RTree, found {len(groups)} groups"
+        )
 
     return groups
+
 
 def cascaded_union(geometries: List[Any], verbose: bool = False) -> Optional[Any]:
     """
@@ -267,12 +295,18 @@ def cascaded_union(geometries: List[Any], verbose: bool = False) -> Optional[Any
             result = result.Union(geometries[i])
         except Exception as e:
             if verbose:
-                print(f'Warning: Failed to union geometry {i}: {str(e)}')
+                print(f"Warning: Failed to union geometry {i}: {str(e)}")
             continue
 
     return result
 
-def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, iFlag_force: bool = False) -> None:
+
+def merge_features(
+    sFilename_in: str,
+    sFilename_out: str,
+    verbose: bool = True,
+    iFlag_force: bool = False,
+) -> None:
     """
     Merge features in a vector file.
     By default, it merges based on connectivity (touching or intersecting geometries).
@@ -367,24 +401,24 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
         print(f"Output file: {sFilename_out}")
 
     if not os.path.exists(sFilename_in):
-        print(f'Error: Input file {sFilename_in} does not exist!')
+        print(f"Error: Input file {sFilename_in} does not exist!")
         return
 
     input_format = get_vector_format_from_filename(sFilename_in)
     output_format = get_vector_format_from_filename(sFilename_out)
     if verbose:
-        print(f'Input format: {input_format}')
-        print(f'Output format: {output_format}')
+        print(f"Input format: {input_format}")
+        print(f"Output format: {output_format}")
 
     pDataset_in = ogr.Open(sFilename_in)
     if pDataset_in is None:
-        print(f'Error: Could not open input file {sFilename_in}')
+        print(f"Error: Could not open input file {sFilename_in}")
         return
 
     # Get the first layer in the file
     pLayer_in = pDataset_in.GetLayer(0)
     if pLayer_in is None:
-        print('Error: No layer found in input file')
+        print("Error: No layer found in input file")
         pDataset_in = None
         return
 
@@ -394,17 +428,17 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
     pSpatial_reference = pLayer_in.GetSpatialRef()
 
     if nFeature == 0:
-        print('No features found in the input file')
+        print("No features found in the input file")
         pDataset_in = None
         return
     else:
         if verbose:
-            print(f'Number of features found in the input file: {nFeature}')
+            print(f"Number of features found in the input file: {nFeature}")
 
     # Create a new dataset using the output filename
     pDriver = get_vector_driver_from_format(output_format)
     if pDriver is None:
-        print(f'Error: Driver {output_format} not available!')
+        print(f"Error: Driver {output_format} not available!")
         if verbose:
             print_supported_vector_formats()
         pDataset_in = None
@@ -412,74 +446,84 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
 
     if os.path.exists(sFilename_out):
         if verbose:
-            print(f'Removing existing output file: {sFilename_out}')
+            print(f"Removing existing output file: {sFilename_out}")
         try:
             pDriver.DeleteDataSource(sFilename_out)
-            print(f'Successfully removed existing output file: {sFilename_out}')
+            print(f"Successfully removed existing output file: {sFilename_out}")
         except Exception as e:
             os.remove(sFilename_out)
 
     pDataset_out = pDriver.CreateDataSource(sFilename_out)
     if pDataset_out is None:
-        print(f'Error: Could not create output file {sFilename_out}')
+        print(f"Error: Could not create output file {sFilename_out}")
         pDataset_in = None
         return
 
-    #obtain the geotype of first layer and
+    # obtain the geotype of first layer and
     iGeomType = pLayer_in.GetGeomType()
-    #obtain the geotype of first geometry
+    # obtain the geotype of first geometry
     pLayer_in.ResetReading()
     # Obtain the first feature
     pFeature_first = pLayer_in.GetNextFeature()
     if pFeature_first is None:
-        print('Error: No features found in input file')
+        print("Error: No features found in input file")
         pDataset_in = None
         pDataset_out = None
         return
 
     pGeometry = pFeature_first.GetGeometryRef()
     if pGeometry is None:
-        print('Error: No geometry found in first feature')
+        print("Error: No geometry found in first feature")
         pDataset_in = None
         pDataset_out = None
         return
 
     pGeometry.FlattenTo2D()
-    #get the geometry type
+    # get the geometry type
     iGeomType = pGeometry.GetGeometryType()
-    #get geometry type name
+    # get geometry type name
     sGeomType = ogr.GeometryTypeToName(iGeomType)
 
     if verbose:
-        print(f'Geometry type: {sGeomType}')
+        print(f"Geometry type: {sGeomType}")
 
     # Store all geometries for analysis
     aGeometries = [pGeometry.Clone()]
 
-    #check whether it is a multi-geometry
-    if iGeomType == ogr.wkbMultiPoint or iGeomType == ogr.wkbMultiLineString or iGeomType == ogr.wkbMultiPolygon:
-        #get the number of geometries
+    # check whether it is a multi-geometry
+    if (
+        iGeomType == ogr.wkbMultiPoint
+        or iGeomType == ogr.wkbMultiLineString
+        or iGeomType == ogr.wkbMultiPolygon
+    ):
+        # get the number of geometries
         nGeom = pGeometry.GetGeometryCount()
-        #get the first geometry
+        # get the first geometry
         pGeometry_single = pGeometry.GetGeometryRef(0)
         iGeomType = pGeometry_single.GetGeometryType()
 
-    layer_name = 'merged'
+    layer_name = "merged"
 
     if iGeomType == ogr.wkbPoint:
-        pLayer_out = pDataset_out.CreateLayer(layer_name, pSpatial_reference, geom_type=ogr.wkbPoint)
+        pLayer_out = pDataset_out.CreateLayer(
+            layer_name, pSpatial_reference, geom_type=ogr.wkbPoint
+        )
     elif iGeomType == ogr.wkbLineString:
-        pLayer_out = pDataset_out.CreateLayer(layer_name, pSpatial_reference, geom_type=ogr.wkbLineString)
+        pLayer_out = pDataset_out.CreateLayer(
+            layer_name, pSpatial_reference, geom_type=ogr.wkbLineString
+        )
     elif iGeomType == ogr.wkbPolygon:
-        pLayer_out = pDataset_out.CreateLayer(layer_name, pSpatial_reference, geom_type=ogr.wkbPolygon)
+        pLayer_out = pDataset_out.CreateLayer(
+            layer_name, pSpatial_reference, geom_type=ogr.wkbPolygon
+        )
     else:
-        print(f'Error: Geometry type {sGeomType} not supported')
+        print(f"Error: Geometry type {sGeomType} not supported")
         pDataset_in = None
         pDataset_out = None
         return
 
     if pLayer_out is None:
-        print('Error: Could not create output layer')
+        print("Error: Could not create output layer")
         pDataset_in = None
         pDataset_out = None
         return
@@ -493,7 +537,9 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
         pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
         result = pLayer_out.CreateField(pFieldDefn)
         if result != ogr.OGRERR_NONE:
-            print(f"Warning: Failed to create field {pFieldDefn.GetName()}, error code: {result}")
+            print(
+                f"Warning: Failed to create field {pFieldDefn.GetName()}, error code: {result}"
+            )
 
     # Store first feature's attributes
     first_feature_attributes = {}
@@ -503,7 +549,7 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
         first_feature_attributes[field_name] = field_value
 
     if verbose:
-        print(f'Starting geometry collection for {nFeature} features...')
+        print(f"Starting geometry collection for {nFeature} features...")
 
     # Collect all geometries first
     collection_start = time.time()
@@ -514,25 +560,29 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
     while pFeature:
         nProcessed += 1
         if verbose and nProcessed % 1000 == 0:
-            print(f'Collected {nProcessed}/{nFeature} features')
+            print(f"Collected {nProcessed}/{nFeature} features")
 
         pGeometry = pFeature.GetGeometryRef()
         if pGeometry is not None:
             pGeometry.FlattenTo2D()
-            #check geotype again
+            # check geotype again
             iGeomType_new = pGeometry.GetGeometryType()
             if iGeomType_new == iGeomType:
                 # Clone geometry before adding to collection
                 geom_to_add = pGeometry.Clone()
                 aGeometries.append(geom_to_add)
             else:
-                #check whether the geometry type is a multi-geometry
-                if iGeomType_new == ogr.wkbMultiPoint or iGeomType_new == ogr.wkbMultiLineString or iGeomType_new == ogr.wkbMultiPolygon:
-                    #get the number of geometries
+                # check whether the geometry type is a multi-geometry
+                if (
+                    iGeomType_new == ogr.wkbMultiPoint
+                    or iGeomType_new == ogr.wkbMultiLineString
+                    or iGeomType_new == ogr.wkbMultiPolygon
+                ):
+                    # get the number of geometries
                     nGeom = pGeometry.GetGeometryCount()
                     for j in range(nGeom):
                         pGeometry_single = pGeometry.GetGeometryRef(j)
-                        #check again its geometry type
+                        # check again its geometry type
                         iGeomType_single = pGeometry_single.GetGeometryType()
                         if iGeomType_single == iGeomType:
                             # Clone geometry before adding to collection
@@ -540,26 +590,32 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
                             aGeometries.append(geom_to_add)
                         else:
                             if verbose:
-                                print(f'Warning: Geometry type {ogr.GeometryTypeToName(iGeomType_single)} not supported in feature {nProcessed}')
+                                print(
+                                    f"Warning: Geometry type {ogr.GeometryTypeToName(iGeomType_single)} not supported in feature {nProcessed}"
+                                )
                 else:
                     if verbose:
-                        print(f'Warning: Geometry type {ogr.GeometryTypeToName(iGeomType_new)} not supported in feature {nProcessed}')
+                        print(
+                            f"Warning: Geometry type {ogr.GeometryTypeToName(iGeomType_new)} not supported in feature {nProcessed}"
+                        )
 
         pFeature = pLayer_in.GetNextFeature()
 
     if verbose:
-        print(f'Collected {len(aGeometries)} geometries, now grouping by connectivity...')
+        print(
+            f"Collected {len(aGeometries)} geometries, now grouping by connectivity..."
+        )
 
     if iFlag_force:
         if verbose:
-            print('iFlag_force is True, merging all features into a single group.')
-        aGeometry_groups = [aGeometries] # All geometries in one group
+            print("iFlag_force is True, merging all features into a single group.")
+        aGeometry_groups = [aGeometries]  # All geometries in one group
     else:
         # Group geometries by connectivity using optimized algorithm
         aGeometry_groups = find_connectivity_groups_optimized(aGeometries, verbose)
 
     if verbose:
-        print(f'Found {len(aGeometry_groups)} connected groups of geometries')
+        print(f"Found {len(aGeometry_groups)} connected groups of geometries")
 
     # Create output features for each group
     nOutput_features = 0
@@ -570,13 +626,17 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
         else:
             # Multiple geometries, union them using optimized cascaded union
             if verbose and len(geometry_group) > 5:
-                print(f'Performing cascaded union for group {group_idx} with {len(geometry_group)} geometries')
+                print(
+                    f"Performing cascaded union for group {group_idx} with {len(geometry_group)} geometries"
+                )
 
             pGeometry_result = cascaded_union(geometry_group, verbose)
 
             if pGeometry_result is None:
                 if verbose:
-                    print(f'Warning: Failed to union geometries in group {group_idx}, skipping')
+                    print(
+                        f"Warning: Failed to union geometries in group {group_idx}, skipping"
+                    )
                 continue
 
         # Skip if geometry is None after union
@@ -593,11 +653,13 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
                 pFeature_out.SetField(field_name, field_value)
             except Exception as e:
                 if verbose:
-                    print(f'Warning: Could not set field {field_name}: {str(e)}')
+                    print(f"Warning: Could not set field {field_name}: {str(e)}")
 
         result = pLayer_out.CreateFeature(pFeature_out)
         if result != ogr.OGRERR_NONE:
-            print(f'Error: Failed to create output feature {group_idx}, error code: {result}')
+            print(
+                f"Error: Failed to create output feature {group_idx}, error code: {result}"
+            )
         else:
             nOutput_features += 1
 
@@ -612,12 +674,11 @@ def merge_features(sFilename_in: str, sFilename_out: str, verbose: bool = True, 
 
     if verbose:
         print("=== Merge operation completed ===")
-        print(f'Total processing time: {total_time:.2f} seconds')
-        print(f'Successfully processed {nProcessed} input features')
-        print(f'Created {nOutput_features} output features based on connectivity')
-        print(f'Found {len(aGeometry_groups)} connected groups')
-        print(f'Average processing rate: {nProcessed/total_time:.1f} features/second')
-        print(f'Output saved to: {sFilename_out}')
+        print(f"Total processing time: {total_time:.2f} seconds")
+        print(f"Successfully processed {nProcessed} input features")
+        print(f"Created {nOutput_features} output features based on connectivity")
+        print(f"Found {len(aGeometry_groups)} connected groups")
+        print(f"Average processing rate: {nProcessed/total_time:.1f} features/second")
+        print(f"Output saved to: {sFilename_out}")
 
     return
-

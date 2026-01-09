@@ -39,17 +39,15 @@ References
 .. [2] Williams, E. "Aviation Formulary V1.47"
        http://www.edwilliams.org/avform147.htm
 """
+
 import numpy as np
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
     convert_longitude_latitude_to_sphere_3d,
-    convert_sphere_3d_to_longitude_latitude
+    convert_sphere_3d_to_longitude_latitude,
 )
 
 
-def project_point_onto_plane(
-    p: np.ndarray,
-    normal: np.ndarray
-) -> np.ndarray:
+def project_point_onto_plane(p: np.ndarray, normal: np.ndarray) -> np.ndarray:
     """Project a 3D point onto a plane defined by its normal vector.
 
     Given a point and a plane (defined by a normal vector passing through
@@ -130,7 +128,7 @@ def calculate_intersect_on_great_circle(
     dLatitude2_in: float,
     dLongitude3_in: float,
     dLatitude3_in: float,
-    iFlag_radian: bool = False
+    iFlag_radian: bool = False,
 ) -> tuple:
     """Calculate the closest point on a great circle arc to a query point.
 
@@ -231,11 +229,7 @@ def calculate_intersect_on_great_circle(
 
 
 def find_great_circle_intersection_with_meridian(
-    lon1: float,
-    lat1: float,
-    lon2: float,
-    lat2: float,
-    target_lon: float
+    lon1: float, lat1: float, lon2: float, lat2: float, target_lon: float
 ) -> tuple:
     """Find the latitude on a great circle arc at a specified longitude.
 
@@ -362,6 +356,3 @@ def find_great_circle_intersection_with_meridian(
     lat_deg = np.degrees(lat_rad)
 
     return (target_lon, float(lat_deg))
-
-
-

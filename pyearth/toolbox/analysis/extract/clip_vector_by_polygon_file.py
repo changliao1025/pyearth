@@ -1,6 +1,7 @@
 """
 Clip vector files by polygon with support for multiple vector formats.
 """
+
 import os
 import logging
 from typing import Optional, List, Dict
@@ -21,7 +22,7 @@ def clip_vector_by_polygon_file(
     sFilename_vector_in: str,
     sFilename_polygon_in: str,
     sFilename_vector_out: str,
-    iFlag_endorheic: int = 0
+    iFlag_endorheic: int = 0,
 ) -> None:
     """
     Clip a vector file by a polygon file with support for multiple vector formats.
@@ -81,7 +82,9 @@ def clip_vector_by_polygon_file(
         # Open input vector file
         pDataset_source = ogr.Open(sFilename_vector_in)
         if pDataset_source is None:
-            raise RuntimeError(f"Could not open input vector file: {sFilename_vector_in}")
+            raise RuntimeError(
+                f"Could not open input vector file: {sFilename_vector_in}"
+            )
 
         pLayer_source = pDataset_source.GetLayer()
         if pLayer_source is None:
@@ -96,12 +99,16 @@ def clip_vector_by_polygon_file(
             logger.warning("Input vector has no spatial reference")
         else:
             pProjection_target = pSpatial_reference_target.ExportToWkt()
-            logger.info(f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}")
+            logger.info(
+                f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}"
+            )
 
         # Open clip polygon file
         pDataset_clip = ogr.Open(sFilename_polygon_in)
         if pDataset_clip is None:
-            raise RuntimeError(f"Could not open clip polygon file: {sFilename_polygon_in}")
+            raise RuntimeError(
+                f"Could not open clip polygon file: {sFilename_polygon_in}"
+            )
 
         pLayer_clip = pDataset_clip.GetLayer()
         if pLayer_clip is None:
@@ -110,7 +117,9 @@ def clip_vector_by_polygon_file(
         pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
         if pSpatial_reference_clip is not None:
             pProjection_clip = pSpatial_reference_clip.ExportToWkt()
-            logger.info(f"Clip polygon projection: {pSpatial_reference_clip.GetName() if pSpatial_reference_clip else 'Unknown'}")
+            logger.info(
+                f"Clip polygon projection: {pSpatial_reference_clip.GetName() if pSpatial_reference_clip else 'Unknown'}"
+            )
         else:
             pProjection_clip = None
             logger.warning("Clip polygon has no spatial reference")
@@ -126,12 +135,18 @@ def clip_vector_by_polygon_file(
 
         if nPolygon > 1:
             if iFlag_endorheic == 1:
-                logger.info("Multiple polygons detected, but endorheic flag is set - skipping merge")
+                logger.info(
+                    "Multiple polygons detected, but endorheic flag is set - skipping merge"
+                )
             else:
                 pDataset_clip = None
                 pLayer_clip = None
-                logger.info("Multiple polygons detected, merging into single feature...")
-                sFilename_clip_new = sFilename_polygon_in.replace(sExtension_clip, '_merged' + sExtension_clip)
+                logger.info(
+                    "Multiple polygons detected, merging into single feature..."
+                )
+                sFilename_clip_new = sFilename_polygon_in.replace(
+                    sExtension_clip, "_merged" + sExtension_clip
+                )
                 merge_features(sFilename_polygon_in, sFilename_clip_new)
                 sFilename_polygon_in = sFilename_clip_new
 
@@ -143,7 +158,11 @@ def clip_vector_by_polygon_file(
                     pProjection_clip = pSpatial_reference_clip.ExportToWkt()
 
         # Handle projection mismatch
-        if pProjection_target is not None and pProjection_clip is not None and pProjection_target != pProjection_clip:
+        if (
+            pProjection_target is not None
+            and pProjection_clip is not None
+            and pProjection_target != pProjection_clip
+        ):
             logger.info("Projection mismatch detected, reprojecting clip polygon...")
             pDataset_clip = None
             pLayer_clip = None
@@ -151,9 +170,13 @@ def clip_vector_by_polygon_file(
             sFolder = os.path.dirname(sFilename_polygon_in)
             sName = os.path.basename(sFilename_polygon_in)
             sName_no_extension = os.path.splitext(sName)[0]
-            sFilename_clip_out = os.path.join(sFolder, sName_no_extension + '_transformed' + sExtension_clip)
+            sFilename_clip_out = os.path.join(
+                sFolder, sName_no_extension + "_transformed" + sExtension_clip
+            )
 
-            reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)
+            reproject_vector(
+                sFilename_polygon_in, sFilename_clip_out, pProjection_target
+            )
             pDataset_clip = ogr.Open(sFilename_clip_out)
             pLayer_clip = pDataset_clip.GetLayer(0)
             logger.info("Clip polygon reprojected")
@@ -199,7 +222,9 @@ def clip_vector_by_polygon_file(
             raise ValueError(str(e))
 
         # Create output layer
-        pLayer_clipped = pDataset_clipped.CreateLayer('layer', pSpatial_reference_target, geom_type=output_geom_type)
+        pLayer_clipped = pDataset_clipped.CreateLayer(
+            "layer", pSpatial_reference_target, geom_type=output_geom_type
+        )
         if pLayer_clipped is None:
             raise RuntimeError("Could not create output layer")
 
@@ -226,7 +251,9 @@ def clip_vector_by_polygon_file(
 
                 # Copy attributes
                 for i in range(pFeature.GetFieldCount()):
-                    pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
+                    pFeature_clipped.SetField(
+                        pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i)
+                    )
 
                 pLayer_clipped.CreateFeature(pFeature_clipped)
                 clipped_count += 1
@@ -249,7 +276,9 @@ def clip_vector_by_polygon_file(
 
                 # Copy attributes
                 for i in range(pFeature.GetFieldCount()):
-                    pFeature_clipped.SetField(pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i))
+                    pFeature_clipped.SetField(
+                        pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i)
+                    )
 
                 pLayer_clipped.CreateFeature(pFeature_clipped)
                 clipped_count += 1
@@ -263,24 +292,22 @@ def clip_vector_by_polygon_file(
 
     finally:
         # Clean up resources
-        if 'pDataset_source' in locals():
+        if "pDataset_source" in locals():
             pDataset_source = None
-        if 'pDataset_clip' in locals():
+        if "pDataset_clip" in locals():
             pDataset_clip = None
-        if 'pDataset_clipped' in locals():
+        if "pDataset_clipped" in locals():
             pDataset_clipped = None
-        if 'pSpatial_reference_clip' in locals():
+        if "pSpatial_reference_clip" in locals():
             pSpatial_reference_clip = None
-        if 'pSpatial_reference_target' in locals():
+        if "pSpatial_reference_target" in locals():
             pSpatial_reference_target = None
 
     return
 
 
 def clip_vector_by_polygon_files(
-    sFilename_vector_in: str,
-    aFilename_polygon_in: List[str],
-    sFilename_vector_out: str
+    sFilename_vector_in: str, aFilename_polygon_in: List[str], sFilename_vector_out: str
 ) -> None:
     """
     Clip a vector file by multiple polygon files (union of all polygons).
@@ -304,7 +331,7 @@ def clip_vector_by_polygon_files(
         - Merges multiple polygons within each file if necessary
         - Uses spatial filtering for performance optimization
     """
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info(f"Starting multi-polygon vector clipping")
     logger.info(f"Input vector: {sFilename_vector_in}")
     logger.info(f"Number of polygon files: {len(aFilename_polygon_in)}")
@@ -313,7 +340,9 @@ def clip_vector_by_polygon_files(
     try:
         # Validate input files
         if not os.path.exists(sFilename_vector_in):
-            raise FileNotFoundError(f"Input vector file not found: {sFilename_vector_in}")
+            raise FileNotFoundError(
+                f"Input vector file not found: {sFilename_vector_in}"
+            )
 
         for polygon_file in aFilename_polygon_in:
             if not os.path.exists(polygon_file):
@@ -322,9 +351,13 @@ def clip_vector_by_polygon_files(
         # Open input vector dataset
         pDataset_source = ogr.Open(sFilename_vector_in)
         if pDataset_source is None:
-            raise RuntimeError(f"Could not open input vector file: {sFilename_vector_in}")
+            raise RuntimeError(
+                f"Could not open input vector file: {sFilename_vector_in}"
+            )
 
-        logger.info(f"Opened input vector dataset with {pDataset_source.GetLayerCount()} layer(s)")
+        logger.info(
+            f"Opened input vector dataset with {pDataset_source.GetLayerCount()} layer(s)"
+        )
 
         # Remove output file if it exists
         if os.path.exists(sFilename_vector_out):
@@ -367,9 +400,7 @@ def clip_vector_by_polygon_files(
 
         # Create output layer
         pLayer_clipped = pDataset_clipped.CreateLayer(
-            'layer',
-            pSpatial_reference_target,
-            geom_type=iGeomType_output
+            "layer", pSpatial_reference_target, geom_type=iGeomType_output
         )
         if pLayer_clipped is None:
             raise RuntimeError("Could not create output layer")
@@ -385,12 +416,16 @@ def clip_vector_by_polygon_files(
         total_clipped = 0
 
         for idx, sFilename_polygon_in in enumerate(aFilename_polygon_in, 1):
-            logger.info(f"Processing polygon file {idx}/{len(aFilename_polygon_in)}: {sFilename_polygon_in}")
+            logger.info(
+                f"Processing polygon file {idx}/{len(aFilename_polygon_in)}: {sFilename_polygon_in}"
+            )
 
             # Open polygon dataset
             pDataset_clip = ogr.Open(sFilename_polygon_in)
             if pDataset_clip is None:
-                logger.warning(f"Could not open polygon file, skipping: {sFilename_polygon_in}")
+                logger.warning(
+                    f"Could not open polygon file, skipping: {sFilename_polygon_in}"
+                )
                 continue
 
             pLayer_clip = pDataset_clip.GetLayer()
@@ -407,8 +442,7 @@ def clip_vector_by_polygon_files(
                 logger.info("Multiple polygons detected, merging into single polygon")
                 sExtension_clip = os.path.splitext(sFilename_polygon_in)[1]
                 sFilename_clip_merged = sFilename_polygon_in.replace(
-                    sExtension_clip,
-                    '_merged' + sExtension_clip
+                    sExtension_clip, "_merged" + sExtension_clip
                 )
 
                 # Close current dataset before merging
@@ -416,7 +450,10 @@ def clip_vector_by_polygon_files(
                 pLayer_clip = None
 
                 # Merge features
-                from pyearth.toolbox.management.vector.merge_features import merge_features
+                from pyearth.toolbox.management.vector.merge_features import (
+                    merge_features,
+                )
+
                 merge_features(sFilename_polygon_in, sFilename_clip_merged)
 
                 # Reopen merged file
@@ -441,12 +478,14 @@ def clip_vector_by_polygon_files(
                 sName_no_ext = os.path.splitext(sName)[0]
                 sExtension_clip = os.path.splitext(sFilename_polygon_in)[1]
                 sFilename_clip_final = os.path.join(
-                    sFolder,
-                    f"{sName_no_ext}_transformed{sExtension_clip}"
+                    sFolder, f"{sName_no_ext}_transformed{sExtension_clip}"
                 )
 
                 from pyearth.toolbox.management.vector.reproject import reproject_vector
-                reproject_vector(sFilename_polygon_in, sFilename_clip_final, pProjection_target)
+
+                reproject_vector(
+                    sFilename_polygon_in, sFilename_clip_final, pProjection_target
+                )
 
                 # Reopen reprojected file
                 pDataset_clip = ogr.Open(sFilename_clip_final)
@@ -470,7 +509,9 @@ def clip_vector_by_polygon_files(
             pEnvelope = pLayer_clip.GetExtent()
             minx, maxx, miny, maxy = pEnvelope
             pLayer_source.SetSpatialFilterRect(minx, miny, maxx, maxy)
-            logger.info(f"Applied spatial filter: [{minx:.2f}, {miny:.2f}, {maxx:.2f}, {maxy:.2f}]")
+            logger.info(
+                f"Applied spatial filter: [{minx:.2f}, {miny:.2f}, {maxx:.2f}, {maxy:.2f}]"
+            )
 
             # Process features
             clipped_count = 0
@@ -490,7 +531,7 @@ def clip_vector_by_polygon_files(
                     for i in range(pFeature.GetFieldCount()):
                         pFeature_clipped.SetField(
                             pFeature.GetFieldDefnRef(i).GetNameRef(),
-                            pFeature.GetField(i)
+                            pFeature.GetField(i),
                         )
 
                     pLayer_clipped.CreateFeature(pFeature_clipped)
@@ -512,7 +553,7 @@ def clip_vector_by_polygon_files(
                     for i in range(pFeature.GetFieldCount()):
                         pFeature_clipped.SetField(
                             pFeature.GetFieldDefnRef(i).GetNameRef(),
-                            pFeature.GetField(i)
+                            pFeature.GetField(i),
                         )
 
                     pLayer_clipped.CreateFeature(pFeature_clipped)
@@ -526,7 +567,9 @@ def clip_vector_by_polygon_files(
             pLayer_clip = None
 
         logger.info(f"Total features clipped: {total_clipped}")
-        logger.info(f"Multi-polygon clipping completed successfully: {sFilename_vector_out}")
+        logger.info(
+            f"Multi-polygon clipping completed successfully: {sFilename_vector_out}"
+        )
 
     except Exception as e:
         logger.error(f"Error during multi-polygon vector clipping: {e}")
@@ -534,15 +577,15 @@ def clip_vector_by_polygon_files(
 
     finally:
         # Clean up resources
-        if 'pDataset_source' in locals():
+        if "pDataset_source" in locals():
             pDataset_source = None
-        if 'pDataset_clip' in locals():
+        if "pDataset_clip" in locals():
             pDataset_clip = None
-        if 'pDataset_clipped' in locals():
+        if "pDataset_clipped" in locals():
             pDataset_clipped = None
-        if 'pSpatial_reference_clip' in locals():
+        if "pSpatial_reference_clip" in locals():
             pSpatial_reference_clip = None
-        if 'pSpatial_reference_target' in locals():
+        if "pSpatial_reference_target" in locals():
             pSpatial_reference_target = None
 
     return

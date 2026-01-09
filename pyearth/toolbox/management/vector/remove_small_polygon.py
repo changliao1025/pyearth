@@ -11,8 +11,9 @@ from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
     print_supported_vector_formats,
-    get_vector_driver_from_format
+    get_vector_driver_from_format,
 )
+
 
 def remove_small_polygon(
     sFilename_vector_in: str,
@@ -20,7 +21,7 @@ def remove_small_polygon(
     dThreshold_in: Union[float, int],
     iFlag_algorithm: int = 2,
     verbose: bool = True,
-    progress_interval: int = 1000
+    progress_interval: int = 1000,
 ) -> None:
     """
     Remove small polygons from a vector file based on area threshold.
@@ -109,7 +110,9 @@ def remove_small_polygon(
     try:
         dThreshold = float(dThreshold_in)
     except (TypeError, ValueError) as e:
-        raise ValueError(f"Threshold must be a numeric value, got {type(dThreshold_in)}: {e}")
+        raise ValueError(
+            f"Threshold must be a numeric value, got {type(dThreshold_in)}: {e}"
+        )
 
     if dThreshold <= 0:
         raise ValueError(f"Threshold must be positive, got {dThreshold}")
@@ -136,14 +139,18 @@ def remove_small_polygon(
 
     if pDriver_out is None:
         available_formats = print_supported_vector_formats()
-        raise ValueError(f"Output format '{sFormat_out}' is not supported. "
-                        f"Available formats: {available_formats}")
+        raise ValueError(
+            f"Output format '{sFormat_out}' is not supported. "
+            f"Available formats: {available_formats}"
+        )
 
     if verbose:
         logging.info(f"Input format: {sFormat_in}")
         logging.info(f"Output format: {sFormat_out}")
         logging.info(f"Area threshold: {dThreshold} m²")
-        logging.info(f"Area calculation algorithm: {'Geodesic' if iFlag_algorithm == 2 else 'Planar'}")
+        logging.info(
+            f"Area calculation algorithm: {'Geodesic' if iFlag_algorithm == 2 else 'Planar'}"
+        )
 
     # Set up spatial reference (WGS84 for geodesic calculations)
     try:
@@ -168,7 +175,9 @@ def remove_small_polygon(
         # Get feature count for progress tracking
         nTotal_features = pLayer_in.GetFeatureCount()
         if nTotal_features < 0:
-            logging.warning("Could not determine total feature count, progress reporting may be inaccurate")
+            logging.warning(
+                "Could not determine total feature count, progress reporting may be inaccurate"
+            )
 
         if verbose:
             logging.info(f"Processing {nTotal_features} features...")
@@ -177,19 +186,23 @@ def remove_small_polygon(
         try:
             pDataSource_out = pDriver_out.CreateDataSource(sFilename_vector_out)
             if pDataSource_out is None:
-                raise RuntimeError(f"Could not create output file: {sFilename_vector_out}")
+                raise RuntimeError(
+                    f"Could not create output file: {sFilename_vector_out}"
+                )
         except Exception as e:
             raise RuntimeError(f"GDAL error creating output file: {e}")
 
         try:
             # Create output layer
-            pLayer_out = pDataSource_out.CreateLayer('filtered_polygons', pSrs, ogr.wkbPolygon)
+            pLayer_out = pDataSource_out.CreateLayer(
+                "filtered_polygons", pSrs, ogr.wkbPolygon
+            )
             if pLayer_out is None:
                 raise RuntimeError("Could not create output layer")
 
             # Add standard fields
-            field_id = ogr.FieldDefn('id', ogr.OFTInteger)
-            field_area = ogr.FieldDefn('area', ogr.OFTReal)
+            field_id = ogr.FieldDefn("id", ogr.OFTInteger)
+            field_area = ogr.FieldDefn("area", ogr.OFTReal)
             pLayer_out.CreateField(field_id)
             pLayer_out.CreateField(field_area)
 
@@ -200,7 +213,7 @@ def remove_small_polygon(
             for i in range(nFieldCount):
                 pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
                 field_name = pFieldDefn.GetName().lower()
-                if field_name not in ['id', 'area']:
+                if field_name not in ["id", "area"]:
                     try:
                         pLayer_out.CreateField(pFieldDefn)
                     except Exception as e:
@@ -220,11 +233,17 @@ def remove_small_polygon(
             for pFeature_in in pLayer_in:
                 nProcessed += 1
 
-                if verbose and progress_interval > 0 and nProcessed % progress_interval == 0:
+                if (
+                    verbose
+                    and progress_interval > 0
+                    and nProcessed % progress_interval == 0
+                ):
                     elapsed = time.time() - start_time
                     rate = nProcessed / elapsed if elapsed > 0 else 0
-                    logging.info(f"Processed {nProcessed}/{nTotal_features} features "
-                               f"({rate:.1f} features/sec), kept {nKept}")
+                    logging.info(
+                        f"Processed {nProcessed}/{nTotal_features} features "
+                        f"({rate:.1f} features/sec), kept {nKept}"
+                    )
 
                 pGeometry = pFeature_in.GetGeometryRef()
                 if pGeometry is None:
@@ -234,20 +253,34 @@ def remove_small_polygon(
                 geometry_type = pGeometry.GetGeometryName()
 
                 # Process POLYGON geometries
-                if geometry_type == 'POLYGON':
+                if geometry_type == "POLYGON":
                     kept = _process_single_polygon(
-                        pGeometry, dThreshold, iFlag_algorithm, pSrs,
-                        pLayerDefn_out, pFeature_in, pLayerDefn_in, lID, pLayer_out
+                        pGeometry,
+                        dThreshold,
+                        iFlag_algorithm,
+                        pSrs,
+                        pLayerDefn_out,
+                        pFeature_in,
+                        pLayerDefn_in,
+                        lID,
+                        pLayer_out,
                     )
                     if kept:
                         lID += 1
                         nKept += 1
 
                 # Process MULTIPOLYGON geometries
-                elif geometry_type == 'MULTIPOLYGON':
+                elif geometry_type == "MULTIPOLYGON":
                     polygons_kept = _process_multipolygon(
-                        pGeometry, dThreshold, iFlag_algorithm, pSrs,
-                        pLayerDefn_out, pFeature_in, pLayerDefn_in, lID, pLayer_out
+                        pGeometry,
+                        dThreshold,
+                        iFlag_algorithm,
+                        pSrs,
+                        pLayerDefn_out,
+                        pFeature_in,
+                        pLayerDefn_in,
+                        lID,
+                        pLayer_out,
                     )
                     lID += polygons_kept
                     nKept += polygons_kept
@@ -267,7 +300,9 @@ def remove_small_polygon(
                 logging.info(f"Features removed: {nProcessed - nKept - nSkipped}")
                 logging.info(f"Features skipped (non-polygon): {nSkipped}")
                 logging.info(f"Processing time: {total_time:.2f} seconds")
-                logging.info(f"Average processing rate: {nProcessed/total_time:.1f} features/sec")
+                logging.info(
+                    f"Average processing rate: {nProcessed/total_time:.1f} features/sec"
+                )
                 logging.info(f"Output saved to: {sFilename_vector_out}")
 
         finally:
@@ -288,7 +323,7 @@ def _process_single_polygon(
     pFeature_in: ogr.Feature,
     pLayerDefn_in: ogr.FeatureDefn,
     lID: int,
-    pLayer_out: ogr.Layer
+    pLayer_out: ogr.Layer,
 ) -> bool:
     """
     Process a single POLYGON geometry.
@@ -301,13 +336,17 @@ def _process_single_polygon(
         if pOuterRing is None or pOuterRing.GetPointCount() < 3:
             return False
 
-        aCoords_outer = np.array([
-            [pOuterRing.GetPoint(i)[0], pOuterRing.GetPoint(i)[1]]
-            for i in range(pOuterRing.GetPointCount())
-        ])
+        aCoords_outer = np.array(
+            [
+                [pOuterRing.GetPoint(i)[0], pOuterRing.GetPoint(i)[1]]
+                for i in range(pOuterRing.GetPointCount())
+            ]
+        )
 
         # Calculate area
-        dArea = calculate_polygon_area(aCoords_outer[:, 0], aCoords_outer[:, 1], iFlag_algorithm)
+        dArea = calculate_polygon_area(
+            aCoords_outer[:, 0], aCoords_outer[:, 1], iFlag_algorithm
+        )
         dAreakm = dArea / 1e6  # Convert to square kilometers
 
         if dArea <= dThreshold:
@@ -341,13 +380,13 @@ def _process_single_polygon(
         # Create and populate output feature
         pFeature_out = ogr.Feature(pLayerDefn_out)
         pFeature_out.SetGeometry(pGeometry_out)
-        pFeature_out.SetField('id', lID)
-        pFeature_out.SetField('area', dAreakm)
+        pFeature_out.SetField("id", lID)
+        pFeature_out.SetField("area", dAreakm)
 
         # Copy other fields
         for i in range(pLayerDefn_in.GetFieldCount()):
             field_name = pLayerDefn_in.GetFieldDefn(i).GetName()
-            if field_name.lower() not in ['id', 'area']:
+            if field_name.lower() not in ["id", "area"]:
                 try:
                     pFeature_out.SetField(field_name, pFeature_in.GetField(field_name))
                 except Exception:
@@ -373,7 +412,7 @@ def _process_multipolygon(
     pFeature_in: ogr.Feature,
     pLayerDefn_in: ogr.FeatureDefn,
     lID_start: int,
-    pLayer_out: ogr.Layer
+    pLayer_out: ogr.Layer,
 ) -> int:
     """
     Process a MULTIPOLYGON geometry, creating separate features for each polygon part.
@@ -385,13 +424,19 @@ def _process_multipolygon(
     try:
         for iPoly in range(pGeometry.GetGeometryCount()):
             pPolygon = pGeometry.GetGeometryRef(iPoly)
-            if pPolygon is None or pPolygon.GetGeometryName() != 'POLYGON':
+            if pPolygon is None or pPolygon.GetGeometryName() != "POLYGON":
                 continue
 
             kept = _process_single_polygon(
-                pPolygon, dThreshold, iFlag_algorithm, pSrs,
-                pLayerDefn_out, pFeature_in, pLayerDefn_in,
-                lID_start + polygons_kept, pLayer_out
+                pPolygon,
+                dThreshold,
+                iFlag_algorithm,
+                pSrs,
+                pLayerDefn_out,
+                pFeature_in,
+                pLayerDefn_in,
+                lID_start + polygons_kept,
+                pLayer_out,
             )
 
             if kept:
@@ -401,4 +446,3 @@ def _process_multipolygon(
         logging.warning(f"Error processing multipolygon: {e}")
 
     return polygons_kept
-

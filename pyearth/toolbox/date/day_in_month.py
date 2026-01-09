@@ -71,9 +71,7 @@ logger = logging.getLogger(__name__)
 
 
 def day_in_month(
-    iYear_in: int,
-    iMonth_in: int,
-    iFlag_leap_year_in: Optional[int] = None
+    iYear_in: int, iMonth_in: int, iFlag_leap_year_in: Optional[int] = None
 ) -> int:
     """
     Calculate the number of days in a specific month.
@@ -227,8 +225,12 @@ def day_in_month(
     # Validate leap year flag if provided
     if iFlag_leap_year_in is not None:
         if iFlag_leap_year_in not in [0, 1]:
-            logger.error(f"Invalid leap year flag: {iFlag_leap_year_in}. Must be 0, 1, or None.")
-            raise ValueError(f"Leap year flag must be 0, 1, or None, got {iFlag_leap_year_in}")
+            logger.error(
+                f"Invalid leap year flag: {iFlag_leap_year_in}. Must be 0, 1, or None."
+            )
+            raise ValueError(
+                f"Leap year flag must be 0, 1, or None, got {iFlag_leap_year_in}"
+            )
 
     # Get number of days in month using standard library
     # calendar.monthrange returns (weekday, num_days)
@@ -238,12 +240,15 @@ def day_in_month(
     if iFlag_leap_year_in is not None and iMonth_in == 2:
         if iFlag_leap_year_in == 0:
             nDays = 28
-            logger.debug(f"Manual override: February {iYear_in} forced to 28 days (non-leap)")
+            logger.debug(
+                f"Manual override: February {iYear_in} forced to 28 days (non-leap)"
+            )
         else:  # iFlag_leap_year_in == 1
             nDays = 29
-            logger.debug(f"Manual override: February {iYear_in} forced to 29 days (leap)")
+            logger.debug(
+                f"Manual override: February {iYear_in} forced to 29 days (leap)"
+            )
 
     logger.debug(f"Year {iYear_in}, Month {iMonth_in}: {nDays} days")
 
     return nDays
-

@@ -11,6 +11,7 @@ from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
 class PolygonClassEncoder(JSONEncoder):
     """Custom JSON encoder for pypolygon objects and their dependencies."""
+
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -69,7 +70,9 @@ class pypolygon:
         >>> print(f"Area: {polygon.calculate_polygon_area():.2f} m²")
     """
 
-    def __init__(self, dLon: float, dLat: float, aLine: List[pyline], aPoint: List[pypoint]):
+    def __init__(
+        self, dLon: float, dLat: float, aLine: List[pyline], aPoint: List[pypoint]
+    ):
         """
         Initialize a polygon object.
 
@@ -98,7 +101,9 @@ class pypolygon:
 
         # Verify polygon is closed (first and last points are identical)
         if len(aPoint) > 0 and aPoint[0] != aPoint[-1]:
-            raise ValueError("Polygon must be closed: first and last points must be identical.")
+            raise ValueError(
+                "Polygon must be closed: first and last points must be identical."
+            )
 
         # Initialize attributes
         self.lPolygonID: int = -1
@@ -117,8 +122,8 @@ class pypolygon:
 
         # Create center point
         pPoint = {
-            'dLongitude_degree': self.dLongitude_center_degree,
-            'dLatitude_degree': self.dLatitude_center_degree
+            "dLongitude_degree": self.dLongitude_center_degree,
+            "dLatitude_degree": self.dLatitude_center_degree,
         }
         self.pPoint_center: pypoint = pypoint(pPoint)
 
@@ -160,7 +165,9 @@ class pypolygon:
         """
         return any(pLine.is_overlap(pLine_in) for pLine in self.aLine)
 
-    def which_line_cross_this_point(self, pPoint_in: pypoint) -> Tuple[bool, Optional[pyline]]:
+    def which_line_cross_this_point(
+        self, pPoint_in: pypoint
+    ) -> Tuple[bool, Optional[pyline]]:
         """
         Find which line (edge) of the polygon contains a given point.
 
@@ -190,7 +197,9 @@ class pypolygon:
             ValueError: If polygon has fewer than 3 points.
         """
         if self.nPoint < 4:  # Need at least 3 unique points + closing point
-            raise ValueError("Polygon must have at least 3 unique vertices to calculate area.")
+            raise ValueError(
+                "Polygon must have at least 3 unique vertices to calculate area."
+            )
 
         lons = [p.dLongitude_degree for p in self.aPoint]
         lats = [p.dLatitude_degree for p in self.aPoint]
@@ -253,8 +262,9 @@ class pypolygon:
         if not isinstance(other, pypolygon):
             return NotImplemented
 
-        return (self.pPoint_center == other.pPoint_center and
-                len(self.aLine) == len(other.aLine))
+        return self.pPoint_center == other.pPoint_center and len(self.aLine) == len(
+            other.aLine
+        )
 
     def __ne__(self, other: object) -> bool:
         """
@@ -287,11 +297,13 @@ class pypolygon:
         Returns:
             str: Developer-friendly representation.
         """
-        return (f"pypolygon(nLine={self.nLine}, nPoint={self.nPoint}, "
-                f"area={self.dArea:.2f}m², "
-                f"center=({self.dLongitude_center_degree:.6f}°, "
-                f"{self.dLatitude_center_degree:.6f}°), "
-                f"ID={self.lPolygonID})")
+        return (
+            f"pypolygon(nLine={self.nLine}, nPoint={self.nPoint}, "
+            f"area={self.dArea:.2f}m², "
+            f"center=({self.dLongitude_center_degree:.6f}°, "
+            f"{self.dLatitude_center_degree:.6f}°), "
+            f"ID={self.lPolygonID})"
+        )
 
     def __str__(self) -> str:
         """
@@ -300,9 +312,11 @@ class pypolygon:
         Returns:
             str: Human-readable description.
         """
-        return (f"Polygon with {self.nLine} edges, {self.nPoint} vertices at "
-                f"({self.dLongitude_center_degree:.4f}°, "
-                f"{self.dLatitude_center_degree:.4f}°)")
+        return (
+            f"Polygon with {self.nLine} edges, {self.nPoint} vertices at "
+            f"({self.dLongitude_center_degree:.4f}°, "
+            f"{self.dLatitude_center_degree:.4f}°)"
+        )
 
     def tojson(self) -> str:
         """
@@ -315,16 +329,14 @@ class pypolygon:
             The 'aLine' attribute is excluded from JSON output to avoid
             circular references and reduce size.
         """
-        aSkip = ['aLine']
+        aSkip = ["aLine"]
         obj = self.__dict__.copy()
         for sKey in aSkip:
             obj.pop(sKey, None)
 
-        sJson = json.dumps(obj,
-                          sort_keys=True,
-                          indent=4,
-                          ensure_ascii=True,
-                          cls=PolygonClassEncoder)
+        sJson = json.dumps(
+            obj, sort_keys=True, indent=4, ensure_ascii=True, cls=PolygonClassEncoder
+        )
         return sJson
 
     def towkt(self) -> str:
@@ -338,7 +350,9 @@ class pypolygon:
             ValueError: If polygon has fewer than 3 unique points.
         """
         if self.nPoint < 4:
-            raise ValueError("Polygon must have at least 3 unique vertices for WKT conversion.")
+            raise ValueError(
+                "Polygon must have at least 3 unique vertices for WKT conversion."
+            )
 
         pGeometry = ogr.Geometry(ogr.wkbPolygon)
         ring = ogr.Geometry(ogr.wkbLinearRing)

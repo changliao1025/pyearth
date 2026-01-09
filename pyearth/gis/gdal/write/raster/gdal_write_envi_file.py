@@ -1,10 +1,16 @@
 import os
 from osgeo import gdal
-def gdal_write_envi_file(sFilename_in,
-                         aData_in,
-                         dPixelWidth_in, dOriginX_in,
-                         dOriginY_in, dMissing_value_in,
-                         pSpatial_reference_in):
+
+
+def gdal_write_envi_file(
+    sFilename_in,
+    aData_in,
+    dPixelWidth_in,
+    dOriginX_in,
+    dOriginY_in,
+    dMissing_value_in,
+    pSpatial_reference_in,
+):
     """
     Write a ENVI standard format raster file
 
@@ -24,7 +30,7 @@ def gdal_write_envi_file(sFilename_in,
         os.remove(sFilename_in)
         pass
 
-    sDriverName = 'ENVI'
+    sDriverName = "ENVI"
     pDriver = gdal.GetDriverByName(sDriverName)
 
     if pDriver is None:
@@ -36,20 +42,13 @@ def gdal_write_envi_file(sFilename_in,
     nband = 1
 
     # Creates a new raster data source
-    pDataset = pDriver.Create(sFilename_in,
-                              ncolumn,
-                              nrow,
-                              nband,
-                              gdal.GDT_Float32)
+    pDataset = pDriver.Create(sFilename_in, ncolumn, nrow, nband, gdal.GDT_Float32)
 
     # Write metadata
 
-    pDataset.SetGeoTransform([dOriginX_in,
-                              dPixelWidth_in,
-                              0.0,
-                              dOriginY_in,
-                              0.0,
-                              -dPixelWidth_in])
+    pDataset.SetGeoTransform(
+        [dOriginX_in, dPixelWidth_in, 0.0, dOriginY_in, 0.0, -dPixelWidth_in]
+    )
 
     pProjection = pSpatial_reference_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)
@@ -70,13 +69,15 @@ def gdal_write_envi_file(sFilename_in,
     return pGeotransform_out, pProjection_out
 
 
-def gdal_write_envi_file_multiple_band(sFilename_in,
-                                       aData_in,
-                                       dPixelWidth_in,
-                                       dOriginX_in,
-                                       dOriginY_in,
-                                       dMissing_value_in,
-                                       pSpatial_reference_in):
+def gdal_write_envi_file_multiple_band(
+    sFilename_in,
+    aData_in,
+    dPixelWidth_in,
+    dOriginX_in,
+    dOriginY_in,
+    dMissing_value_in,
+    pSpatial_reference_in,
+):
     """
     Write a multi-band ENVI raster file
 
@@ -97,7 +98,7 @@ def gdal_write_envi_file_multiple_band(sFilename_in,
         os.remove(sFilename_in)
         pass
 
-    sDriverName = 'ENVI'
+    sDriverName = "ENVI"
     pDriver = gdal.GetDriverByName(sDriverName)
 
     if pDriver is None:
@@ -108,20 +109,13 @@ def gdal_write_envi_file_multiple_band(sFilename_in,
     nband, nrow, ncolumn = aData_in.shape
 
     # Creates a new raster data source
-    pDataset = pDriver.Create(sFilename_in,
-                              ncolumn,
-                              nrow,
-                              nband,
-                              gdal.GDT_Float32)
+    pDataset = pDriver.Create(sFilename_in, ncolumn, nrow, nband, gdal.GDT_Float32)
 
     # Write metadata
 
-    pDataset.SetGeoTransform([dOriginX_in,
-                              dPixelWidth_in,
-                              0.0,
-                              dOriginY_in,
-                              0.0,
-                              -dPixelWidth_in])
+    pDataset.SetGeoTransform(
+        [dOriginX_in, dPixelWidth_in, 0.0, dOriginY_in, 0.0, -dPixelWidth_in]
+    )
 
     pProjection = pSpatial_reference_in.ExportToPrettyWkt()
     pDataset.SetProjection(pProjection)

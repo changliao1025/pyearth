@@ -2,29 +2,33 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
-from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.visual.color.create_diverge_rgb_color_hex import (
+    create_diverge_rgb_color_hex,
+)
 
 
-def barplot_data_stacked(aData_in,
-                         aLabel_x_in,
-                         aLabel_y_in,
-                         sFilename_out,
-                         iDPI_in=None,
-                         ncolumn_in=None,
-                         iSize_x_in=None,
-                         iSize_y_in=None,
-                         dMax_y_in=None,
-                         dMin_y_in=None,
-                         dSpace_y_in=None,
-                         aMarker_in=None,
-                         aColor_in=None,
-                         aHatch_in=None,
-                         sLabel_y_in=None,
-                         aLabel_legend_in=None,
-                         aLocation_legend_in=None,
-                         sFormat_y_in=None,
-                         sLocation_legend_in=None,
-                         sTitle_in=None):
+def barplot_data_stacked(
+    aData_in,
+    aLabel_x_in,
+    aLabel_y_in,
+    sFilename_out,
+    iDPI_in=None,
+    ncolumn_in=None,
+    iSize_x_in=None,
+    iSize_y_in=None,
+    dMax_y_in=None,
+    dMin_y_in=None,
+    dSpace_y_in=None,
+    aMarker_in=None,
+    aColor_in=None,
+    aHatch_in=None,
+    sLabel_y_in=None,
+    aLabel_legend_in=None,
+    aLocation_legend_in=None,
+    sFormat_y_in=None,
+    sLocation_legend_in=None,
+    sTitle_in=None,
+):
     """
     Draw a barplot
     """
@@ -59,18 +63,18 @@ def barplot_data_stacked(aData_in,
     else:
         dMin_y = np.nanmin(aData_in)
 
-    if (dMax_y <= dMin_y):
+    if dMax_y <= dMin_y:
         return
 
     if sLabel_y_in is not None:
         sLabel_y = sLabel_y_in
     else:
-        sLabel_y = ''
+        sLabel_y = ""
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
-        sTitle = ''
+        sTitle = ""
 
     if sFormat_y_in is not None:
         iFlag_format_y = 1
@@ -96,18 +100,18 @@ def barplot_data_stacked(aData_in,
     if aColor_in is not None:
         aColor = aColor_in
     else:
-        if (nData >= 3):
+        if nData >= 3:
             aColor = create_diverge_rgb_color_hex(nData)
         else:
             if nData == 2:
-                aColor = ['red', 'blue']
+                aColor = ["red", "blue"]
             else:
-                aColor = ['red']
+                aColor = ["red"]
 
     if aHatch_in is not None:
         aHatch = aHatch_in
     else:
-        aHatch = np.fill(nData, '+')
+        aHatch = np.fill(nData, "+")
 
     fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
@@ -125,29 +129,40 @@ def barplot_data_stacked(aData_in,
 
     for i in np.arange(1, nData + 1, 1):
 
-        data1 = aData_in[i-1]
+        data1 = aData_in[i - 1]
         # need bettern control here, hatch (texture) can be used to betten represet some data
         if i == 1 or i == 2:
-            rects = ax.bar(x - total_width * 0.5 + i * width, data1, width, label=aLabel_y_in[i-1],
-                           color=aColor[i-1], hatch=aHatch[i-1], edgecolor="k")
+            rects = ax.bar(
+                x - total_width * 0.5 + i * width,
+                data1,
+                width,
+                label=aLabel_y_in[i - 1],
+                color=aColor[i - 1],
+                hatch=aHatch[i - 1],
+                edgecolor="k",
+            )
         else:
-            rects = ax.bar(x - total_width * 0.5 + i * width, data1, width, label=aLabel_y_in[i-1],
-                           color=aColor[i-1])  # , hatch = aHatch[i-1], edgecolor = "k")
+            rects = ax.bar(
+                x - total_width * 0.5 + i * width,
+                data1,
+                width,
+                label=aLabel_y_in[i - 1],
+                color=aColor[i - 1],
+            )  # , hatch = aHatch[i-1], edgecolor = "k")
 
         pass
 
-    if (iFlag_format_y == 1):
+    if iFlag_format_y == 1:
         ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
     ax.set_ylim(dMin_y, dMax_y)
-    ax.legend(bbox_to_anchor=aLocation_legend,
-              loc=sLocation_legend,
-              fontsize=12,
-              ncol=ncolumn)
-    
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    ax.legend(
+        bbox_to_anchor=aLocation_legend, loc=sLocation_legend, fontsize=12, ncol=ncolumn
+    )
 
-    plt.close('all')
+    plt.savefig(sFilename_out, bbox_inches="tight")
+
+    plt.close("all")
     plt.clf()
 
     return

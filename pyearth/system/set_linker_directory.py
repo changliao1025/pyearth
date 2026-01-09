@@ -32,7 +32,7 @@ from typing import List, Optional
 def configure_linker_path(
     env_path: Optional[str] = None,
     additional_paths: Optional[List[str]] = None,
-    prepend: bool = True
+    prepend: bool = True,
 ) -> str:
     """
     Configure LD_LIBRARY_PATH for conda environment shared libraries.
@@ -106,6 +106,7 @@ def configure_linker_path(
     # Auto-detect Python environment if not provided
     if env_path is None:
         from pyearth.system.python.get_python_environment import get_python_environment
+
         try:
             env_path, _, _ = get_python_environment()
         except (ValueError, RuntimeError) as e:
@@ -122,34 +123,31 @@ def configure_linker_path(
         raise ValueError(f"Environment path is not a directory: {env_path}")
 
     # Build list of library paths to add
-    lib_paths = [
-        str(env_path_obj / "lib"),
-        str(env_path_obj / "lib64")
-    ]
+    lib_paths = [str(env_path_obj / "lib"), str(env_path_obj / "lib64")]
 
     # Add any additional paths
     if additional_paths:
         lib_paths.extend(additional_paths)
 
     # Get existing LD_LIBRARY_PATH
-    existing_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+    existing_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
 
     # Combine paths
     if prepend:
         # Conda paths first, then existing paths
         if existing_ld_path:
-            new_ld_path = ':'.join(lib_paths) + ':' + existing_ld_path
+            new_ld_path = ":".join(lib_paths) + ":" + existing_ld_path
         else:
-            new_ld_path = ':'.join(lib_paths)
+            new_ld_path = ":".join(lib_paths)
     else:
         # Existing paths first, then conda paths
         if existing_ld_path:
-            new_ld_path = existing_ld_path + ':' + ':'.join(lib_paths)
+            new_ld_path = existing_ld_path + ":" + ":".join(lib_paths)
         else:
-            new_ld_path = ':'.join(lib_paths)
+            new_ld_path = ":".join(lib_paths)
 
     # Set the environment variable
-    os.environ['LD_LIBRARY_PATH'] = new_ld_path
+    os.environ["LD_LIBRARY_PATH"] = new_ld_path
 
     return new_ld_path
 

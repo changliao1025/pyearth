@@ -4,7 +4,7 @@ from typing import Literal
 from osgeo import gdal, ogr
 
 
-def gdal_check_file_type(sFilename_in: str) -> Literal['raster', 'vector', 'unknown']:
+def gdal_check_file_type(sFilename_in: str) -> Literal["raster", "vector", "unknown"]:
     """Determine whether a file is a raster, vector, or unknown spatial data type.
 
     Parameters
@@ -27,18 +27,18 @@ def gdal_check_file_type(sFilename_in: str) -> Literal['raster', 'vector', 'unkn
     """
 
     if not os.path.exists(sFilename_in):
-        return 'unknown'
+        return "unknown"
 
     # Try to open as raster
     raster = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
     if raster is not None:
         raster = None  # Close dataset
-        return 'raster'
+        return "raster"
 
     # Try to open as vector
     vector = ogr.Open(sFilename_in, 0)  # 0 = read-only
     if vector is not None:
         vector = None  # Close dataset
-        return 'vector'
+        return "vector"
 
-    return 'unknown'
+    return "unknown"

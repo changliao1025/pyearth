@@ -1,4 +1,6 @@
 import os
+
+
 def read_configuration_file(sFilename_configuration_in):
     """
     Read a text based configuration file
@@ -13,14 +15,14 @@ def read_configuration_file(sFilename_configuration_in):
     if os.path.exists(sFilename_configuration_in):
         pass
     else:
-        print('The xml file does not exist!')
+        print("The xml file does not exist!")
         return
- 
+
     aConfig_out = {}
-    ifs = open(sFilename_configuration_in, 'r')
+    ifs = open(sFilename_configuration_in, "r")
     for sLine in ifs:
-        sDummy = sLine.split(',')
-        if (len(sDummy) == 2):
+        sDummy = sLine.split(",")
+        if len(sDummy) == 2:
             print(sDummy)
             sKey = (sDummy[0]).strip()
             sValue = (sDummy[1]).strip()
@@ -29,8 +31,3 @@ def read_configuration_file(sFilename_configuration_in):
             pass
     ifs.close()
     return aConfig_out
- 
-    
-    
-    
-    

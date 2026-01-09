@@ -45,7 +45,9 @@ def envi_write_header(sFilename_in, aHeader_in):
 
     interleave = aHeader_in.get("interleave", aHeader_in.get("bsq"))
     if interleave is None:
-        raise ValueError("ENVI header dictionary must include an 'interleave' or 'bsq' entry")
+        raise ValueError(
+            "ENVI header dictionary must include an 'interleave' or 'bsq' entry"
+        )
 
     def _as_str(key):
         try:

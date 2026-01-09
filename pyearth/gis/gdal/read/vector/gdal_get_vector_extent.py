@@ -5,9 +5,12 @@ from osgeo import gdal, osr, ogr
 
 
 def gdal_get_vector_extent(
-    sFilename_in: str,
-    iFlag_return_union_geometry: bool = False
-) -> Union[Tuple[float, float, float, float], Tuple[Tuple[float, float, float, float], Optional[ogr.Geometry]], None]:
+    sFilename_in: str, iFlag_return_union_geometry: bool = False
+) -> Union[
+    Tuple[float, float, float, float],
+    Tuple[Tuple[float, float, float, float], Optional[ogr.Geometry]],
+    None,
+]:
     """Get the spatial extent of a vector file, optionally with a union geometry.
 
     This function can also return a single geometry that is a collection of all
@@ -73,7 +76,7 @@ def gdal_get_vector_extent(
         layer_geom_type = layer.GetGeomType()
 
         # Determine the target collection type using the flattened geometry type
-        base_geom_type = layer_geom_type & 0xff  # Flatten to 2D base type
+        base_geom_type = layer_geom_type & 0xFF  # Flatten to 2D base type
 
         if base_geom_type == ogr.wkbPoint:
             union_geom = ogr.Geometry(ogr.wkbMultiPoint)
@@ -101,7 +104,11 @@ def gdal_get_vector_extent(
             flat_geom_type = geom_clone.GetGeometryType()
 
             # Handle multi-geometries by adding their individual parts
-            if flat_geom_type in [ogr.wkbMultiPoint, ogr.wkbMultiLineString, ogr.wkbMultiPolygon]:
+            if flat_geom_type in [
+                ogr.wkbMultiPoint,
+                ogr.wkbMultiLineString,
+                ogr.wkbMultiPolygon,
+            ]:
                 for i in range(geom_clone.GetGeometryCount()):
                     part = geom_clone.GetGeometryRef(i)
                     if part is not None:

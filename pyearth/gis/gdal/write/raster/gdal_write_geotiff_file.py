@@ -2,16 +2,18 @@ import os
 from osgeo import gdal
 
 
-def gdal_write_geotiff_file(sFilename_in,
-                            aData_in,
-                            dPixelWidth_in,
-                            dPixelHeight_in,
-                            dOriginX_in,
-                            dOriginY_in,
-                            dMissing_value_in,
-                            pProjection_in,
-                            datatype=gdal.GDT_Float32,
-                            compression='LZW'):
+def gdal_write_geotiff_file(
+    sFilename_in,
+    aData_in,
+    dPixelWidth_in,
+    dPixelHeight_in,
+    dOriginX_in,
+    dOriginY_in,
+    dMissing_value_in,
+    pProjection_in,
+    datatype=gdal.GDT_Float32,
+    compression="LZW",
+):
     """
     Write a Geotiff standard format raster file
 
@@ -31,7 +33,7 @@ def gdal_write_geotiff_file(sFilename_in,
         os.remove(sFilename_in)
         pass
 
-    sDriverName = 'GTiff'
+    sDriverName = "GTiff"
     pDriver = gdal.GetDriverByName(sDriverName)
 
     if pDriver is None:
@@ -45,28 +47,26 @@ def gdal_write_geotiff_file(sFilename_in,
     # Create creation options for compression
     creation_options = []
     if compression:
-        creation_options.extend(['COMPRESS=' + compression, 'PREDICTOR=2'])
+        creation_options.extend(["COMPRESS=" + compression, "PREDICTOR=2"])
         # Add BIGTIFF option for large files
-        creation_options.append('BIGTIFF=IF_SAFER')
+        creation_options.append("BIGTIFF=IF_SAFER")
         # Add tiling for better access performance
-        creation_options.extend(['TILED=YES', 'BLOCKXSIZE=256', 'BLOCKYSIZE=256'])
-
+        creation_options.extend(["TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256"])
 
     pDataset = pDriver.Create(
-        sFilename_in,
-        ncolumn,
-        nrow,
-        nband,
-        datatype,
-        options=creation_options)
+        sFilename_in, ncolumn, nrow, nband, datatype, options=creation_options
+    )
 
-    pDataset.SetGeoTransform([
-        dOriginX_in,    # 0
-        dPixelWidth_in,  # 1
-        0,                      # 2
-        dOriginY_in,    # 3
-        0,                      # 4
-        dPixelHeight_in])
+    pDataset.SetGeoTransform(
+        [
+            dOriginX_in,  # 0
+            dPixelWidth_in,  # 1
+            0,  # 2
+            dOriginY_in,  # 3
+            0,  # 4
+            dPixelHeight_in,
+        ]
+    )
 
     pDataset.SetProjection(pProjection_in)
 
@@ -84,15 +84,17 @@ def gdal_write_geotiff_file(sFilename_in,
     return sFilename_in, pGeotransform_out, pProjection_out
 
 
-def gdal_write_geotiff_file_multiple_band(sFilename_in,
-                                          aData_in,
-                                          dPixelWidth_in,
-                                          dPixelHeight_in,
-                                          dOriginX_in,
-                                          dOriginY_in,
-                                          dMissing_value_in,
-                                          pProjection_in,
-                                          datatype=gdal.GDT_Float32):
+def gdal_write_geotiff_file_multiple_band(
+    sFilename_in,
+    aData_in,
+    dPixelWidth_in,
+    dPixelHeight_in,
+    dOriginX_in,
+    dOriginY_in,
+    dMissing_value_in,
+    pProjection_in,
+    datatype=gdal.GDT_Float32,
+):
     """
     Write a multi-band geotiff raster file
 
@@ -112,7 +114,7 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
         os.remove(sFilename_in)
         pass
 
-    sDriverName = 'GTiff'
+    sDriverName = "GTiff"
     pDriver = gdal.GetDriverByName(sDriverName)
 
     if pDriver is None:
@@ -123,21 +125,13 @@ def gdal_write_geotiff_file_multiple_band(sFilename_in,
     nband, nrow, ncolumn = aData_in.shape
 
     # Creates a new raster data source
-    pDataset = pDriver.Create(sFilename_in,
-                              ncolumn,
-                              nrow,
-                              nband,
-                              datatype)
+    pDataset = pDriver.Create(sFilename_in, ncolumn, nrow, nband, datatype)
 
     # Write metadata
 
-    pDataset.SetGeoTransform([dOriginX_in,
-                              dPixelWidth_in,
-                              0.0,
-                              dOriginY_in,
-                              0.0,
-                              dPixelHeight_in])
-
+    pDataset.SetGeoTransform(
+        [dOriginX_in, dPixelWidth_in, 0.0, dOriginY_in, 0.0, dPixelHeight_in]
+    )
 
     pDataset.SetProjection(pProjection_in)
 

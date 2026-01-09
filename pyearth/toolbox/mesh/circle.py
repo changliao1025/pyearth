@@ -4,6 +4,7 @@ import numpy as np
 from typing import List
 from pyearth.toolbox.mesh.point import pypoint
 
+
 class CircleClassEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -15,6 +16,7 @@ class CircleClassEncoder(JSONEncoder):
         if isinstance(obj, pypoint):
             return json.loads(obj.tojson())
         return JSONEncoder.default(self, obj)
+
 
 class pycircle(object):
     """The pycircle class represents a circle on a sphere."""

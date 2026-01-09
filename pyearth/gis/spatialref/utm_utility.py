@@ -7,7 +7,9 @@ References
 - UTM zones: 1-60, each covering 6° of longitude
 - EPSG codes: 326XX for Northern Hemisphere, 327XX for Southern Hemisphere
 """
-from osgeo import  osr
+
+from osgeo import osr
+
 
 def get_utm_zone(lon: float, lat: float) -> int:
     """Calculate the UTM zone number from longitude and latitude coordinates.
@@ -120,13 +122,13 @@ def get_utm_epsg_code(lon: float, lat: float) -> int:
     utm_zone = get_utm_zone(lon, lat)
 
     # Format zone number with zero-padding (01-60)
-    zone_str = f'{utm_zone:02d}'
+    zone_str = f"{utm_zone:02d}"
 
     # Determine hemisphere: Northern (326XX) or Southern (327XX)
     if lat >= 0:
-        epsg_code = int('326' + zone_str)
+        epsg_code = int("326" + zone_str)
     else:
-        epsg_code = int('327' + zone_str)
+        epsg_code = int("327" + zone_str)
 
     return epsg_code
 
@@ -214,6 +216,4 @@ def get_utm_spatial_reference_wkt(dLongitude_in: float, dLatitude_in: float) -> 
             )
         return wkt_projection
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to export WKT for EPSG:{epsg_code}: {e}"
-        )
+        raise RuntimeError(f"Failed to export WKT for EPSG:{epsg_code}: {e}")

@@ -1,4 +1,6 @@
 import numpy as np
+
+
 def list_max(pList):
     nlist = len(pList)
     dmax_max = np.nan  # Initialize with nan
@@ -12,6 +14,7 @@ def list_max(pList):
             dmax_max = dmax
 
     return dmax_max
+
 
 def list_min(pList):
     nlist = len(pList)

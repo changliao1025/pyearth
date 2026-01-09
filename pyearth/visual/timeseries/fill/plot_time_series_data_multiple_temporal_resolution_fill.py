@@ -6,23 +6,25 @@ import matplotlib.pyplot as plt
 from pyearth.system.define_global_variables import *
 
 
-def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all, 
-                                                            aData_all,
-                                                            sFilename_out,
-                                                            iDPI_in=None,
-                                                            iFlag_trend_in=None,
-                                                            iReverse_Y_in=None,
-                                                            iSize_X_in=None,
-                                                            iSize_Y_in=None,
-                                                            dMax_Y_in=None,
-                                                            dMin_Y_in=None,
-                                                            dSpace_y_in=None,
-                                                            aMarker_in=None,
-                                                            aColor_in=None,
-                                                            aLinestyle_in=None,
-                                                            sLabel_Y_in=None,
-                                                            aLabel_legend_in=None,
-                                                            sTitle_in=None):
+def plot_time_series_data_multiple_temporal_resolution_fill(
+    aTime_all,
+    aData_all,
+    sFilename_out,
+    iDPI_in=None,
+    iFlag_trend_in=None,
+    iReverse_Y_in=None,
+    iSize_X_in=None,
+    iSize_Y_in=None,
+    dMax_Y_in=None,
+    dMin_Y_in=None,
+    dSpace_y_in=None,
+    aMarker_in=None,
+    aColor_in=None,
+    aLinestyle_in=None,
+    sLabel_Y_in=None,
+    aLabel_legend_in=None,
+    sTitle_in=None,
+):
 
     nData = len(aData_all)
     aData = [aData_all]
@@ -53,7 +55,7 @@ def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all,
     if sLabel_Y_in is not None:
         sLabel_Y = sLabel_Y_in
     else:
-        sLabel_Y = ''
+        sLabel_Y = ""
     if aLabel_legend_in is not None:
         aLabel_legend = aLabel_legend_in
     else:
@@ -61,21 +63,21 @@ def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all,
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
-        sTitle = ''
+        sTitle = ""
 
     if aMarker_in is not None:
         aMarker = aMarker_in
     else:
-        aMarker = np.full(nData, '+')
+        aMarker = np.full(nData, "+")
     if aColor_in is not None:
         aColor = aColor_in
     else:
-        aColor = np.full(nData, 'black')
+        aColor = np.full(nData, "black")
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
     else:
 
-        aLinestyle = np.full(nData, '-')
+        aLinestyle = np.full(nData, "-")
 
     if dMax_Y_in is not None:
         dMax_Y = dMax_Y_in
@@ -85,7 +87,7 @@ def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all,
         dMin_Y = dMin_Y_in
     else:
         dMin_Y = np.nanmin(aData)  # if it has negative value, change here
-    if (dMax_Y <= dMin_Y):
+    if dMax_Y <= dMin_Y:
         return
 
     if dSpace_y_in is not None:
@@ -97,33 +99,41 @@ def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all,
     fig.set_figwidth(iSize_X)
     fig.set_figheight(iSize_Y)
     ax = fig.add_axes([0.1, 0.5, 0.8, 0.4])
-    pYear = mpl.dates.YearLocator(1)   # every year
+    pYear = mpl.dates.YearLocator(1)  # every year
     pMonth = mpl.dates.MonthLocator()  # every month
-    sYear_format = mpl.dates.DateFormatter('%Y')
+    sYear_format = mpl.dates.DateFormatter("%Y")
 
-    for i in np.arange(1, nData+1):
-        x1 = aTime_all[i-1]
+    for i in np.arange(1, nData + 1):
+        x1 = aTime_all[i - 1]
 
         if i == 1:
             # we need to plot low and high fill
-            y_top = aData_all[i-1][2]
-            y_bot = aData_all[i-1][1]
-            ax.fill_between(x1, y_top, y_bot,  facecolor='cornflowerblue')
+            y_top = aData_all[i - 1][2]
+            y_bot = aData_all[i - 1][1]
+            ax.fill_between(x1, y_top, y_bot, facecolor="cornflowerblue")
             # plot mean
-            y1 = aData_all[i-1][0]
+            y1 = aData_all[i - 1][0]
 
-            ax.plot(x1, y1,
-                    color=aColor[i-1], linestyle=aLinestyle[i-1],
-                    marker=aMarker[i-1],
-                    label=aLabel_legend[i-1])
+            ax.plot(
+                x1,
+                y1,
+                color=aColor[i - 1],
+                linestyle=aLinestyle[i - 1],
+                marker=aMarker[i - 1],
+                label=aLabel_legend[i - 1],
+            )
 
         else:
-            y1 = aData_all[i-1]
+            y1 = aData_all[i - 1]
 
-            ax.plot(x1, y1,
-                    color=aColor[i-1], linestyle=aLinestyle[i-1],
-                    marker=aMarker[i-1],
-                    label=aLabel_legend[i-1])
+            ax.plot(
+                x1,
+                y1,
+                color=aColor[i - 1],
+                linestyle=aLinestyle[i - 1],
+                marker=aMarker[i - 1],
+                label=aLabel_legend[i - 1],
+            )
 
         # calculate linear regression
         nan_index = np.where(y1 == missing_value)
@@ -140,10 +150,10 @@ def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all,
             x2 = [mn, mx]
             y2 = poly1d_fn(x2)
             x2 = [datetime.fromtimestamp(i) for i in x2]
-            ax.plot(x2, y2, color='orange', linestyle='-.',  linewidth=0.5)
+            ax.plot(x2, y2, color="orange", linestyle="-.", linewidth=0.5)
 
-    ax.axis('on')
-    ax.grid(which='major', color='grey', linestyle='--', axis='y')
+    ax.axis("on")
+    ax.grid(which="major", color="grey", linestyle="--", axis="y")
 
     # ax.set_aspect(dRatio)  #this one set the y / x ratio
     ax.xaxis.set_major_locator(pYear)
@@ -155,27 +165,27 @@ def plot_time_series_data_multiple_temporal_resolution_fill(aTime_all,
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.15)
 
-    ax.set_xlabel('Year', fontsize=12)
+    ax.set_xlabel("Year", fontsize=12)
     ax.set_ylabel(sLabel_Y, fontsize=12)
-    ax.set_title(sTitle, loc='center', fontsize=15)
+    ax.set_title(sTitle, loc="center", fontsize=15)
     # round to nearest years...
-    x_min = np.datetime64(aTime_all[1][0], 'Y')
-    x_max = np.datetime64(aTime_all[1][-1], 'Y') + np.timedelta64(1, 'Y')
+    x_min = np.datetime64(aTime_all[1][0], "Y")
+    x_max = np.datetime64(aTime_all[1][-1], "Y") + np.timedelta64(1, "Y")
     ax.set_xlim(x_min, x_max)
     if dMax_Y < 1000 and dMax_Y > 0.001:
-        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%.1f"))
     else:
-        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%.1e"))
 
     ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace_y))
 
-    if (iReverse_Y == 1):
+    if iReverse_Y == 1:
         ax.set_ylim(dMax_Y, dMin_Y)
     else:
         ax.set_ylim(dMin_Y, dMax_Y)
     ax.legend(bbox_to_anchor=(1.0, 1.0), loc="upper right", fontsize=12)
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches="tight")
 
-    plt.close('all')
+    plt.close("all")
     plt.clf()
     # print('finished plotting')

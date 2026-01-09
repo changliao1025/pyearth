@@ -5,13 +5,14 @@ from osgeo import ogr, osr
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 
+
 def export_point_to_vector_file(
     aPoint_in: List[Any],
     sFilename_vector_in: str,
     iFlag_projected_in: Optional[int] = None,
     pSpatial_reference_in: Optional[osr.SpatialReference] = None,
     aAttribute_data: Optional[List[int]] = None,
-    overwrite: bool = True
+    overwrite: bool = True,
 ) -> None:
     """Export points to a vector file.
 
@@ -82,31 +83,38 @@ def export_point_to_vector_file(
         # Create dataset and layer
         dataset = driver.CreateDataSource(sFilename_vector_in)
         if dataset is None:
-            raise RuntimeError(f"Could not create output dataset: {sFilename_vector_in}")
+            raise RuntimeError(
+                f"Could not create output dataset: {sFilename_vector_in}"
+            )
 
-        layer = dataset.CreateLayer('point', spatial_ref, ogr.wkbPoint)
+        layer = dataset.CreateLayer("point", spatial_ref, ogr.wkbPoint)
         if layer is None:
-            raise RuntimeError(f"Could not create layer in output dataset: {sFilename_vector_in}")
+            raise RuntimeError(
+                f"Could not create layer in output dataset: {sFilename_vector_in}"
+            )
 
         # Create fields
-        layer.CreateField(ogr.FieldDefn('pointid', ogr.OFTInteger64))
+        layer.CreateField(ogr.FieldDefn("pointid", ogr.OFTInteger64))
         if iFlag_attribute:
-            layer.CreateField(ogr.FieldDefn('connectivity', ogr.OFTInteger64))
+            layer.CreateField(ogr.FieldDefn("connectivity", ogr.OFTInteger64))
 
         layer_defn = layer.GetLayerDefn()
         feature = ogr.Feature(layer_defn)
-
 
         # Add points as features
         for point_id, pPoint in enumerate(aPoint_in):
             point = ogr.Geometry(ogr.wkbPoint)
 
             if iFlag_projected == 1:
-                if not hasattr(pPoint, 'dx') or not hasattr(pPoint, 'dy'):
-                    raise ValueError(f"Point {point_id} missing dx or dy attributes for projected coordinates.")
+                if not hasattr(pPoint, "dx") or not hasattr(pPoint, "dy"):
+                    raise ValueError(
+                        f"Point {point_id} missing dx or dy attributes for projected coordinates."
+                    )
                 point.AddPoint(pPoint.dx, pPoint.dy)
             else:
-                if not hasattr(pPoint, 'dLongitude_degree') or not hasattr(pPoint, 'dLatitude_degree'):
+                if not hasattr(pPoint, "dLongitude_degree") or not hasattr(
+                    pPoint, "dLatitude_degree"
+                ):
                     raise ValueError(f"Point {point_id} missing coordinate attributes.")
                 point.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
 
@@ -138,7 +146,7 @@ def export_point_as_polygon_file(
     aPoint_in: List[Any],
     sFilename_out: str,
     pSpatial_reference_in: Optional[osr.SpatialReference] = None,
-    overwrite: bool = True
+    overwrite: bool = True,
 ) -> None:
     """Export points as a closed polygon to a vector file.
 
@@ -198,12 +206,14 @@ def export_point_as_polygon_file(
         if dataset is None:
             raise RuntimeError(f"Could not create output dataset: {sFilename_out}")
 
-        layer = dataset.CreateLayer('polygon', spatial_ref, geom_type=ogr.wkbPolygon)
+        layer = dataset.CreateLayer("polygon", spatial_ref, geom_type=ogr.wkbPolygon)
         if layer is None:
-            raise RuntimeError(f"Could not create layer in output dataset: {sFilename_out}")
+            raise RuntimeError(
+                f"Could not create layer in output dataset: {sFilename_out}"
+            )
 
         # Create area field
-        area_field = ogr.FieldDefn('area', ogr.OFTReal)
+        area_field = ogr.FieldDefn("area", ogr.OFTReal)
         area_field.SetWidth(20)
         area_field.SetPrecision(2)
         layer.CreateField(area_field)
@@ -213,9 +223,10 @@ def export_point_as_polygon_file(
         lon_list = []
         lat_list = []
 
-
         for point_id, pPoint in enumerate(aPoint_in):
-            if not hasattr(pPoint, 'dLongitude_degree') or not hasattr(pPoint, 'dLatitude_degree'):
+            if not hasattr(pPoint, "dLongitude_degree") or not hasattr(
+                pPoint, "dLatitude_degree"
+            ):
                 raise ValueError(f"Point {point_id} missing coordinate attributes.")
 
             ring.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
@@ -248,7 +259,3 @@ def export_point_as_polygon_file(
         feature = None
         layer = None
         dataset = None
-
-
-
-

@@ -4,6 +4,7 @@ Grid indexing utilities for finding cell indices from geographic coordinates.
 This module provides functions for converting longitude/latitude coordinates
 to grid cell indices (row, column) in regular 2D raster grids.
 """
+
 from typing import Tuple
 
 
@@ -14,7 +15,7 @@ def find_index_by_longitude_latitude(
     dLat_max_in: float,
     dResolution_x_in: float,
     dResolution_y_in: float,
-    iFlag_center_in: bool = True
+    iFlag_center_in: bool = True,
 ) -> Tuple[int, int]:
     """Find the grid cell indices (row, column) for a geographic coordinate.
 
@@ -126,13 +127,9 @@ def find_index_by_longitude_latitude(
 
     # Validate resolutions
     if res_x <= 0:
-        raise ValueError(
-            f"X resolution must be positive. Got {res_x}"
-        )
+        raise ValueError(f"X resolution must be positive. Got {res_x}")
     if res_y <= 0:
-        raise ValueError(
-            f"Y resolution must be positive. Got {res_y}"
-        )
+        raise ValueError(f"Y resolution must be positive. Got {res_y}")
 
     # Calculate indices based on registration mode
     if iFlag_center_in:
@@ -165,4 +162,3 @@ def find_index_by_longitude_latitude(
         )
 
     return int(row_index), int(column_index)
-

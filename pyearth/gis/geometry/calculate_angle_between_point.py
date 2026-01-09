@@ -1,11 +1,21 @@
 import numpy as np
-from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
-from pyearth.gis.geometry.calculate_angle_between_vectors_degrees import calculate_angle_between_vectors_degrees
+from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
+    convert_longitude_latitude_to_sphere_3d,
+)
+from pyearth.gis.geometry.calculate_angle_between_vectors_degrees import (
+    calculate_angle_between_vectors_degrees,
+)
 
-def calculate_angle_between_point(dLongitude1_in: float, dLatitude1_in: float,
-                                dLongitude2_in: float, dLatitude2_in: float,
-                                dLongitude3_in: float, dLatitude3_in: float,
-                                iFlag_radian: bool = False) -> float:
+
+def calculate_angle_between_point(
+    dLongitude1_in: float,
+    dLatitude1_in: float,
+    dLongitude2_in: float,
+    dLatitude2_in: float,
+    dLongitude3_in: float,
+    dLatitude3_in: float,
+    iFlag_radian: bool = False,
+) -> float:
     """
 
     Calculates the angle between three points on a sphere.
@@ -27,9 +37,15 @@ def calculate_angle_between_point(dLongitude1_in: float, dLatitude1_in: float,
     iFlag_convert_radian = True if iFlag_radian else None
 
     # The points in 3D space
-    a3 = convert_longitude_latitude_to_sphere_3d(dLongitude1_in, dLatitude1_in, iFlag_convert_radian)
-    b3 = convert_longitude_latitude_to_sphere_3d(dLongitude2_in, dLatitude2_in, iFlag_convert_radian)
-    c3 = convert_longitude_latitude_to_sphere_3d(dLongitude3_in, dLatitude3_in, iFlag_convert_radian)
+    a3 = convert_longitude_latitude_to_sphere_3d(
+        dLongitude1_in, dLatitude1_in, iFlag_convert_radian
+    )
+    b3 = convert_longitude_latitude_to_sphere_3d(
+        dLongitude2_in, dLatitude2_in, iFlag_convert_radian
+    )
+    c3 = convert_longitude_latitude_to_sphere_3d(
+        dLongitude3_in, dLatitude3_in, iFlag_convert_radian
+    )
 
     # Vectors in 3D space
     a3vec = a3 - b3

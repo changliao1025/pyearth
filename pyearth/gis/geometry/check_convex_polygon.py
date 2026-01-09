@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def cross_product_2d(p_prev, p_curr, p_next):
     """
     Calculates the 2D cross product of vectors defined by three consecutive points.
@@ -21,6 +22,7 @@ def cross_product_2d(p_prev, p_curr, p_next):
 
     # 2D Cross Product (Ax * By) - (Ay * Bx)
     return (ax * by) - (ay * bx)
+
 
 def is_convex_polygon(polygon_vertices):
     """

@@ -5,11 +5,14 @@ This module provides functionality to calculate the perpendicular distance from 
 geographic point to a plane defined by three other points, using 3D spherical geometry.
 The plane passes through the Earth's center and the three defining points.
 """
+
 import math
 import numpy as np
 from typing import Union
 
-from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import convert_longitude_latitude_to_sphere_3d
+from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
+    convert_longitude_latitude_to_sphere_3d,
+)
 
 
 def calculate_distance_to_plane(
@@ -19,7 +22,7 @@ def calculate_distance_to_plane(
     dLatitude2_in: float,
     dLongitude3_in: float,
     dLatitude3_in: float,
-    iFlag_radian: bool = False
+    iFlag_radian: bool = False,
 ) -> float:
     """
     Calculate the distance from a point to a plane defined by three points in 3D space.
@@ -87,9 +90,15 @@ def calculate_distance_to_plane(
         lon3_rad, lat3_rad = np.radians([dLongitude3_in, dLatitude3_in])
 
     # Convert geographic coordinates to 3D Cartesian coordinates on unit sphere
-    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(lon1_rad, lat1_rad)  # Plane point 1
-    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(lon2_rad, lat2_rad)  # Query point
-    x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(lon3_rad, lat3_rad)  # Plane point 2
+    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(
+        lon1_rad, lat1_rad
+    )  # Plane point 1
+    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(
+        lon2_rad, lat2_rad
+    )  # Query point
+    x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(
+        lon3_rad, lat3_rad
+    )  # Plane point 2
 
     # Calculate two vectors in the plane
     # v1: from point 1 to point 2

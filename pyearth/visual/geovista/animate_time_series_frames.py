@@ -2,6 +2,7 @@ import os, sys
 import logging
 import numpy as np
 from typing import Optional, List, Tuple, Union, Dict, Any
+
 logger = logging.getLogger(__name__)
 import traceback
 from pyearth.visual.geovista.utility import (
@@ -11,8 +12,19 @@ from pyearth.visual.geovista.utility import (
     configure_camera,
     add_geographic_context,
 )
-def animate_multiple_frames(pPlotter, sFilename_out, dLongitude_start, dLatitude_focus,
-                               dZoom_factor, iAnimation_frames, dAnimation_speed, sAnimation_format, iFlag_verbose_in):
+
+
+def animate_multiple_frames(
+    pPlotter,
+    sFilename_out,
+    dLongitude_start,
+    dLatitude_focus,
+    dZoom_factor,
+    iAnimation_frames,
+    dAnimation_speed,
+    sAnimation_format,
+    iFlag_verbose_in,
+):
     """
     Create a rotating animation of the 3D globe visualization.
 
@@ -35,11 +47,11 @@ def animate_multiple_frames(pPlotter, sFilename_out, dLongitude_start, dLatitude
     """
     try:
         if iFlag_verbose_in:
-            logger.info(f'Creating {iAnimation_frames}-frame rotation animation')
-            logger.info(f'  - Starting longitude: {dLongitude_start:.1f}°')
-            logger.info(f'  - Base latitude: {dLatitude_focus:.1f}°')
-            logger.info(f'  - Rotation speed: {dAnimation_speed:.1f}°/frame')
-            logger.info(f'  - Output format: {sAnimation_format}')
+            logger.info(f"Creating {iAnimation_frames}-frame rotation animation")
+            logger.info(f"  - Starting longitude: {dLongitude_start:.1f}°")
+            logger.info(f"  - Base latitude: {dLatitude_focus:.1f}°")
+            logger.info(f"  - Rotation speed: {dAnimation_speed:.1f}°/frame")
+            logger.info(f"  - Output format: {sAnimation_format}")
 
         # Animation parameters
         dEarth_radius = DEFAULT_EARTH_RADIUS
@@ -52,7 +64,7 @@ def animate_multiple_frames(pPlotter, sFilename_out, dLongitude_start, dLatitude
         pPlotter.open_movie(sFilename_out, framerate=30)
 
         if iFlag_verbose_in:
-            logger.info('Generating animation frames...')
+            logger.info("Generating animation frames...")
 
         for iFrame in range(iAnimation_frames):
             # Calculate current longitude with smooth rotation
@@ -65,7 +77,9 @@ def animate_multiple_frames(pPlotter, sFilename_out, dLongitude_start, dLatitude
             # This creates a more interesting camera path than fixed latitude
             dFrames_div = float(iAnimation_frames) if iAnimation_frames > 0 else 1.0
             dTheta = 2.0 * math.pi * (float(iFrame) / dFrames_div) * dCycles + dPhase
-            dLatitude_current = float(dLatitude_focus) + dAmplitude_deg * math.sin(dTheta)
+            dLatitude_current = float(dLatitude_focus) + dAmplitude_deg * math.sin(
+                dTheta
+            )
 
             # Clamp latitude to avoid pole singularities
             dLatitude_current = max(-89.9, min(89.9, dLatitude_current))
@@ -107,12 +121,17 @@ def animate_multiple_frames(pPlotter, sFilename_out, dLongitude_start, dLatitude
             try:
                 pPlotter.write_frame()
 
-                if iFlag_verbose_in and (iFrame + 1) % max(1, iAnimation_frames // 10) == 0:
+                if (
+                    iFlag_verbose_in
+                    and (iFrame + 1) % max(1, iAnimation_frames // 10) == 0
+                ):
                     dProgress = ((iFrame + 1) / iAnimation_frames) * 100
-                    logger.info(f'  Progress: {dProgress:.0f}% ({iFrame + 1}/{iAnimation_frames} frames)')
+                    logger.info(
+                        f"  Progress: {dProgress:.0f}% ({iFrame + 1}/{iAnimation_frames} frames)"
+                    )
 
             except Exception as e:
-                logger.error(f'Failed to render frame {iFrame + 1}: {e}')
+                logger.error(f"Failed to render frame {iFrame + 1}: {e}")
                 try:
                     pPlotter.close()
                 except Exception:
@@ -123,27 +142,27 @@ def animate_multiple_frames(pPlotter, sFilename_out, dLongitude_start, dLatitude
         try:
             pPlotter.close()
         except Exception as e:
-            logger.warning(f'Error closing plotter: {e}')
+            logger.warning(f"Error closing plotter: {e}")
 
         # Validate output file creation
         if not os.path.exists(sFilename_out):
-            logger.error('Animation file was not created')
+            logger.error("Animation file was not created")
             return False
 
         # Log success information
         iFile_size = os.path.getsize(sFilename_out)
         if iFlag_verbose_in:
-            logger.info(f'✓ Animation created successfully: {sFilename_out}')
-            logger.info(f'  File size: {iFile_size / (1024*1024):.2f} MB')
-            logger.info(f'  Frames: {iAnimation_frames}')
-            logger.info(f'  Format: {sAnimation_format.upper()}')
-            logger.info(f'  Duration: ~{iAnimation_frames / 30:.1f} seconds at 30 FPS')
+            logger.info(f"✓ Animation created successfully: {sFilename_out}")
+            logger.info(f"  File size: {iFile_size / (1024*1024):.2f} MB")
+            logger.info(f"  Frames: {iAnimation_frames}")
+            logger.info(f"  Format: {sAnimation_format.upper()}")
+            logger.info(f"  Duration: ~{iAnimation_frames / 30:.1f} seconds at 30 FPS")
 
         return True
 
     except Exception as e:
-        logger.error(f'Unexpected error during animation creation: {e}')
-        logger.error(f'Traceback: {traceback.format_exc()}')
+        logger.error(f"Unexpected error during animation creation: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         try:
             pPlotter.close()
         except Exception:

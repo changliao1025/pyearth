@@ -1,4 +1,3 @@
-
 import io
 import os
 
@@ -6,8 +5,7 @@ from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 
 NAME = "pyearth"
-DESCRIPTION = \
-    "Python for Earth Science."
+DESCRIPTION = "Python for Earth Science."
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
@@ -29,7 +27,7 @@ CLASSIFY = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Visualization"
+    "Topic :: Scientific/Engineering :: Visualization",
 ]
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -56,8 +54,7 @@ extensions = [
 # To build Cython extensions, run: python setup.py build_ext --inplace
 
 try:
-    with io.open(os.path.join(
-            HERE, "README.md"), encoding="utf-8") as f:
+    with io.open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
         LONG_DESCRIPTION = "\n" + f.read()
 
 except FileNotFoundError:
@@ -80,8 +77,8 @@ setup(
     install_requires=REQUIRED,
     classifiers=CLASSIFY,
     extras_require={
-        'statistics': ['requests','netCDF4','pandas', 'scipy', 'statsmodels'],
-        'spatial': ['rtree'],
-        'cython': ['Cython>=0.29.0', 'numpy'],
-    }
+        "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
+        "spatial": ["rtree"],
+        "cython": ["Cython>=0.29.0", "numpy"],
+    },
 )

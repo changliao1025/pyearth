@@ -2,6 +2,7 @@ import numpy as np
 from osgeo import gdalconst, ogr
 from typing import Any, Type, Union
 
+
 def gdal_to_numpy_datatype(gdal_dtype: int) -> Type[np.number]:
     """
     Convert a GDAL data type to a NumPy data type.
@@ -30,6 +31,7 @@ def gdal_to_numpy_datatype(gdal_dtype: int) -> Type[np.number]:
         return np.int8
     else:
         raise ValueError(f"GDAL data type {gdal_dtype} not recognized")
+
 
 def numpy_dtype_to_gdal(numpy_dtype: Type[np.number]) -> int:
     """
@@ -61,7 +63,9 @@ def numpy_dtype_to_gdal(numpy_dtype: Type[np.number]) -> int:
         raise ValueError(f"Numpy data type {numpy_dtype} not recognized")
 
 
-def numpy_to_gdal_type(numpy_value: Any, target_type: int = None) -> Union[int, float, str, bool, None]:
+def numpy_to_gdal_type(
+    numpy_value: Any, target_type: int = None
+) -> Union[int, float, str, bool, None]:
     """
     Convert a NumPy value to an appropriate type for GDAL/OGR functions.
 
@@ -72,7 +76,7 @@ def numpy_to_gdal_type(numpy_value: Any, target_type: int = None) -> Union[int, 
     Returns:
     Union[int, float, str, bool, None]: The value converted to a Python native type that GDAL/OGR can handle.
     """
-    if numpy_value is None or (hasattr(numpy_value, 'dtype') and np.isnan(numpy_value)):
+    if numpy_value is None or (hasattr(numpy_value, "dtype") and np.isnan(numpy_value)):
         if target_type in (ogr.OFTInteger, ogr.OFTInteger64):
             return 0
         elif target_type == ogr.OFTReal:
@@ -90,8 +94,22 @@ def numpy_to_gdal_type(numpy_value: Any, target_type: int = None) -> Union[int, 
         elif target_type == ogr.OFTString:
             return str(numpy_value)
 
-    if isinstance(numpy_value, (np.integer, np.int_, np.int8, np.int16, np.int32, np.int64,
-                                np.uint, np.uint8, np.uint16, np.uint32, np.uint64)):
+    if isinstance(
+        numpy_value,
+        (
+            np.integer,
+            np.int_,
+            np.int8,
+            np.int16,
+            np.int32,
+            np.int64,
+            np.uint,
+            np.uint8,
+            np.uint16,
+            np.uint32,
+            np.uint64,
+        ),
+    ):
         return int(numpy_value)
     elif isinstance(numpy_value, (np.float_, np.float16, np.float32, np.float64)):
         return float(numpy_value)

@@ -1,9 +1,13 @@
 import numpy as np
 from osgeo import ogr
 from typing import List, Tuple, Optional
-from pyearth.gis.geometry.calculate_intersect_on_great_circle import find_great_circle_intersection_with_meridian
+from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
+    find_great_circle_intersection_with_meridian,
+)
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+
 Coord = Tuple[float, float]
+
 
 def unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
     """Unwrap longitude coordinates to handle International Date Line crossings.
@@ -48,8 +52,9 @@ def unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
 
     return coords_unwrapped
 
+
 def convert_international_date_line_polygon_to_unwrapped_polygon(
-    geometry_in: ogr.Geometry
+    geometry_in: ogr.Geometry,
 ) -> Optional[ogr.Geometry]:
     """
     Convert a polygon crossing the International Date Line to a valid polygon.
@@ -229,7 +234,10 @@ def convert_international_date_line_polygon_to_unwrapped_polygon(
 
     return geometry_out
 
-def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) -> Optional[List[np.ndarray]]:
+
+def split_international_date_line_polygon_coordinates(
+    aCoord_gcs: np.ndarray,
+) -> Optional[List[np.ndarray]]:
     """
     Split a polygon crossing the International Date Line into left and right hemisphere polygons.
 
@@ -414,18 +422,32 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
     idl_points[:-1] = (longitudes[:-1] == 180.0) | (longitudes[:-1] == -180.0)
 
     # More explicit IDL point detection for crossing logic
-    current_on_idl = (np.abs(longitudes - 180.0) < 1e-10) | (np.abs(longitudes + 180.0) < 1e-10)
-    next_on_idl = (np.abs(longitudes_next - 180.0) < 1e-10) | (np.abs(longitudes_next + 180.0) < 1e-10)
+    current_on_idl = (np.abs(longitudes - 180.0) < 1e-10) | (
+        np.abs(longitudes + 180.0) < 1e-10
+    )
+    next_on_idl = (np.abs(longitudes_next - 180.0) < 1e-10) | (
+        np.abs(longitudes_next + 180.0) < 1e-10
+    )
 
     # Find eastward crossings: positive to negative longitude (0° → 180° → -180°)
     # Exclude edges where either vertex is exactly on the IDL
-    eastward_crossings = ((longitudes > 0) & (longitudes < 180.0) & (longitudes_next < 0) &
-                         ~current_on_idl & ~next_on_idl)
+    eastward_crossings = (
+        (longitudes > 0)
+        & (longitudes < 180.0)
+        & (longitudes_next < 0)
+        & ~current_on_idl
+        & ~next_on_idl
+    )
 
     # Find westward crossings: negative to positive longitude (-180° → 180° → 0°)
     # Exclude edges where either vertex is exactly on the IDL
-    westward_crossings = ((longitudes < 0) & (longitudes > -180.0) & (longitudes_next > 0) &
-                         ~current_on_idl & ~next_on_idl)
+    westward_crossings = (
+        (longitudes < 0)
+        & (longitudes > -180.0)
+        & (longitudes_next > 0)
+        & ~current_on_idl
+        & ~next_on_idl
+    )
 
     # Combine crossing conditions
     crossing_mask = idl_points | eastward_crossings | westward_crossings
@@ -440,8 +462,10 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
     # Verify we found exactly 2 crossings for normal splitting
     # A polygon crossing the IDL should have exactly 2 edges that cross it
     if len(aIndex) != 2:
-        raise ValueError(f"Expected exactly 2 IDL crossings, found {len(aIndex)}. "
-                        f"This polygon may not cross the IDL properly or may have a complex crossing pattern.")
+        raise ValueError(
+            f"Expected exactly 2 IDL crossings, found {len(aIndex)}. "
+            f"This polygon may not cross the IDL properly or may have a complex crossing pattern."
+        )
 
     # Helper function to calculate intersection latitude for an edge
     def calculate_intersection_latitude(edge_index: int) -> float:
@@ -462,10 +486,12 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
         # Determine correct order for intersection calculation
         if start_lon > 0 and end_lon < 0:
             _, intersection_lat = find_great_circle_intersection_with_meridian(
-                start_lon, start_lat, end_lon, end_lat, target_longitude)
+                start_lon, start_lat, end_lon, end_lat, target_longitude
+            )
         else:
             _, intersection_lat = find_great_circle_intersection_with_meridian(
-                end_lon, end_lat, start_lon, start_lat, target_longitude)
+                end_lon, end_lat, start_lon, start_lat, target_longitude
+            )
 
         return intersection_lat
 
@@ -512,10 +538,9 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
             if is_crossing_vertex and not eastern_boundary_added:
                 eastern_boundary_added = True
                 # Add meridian boundary points (south to north)
-                eastern_polygon_coords.extend([
-                    [EASTERN_BOUNDARY, southern_lat],
-                    [EASTERN_BOUNDARY, northern_lat]
-                ])
+                eastern_polygon_coords.extend(
+                    [[EASTERN_BOUNDARY, southern_lat], [EASTERN_BOUNDARY, northern_lat]]
+                )
 
         # Process Western hemisphere vertices (negative longitude)
         elif longitude < 0:
@@ -530,10 +555,9 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
             if is_crossing_vertex and not western_boundary_added:
                 western_boundary_added = True
                 # Add meridian boundary points (north to south for correct winding)
-                western_polygon_coords.extend([
-                    [WESTERN_BOUNDARY, northern_lat],
-                    [WESTERN_BOUNDARY, southern_lat]
-                ])
+                western_polygon_coords.extend(
+                    [[WESTERN_BOUNDARY, northern_lat], [WESTERN_BOUNDARY, southern_lat]]
+                )
 
     # Convert to numpy arrays and ensure proper closure
     def ensure_polygon_closure(coords_list: list) -> np.ndarray:
@@ -560,7 +584,10 @@ def split_international_date_line_polygon_coordinates(aCoord_gcs: np.ndarray) ->
 
     return [eastern_polygon, western_polygon]
 
-def check_cross_international_date_line_polygon(coords: np.ndarray) -> Tuple[bool, np.ndarray]:
+
+def check_cross_international_date_line_polygon(
+    coords: np.ndarray,
+) -> Tuple[bool, np.ndarray]:
     """Check if polygon coordinates cross the International Date Line.
 
     This function distinguishes between actual IDL edge crossings and vertices
@@ -603,7 +630,11 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> Tuple[boo
     detection while preserving the ability to split truly crossing polygons.
     """
     try:
-        if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
+        if (
+            not isinstance(coords, np.ndarray)
+            or coords.ndim != 2
+            or coords.shape[1] != 2
+        ):
             raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
 
         if len(coords) < 3:
@@ -611,7 +642,10 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> Tuple[boo
 
         # Validate coordinate ranges
         lons, lats = coords[:, 0], coords[:, 1]
-        if not (np.all((-180 <= lons) & (lons <= 180)) and np.all((-90 <= lats) & (lats <= 90))):
+        if not (
+            np.all((-180 <= lons) & (lons <= 180))
+            and np.all((-90 <= lats) & (lats <= 90))
+        ):
             return False, coords.copy()
 
     except (ValueError, IndexError, TypeError):
@@ -631,12 +665,18 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> Tuple[boo
         lons_next = np.roll(lons, -1)
 
         # Find eastward crossings: positive to negative longitude, excluding IDL vertices
-        eastward_crossings = ((lons > 0) & (lons < 180.0) & (lons_next < 0) &
-                             ~idl_vertices & ~np.roll(idl_vertices, -1))
+        eastward_crossings = (
+            (lons > 0)
+            & (lons < 180.0)
+            & (lons_next < 0)
+            & ~idl_vertices
+            & ~np.roll(idl_vertices, -1)
+        )
 
         # Find westward crossings: negative to positive longitude, excluding IDL vertices
-        westward_crossings = ((lons < 0) & (lons_next > 0) &
-                             ~idl_vertices & ~np.roll(idl_vertices, -1))
+        westward_crossings = (
+            (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
+        )
 
         # If no actual edge crossings, adjust IDL vertices and return False
         if not (np.any(eastward_crossings) or np.any(westward_crossings)):
@@ -695,8 +735,10 @@ def check_cross_international_date_line_polygon(coords: np.ndarray) -> Tuple[boo
     crossing = max_jump > 180 or wrap_jump > 180
     return crossing, None
 
+
 # Alias for backward compatibility
 check_cross_idl = check_cross_international_date_line_polygon
+
 
 def check_cross_international_date_line_geometry(geometry_in: ogr.Geometry) -> bool:
     """Check if an OGR geometry crosses the International Date Line.
@@ -792,7 +834,7 @@ def check_cross_international_date_line_geometry(geometry_in: ogr.Geometry) -> b
         raise ValueError("geometry_in cannot be None")
 
     # Verify it's an OGR Geometry object
-    if not hasattr(geometry_in, 'GetGeometryName'):
+    if not hasattr(geometry_in, "GetGeometryName"):
         raise TypeError("geometry_in must be an OGR Geometry object")
 
     # Validate geometry before processing
@@ -824,9 +866,11 @@ def check_cross_international_date_line_geometry(geometry_in: ogr.Geometry) -> b
 
     else:
         # Handle unknown or unsupported geometry types
-        raise ValueError(f"Unsupported geometry type: {sGeometry_type}. "
-                        f"Supported types: POLYGON, MULTIPOLYGON, LINESTRING, "
-                        f"MULTILINESTRING, POINT, MULTIPOINT, GEOMETRYCOLLECTION")
+        raise ValueError(
+            f"Unsupported geometry type: {sGeometry_type}. "
+            f"Supported types: POLYGON, MULTIPOLYGON, LINESTRING, "
+            f"MULTILINESTRING, POINT, MULTIPOINT, GEOMETRYCOLLECTION"
+        )
 
 
 def _check_polygon_idl_crossing(polygon: ogr.Geometry) -> bool:
@@ -1009,7 +1053,9 @@ def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     return signed_area
 
 
-def reorder_international_date_line_polygon_vertices(vertices: List[Coord]) -> List[Coord]:
+def reorder_international_date_line_polygon_vertices(
+    vertices: List[Coord],
+) -> List[Coord]:
     """Reorder polygon vertices to create a valid geometry by rotation.
 
     Parameters
@@ -1036,11 +1082,13 @@ def reorder_international_date_line_polygon_vertices(vertices: List[Coord]) -> L
     try:
         # Check that each vertex is a valid coordinate pair
         for i, vertex in enumerate(vertices):
-            if not hasattr(vertex, '__len__') or len(vertex) != 2:
+            if not hasattr(vertex, "__len__") or len(vertex) != 2:
                 raise ValueError(f"Vertex {i} must be a coordinate pair (lon, lat)")
             lon, lat = float(vertex[0]), float(vertex[1])
             if not (-180 <= lon <= 180):
-                raise ValueError(f"Longitude {lon} at vertex {i} out of range [-180, 180]")
+                raise ValueError(
+                    f"Longitude {lon} at vertex {i} out of range [-180, 180]"
+                )
             if not (-90 <= lat <= 90):
                 raise ValueError(f"Latitude {lat} at vertex {i} out of range [-90, 90]")
     except (TypeError, ValueError, IndexError) as e:
@@ -1084,8 +1132,10 @@ def reorder_international_date_line_polygon_vertices(vertices: List[Coord]) -> L
             current_vertices = current_vertices[1:] + [current_vertices[0]]
 
     if not is_valid:
-        raise ValueError('Cannot form a valid polygon by rotating vertices. '
-                        'The input coordinates may be self-intersecting or invalid.')
+        raise ValueError(
+            "Cannot form a valid polygon by rotating vertices. "
+            "The input coordinates may be self-intersecting or invalid."
+        )
 
     new_vertices = current_vertices + [current_vertices[0]]
     return new_vertices

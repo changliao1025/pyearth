@@ -4,6 +4,7 @@ Symbolic link creation utilities.
 This module provides functions for creating symbolic links (symlinks) with
 automatic handling of existing links and proper error management.
 """
+
 import os
 import errno
 from pathlib import Path
@@ -78,7 +79,9 @@ def create_symlink(source: Union[str, Path], target_link: Union[str, Path]) -> N
     """
     # Convert to Path objects for easier manipulation
     source_path = Path(source) if not isinstance(source, Path) else source
-    target_path = Path(target_link) if not isinstance(target_link, Path) else target_link
+    target_path = (
+        Path(target_link) if not isinstance(target_link, Path) else target_link
+    )
 
     # Validate inputs
     if not source:

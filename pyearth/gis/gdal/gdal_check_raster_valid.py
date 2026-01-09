@@ -4,7 +4,10 @@ from typing import Union
 from pathlib import Path
 from osgeo import gdal
 
-def gdal_check_raster_valid(sFilename_in: Union[str, Path], print_err: bool = False) -> bool:
+
+def gdal_check_raster_valid(
+    sFilename_in: Union[str, Path], print_err: bool = False
+) -> bool:
     """Check if a raster file is valid by computing band checksums.
 
     This function attempts to open a raster and compute checksums for all bands
@@ -44,7 +47,9 @@ def gdal_check_raster_valid(sFilename_in: Union[str, Path], print_err: bool = Fa
         if dataset is None:
             if print_err:
                 error_msg = gdal.GetLastErrorMsg()
-                print(f"GDAL error opening file: {error_msg if error_msg else 'Unknown error'}")
+                print(
+                    f"GDAL error opening file: {error_msg if error_msg else 'Unknown error'}"
+                )
             return False
 
         band_count = dataset.RasterCount

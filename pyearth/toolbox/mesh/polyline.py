@@ -8,16 +8,24 @@ import numpy as np
 from osgeo import ogr
 from pyearth.toolbox.mesh.point import pypoint
 from pyearth.toolbox.mesh.line import pyline
-from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import export_point_as_polygon_file
+from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
+    export_point_as_polygon_file,
+)
+
 iFlag_cython = importlib.util.find_spec("cython")
 if iFlag_cython is not None:
-    from pyearth.gis.geometry.kernel import calculate_distance_based_on_longitude_latitude
+    from pyearth.gis.geometry.kernel import (
+        calculate_distance_based_on_longitude_latitude,
+    )
 else:
-    from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
+    from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import (
+        calculate_distance_based_on_longitude_latitude,
+    )
 
 
 class PolylineClassEncoder(JSONEncoder):
     """Custom JSON encoder for pypolyline objects and their dependencies."""
+
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -33,6 +41,7 @@ class PolylineClassEncoder(JSONEncoder):
             return obj.lLineID
 
         return JSONEncoder.default(self, obj)
+
 
 class pypolyline:
     """
@@ -123,12 +132,14 @@ class pypolyline:
         Returns:
             str: Developer-friendly representation.
         """
-        return (f"pypolyline(nLine={self.nLine}, nPoint={self.nPoint}, "
-                f"length={self.dLength:.2f}m, "
-                f"start=({self.pPoint_start.dLongitude_degree:.6f}, "
-                f"{self.pPoint_start.dLatitude_degree:.6f}), "
-                f"end=({self.pPoint_end.dLongitude_degree:.6f}, "
-                f"{self.pPoint_end.dLatitude_degree:.6f}))")
+        return (
+            f"pypolyline(nLine={self.nLine}, nPoint={self.nPoint}, "
+            f"length={self.dLength:.2f}m, "
+            f"start=({self.pPoint_start.dLongitude_degree:.6f}, "
+            f"{self.pPoint_start.dLatitude_degree:.6f}), "
+            f"end=({self.pPoint_end.dLongitude_degree:.6f}, "
+            f"{self.pPoint_end.dLatitude_degree:.6f}))"
+        )
 
     def __str__(self) -> str:
         """
@@ -137,12 +148,14 @@ class pypolyline:
         Returns:
             str: Human-readable description.
         """
-        return (f"Polyline with {self.nLine} segments, {self.nPoint} points, "
-                f"length {self.dLength:.2f}m from "
-                f"({self.pPoint_start.dLongitude_degree:.4f}°, "
-                f"{self.pPoint_start.dLatitude_degree:.4f}°) to "
-                f"({self.pPoint_end.dLongitude_degree:.4f}°, "
-                f"{self.pPoint_end.dLatitude_degree:.4f}°)")
+        return (
+            f"Polyline with {self.nLine} segments, {self.nPoint} points, "
+            f"length {self.dLength:.2f}m from "
+            f"({self.pPoint_start.dLongitude_degree:.4f}°, "
+            f"{self.pPoint_start.dLatitude_degree:.4f}°) to "
+            f"({self.pPoint_end.dLongitude_degree:.4f}°, "
+            f"{self.pPoint_end.dLatitude_degree:.4f}°)"
+        )
 
     def calculate_length(self) -> float:
         """
@@ -182,8 +195,10 @@ class pypolyline:
         self.aPoint = list(reversed(self.aPoint))
 
         # Rebuild line segments from reversed points
-        self.aLine = [pyline(self.aPoint[i], self.aPoint[i + 1])
-                      for i in range(len(self.aPoint) - 1)]
+        self.aLine = [
+            pyline(self.aPoint[i], self.aPoint[i + 1])
+            for i in range(len(self.aPoint) - 1)
+        ]
 
         # Update endpoints
         self.pPoint_start = self.aLine[0].pPoint_start
@@ -305,7 +320,7 @@ class pypolyline:
                 - Closest point on the polyline
         """
         # Check distances to all vertices
-        dDistance_min_point = float('inf')
+        dDistance_min_point = float("inf")
         pPoint_min_point = None
 
         for point in self.aPoint:
@@ -315,7 +330,7 @@ class pypolyline:
                 pPoint_min_point = point
 
         # Check distances to all line segments (FIXED: was using non-existent nEdge/aEdge)
-        dDistance_min_edge = float('inf')
+        dDistance_min_edge = float("inf")
         pPoint_min_edge = None
 
         for line in self.aLine:
@@ -330,8 +345,12 @@ class pypolyline:
         else:
             return dDistance_min_edge, pPoint_min_edge
 
-    def calculate_buffer_zone_polygon(self, dRadius: float, sFilename_out: Optional[str] = None,
-                                     sFolder_out: Optional[str] = None) -> Tuple[str, List[pypoint], List]:
+    def calculate_buffer_zone_polygon(
+        self,
+        dRadius: float,
+        sFilename_out: Optional[str] = None,
+        sFolder_out: Optional[str] = None,
+    ) -> Tuple[str, List[pypoint], List]:
         """
         Calculate the buffer zone polygon around the polyline.
 
@@ -357,7 +376,9 @@ class pypolyline:
         aCircle_out = list()
         for i in range(self.nLine):
             line = self.aLine[i]
-            aPoint, aPoint_center, aPoint_circle, aCircle = line.calculate_buffer_zone_polygon(dRadius)
+            aPoint, aPoint_center, aPoint_circle, aCircle = (
+                line.calculate_buffer_zone_polygon(dRadius)
+            )
             aCircle_out.append(aCircle)
             ring = ogr.Geometry(ogr.wkbLinearRing)
             for pPoint in aPoint:
@@ -369,15 +390,17 @@ class pypolyline:
             # Add the polygon to the MultiPolygon
             pMultiPolygon.AddGeometry(pPolygon)
             if sFolder_out is not None:
-                sFilename_dummy = os.path.join(sFolder_out, 'buffer_zone_line_%d.geojson' % i)
+                sFilename_dummy = os.path.join(
+                    sFolder_out, "buffer_zone_line_%d.geojson" % i
+                )
                 export_point_as_polygon_file(aPoint, sFilename_dummy)
 
         pUnionPolygon = pMultiPolygon.UnionCascaded()
         for i in range(pUnionPolygon.GetGeometryRef(0).GetPointCount()):
             lon, lat, _ = pUnionPolygon.GetGeometryRef(0).GetPoint(i)
             point2 = dict()
-            point2['dLongitude_degree'] = lon
-            point2['dLatitude_degree'] = lat
+            point2["dLongitude_degree"] = lon
+            point2["dLatitude_degree"] = lat
             pPoint2 = pypoint(point2)
             aPoint_out.append(pPoint2)
 
@@ -401,16 +424,22 @@ class pypolyline:
         Returns:
             float: Minimum distance in meters between the two polylines.
         """
-        aPoint_a = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in self.aPoint])
-        aPoint_b = np.array([[v.dLongitude_degree, v.dLatitude_degree] for v in pPolyline_other.aPoint])
+        aPoint_a = np.array(
+            [[v.dLongitude_degree, v.dLatitude_degree] for v in self.aPoint]
+        )
+        aPoint_b = np.array(
+            [[v.dLongitude_degree, v.dLatitude_degree] for v in pPolyline_other.aPoint]
+        )
 
         # Use broadcasting to calculate all pairwise distances at once
         lon1 = aPoint_a[:, 0:1]  # Convert to column vector
         lat1 = aPoint_a[:, 1:2]
-        lon2 = aPoint_b[:, 0]    # Keep as row vector
+        lon2 = aPoint_b[:, 0]  # Keep as row vector
         lat2 = aPoint_b[:, 1]
         # Vectorized distance calculation
-        distances = calculate_distance_based_on_longitude_latitude(lon1, lat1, lon2, lat2)
+        distances = calculate_distance_based_on_longitude_latitude(
+            lon1, lat1, lon2, lat2
+        )
         return np.min(distances)
 
     def calculate_bearing_angle(self) -> Optional[float]:
@@ -439,7 +468,9 @@ class pypolyline:
 
         # Calculate bearing using the forward azimuth formula
         y = np.sin(dlon_rad) * np.cos(lat2_rad)
-        x = np.cos(lat1_rad) * np.sin(lat2_rad) - np.sin(lat1_rad) * np.cos(lat2_rad) * np.cos(dlon_rad)
+        x = np.cos(lat1_rad) * np.sin(lat2_rad) - np.sin(lat1_rad) * np.cos(
+            lat2_rad
+        ) * np.cos(dlon_rad)
 
         # Calculate bearing in radians
         bearing_rad = np.arctan2(y, x)
@@ -494,17 +525,15 @@ class pypolyline:
             The 'aLine' and 'aPoint' attributes are excluded from JSON output
             to avoid circular references and reduce size.
         """
-        aSkip = ['aLine', 'aPoint']
+        aSkip = ["aLine", "aPoint"]
 
         obj = self.__dict__.copy()
         for sKey in aSkip:
             obj.pop(sKey, None)
 
-        sJson = json.dumps(obj,
-            sort_keys=True,
-            indent=4,
-            ensure_ascii=True,
-            cls=PolylineClassEncoder)
+        sJson = json.dumps(
+            obj, sort_keys=True, indent=4, ensure_ascii=True, cls=PolylineClassEncoder
+        )
         return sJson
 
     def towkt(self) -> str:
@@ -516,7 +545,9 @@ class pypolyline:
         """
         pGeometry = ogr.Geometry(ogr.wkbLineString)
         for i in range(self.nPoint):
-            pGeometry.AddPoint(self.aPoint[i].dLongitude_degree, self.aPoint[i].dLatitude_degree)
+            pGeometry.AddPoint(
+                self.aPoint[i].dLongitude_degree, self.aPoint[i].dLatitude_degree
+            )
 
         sWKT = pGeometry.ExportToWkt()
         pGeometry = None

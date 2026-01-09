@@ -86,17 +86,17 @@ import numpy as np
 
 
 @overload
-def convert_360_to_180(longitude_degree_in: float) -> float:
-    ...
+def convert_360_to_180(longitude_degree_in: float) -> float: ...
 
 
 @overload
-def convert_360_to_180(longitude_degree_in: Union[np.ndarray, list, tuple]) -> np.ndarray:
-    ...
+def convert_360_to_180(
+    longitude_degree_in: Union[np.ndarray, list, tuple],
+) -> np.ndarray: ...
 
 
 def convert_360_to_180(
-    longitude_degree_in: Union[float, np.ndarray, list, tuple]
+    longitude_degree_in: Union[float, np.ndarray, list, tuple],
 ) -> Union[float, np.ndarray]:
     """
     Convert longitude from [0°, 360°] range to [-180°, 180°] range.

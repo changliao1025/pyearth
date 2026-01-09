@@ -22,18 +22,23 @@ from pyearth.visual.geovista.utility import (
     add_mesh_to_plotter,
     validate_output_filename,
     get_system_info,
-    VALID_IMAGE_FORMATS
+    VALID_IMAGE_FORMATS,
 )
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
+
 class SingleFrameResult:
     """Result object for single frame visualization operations."""
 
-    def __init__(self, success: bool, message: str = "",
-                 file_info: Optional[Dict[str, Any]] = None,
-                 system_info: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        success: bool,
+        message: str = "",
+        file_info: Optional[Dict[str, Any]] = None,
+        system_info: Optional[Dict[str, Any]] = None,
+    ):
         self.success = success
         self.message = message
         self.file_info = file_info or {}
@@ -58,11 +63,12 @@ class SingleFrameResult:
 
         return "\n".join(lines)
 
+
 def map_single_frame(
     pMesh,
     aValid_cell_indices: np.ndarray,
     pConfig: VisualizationConfig,
-    style: Optional[str] = 'surface',
+    style: Optional[str] = "surface",
     sScalar: Optional[str] = None,
     sUnit: Optional[str] = None,
     sFilename_out: Optional[str] = None,
@@ -70,7 +76,7 @@ def map_single_frame(
     scalar_config: Optional[ScalarBarConfig] = None,
     validate_inputs: bool = True,
     retry_on_failure: bool = True,
-    return_detailed_result: bool = False
+    return_detailed_result: bool = False,
 ) -> Union[bool, SingleFrameResult]:
     """
     Enhanced single frame visualization with comprehensive error handling and validation.
@@ -116,7 +122,9 @@ def map_single_frame(
 
     # Input validation
     if validate_inputs:
-        validation_errors = _validate_inputs(pMesh, aValid_cell_indices, pConfig, sFilename_out)
+        validation_errors = _validate_inputs(
+            pMesh, aValid_cell_indices, pConfig, sFilename_out
+        )
         if validation_errors:
             error_msg = f"Input validation failed: {'; '.join(validation_errors)}"
             logger.error(error_msg)
@@ -125,11 +133,11 @@ def map_single_frame(
 
     # Initialize result tracking
     result_info = {
-        'plotter_created': False,
-        'mesh_added': False,
-        'camera_configured': False,
-        'context_added': False,
-        'output_saved': False
+        "plotter_created": False,
+        "mesh_added": False,
+        "camera_configured": False,
+        "context_added": False,
+        "output_saved": False,
     }
 
     plotter = None
@@ -138,7 +146,9 @@ def map_single_frame(
     try:
         # Validate output filename if provided
         if sFilename_out:
-            is_valid, validation_msg = validate_output_filename(sFilename_out, VALID_IMAGE_FORMATS)
+            is_valid, validation_msg = validate_output_filename(
+                sFilename_out, VALID_IMAGE_FORMATS
+            )
             if not is_valid:
                 error_msg = f"Output filename validation failed: {validation_msg}"
                 logger.error(error_msg)
@@ -154,10 +164,10 @@ def map_single_frame(
             verbose=pConfig.verbose,
             window_size=pConfig.window_size,
             use_xvfb=pConfig.use_xvfb,
-            force_xvfb=pConfig.force_xvfb
+            force_xvfb=pConfig.force_xvfb,
         )
 
-        plotter.add_base_layer(texture= gv.natural_earth_hypsometric())
+        plotter.add_base_layer(texture=gv.natural_earth_hypsometric())
 
         if plotter is None:
             error_msg = "Failed to create GeoVista plotter"
@@ -169,7 +179,7 @@ def map_single_frame(
             result = SingleFrameResult(False, error_msg, system_info=get_system_info())
             return result if return_detailed_result else False
 
-        result_info['plotter_created'] = True
+        result_info["plotter_created"] = True
 
         # Add mesh to plotter using enhanced handler
         if pConfig.verbose:
@@ -184,7 +194,7 @@ def map_single_frame(
             scalar_config=scalar_config,
             colormap=pConfig.colormap,
             unit=sUnit or "",
-            validate_data=validate_inputs
+            validate_data=validate_inputs,
         )
 
         if not mesh_success:
@@ -193,34 +203,30 @@ def map_single_frame(
             result = SingleFrameResult(False, error_msg, result_info)
             return result if return_detailed_result else False
 
-        result_info['mesh_added'] = True
+        result_info["mesh_added"] = True
 
         # Configure camera with enhanced controller
         if pConfig.verbose:
             logger.info("📷 Configuring camera position...")
 
         camera_success = configure_camera_enhanced(
-            plotter=plotter,
-            config=pConfig,
-            use_enhanced_controller=True
+            plotter=plotter, config=pConfig, use_enhanced_controller=True
         )
 
         if not camera_success and pConfig.verbose:
             logger.warning("Camera configuration had issues, but continuing...")
 
-        result_info['camera_configured'] = camera_success
+        result_info["camera_configured"] = camera_success
 
         # Add geographic context with enhanced handler
         if pConfig.verbose:
             logger.info("🌍 Adding geographic context...")
 
         context_results = add_geographic_context_enhanced(
-            plotter=plotter,
-            config=pConfig,
-            retry_on_failure=retry_on_failure
+            plotter=plotter, config=pConfig, retry_on_failure=retry_on_failure
         )
 
-        result_info['context_added'] = any(context_results.values())
+        result_info["context_added"] = any(context_results.values())
 
         if pConfig.verbose and context_results:
             success_items = [k for k, v in context_results.items() if v]
@@ -237,28 +243,28 @@ def map_single_frame(
 
             try:
                 # Apply image scaling if specified
-                if hasattr(pConfig, 'image_scale') and pConfig.image_scale != 1.0:
+                if hasattr(pConfig, "image_scale") and pConfig.image_scale != 1.0:
                     plotter.image_scale = pConfig.image_scale
                     print(f"🔍 Applied image scale: {pConfig.image_scale}")
 
-                #plotter.screenshot(sFilename_out)
-                #get the extension to determine raster or vector
-                ext = os.path.splitext(sFilename_out.lower())[1].lstrip('.')
-                if ext in ['png','jpg','jpeg']:
+                # plotter.screenshot(sFilename_out)
+                # get the extension to determine raster or vector
+                ext = os.path.splitext(sFilename_out.lower())[1].lstrip(".")
+                if ext in ["png", "jpg", "jpeg"]:
                     plotter.screenshot(sFilename_out)
                 else:
-                    plotter.save_graphic(sFilename_out, raster = False)
-                result_info['output_saved'] = True
+                    plotter.save_graphic(sFilename_out, raster=False)
+                result_info["output_saved"] = True
 
                 # Verify and collect file information
                 if os.path.exists(sFilename_out):
                     file_size = os.path.getsize(sFilename_out)
                     file_info = {
-                        'filename': sFilename_out,
-                        'size_bytes': file_size,
-                        'size_kb': file_size / 1024,
-                        'size_mb': file_size / (1024 * 1024),
-                        'exists': True
+                        "filename": sFilename_out,
+                        "size_bytes": file_size,
+                        "size_kb": file_size / 1024,
+                        "size_mb": file_size / (1024 * 1024),
+                        "exists": True,
                     }
 
                     if pConfig.verbose:
@@ -268,12 +274,14 @@ def map_single_frame(
                 else:
                     error_msg = f"Screenshot command executed but file not found: {sFilename_out}"
                     logger.warning(error_msg)
-                    file_info['exists'] = False
+                    file_info["exists"] = False
 
             except Exception as e:
                 error_msg = f"Failed to save screenshot: {e}"
                 logger.error(error_msg)
-                result = SingleFrameResult(False, error_msg, result_info, get_system_info())
+                result = SingleFrameResult(
+                    False, error_msg, result_info, get_system_info()
+                )
                 return result if return_detailed_result else False
         else:
             # Interactive display
@@ -283,11 +291,15 @@ def map_single_frame(
 
             try:
                 plotter.show()
-                result_info['output_saved'] = True  # Consider interactive display as "output"
+                result_info["output_saved"] = (
+                    True  # Consider interactive display as "output"
+                )
             except Exception as e:
                 error_msg = f"Failed to display interactive window: {e}"
                 logger.error(error_msg)
-                result = SingleFrameResult(False, error_msg, result_info, get_system_info())
+                result = SingleFrameResult(
+                    False, error_msg, result_info, get_system_info()
+                )
                 return result if return_detailed_result else False
 
         # Success!
@@ -299,7 +311,7 @@ def map_single_frame(
             success=True,
             message=success_msg,
             file_info=file_info,
-            system_info=get_system_info() if return_detailed_result else {}
+            system_info=get_system_info() if return_detailed_result else {},
         )
 
         return result if return_detailed_result else True
@@ -322,9 +334,13 @@ def map_single_frame(
             except Exception as e:
                 logger.warning(f"Error during plotter cleanup: {e}")
 
-def _validate_inputs(mesh, valid_cell_indices: np.ndarray,
-                    config: VisualizationConfig,
-                    output_filename: Optional[str]) -> List[str]:
+
+def _validate_inputs(
+    mesh,
+    valid_cell_indices: np.ndarray,
+    config: VisualizationConfig,
+    output_filename: Optional[str],
+) -> List[str]:
     """
     Validate inputs for single frame visualization.
 
@@ -355,8 +371,10 @@ def _validate_inputs(mesh, valid_cell_indices: np.ndarray,
             errors.append("Output filename must be a non-empty string")
         else:
             # Check extension
-            ext = os.path.splitext(output_filename.lower())[1].lstrip('.')
+            ext = os.path.splitext(output_filename.lower())[1].lstrip(".")
             if ext not in VALID_IMAGE_FORMATS:
-                errors.append(f"Invalid image format '{ext}'. Valid formats: {VALID_IMAGE_FORMATS}")
+                errors.append(
+                    f"Invalid image format '{ext}'. Valid formats: {VALID_IMAGE_FORMATS}"
+                )
 
     return errors
