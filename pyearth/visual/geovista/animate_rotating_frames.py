@@ -150,6 +150,7 @@ def animate_rotating_frames(
         'frames_completed': 0,
         'animation_saved': False
     }
+    import geovista as gv
 
     plotter = None
     start_time = None
@@ -192,6 +193,8 @@ def animate_rotating_frames(
             logger.error(error_msg)
             result = AnimationResult(False, error_msg, system_info=get_system_info())
             return result if return_detailed_result else False
+
+        plotter.add_base_layer(texture= gv.natural_earth_hypsometric())
 
         progress_info['plotter_created'] = True
 

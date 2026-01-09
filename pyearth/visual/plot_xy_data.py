@@ -15,6 +15,7 @@ def plot_xy_data(aX_all,
                  iReverse_y_in=None,
                  iSize_x_in=None,
                  iSize_y_in=None,
+                 iFontsize_in=None,
                  ncolumn_in=None,
                  dMax_x_in=None,
                  dMin_x_in=None,
@@ -94,6 +95,11 @@ def plot_xy_data(aX_all,
         iSize_y = iSize_y_in
     else:
         iSize_y = 9
+
+    if iFontsize_in is not None:
+        iFontsize = iFontsize_in
+    else:
+        iFontsize = 12
 
     if sLocation_legend_in is not None:
         sLocation_legend = sLocation_legend_in
@@ -245,15 +251,15 @@ def plot_xy_data(aX_all,
 
     # ax.set_aspect(dRatio)  #this one set the y / x ratio
 
-    ax.tick_params(axis="x", labelsize=10)
-    ax.tick_params(axis="y", labelsize=10)
+    ax.tick_params(axis="x", labelsize=iFontsize)
+    ax.tick_params(axis="y", labelsize=iFontsize)
 
     ax.set_xmargin(0.05)
     ax.set_ymargin(0.15)
 
-    ax.set_xlabel(sLabel_x, fontsize=12)
-    ax.set_ylabel(sLabel_y, fontsize=12)
-    ax.set_title(sTitle, loc='center', fontsize=15)
+    ax.set_xlabel(sLabel_x, fontsize=iFontsize)
+    ax.set_ylabel(sLabel_y, fontsize=iFontsize)
+    ax.set_title(sTitle, loc='center', fontsize=iFontsize + 3)
 
     ax.set_xlim(dMin_x, dMax_x)
 
@@ -305,7 +311,7 @@ def plot_xy_data(aX_all,
         ax.text(0.03, dLocation, sText,
                 verticalalignment='top', horizontalalignment='left',
                 transform=ax.transAxes,
-                color='black', fontsize=12)
+                color='black', fontsize= iFontsize)
         # plot the remaining on the bottom
         nlegend = len(aLabel_tag_in)
         for i in range(1, nlegend, 1):
@@ -314,18 +320,18 @@ def plot_xy_data(aX_all,
             ax.text(0.03, dLocation, sText,
                     verticalalignment='top', horizontalalignment='left',
                     transform=ax.transAxes,
-                    color='black', fontsize=12)
+                    color='black', fontsize=iFontsize)
 
             pass
 
     if iFlag_replace_xtick == 1:
         ax.set_xticks(aX_all[0])
-        ax.set_xticklabels(xtick_labels, fontsize=8)
+        ax.set_xticklabels(xtick_labels, fontsize=iFontsize)
         pass
 
     ax.legend(bbox_to_anchor=aLocation_legend,
               loc=sLocation_legend,
-              fontsize=12,
+              fontsize=iFontsize,
               ncol=ncolumn)
 
     plt.savefig(sFilename_out, bbox_inches='tight')

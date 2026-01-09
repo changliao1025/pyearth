@@ -62,6 +62,7 @@ def map_single_frame(
     pMesh,
     aValid_cell_indices: np.ndarray,
     pConfig: VisualizationConfig,
+    style: Optional[str] = 'surface',
     sScalar: Optional[str] = None,
     sUnit: Optional[str] = None,
     sFilename_out: Optional[str] = None,
@@ -132,6 +133,7 @@ def map_single_frame(
     }
 
     plotter = None
+    import geovista as gv
 
     try:
         # Validate output filename if provided
@@ -155,6 +157,8 @@ def map_single_frame(
             force_xvfb=pConfig.force_xvfb
         )
 
+        plotter.add_base_layer(texture= gv.natural_earth_hypsometric())
+
         if plotter is None:
             error_msg = "Failed to create GeoVista plotter"
             logger.error(error_msg)
@@ -174,6 +178,7 @@ def map_single_frame(
         mesh_success = add_mesh_to_plotter(
             plotter=plotter,
             mesh=pMesh,
+            style=style,
             valid_indices=aValid_cell_indices,
             scalar_name=sScalar,
             scalar_config=scalar_config,
@@ -234,9 +239,15 @@ def map_single_frame(
                 # Apply image scaling if specified
                 if hasattr(pConfig, 'image_scale') and pConfig.image_scale != 1.0:
                     plotter.image_scale = pConfig.image_scale
+                    print(f"🔍 Applied image scale: {pConfig.image_scale}")
 
                 #plotter.screenshot(sFilename_out)
-                plotter.save_graphic(sFilename_out, raster = False)
+                #get the extension to determine raster or vector
+                ext = os.path.splitext(sFilename_out.lower())[1].lstrip('.')
+                if ext in ['png','jpg','jpeg']:
+                    plotter.screenshot(sFilename_out)
+                else:
+                    plotter.save_graphic(sFilename_out, raster = False)
                 result_info['output_saved'] = True
 
                 # Verify and collect file information

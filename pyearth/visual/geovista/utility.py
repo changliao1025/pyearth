@@ -36,7 +36,7 @@ DEFAULT_FRAMERATE = 30
 DEFAULT_ANIMATION_FRAMES = 36
 DEFAULT_ANIMATION_SPEED = 10.0  # degrees per frame
 VALID_ANIMATION_FORMATS = ['mp4', 'gif', 'avi']
-VALID_IMAGE_FORMATS = ['png', 'jpg', 'jpeg', 'svg', 'tif', 'tiff']
+VALID_IMAGE_FORMATS = ['png', 'jpg', 'jpeg', 'svg', 'tif', 'tiff', 'pdf' ,'ps']
 COORDINATE_BOUNDS = {'longitude': (-180, 180), 'latitude': (-90, 90)}
 
 # Camera position cache for performance optimization
@@ -209,7 +209,7 @@ class CameraController:
 
     @staticmethod
     def calculate_animation_camera_position(longitude: float, latitude: float,
-                                          frame_idx: int, pConfig_anima: 'AnimationConfig') -> CameraPosition:
+                                          frame_idx: int, config: 'AnimationConfig') -> CameraPosition:
         """
         Calculate camera position for animation frame with enhanced latitude movement.
 
@@ -223,15 +223,15 @@ class CameraController:
             CameraPosition: Camera position for this frame
         """
         # Calculate current longitude with rotation
-        longitude_current = pConfig_anima.longitude_start + (frame_idx * pConfig_anima.speed)
+        longitude_current = config.longitude_start + (frame_idx * config.speed)
         longitude_current = longitude_current % 360.0  # Keep within [0, 360)
         if longitude_current > 180.0:
             longitude_current -= 360.0  # Convert to [-180, 180]
 
         # Enhanced latitude movement: sine-wave oscillation for dynamic viewing
-        frames_div = float(pConfig_anima.frames) if pConfig_anima.frames > 0 else 1.0
-        theta = 2.0 * math.pi * (float(frame_idx) / frames_div) * pConfig_anima.cycles + pConfig_anima.phase
-        latitude_current = float(pConfig_anima.latitude_start) + pConfig_anima.amplitude_deg * math.sin(theta)
+        frames_div = float(config.frames) if config.frames > 0 else 1.0
+        theta = 2.0 * math.pi * (float(frame_idx) / frames_div) * config.cycles + config.phase
+        latitude_current = float(config.latitude_start) + config.amplitude_deg * math.sin(theta)
 
         # Clamp latitude to avoid pole singularities
         latitude_current = max(-89.9, min(89.9, latitude_current))
@@ -387,6 +387,7 @@ class ScalarBarConfig:
             "position_y": self.position_y,
             "width": self.width,
             "height": self.height,
+            "vertical": (self.orientation == "vertical"),
         }
 
 class AnimationConfig:
@@ -668,8 +669,7 @@ class PlotterManager:
     def _create_standard_plotter(gv, off_screen: bool, window_size: Tuple[int, int], theme: str):
         """Create plotter with standard configuration."""
         kwargs = {'off_screen': off_screen}
-        if not off_screen:
-            kwargs['window_size'] = window_size
+        kwargs['window_size'] = window_size
         if theme != 'default':
             kwargs['theme'] = theme
         return gv.GeoPlotter(**kwargs)

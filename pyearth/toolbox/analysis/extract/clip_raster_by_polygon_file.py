@@ -11,7 +11,7 @@ from osgeo import gdal, ogr, osr
 from pyearth.toolbox.management.vector.merge_features import merge_features
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
 from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -90,7 +90,7 @@ def clip_raster_by_polygon_file(
 
         # Get vector driver using multi-format support
         try:
-            pDriver_vector = get_vector_driver_from_extension(sFilename_polygon_in)
+            pDriver_vector = get_vector_format_from_filename(sFilename_polygon_in)
             logger.info(f"Using vector driver for polygon file")
         except ValueError as e:
             raise RuntimeError(f"Unsupported polygon file format: {e}")
