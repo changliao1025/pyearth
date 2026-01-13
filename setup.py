@@ -2,6 +2,7 @@ import io
 import os
 
 from setuptools import setup, find_packages, Extension
+import numpy
 
 NAME = "pyearth"
 DESCRIPTION = "Python for Earth Science."
@@ -37,14 +38,14 @@ extensions = [
     Extension(
         "pyearth.gis.geometry.kernel",
         ["pyearth/gis/geometry/kernel.pyx"],
-        include_dirs=[],
+        include_dirs=[numpy.get_include()],
         libraries=[],
         library_dirs=[],
     ),
     Extension(
         "pyearth.gis.location.kernel",
         ["pyearth/gis/location/kernel.pyx"],
-        include_dirs=[],
+        include_dirs=[numpy.get_include()],
         libraries=[],
         library_dirs=[],
     ),

@@ -1,41 +1,47 @@
+{% set name = "pyearth" %}
+{% set version = "0.1.29" %}
+{% set git_rev = "v" + version %}
+{% set python_min = "3.8" %}
+
 package:
-  name: "pyearth"
-  version: "0.1.29"
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  git_rev: 0.1.29
-  git_url: https://github.com/changliao1025/pyearth.git
+  git_rev: {{ git_rev }}
+  git_url: https://github.com/changliao1025/pyearth
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
 
 requirements:
-  build:
+  host:
+    - pip
     - python
     - setuptools
-
-  run:
-    - python >=3.8
+    - cython >=0.29.0
     - numpy
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
     - gdal
     - matplotlib-base
     - cartopy
-    - requests
-    - netCDF4
-    - pandas
-    - scipy
-    - statsmodels
 
-build:
-  number: 0
-  noarch: python
-  script: "{{ PYTHON }} -m pip install . -vv"
-
-
+test:
+  imports:
+    - pyearth
+  commands:
+    - pip check
+  requires:
+    - pip
 
 about:
   home: https://github.com/changliao1025/pyearth
-  license: BSD
-  license_family: BSD
+  summary: Python for Earth Science.
+  license: BSD-3-Clause
   license_file: LICENSE.md
-  summary: "Python for Earth Science"
 
 extra:
   recipe-maintainers:
