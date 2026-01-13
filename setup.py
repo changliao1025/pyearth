@@ -9,7 +9,7 @@ DESCRIPTION = "Python for Earth Science."
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.28"
+VERSION = "0.1.29"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
@@ -67,7 +67,7 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    license="custom",
+    license="BSD-3-Clause",
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     python_requires=REQUIRES_PYTHON,
@@ -75,6 +75,7 @@ setup(
     url=URL,
     packages=find_packages(),
     install_requires=REQUIRED,
+    include_package_data=True,
     classifiers=CLASSIFY,
     extras_require={
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
