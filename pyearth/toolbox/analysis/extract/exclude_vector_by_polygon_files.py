@@ -4,6 +4,7 @@ Exclude vector features by multiple polygon files with support for multiple vect
 This module provides functionality to exclude (remove) features from a vector file
 that fall within or intersect a union of multiple polygon boundaries.
 """
+
 import os
 import logging
 from typing import List
@@ -21,9 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def exclude_vector_by_polygon_files(
-    sFilename_vector_in: str,
-    aFilename_polygon_in: List[str],
-    sFilename_vector_out: str
+    sFilename_vector_in: str, aFilename_polygon_in: List[str], sFilename_vector_out: str
 ) -> None:
     """
     Exclude (remove) vector features that fall within a union of multiple polygon files.
@@ -60,7 +59,7 @@ def exclude_vector_by_polygon_files(
         ...     'land_rivers.gpkg'  # Rivers excluding all water bodies
         ... )
     """
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("Starting multi-polygon vector exclusion operation")
     logger.info(f"Input vector: {sFilename_vector_in}")
     logger.info(f"Number of polygon files: {len(aFilename_polygon_in)}")
@@ -69,7 +68,9 @@ def exclude_vector_by_polygon_files(
     try:
         # Validate input files
         if not os.path.exists(sFilename_vector_in):
-            raise FileNotFoundError(f"Input vector file not found: {sFilename_vector_in}")
+            raise FileNotFoundError(
+                f"Input vector file not found: {sFilename_vector_in}"
+            )
 
         for polygon_file in aFilename_polygon_in:
             if not os.path.exists(polygon_file):
@@ -93,7 +94,9 @@ def exclude_vector_by_polygon_files(
         # Open input vector dataset
         pDataset_source = ogr.Open(sFilename_vector_in)
         if pDataset_source is None:
-            raise RuntimeError(f"Could not open input vector file: {sFilename_vector_in}")
+            raise RuntimeError(
+                f"Could not open input vector file: {sFilename_vector_in}"
+            )
 
         pLayer_source = pDataset_source.GetLayer()
         if pLayer_source is None:
@@ -109,7 +112,9 @@ def exclude_vector_by_polygon_files(
             pProjection_target = None
         else:
             pProjection_target = pSpatial_reference_target.ExportToWkt()
-            logger.info(f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}")
+            logger.info(
+                f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}"
+            )
 
         # Create output dataset
         pDataset_excluded = pDriver_out.CreateDataSource(sFilename_vector_out)
@@ -128,9 +133,7 @@ def exclude_vector_by_polygon_files(
 
         # Create output layer
         pLayer_excluded = pDataset_excluded.CreateLayer(
-            'layer',
-            pSpatial_reference_target,
-            geom_type=output_geom_type
+            "layer", pSpatial_reference_target, geom_type=output_geom_type
         )
         if pLayer_excluded is None:
             raise RuntimeError("Could not create output layer")
@@ -146,12 +149,16 @@ def exclude_vector_by_polygon_files(
 
         # Process each polygon file
         for idx, sFilename_polygon_in in enumerate(aFilename_polygon_in, 1):
-            logger.info(f"Processing polygon file {idx}/{len(aFilename_polygon_in)}: {sFilename_polygon_in}")
+            logger.info(
+                f"Processing polygon file {idx}/{len(aFilename_polygon_in)}: {sFilename_polygon_in}"
+            )
 
             # Open polygon dataset
             pDataset_clip = ogr.Open(sFilename_polygon_in)
             if pDataset_clip is None:
-                logger.warning(f"Could not open polygon file, skipping: {sFilename_polygon_in}")
+                logger.warning(
+                    f"Could not open polygon file, skipping: {sFilename_polygon_in}"
+                )
                 continue
 
             pLayer_clip = pDataset_clip.GetLayer()
@@ -169,8 +176,7 @@ def exclude_vector_by_polygon_files(
             if nPolygon > 1:
                 logger.info("Multiple polygons detected, merging into single polygon")
                 sFilename_clip_merged = sFilename_polygon_in.replace(
-                    sExtension_clip,
-                    '_merged' + sExtension_clip
+                    sExtension_clip, "_merged" + sExtension_clip
                 )
 
                 # Close current dataset before merging
@@ -194,7 +200,11 @@ def exclude_vector_by_polygon_files(
                 logger.warning(f"Polygon file {idx} has no spatial reference")
 
             sFilename_clip_final = sFilename_polygon_in
-            if pProjection_target is not None and pProjection_clip is not None and pProjection_target != pProjection_clip:
+            if (
+                pProjection_target is not None
+                and pProjection_clip is not None
+                and pProjection_target != pProjection_clip
+            ):
                 logger.info("Projection mismatch detected, reprojecting polygon file")
 
                 # Close dataset before reprojection
@@ -206,11 +216,12 @@ def exclude_vector_by_polygon_files(
                 sName = os.path.basename(sFilename_polygon_in)
                 sName_no_ext = os.path.splitext(sName)[0]
                 sFilename_clip_final = os.path.join(
-                    sFolder,
-                    f"{sName_no_ext}_transformed{sExtension_clip}"
+                    sFolder, f"{sName_no_ext}_transformed{sExtension_clip}"
                 )
 
-                reproject_vector(sFilename_polygon_in, sFilename_clip_final, pProjection_target)
+                reproject_vector(
+                    sFilename_polygon_in, sFilename_clip_final, pProjection_target
+                )
 
                 # Reopen reprojected file
                 pDataset_clip = ogr.Open(sFilename_clip_final)
@@ -224,7 +235,9 @@ def exclude_vector_by_polygon_files(
         if len(aFilename_polygon_processed) == 0:
             raise ValueError("No valid polygon files could be processed!")
 
-        logger.info(f"Successfully processed {len(aFilename_polygon_processed)} polygon file(s)")
+        logger.info(
+            f"Successfully processed {len(aFilename_polygon_processed)} polygon file(s)"
+        )
 
         # Create union of all polygons
         logger.info("Creating union of all polygon geometries...")
@@ -240,7 +253,9 @@ def exclude_vector_by_polygon_files(
             logger.info("Using single polygon geometry")
         else:
             # Multiple polygon files - create union
-            logger.info(f"Creating union of {len(aFilename_polygon_processed)} polygon geometries...")
+            logger.info(
+                f"Creating union of {len(aFilename_polygon_processed)} polygon geometries..."
+            )
 
             for idx, sFilename_polygon in enumerate(aFilename_polygon_processed, 1):
                 pDataset_clip = ogr.Open(sFilename_polygon)
@@ -267,7 +282,9 @@ def exclude_vector_by_polygon_files(
 
         # Get envelope for logging
         minx, maxx, miny, maxy = pGeometry_union.GetEnvelope()
-        logger.info(f"Union polygon envelope: ({minx:.2f}, {miny:.2f}) to ({maxx:.2f}, {maxy:.2f})")
+        logger.info(
+            f"Union polygon envelope: ({minx:.2f}, {miny:.2f}) to ({maxx:.2f}, {maxy:.2f})"
+        )
 
         # Use the union as the exclusion polygon
         pPolygon_exclude = pGeometry_union
@@ -299,7 +316,9 @@ def exclude_vector_by_polygon_files(
                 pGeometry_difference = pGeometry_source.Difference(pPolygon_exclude)
 
                 if pGeometry_difference is None or pGeometry_difference.IsEmpty():
-                    logger.debug("Difference resulted in empty geometry, excluding feature")
+                    logger.debug(
+                        "Difference resulted in empty geometry, excluding feature"
+                    )
                     excluded_count += 1
                     continue
 
@@ -314,16 +333,21 @@ def exclude_vector_by_polygon_files(
                     for i in range(pFeature.GetFieldCount()):
                         pFeature_excluded.SetField(
                             pFeature.GetFieldDefnRef(i).GetNameRef(),
-                            pFeature.GetField(i)
+                            pFeature.GetField(i),
                         )
 
                     pLayer_excluded.CreateFeature(pFeature_excluded)
                     trimmed_count += 1
 
-                elif iGeomType_difference == ogr.wkbMultiLineString and output_geom_type == ogr.wkbLineString:
+                elif (
+                    iGeomType_difference == ogr.wkbMultiLineString
+                    and output_geom_type == ogr.wkbLineString
+                ):
                     # Handle MultiLineString -> LineString conversion
                     nPart = pGeometry_difference.GetGeometryCount()
-                    logger.debug(f"Splitting MultiLineString into {nPart} LineString parts")
+                    logger.debug(
+                        f"Splitting MultiLineString into {nPart} LineString parts"
+                    )
 
                     for iPart in range(nPart):
                         pGeometry_part = pGeometry_difference.GetGeometryRef(iPart)
@@ -334,7 +358,7 @@ def exclude_vector_by_polygon_files(
                         for i in range(pFeature.GetFieldCount()):
                             pFeature_excluded.SetField(
                                 pFeature.GetFieldDefnRef(i).GetNameRef(),
-                                pFeature.GetField(i)
+                                pFeature.GetField(i),
                             )
 
                         pLayer_excluded.CreateFeature(pFeature_excluded)
@@ -342,7 +366,9 @@ def exclude_vector_by_polygon_files(
                     trimmed_multipart_count += 1
                 else:
                     sGeomType_diff = ogr.GeometryTypeToName(iGeomType_difference)
-                    logger.debug(f"Difference geometry type mismatch: {sGeomType_diff}, excluding")
+                    logger.debug(
+                        f"Difference geometry type mismatch: {sGeomType_diff}, excluding"
+                    )
                     excluded_count += 1
             else:
                 # Feature is entirely outside the exclusion polygon - KEEP it
@@ -352,8 +378,7 @@ def exclude_vector_by_polygon_files(
                 # Copy attributes
                 for i in range(pFeature.GetFieldCount()):
                     pFeature_excluded.SetField(
-                        pFeature.GetFieldDefnRef(i).GetNameRef(),
-                        pFeature.GetField(i)
+                        pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i)
                     )
 
                 pLayer_excluded.CreateFeature(pFeature_excluded)
@@ -365,7 +390,9 @@ def exclude_vector_by_polygon_files(
         logger.info(f"  - Features split from multipart: {trimmed_multipart_count}")
         logger.info(f"  - Features excluded (entirely inside): {excluded_count}")
         logger.info(f"  - Total output features: {kept_count + trimmed_count}")
-        logger.info(f"Multi-polygon exclusion completed successfully: {sFilename_vector_out}")
+        logger.info(
+            f"Multi-polygon exclusion completed successfully: {sFilename_vector_out}"
+        )
 
     except Exception as e:
         logger.error(f"Error during multi-polygon vector exclusion: {e}")
@@ -373,17 +400,17 @@ def exclude_vector_by_polygon_files(
 
     finally:
         # Clean up resources
-        if 'pDataset_source' in locals():
+        if "pDataset_source" in locals():
             pDataset_source = None
-        if 'pDataset_clip' in locals():
+        if "pDataset_clip" in locals():
             pDataset_clip = None
-        if 'pDataset_excluded' in locals():
+        if "pDataset_excluded" in locals():
             pDataset_excluded = None
-        if 'pSpatial_reference_clip' in locals():
+        if "pSpatial_reference_clip" in locals():
             pSpatial_reference_clip = None
-        if 'pSpatial_reference_target' in locals():
+        if "pSpatial_reference_target" in locals():
             pSpatial_reference_target = None
-        if 'pGeometry_union' in locals():
+        if "pGeometry_union" in locals():
             pGeometry_union = None
 
     return

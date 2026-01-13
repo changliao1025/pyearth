@@ -1,11 +1,14 @@
 import numpy as np
 from typing import Union, Tuple
 
-def kde_support(data: np.ndarray,
-                bandwidth: Union[float, str],
-                grid_size: int,
-                cut: float,
-                bounds: np.ndarray) -> np.ndarray:
+
+def kde_support(
+    data: np.ndarray,
+    bandwidth: Union[float, str],
+    grid_size: int,
+    cut: float,
+    bounds: np.ndarray,
+) -> np.ndarray:
     """
     Establish support (range) for kernel density estimation.
 
@@ -69,12 +72,14 @@ def kde_support(data: np.ndarray,
     return np.linspace(support_min, support_max, grid_size)
 
 
-def scipy_bivariate_kde(x_data: np.ndarray,
-                       y_data: np.ndarray,
-                       bandwidth: Union[float, str],
-                       grid_size: int,
-                       cut: float,
-                       bounds: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def scipy_bivariate_kde(
+    x_data: np.ndarray,
+    y_data: np.ndarray,
+    bandwidth: Union[float, str],
+    grid_size: int,
+    cut: float,
+    bounds: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Compute bivariate kernel density estimate using SciPy.
 
@@ -160,7 +165,8 @@ def scipy_bivariate_kde(x_data: np.ndarray,
         import scipy
     except ImportError as e:
         raise ImportError(
-            "The package 'scipy' is required for this function to run.") from e
+            "The package 'scipy' is required for this function to run."
+        ) from e
 
     # Combine x and y data into coordinate pairs
     data = np.c_[x_data, y_data]
@@ -182,8 +188,10 @@ def scipy_bivariate_kde(x_data: np.ndarray,
         bw_x = bw_y = bandwidth
     else:
         # Different bandwidths not supported by scipy backend
-        msg = ("Cannot specify a different bandwidth for each dimension "
-               "with the scipy backend. You should install statsmodels.")
+        msg = (
+            "Cannot specify a different bandwidth for each dimension "
+            "with the scipy backend. You should install statsmodels."
+        )
         raise ValueError(msg)
 
     # Create evaluation grids for x and y dimensions

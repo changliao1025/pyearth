@@ -2,9 +2,17 @@ import numpy as np
 import logging
 from typing import List, Tuple, Union, Optional, Any, Dict
 from osgeo import ogr, gdal
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
 
-def get_field_value(sFilename_vector_in: str, sField_name_in: str, dMissing_value: Optional[Any] = None, iLayer: Optional[Union[int, str]] = None, bVerbose: bool = False, bUnique: bool = False) -> np.ndarray:
+
+def get_field_value(
+    sFilename_vector_in: str,
+    sField_name_in: str,
+    dMissing_value: Optional[Any] = None,
+    iLayer: Optional[Union[int, str]] = None,
+    bVerbose: bool = False,
+    bUnique: bool = False,
+) -> np.ndarray:
     """Return values for a field from a specified layer of a vector.
 
     This helper opens a vector datasource, finds the requested field (case-
@@ -38,7 +46,7 @@ def get_field_value(sFilename_vector_in: str, sField_name_in: str, dMissing_valu
     if bVerbose:
         logging.info(f"Opening vector file: {sFilename_vector_in}")
     try:
-        drv = get_vector_driver_from_extension(sFilename_vector_in)
+        drv = get_vector_format_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 0)
     except Exception:
@@ -76,7 +84,9 @@ def get_field_value(sFilename_vector_in: str, sField_name_in: str, dMissing_valu
     field_map = {f.lower(): f for f in layer_fields}
     key = sField_name_in.lower()
     if key not in field_map:
-        raise KeyError(f"Field '{sField_name_in}' not found in layer. Available fields: {layer_fields}")
+        raise KeyError(
+            f"Field '{sField_name_in}' not found in layer. Available fields: {layer_fields}"
+        )
     field_name_actual = field_map[key]
 
     # Collect values
@@ -113,7 +123,12 @@ def get_field_value(sFilename_vector_in: str, sField_name_in: str, dMissing_valu
 
     return arr
 
-def get_field_and_value(sFilename_vector_in: str, iLayer: Optional[Union[int, str]] = None, bVerbose: bool = False) -> Tuple[List[str], List[Dict[str, Any]]]:
+
+def get_field_and_value(
+    sFilename_vector_in: str,
+    iLayer: Optional[Union[int, str]] = None,
+    bVerbose: bool = False,
+) -> Tuple[List[str], List[Dict[str, Any]]]:
     """Return all field names and values from a specified layer of a vector.
 
     This helper opens a vector datasource and extracts all field names and their
@@ -138,7 +153,7 @@ def get_field_and_value(sFilename_vector_in: str, iLayer: Optional[Union[int, st
     """
     pDataset = None
     try:
-        drv = get_vector_driver_from_extension(sFilename_vector_in)
+        drv = get_vector_format_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 0)
     except Exception:
@@ -158,8 +173,7 @@ def get_field_and_value(sFilename_vector_in: str, iLayer: Optional[Union[int, st
 
     # Collect all field names and values
     aField_names = [field.name for field in pLayer.schema]
-    aValues= list()
-
+    aValues = list()
 
     for pFeature in pLayer:
         feature_dict = {}
@@ -172,7 +186,14 @@ def get_field_and_value(sFilename_vector_in: str, iLayer: Optional[Union[int, st
 
     return aField_names, aValues
 
-def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[str]], aValue: Union[Any, List[Any], Dict[str, Any], List[Dict[str, Any]]], iLayer: Optional[Union[int, str]] = None, bVerbose: bool = False) -> None:
+
+def add_field_to_vector_file(
+    sFilename_vector_in: str,
+    aField: Union[str, List[str]],
+    aValue: Union[Any, List[Any], Dict[str, Any], List[Dict[str, Any]]],
+    iLayer: Optional[Union[int, str]] = None,
+    bVerbose: bool = False,
+) -> None:
     """Add fields to a vector file with specified values.
 
     This function opens a vector datasource for updating, creates new fields if they
@@ -211,7 +232,7 @@ def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[s
     if bVerbose:
         logging.info(f"Opening vector file for updating: {sFilename_vector_in}")
     try:
-        drv = get_vector_driver_from_extension(sFilename_vector_in)
+        drv = get_vector_format_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 1)  # 1 for update
     except Exception:
@@ -222,9 +243,11 @@ def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[s
             pDataset = ogr.Open(sFilename_vector_in, 1)  # 1 for update
         except Exception as e:
             # Handle parquet files specially
-            if sFilename_vector_in.lower().endswith('.parquet'):
+            if sFilename_vector_in.lower().endswith(".parquet"):
                 if bVerbose:
-                    logging.warning(f"Parquet files may not support in-place updates: {e}")
+                    logging.warning(
+                        f"Parquet files may not support in-place updates: {e}"
+                    )
                 return
             raise ValueError(f"Could not open {sFilename_vector_in} for updating: {e}")
 
@@ -268,7 +291,12 @@ def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[s
         if sFieldname not in aField_existing:
             # Determine the field type based on the value
             if isinstance(aValue_row, dict):
-                sample_value = aValue_row.get(sFieldname, [None])[0] if isinstance(aValue_row.get(sFieldname), list) and len(aValue_row.get(sFieldname, [])) > 0 else aValue_row.get(sFieldname)
+                sample_value = (
+                    aValue_row.get(sFieldname, [None])[0]
+                    if isinstance(aValue_row.get(sFieldname), list)
+                    and len(aValue_row.get(sFieldname, [])) > 0
+                    else aValue_row.get(sFieldname)
+                )
             else:
                 sample_value = aValue_row
 
@@ -333,9 +361,3 @@ def add_field_to_vector_file(sFilename_vector_in: str, aField: Union[str, List[s
 
     if bVerbose:
         logging.info("Field addition completed")
-
-
-
-
-
-

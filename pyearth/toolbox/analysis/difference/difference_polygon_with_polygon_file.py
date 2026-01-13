@@ -75,6 +75,7 @@ Find coverage gaps between datasets:
     ...     'coverage_gaps.parquet'
     ... )
 """
+
 import os
 import sys
 import logging
@@ -85,7 +86,7 @@ from rtree.index import Index as RTreeindex
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_format_from_extension,
 )
 
 # Configure logging
@@ -97,7 +98,7 @@ def difference_polygon_with_polygon_file(
     sFilename_base: str,
     sFilename_new: str,
     sFilename_difference_out: str,
-    spatial_ref_epsg: int = 4326
+    spatial_ref_epsg: int = 4326,
 ) -> None:
     """
     Calculate the geometric difference between base polygons and new polygons.
@@ -271,17 +272,19 @@ def difference_polygon_with_polygon_file(
             format_new = get_vector_format_from_extension(sFilename_new)
             format_out = get_vector_format_from_extension(sFilename_difference_out)
 
-            logger.info(f"Input formats - Base: {format_base}, New: {format_new}, Output: {format_out}")
+            logger.info(
+                f"Input formats - Base: {format_base}, New: {format_new}, Output: {format_out}"
+            )
         except ValueError as e:
             raise RuntimeError(f"Unsupported file format: {e}")
 
         # Remove existing output file to ensure clean write
         # For shapefiles, must remove all component files (.shp, .shx, .dbf, etc.)
         if os.path.exists(sFilename_difference_out):
-            if format_out == 'ESRI Shapefile':
+            if format_out == "ESRI Shapefile":
                 # Shapefiles consist of multiple files with different extensions
                 base_name = os.path.splitext(sFilename_difference_out)[0]
-                for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg']:
+                for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg"]:
                     if os.path.exists(base_name + ext):
                         os.remove(base_name + ext)
             else:
@@ -292,7 +295,9 @@ def difference_polygon_with_polygon_file(
         # Create output dataset using the format-specific driver
         pDataset_out = driver_out.CreateDataSource(sFilename_difference_out)
         if pDataset_out is None:
-            raise RuntimeError(f"Could not create output file: {sFilename_difference_out}")
+            raise RuntimeError(
+                f"Could not create output file: {sFilename_difference_out}"
+            )
 
         # Configure spatial reference system for output layer
         # All output features will be in this coordinate system
@@ -302,7 +307,9 @@ def difference_polygon_with_polygon_file(
 
         # Create output layer with polygon geometry type
         # Layer name 'diff' is arbitrary but descriptive
-        pLayerOut = pDataset_out.CreateLayer('diff', pSpatial_reference_gcs, ogr.wkbPolygon)
+        pLayerOut = pDataset_out.CreateLayer(
+            "diff", pSpatial_reference_gcs, ogr.wkbPolygon
+        )
         if pLayerOut is None:
             raise RuntimeError("Could not create output layer")
 
@@ -310,9 +317,9 @@ def difference_polygon_with_polygon_file(
         # id: Sequential identifier for output polygons
         # base_fid: Original feature ID from base dataset (for traceability)
         # new_fid: Feature ID from new dataset that intersected (for analysis)
-        pLayerOut.CreateField(ogr.FieldDefn('id', ogr.OFTInteger64))
-        pLayerOut.CreateField(ogr.FieldDefn('base_fid', ogr.OFTInteger64))
-        pLayerOut.CreateField(ogr.FieldDefn('new_fid', ogr.OFTInteger64))
+        pLayerOut.CreateField(ogr.FieldDefn("id", ogr.OFTInteger64))
+        pLayerOut.CreateField(ogr.FieldDefn("base_fid", ogr.OFTInteger64))
+        pLayerOut.CreateField(ogr.FieldDefn("new_fid", ogr.OFTInteger64))
 
         pLayerDefn = pLayerOut.GetLayerDefn()
 
@@ -374,12 +381,16 @@ def difference_polygon_with_polygon_file(
             # Validate and repair invalid geometries using Buffer(0) technique
             # Buffer(0) rebuilds the geometry, often fixing self-intersections and other issues
             if not pGeometry_base.IsValid():
-                logger.warning(f"Base feature {fid} has invalid geometry, attempting to fix")
+                logger.warning(
+                    f"Base feature {fid} has invalid geometry, attempting to fix"
+                )
                 pGeometry_base = pGeometry_base.Buffer(0)
 
             # Skip features that are still invalid or empty after repair
             if pGeometry_base is None or pGeometry_base.IsEmpty():
-                logger.warning(f"Base feature {fid} has empty geometry after validation, skipping")
+                logger.warning(
+                    f"Base feature {fid} has empty geometry after validation, skipping"
+                )
                 continue
 
             try:
@@ -419,7 +430,9 @@ def difference_polygon_with_polygon_file(
             processed_features += 1
             # Log progress every 100 features for long-running operations
             if processed_features % 100 == 0:
-                logger.info(f"Processed {processed_features}/{nFeature_new} new features")
+                logger.info(
+                    f"Processed {processed_features}/{nFeature_new} new features"
+                )
 
             new_fid = pFeature_new.GetFID()
             pGeometry_new = pFeature_new.GetGeometryRef()
@@ -431,12 +444,16 @@ def difference_polygon_with_polygon_file(
 
             # Validate and repair invalid geometries
             if not pGeometry_new.IsValid():
-                logger.warning(f"New feature {new_fid} has invalid geometry, attempting to fix")
+                logger.warning(
+                    f"New feature {new_fid} has invalid geometry, attempting to fix"
+                )
                 pGeometry_new = pGeometry_new.Buffer(0)
 
             # Skip features that are still invalid or empty after repair
             if pGeometry_new is None or pGeometry_new.IsEmpty():
-                logger.warning(f"New feature {new_fid} has empty geometry after validation, skipping")
+                logger.warning(
+                    f"New feature {new_fid} has empty geometry after validation, skipping"
+                )
                 continue
 
             try:
@@ -474,7 +491,7 @@ def difference_polygon_with_polygon_file(
                         # Handle output based on geometry type
                         pGeometrytype_intersect = pGeometry_diff.GetGeometryName()
 
-                        if pGeometrytype_intersect == 'POLYGON':
+                        if pGeometrytype_intersect == "POLYGON":
                             # Simple polygon result - create single output feature
                             pFeatureOut = ogr.Feature(pLayerDefn)
                             pFeatureOut.SetGeometry(pGeometry_diff)
@@ -484,15 +501,21 @@ def difference_polygon_with_polygon_file(
                             pLayerOut.CreateFeature(pFeatureOut)
                             lID_polygon += 1
 
-                        elif pGeometrytype_intersect in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION']:
+                        elif pGeometrytype_intersect in [
+                            "MULTIPOLYGON",
+                            "GEOMETRYCOLLECTION",
+                        ]:
                             # Multi-part geometry result - decompose into individual polygons
                             # This happens when new feature splits base feature into multiple parts
                             for i in range(pGeometry_diff.GetGeometryCount()):
                                 pGeometry_part = pGeometry_diff.GetGeometryRef(i)
-                                if pGeometry_part is not None and not pGeometry_part.IsEmpty():
+                                if (
+                                    pGeometry_part is not None
+                                    and not pGeometry_part.IsEmpty()
+                                ):
                                     part_type = pGeometry_part.GetGeometryName()
                                     # Only extract polygon parts (ignore points, lines from collection)
-                                    if part_type == 'POLYGON':
+                                    if part_type == "POLYGON":
                                         pFeatureOut = ogr.Feature(pLayerDefn)
                                         pFeatureOut.SetGeometry(pGeometry_part)
                                         pFeatureOut.SetField("id", lID_polygon)
@@ -502,7 +525,9 @@ def difference_polygon_with_polygon_file(
                                         lID_polygon += 1
 
                     except Exception as e:
-                        logger.error(f"Error processing intersection between base {base_fid} and new {new_fid}: {e}")
+                        logger.error(
+                            f"Error processing intersection between base {base_fid} and new {new_fid}: {e}"
+                        )
                         continue
 
             except Exception as e:
@@ -517,11 +542,11 @@ def difference_polygon_with_polygon_file(
 
     finally:
         # Clean up resources
-        if 'pDataset_base' in locals():
+        if "pDataset_base" in locals():
             pDataset_base = None
-        if 'pDataset_new' in locals():
+        if "pDataset_new" in locals():
             pDataset_new = None
-        if 'pDataset_out' in locals():
+        if "pDataset_out" in locals():
             pDataset_out = None
 
     # Report timing
@@ -530,7 +555,8 @@ def difference_polygon_with_polygon_file(
     seconds = delta.total_seconds()
     minutes = seconds / 60
 
-    logger.info(f"Processing completed in {seconds:.2f} seconds ({minutes:.2f} minutes)")
+    logger.info(
+        f"Processing completed in {seconds:.2f} seconds ({minutes:.2f} minutes)"
+    )
 
     return None
-

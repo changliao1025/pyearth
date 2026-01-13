@@ -76,11 +76,7 @@ from typing import Union
 logger = logging.getLogger(__name__)
 
 
-def day_of_year(
-    iYear_in: int,
-    iMonth_in: int,
-    iDay_in: int
-) -> int:
+def day_of_year(iYear_in: int, iMonth_in: int, iDay_in: int) -> int:
     """
     Calculate the day of year (ordinal day) for a specific date.
 
@@ -268,12 +264,14 @@ def day_of_year(
         date_obj = datetime.date(iYear_in, iMonth_in, iDay_in)
         nDay_of_year = date_obj.timetuple().tm_yday
 
-        logger.debug(f"Date {iYear_in}-{iMonth_in:02d}-{iDay_in:02d} is day {nDay_of_year} of year")
+        logger.debug(
+            f"Date {iYear_in}-{iMonth_in:02d}-{iDay_in:02d} is day {nDay_of_year} of year"
+        )
 
         return nDay_of_year
 
     except ValueError as e:
         logger.error(f"Invalid date {iYear_in}-{iMonth_in}-{iDay_in}: {e}")
-        raise ValueError(f"Invalid date: {iYear_in}-{iMonth_in:02d}-{iDay_in:02d}. {str(e)}")
-
-
+        raise ValueError(
+            f"Invalid date: {iYear_in}-{iMonth_in:02d}-{iDay_in:02d}. {str(e)}"
+        )

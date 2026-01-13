@@ -2,14 +2,19 @@ import numpy as np
 from pyearth.toolbox.reader.text_reader_string import text_reader_string
 from pyearth.toolbox.date.day_in_month import day_in_month
 
+
 def read_gsim_indices_data(sFilename_in, iYear_start_in=2000, iYear_end_in=2019):
 
-    dummy = text_reader_string(sFilename_in, iSkipline_in=22, cDelimiter_in=',', ncolumn_in=11)
+    dummy = text_reader_string(
+        sFilename_in, iSkipline_in=22, cDelimiter_in=",", ncolumn_in=11
+    )
 
     aDate = dummy[:, 0]
-    aDischarge_mean = np.array([float(x.strip()) if x.strip() != 'NA' else np.nan for x in dummy[:, 1]])
+    aDischarge_mean = np.array(
+        [float(x.strip()) if x.strip() != "NA" else np.nan for x in dummy[:, 1]]
+    )
 
-    #build the monthly index
+    # build the monthly index
 
     nYear = iYear_end_in - iYear_start_in + 1
 
@@ -33,6 +38,5 @@ def read_gsim_indices_data(sFilename_in, iYear_start_in=2000, iYear_end_in=2019)
 
             aDate_out[i] = sDate
             i = i + 1
-
 
     return aDate_out, aDischarge_out

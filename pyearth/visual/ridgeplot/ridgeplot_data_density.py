@@ -3,32 +3,37 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
 
-def ridgeplot_data_density(aDict,
-                           aData,
-                           sFilename_out,
-                           iSize_x_in=None,
-                           iSize_y_in=None,
-                           iDPI_in=None,
-                           iFlag_scientific_notation_x_in=None,
-                           iFlag_scientific_notation_y_in=None,
-                           iFlag_log_x_in=None,
-                           iFlag_log_y_in=None,
-                           dMin_x_in=None,
-                           dMax_x_in=None,
-                           dSpace_x_in=None,
-                           sFormat_x_in=None,
-                           sLabel_x_in=None,
-                           sLabel_y_in=None,
-                           sLabel_legend_in=None,
-                           sTitle_in=None):
+
+def ridgeplot_data_density(
+    aDict,
+    aData,
+    sFilename_out,
+    iSize_x_in=None,
+    iSize_y_in=None,
+    iDPI_in=None,
+    iFlag_scientific_notation_x_in=None,
+    iFlag_scientific_notation_y_in=None,
+    iFlag_log_x_in=None,
+    iFlag_log_y_in=None,
+    dMin_x_in=None,
+    dMax_x_in=None,
+    dSpace_x_in=None,
+    sFormat_x_in=None,
+    sLabel_x_in=None,
+    sLabel_y_in=None,
+    sLabel_legend_in=None,
+    sTitle_in=None,
+):
 
     try:
         import seaborn as sns
         from scipy.stats import gaussian_kde
+
         sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
     except ImportError as e:
         raise ImportError(
-            "The package 'sns and scipy' is required for this function to run.") from e
+            "The package 'sns and scipy' is required for this function to run."
+        ) from e
 
     nData = len(aDict)
 
@@ -70,35 +75,34 @@ def ridgeplot_data_density(aDict,
     if sLabel_x_in is not None:
         sLabel_x = sLabel_x_in
     else:
-        sLabel_x = ''
+        sLabel_x = ""
 
     if sLabel_y_in is not None:
         sLabel_y = sLabel_y_in
     else:
-        sLabel_y = ''
+        sLabel_y = ""
 
     if sLabel_legend_in is not None:
         sLabel_legend = sLabel_legend_in
     else:
-        sLabel_legend = ''
+        sLabel_legend = ""
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
-        sTitle = ''
+        sTitle = ""
 
     plt.rcParams["font.family"] = "Times New Roman"
     fig = plt.figure(dpi=iDPI)
 
     # we generate a color palette with Seaborn.color_palette()
-    pal = sns.color_palette(palette='coolwarm', n_colors=nData)
+    pal = sns.color_palette(palette="coolwarm", n_colors=nData)
 
     fig.set_figwidth(iSize_x)
     fig.set_figheight(iSize_y)
-    axgr = AxesGrid(fig, 111,
-                    nrows_ncols=(nData, 1),
-                    axes_pad=-0.1,
-                    label_mode='L')  # note the empty label_mode
+    axgr = AxesGrid(
+        fig, 111, nrows_ncols=(nData, 1), axes_pad=-0.1, label_mode="L"
+    )  # note the empty label_mode
 
     if dMin_x_in is None:
         for i in range(nData):
@@ -129,14 +133,15 @@ def ridgeplot_data_density(aDict,
         density = gaussian_kde(aData_dummy)
         xx = np.linspace(dMin_x, dMax_x, 1000)
         yy = density(xx)
-        ax.plot(xx, yy, color='w', linewidth=0.5)
-        ax.fill_between(xx, yy, 0,  linewidth=1.5, color=pal[i])
+        ax.plot(xx, yy, color="w", linewidth=0.5)
+        ax.fill_between(xx, yy, 0, linewidth=1.5, color=pal[i])
         dMin_y = np.min(yy)
         dMax_y = np.max(yy)
 
-        dRatio = (float((iSize_y/nData))/iSize_x) / \
-            ((dMax_y-dMin_y) / (dMax_x-dMin_x))
-        ax.set_aspect(dRatio, 'box')
+        dRatio = (float((iSize_y / nData)) / iSize_x) / (
+            (dMax_y - dMin_y) / (dMax_x - dMin_x)
+        )
+        ax.set_aspect(dRatio, "box")
 
         ax.spines.left.set_visible(False)
         ax.spines.right.set_visible(False)
@@ -144,22 +149,29 @@ def ridgeplot_data_density(aDict,
         ax.spines.bottom.set_visible(False)
 
         ax.get_yaxis().set_visible(False)
-        sText = aDict[i+1]
-        ax.text(0.85, 0.40, sText,
-                verticalalignment='bottom', horizontalalignment='left',
-                transform=ax.transAxes,
-                color=pal[i], fontsize=10, fontweight='bold')
+        sText = aDict[i + 1]
+        ax.text(
+            0.85,
+            0.40,
+            sText,
+            verticalalignment="bottom",
+            horizontalalignment="left",
+            transform=ax.transAxes,
+            color=pal[i],
+            fontsize=10,
+            fontweight="bold",
+        )
 
-        if i < (nData-1):
+        if i < (nData - 1):
 
             ax.axes.xaxis.set_visible(False)
         else:
             sText = sLabel_x
-            ax.set_xlabel(sText,  fontsize=15)
+            ax.set_xlabel(sText, fontsize=15)
             pass
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches="tight")
 
-    plt.close('all')
+    plt.close("all")
     plt.clf()
     return

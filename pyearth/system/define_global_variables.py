@@ -109,38 +109,38 @@ sUsername = getpass.getuser()
 sWorkspace_home = str(Path.home())
 
 # Platform-specific configuration
-if sPlatform_os == 'Windows':
-    slash = '\\'
-    sMachine = 'windows'
-    sWorkspace_scratch = 'C:\\scratch'
+if sPlatform_os == "Windows":
+    slash = "\\"
+    sMachine = "windows"
+    sWorkspace_scratch = "C:\\scratch"
 else:  # Linux or Unix-like systems
-    slash = '/'
+    slash = "/"
 
-    if sPlatform_os == 'Linux':
-        sMachine = 'linux'
-        sWorkspace_scratch = os.path.join(sWorkspace_home, 'scratch')
-    elif sPlatform_os == 'Darwin':
-        sMachine = 'mac'
-        sWorkspace_scratch = os.path.join(sWorkspace_home, 'scratch')
+    if sPlatform_os == "Linux":
+        sMachine = "linux"
+        sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
+    elif sPlatform_os == "Darwin":
+        sMachine = "mac"
+        sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
     else:
-        sMachine = 'unix'
-        sWorkspace_scratch = os.path.join(sWorkspace_home, 'scratch')
+        sMachine = "unix"
+        sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
 
 
 # Data file type extensions
-sExtension_txt = '.txt'
-sExtension_envi = '.dat'
-sExtension_tiff = '.tif'
-sExtension_header = '.hdr'
-sExtension_netcdf = '.nc'
-sExtension_shapefile = '.shp'
-sExtension_json = '.json'
+sExtension_txt = ".txt"
+sExtension_envi = ".dat"
+sExtension_tiff = ".tif"
+sExtension_header = ".hdr"
+sExtension_netcdf = ".nc"
+sExtension_shapefile = ".shp"
+sExtension_json = ".json"
 
 # Graphics format extensions
-sExtension_png = '.png'
-sExtension_jpg = '.jpg'
-sExtension_ps = '.ps'
-sExtension_vtk = '.vtk'
+sExtension_png = ".png"
+sExtension_jpg = ".jpg"
+sExtension_ps = ".ps"
+sExtension_vtk = ".vtk"
 
 
 # Constant values
@@ -149,20 +149,17 @@ nmonth = 12  # Number of months in a year
 
 # Time period defaults
 iMonth_start = 1  # January (1-based indexing)
-iMonth_end = 12   # December (1-based indexing)
+iMonth_end = 12  # December (1-based indexing)
 
 # Unit conversion factors
 mms2mmd = 24 * 3600.0  # mm/s to mm/day
-feet2meter = 0.3048     # feet to meters
-inch2mm = 25.4          # inches to millimeters
-cms2cmd = 24 * 3600     # cm/s to cm/day
+feet2meter = 0.3048  # feet to meters
+inch2mm = 25.4  # inches to millimeters
+cms2cmd = 24 * 3600  # cm/s to cm/day
 
 # Earth parameters (WGS84)
 earth_radius = 6378137.0  # Equatorial radius in meters
 
-
-# Python environment detection
-sConda_env_path, sConda_env_name, sConda_env_type = get_python_environment()
 
 # Python environment detection
 sConda_env_path, sConda_env_name, sConda_env_type = get_python_environment()
@@ -192,14 +189,24 @@ def _configure_proj_lib() -> Optional[str]:
     """
     # Check for PROJ data directory in multiple possible locations
     proj_paths = [
-        os.path.join(sConda_env_path, 'share', 'proj'),           # Linux/Mac typical
-        os.path.join(sConda_env_path, 'Library', 'share', 'proj'), # Windows conda-forge
-        os.path.join(sConda_env_path, 'Lib', 'site-packages', 'pyproj', 'proj_dir', 'share', 'proj'), # PyPI pyproj
+        os.path.join(sConda_env_path, "share", "proj"),  # Linux/Mac typical
+        os.path.join(
+            sConda_env_path, "Library", "share", "proj"
+        ),  # Windows conda-forge
+        os.path.join(
+            sConda_env_path,
+            "Lib",
+            "site-packages",
+            "pyproj",
+            "proj_dir",
+            "share",
+            "proj",
+        ),  # PyPI pyproj
     ]
 
     for proj_path in proj_paths:
         if os.path.exists(proj_path) and os.path.isdir(proj_path):
-            os.environ['PROJ_LIB'] = proj_path
+            os.environ["PROJ_LIB"] = proj_path
             return proj_path
 
     return None
@@ -264,7 +271,3 @@ def print_environment_info(verbose: bool = True) -> None:
         print(f"  Raster: {sExtension_tiff}, {sExtension_envi}, {sExtension_netcdf}")
         print(f"  Vector: {sExtension_shapefile}, {sExtension_json}")
         print(f"  Image: {sExtension_png}, {sExtension_jpg}")
-
-
-
-

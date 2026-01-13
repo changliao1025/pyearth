@@ -243,18 +243,18 @@ def check_if_duplicates(aList_in: Sequence) -> int:
     if aList_in is None:
         error_msg = "Input sequence cannot be None"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return 0
 
     try:
         # Convert to list if needed to get length
         # This handles generators and other iterables
-        if not hasattr(aList_in, '__len__'):
+        if not hasattr(aList_in, "__len__"):
             aList_in = list(aList_in)
     except Exception as e:
         error_msg = f"Failed to process input sequence: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return 0
 
     # Check if empty - no duplicates in empty sequence
@@ -273,7 +273,9 @@ def check_if_duplicates(aList_in: Sequence) -> int:
         has_duplicates = len(set(aList_in)) != len(aList_in)
 
         if has_duplicates:
-            logger.debug(f"Duplicates found: {len(aList_in)} elements, {len(set(aList_in))} unique")
+            logger.debug(
+                f"Duplicates found: {len(aList_in)} elements, {len(set(aList_in))} unique"
+            )
             return 0
         else:
             logger.debug(f"No duplicates: all {len(aList_in)} elements unique")
@@ -283,12 +285,14 @@ def check_if_duplicates(aList_in: Sequence) -> int:
         # Occurs when sequence contains unhashable elements
         error_msg = f"Input contains unhashable elements: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
-        print(f'Hint: Elements must be hashable (int, str, tuple, etc.), not list or dict')
+        print(f"Error: {error_msg}")
+        print(
+            f"Hint: Elements must be hashable (int, str, tuple, etc.), not list or dict"
+        )
         return 0
     except Exception as e:
         # Catch any other unexpected errors
         error_msg = f"Unexpected error checking duplicates: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return 0

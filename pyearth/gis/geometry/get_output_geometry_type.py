@@ -4,6 +4,7 @@ Get output geometry type for OGR vector operations.
 This module provides functionality to map input geometry types to appropriate
 output geometry types, handling multi-geometry types and 2.5D/3D variants.
 """
+
 from osgeo import ogr
 
 # Geometry type mapping for common conversions

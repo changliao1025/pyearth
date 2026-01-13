@@ -69,7 +69,7 @@ logger = logging.getLogger(__name__)
 def cgpercentiles(
     aData_in: Union[np.ndarray, Sequence[float]],
     aPercentiles_in: Union[np.ndarray, Sequence[float]],
-    missing_value_in: Optional[float] = None
+    missing_value_in: Optional[float] = None,
 ) -> Union[List[float], int]:
     """
     Calculate percentiles with robust handling of duplicate extreme values.
@@ -258,7 +258,7 @@ def cgpercentiles(
     if aData_in is None:
         error_msg = "Input data cannot be None"
         logger.error(error_msg)
-        print('Error: Input data is required.')
+        print("Error: Input data is required.")
         return -1
 
     # Convert to numpy array and flatten
@@ -267,7 +267,7 @@ def cgpercentiles(
     except Exception as e:
         error_msg = f"Failed to convert input data to array: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return -1
 
     aData_in_flat = aData_in0.flatten()
@@ -276,7 +276,7 @@ def cgpercentiles(
     if aData_in_reshaped.size == 0:
         error_msg = "Input data array is empty"
         logger.error(error_msg)
-        print('Error: Input data is required.')
+        print("Error: Input data is required.")
         return -1
 
     # Validate and prepare percentiles
@@ -285,7 +285,7 @@ def cgpercentiles(
     except Exception as e:
         error_msg = f"Failed to convert percentiles to array: {str(e)}"
         logger.error(error_msg)
-        print(f'Error: {error_msg}')
+        print(f"Error: {error_msg}")
         return -1
 
     aPercentiles_flat = aPercentiles_in_array.flatten()
@@ -312,7 +312,7 @@ def cgpercentiles(
     if aData_copy.size == 0:
         error_msg = "No valid (finite) data values after filtering"
         logger.error(error_msg)
-        print('Error: All data values are NaN or infinite.')
+        print("Error: All data values are NaN or infinite.")
         return -1
 
     num = aData_copy.size
@@ -373,7 +373,9 @@ def cgpercentiles(
             else:
                 scenario = 4
 
-    logger.debug(f"Detected scenario {scenario}: min_count={nan_count1}, max_count={nan_count2}, threshold={min_count}")
+    logger.debug(
+        f"Detected scenario {scenario}: min_count={nan_count1}, max_count={nan_count2}, threshold={min_count}"
+    )
 
     # Process data based on scenario
     if scenario == 1:
@@ -420,7 +422,9 @@ def cgpercentiles(
 
     elif scenario == 5:
         # Min, max, and zero problematic
-        good_index = np.where((aData_copy > min_value) & (aData_copy != 0.0) & (aData_copy < max_value))
+        good_index = np.where(
+            (aData_copy > min_value) & (aData_copy != 0.0) & (aData_copy < max_value)
+        )
         good_count = good_index[0].size
         if good_count <= num_per:
             logger.warning(f"Insufficient valid data: {good_count} <= {num_per}")
@@ -432,7 +436,9 @@ def cgpercentiles(
         bad_copy2 = np.full(sample_count2, fill_value=0.0)
         sample_count3 = int(np.floor(float(good_count) / (num_per - 2)) - 1)
         bad_copy3 = np.full(sample_count3, fill_value=max_value)
-        data_copy2 = np.concatenate((bad_copy1, bad_copy2, bad_copy3, aData_copy[good_index]))
+        data_copy2 = np.concatenate(
+            (bad_copy1, bad_copy2, bad_copy3, aData_copy[good_index])
+        )
 
     elif scenario == 6:
         # Min and zero problematic

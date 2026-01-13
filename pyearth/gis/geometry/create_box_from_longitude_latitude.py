@@ -78,13 +78,13 @@ from typing import Optional, Tuple
 import numpy as np
 from osgeo import ogr, osr
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
-from pyearth.gis.spatialref.convert_between_degree_and_meter import degree_to_meter, meter_to_degree
+from pyearth.gis.spatialref.convert_between_degree_and_meter import (
+    degree_to_meter,
+    meter_to_degree,
+)
 
 
-def find_nearest_resolution(
-    dResolution_meter_in: float,
-    dLatitude_in: float
-) -> float:
+def find_nearest_resolution(dResolution_meter_in: float, dLatitude_in: float) -> float:
     """
     Find the nearest power-of-2 degree resolution larger than a given meter resolution.
 
@@ -172,7 +172,9 @@ def find_nearest_resolution(
     """
     # Validate inputs
     if dResolution_meter_in <= 0:
-        raise ValueError(f"dResolution_meter_in must be positive, got {dResolution_meter_in}")
+        raise ValueError(
+            f"dResolution_meter_in must be positive, got {dResolution_meter_in}"
+        )
 
     if not -90 <= dLatitude_in <= 90:
         raise ValueError(f"dLatitude_in must be in range [-90, 90], got {dLatitude_in}")
@@ -208,7 +210,7 @@ def create_box_from_longitude_latitude(
     dLatitude_in: float,
     dResolution_x_in: float,
     dResolution_y_in: float,
-    sFilename_output_in: Optional[str] = None
+    sFilename_output_in: Optional[str] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Create a grid-aligned bounding box from a longitude/latitude point.
@@ -408,7 +410,7 @@ def create_box_from_longitude_latitude(
     # Save as GeoJSON file if requested
     if sFilename_output_in is not None:
         # Create GeoJSON driver and dataset
-        pDriver_geojson = ogr.GetDriverByName('GeoJSON')
+        pDriver_geojson = ogr.GetDriverByName("GeoJSON")
         pDataset = pDriver_geojson.CreateDataSource(sFilename_output_in)
 
         # Set up WGS84 spatial reference
@@ -417,14 +419,14 @@ def create_box_from_longitude_latitude(
         pSpatial_reference_gcs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
         # Create layer
-        pLayer = pDataset.CreateLayer('cell', pSpatial_reference_gcs, ogr.wkbPolygon)
+        pLayer = pDataset.CreateLayer("cell", pSpatial_reference_gcs, ogr.wkbPolygon)
 
         # Add attribute fields
-        pLayer.CreateField(ogr.FieldDefn('cellid', ogr.OFTInteger64))
-        pLayer.CreateField(ogr.FieldDefn('longitude', ogr.OFTReal))
-        pLayer.CreateField(ogr.FieldDefn('latitude', ogr.OFTReal))
+        pLayer.CreateField(ogr.FieldDefn("cellid", ogr.OFTInteger64))
+        pLayer.CreateField(ogr.FieldDefn("longitude", ogr.OFTReal))
+        pLayer.CreateField(ogr.FieldDefn("latitude", ogr.OFTReal))
 
-        pArea_field = ogr.FieldDefn('area', ogr.OFTReal)
+        pArea_field = ogr.FieldDefn("area", ogr.OFTReal)
         pArea_field.SetWidth(20)
         pArea_field.SetPrecision(2)
         pLayer.CreateField(pArea_field)

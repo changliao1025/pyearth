@@ -83,8 +83,9 @@ from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
 from pyearth.gis.gdal.gdal_raster_format_support import (
     get_raster_driver_from_extension,
-    get_raster_format_from_extension
+    get_raster_format_from_extension,
 )
+
 
 def merge_rasters(
     aFilename_rasters: List[str],
@@ -93,14 +94,24 @@ def merge_rasters(
     dResolution_y: float,
     sFilename_mask: str,
     sResampleAlg: Literal[
-        'NEAREST', 'BILINEAR', 'CUBIC', 'CUBICSPLINE', 'LANCZOS',
-        'AVERAGE', 'MODE', 'MAX', 'MIN', 'MED', 'Q1', 'Q3'
-    ] = 'NEAREST',
+        "NEAREST",
+        "BILINEAR",
+        "CUBIC",
+        "CUBICSPLINE",
+        "LANCZOS",
+        "AVERAGE",
+        "MODE",
+        "MAX",
+        "MIN",
+        "MED",
+        "Q1",
+        "Q3",
+    ] = "NEAREST",
     dMissing_value_source: Union[int, float] = -9999,
     dMissing_value_target: Union[int, float] = -9999,
     iData_type: int = gdal.GDT_Int16,
     iFlag_overwrite: bool = True,
-    iFlag_verbose: bool = False
+    iFlag_verbose: bool = False,
 ) -> dict:
     """Implementation: validate inputs, warp+merge rasters, write output, return stats.
 
@@ -110,8 +121,9 @@ def merge_rasters(
 
     logger = logging.getLogger(__name__)
     if iFlag_verbose:
-        logging.basicConfig(level=logging.INFO,
-                            format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
 
     # ----------------------- Input checks -----------------------
     if not isinstance(aFilename_rasters, list):
@@ -141,8 +153,18 @@ def merge_rasters(
     # Validate resampling algorithm (case-insensitive)
     sResampleAlg = sResampleAlg.upper()
     valid_algorithms = [
-        'NEAREST', 'BILINEAR', 'CUBIC', 'CUBICSPLINE', 'LANCZOS',
-        'AVERAGE', 'MODE', 'MAX', 'MIN', 'MED', 'Q1', 'Q3'
+        "NEAREST",
+        "BILINEAR",
+        "CUBIC",
+        "CUBICSPLINE",
+        "LANCZOS",
+        "AVERAGE",
+        "MODE",
+        "MAX",
+        "MIN",
+        "MED",
+        "Q1",
+        "Q3",
     ]
     if sResampleAlg not in valid_algorithms:
         raise ValueError(f"Unsupported resampling algorithm: {sResampleAlg}")
@@ -153,7 +175,7 @@ def merge_rasters(
         pDriver_out = get_raster_driver_from_extension(sFilename_merge_out)
     except Exception:
         # fallback to GTiff for safety
-        pDriver_out = gdal.GetDriverByName('GTiff')
+        pDriver_out = gdal.GetDriverByName("GTiff")
         if pDriver_out is None:
             raise RuntimeError("Cannot obtain GDAL driver for output format")
 
@@ -172,16 +194,16 @@ def merge_rasters(
     # Get extent and grid from mask
     dLon_min, dLon_max, dLat_min, dLat_max = gdal_get_raster_extent(sFilename_mask)
     mask_meta = gdal_read_geotiff_file(sFilename_mask)
-    pGeoTransform = mask_meta['geotransform']
-    pProjection_target = mask_meta['projection']
-    ncolumn = mask_meta['ncolumn']
-    nrow = mask_meta['nrow']
+    pGeoTransform = mask_meta["geotransform"]
+    pProjection_target = mask_meta["projection"]
+    ncolumn = mask_meta["ncolumn"]
+    nrow = mask_meta["nrow"]
 
     iNewWidth = int(ncolumn)
     iNewHeight = int(nrow)
 
     # Create output dataset
-    options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
+    options = ["COMPRESS=DEFLATE", "PREDICTOR=2"]
     pDataset_out = pDriver_out.Create(
         sFilename_merge_out, iNewWidth, iNewHeight, 1, eType=iData_type, options=options
     )
@@ -203,37 +225,41 @@ def merge_rasters(
         height=iNewHeight,
         outputBounds=[dLon_min, dLat_min, dLon_max, dLat_max],
         dstSRS=pProjection_target,
-        format='MEM',
-        resampleAlg=sResampleAlg
+        format="MEM",
+        resampleAlg=sResampleAlg,
     )
 
-    pDataset_warped = gdal.Warp('', aFilename_rasters, options=pWarpOptions)
+    pDataset_warped = gdal.Warp("", aFilename_rasters, options=pWarpOptions)
     if pDataset_warped is None:
         pDataset_out = None
-        raise RuntimeError('GDAL warp operation failed')
+        raise RuntimeError("GDAL warp operation failed")
 
     aData_merged = pDataset_warped.ReadAsArray()
     if aData_merged is None:
         pDataset_warped = None
         pDataset_out = None
-        raise RuntimeError('Failed to read warped dataset into array')
+        raise RuntimeError("Failed to read warped dataset into array")
 
     # Handle multi-band -> single band (use first band)
     if aData_merged.ndim == 3:
         # (bands, rows, cols) -> pick first band, warn user
         if iFlag_verbose:
-            logger.info(f"Warped data contains {aData_merged.shape[0]} bands; using band 1")
+            logger.info(
+                f"Warped data contains {aData_merged.shape[0]} bands; using band 1"
+            )
         aData_merged = aData_merged[0, :, :]
 
     # Convert nodata values (handle floats and ints)
     try:
         if np.issubdtype(aData_merged.dtype, np.floating):
-            mask_missing = np.isclose(aData_merged, dMissing_value_source, rtol=1e-9, atol=1e-9)
+            mask_missing = np.isclose(
+                aData_merged, dMissing_value_source, rtol=1e-9, atol=1e-9
+            )
         else:
-            mask_missing = (aData_merged == dMissing_value_source)
+            mask_missing = aData_merged == dMissing_value_source
     except Exception:
         # Fallback: direct equality
-        mask_missing = (aData_merged == dMissing_value_source)
+        mask_missing = aData_merged == dMissing_value_source
 
     aData_merged[mask_missing] = dMissing_value_target
 
@@ -261,29 +287,28 @@ def merge_rasters(
 
     # Map GDAL data type to name
     data_type_names = {
-        gdal.GDT_Byte: 'Byte',
-        gdal.GDT_Int16: 'Int16',
-        gdal.GDT_UInt16: 'UInt16',
-        gdal.GDT_Int32: 'Int32',
-        gdal.GDT_UInt32: 'UInt32',
-        gdal.GDT_Float32: 'Float32',
-        gdal.GDT_Float64: 'Float64'
+        gdal.GDT_Byte: "Byte",
+        gdal.GDT_Int16: "Int16",
+        gdal.GDT_UInt16: "UInt16",
+        gdal.GDT_Int32: "Int32",
+        gdal.GDT_UInt32: "UInt32",
+        gdal.GDT_Float32: "Float32",
+        gdal.GDT_Float64: "Float64",
     }
-    data_type_name = data_type_names.get(iData_type, 'Unknown')
+    data_type_name = data_type_names.get(iData_type, "Unknown")
 
     return {
-        'success': True,
-        'output_file': sFilename_merge_out,
-        'num_input_files': len(aFilename_rasters),
-        'output_width': iNewWidth,
-        'output_height': iNewHeight,
-        'output_extent': (dLon_min, dLon_max, dLat_min, dLat_max),
-        'output_projection': pProjection_target,
-        'resampling_algorithm': sResampleAlg,
-        'data_type': data_type_name,
-        'nodata_value': dMissing_value_target,
-        'num_valid_pixels': num_valid,
-        'num_nodata_pixels': num_nodata,
-        'percent_valid': float(percent_valid)
+        "success": True,
+        "output_file": sFilename_merge_out,
+        "num_input_files": len(aFilename_rasters),
+        "output_width": iNewWidth,
+        "output_height": iNewHeight,
+        "output_extent": (dLon_min, dLon_max, dLat_min, dLat_max),
+        "output_projection": pProjection_target,
+        "resampling_algorithm": sResampleAlg,
+        "data_type": data_type_name,
+        "nodata_value": dMissing_value_target,
+        "num_valid_pixels": num_valid,
+        "num_nodata_pixels": num_nodata,
+        "percent_valid": float(percent_valid),
     }
-

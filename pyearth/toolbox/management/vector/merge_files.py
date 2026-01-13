@@ -6,11 +6,17 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
     print_supported_vector_formats,
     get_vector_driver_from_format,
-    get_vector_driver_from_filename
+    get_vector_driver_from_filename,
 )
 
 
-def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bool = False, add_id_field: bool = True, verbose: bool = True) -> None:
+def merge_files(
+    aFilename_in: List[str],
+    sFilename_out: str,
+    copy_attributes: bool = False,
+    add_id_field: bool = True,
+    verbose: bool = True,
+) -> None:
     """
     Merge multiple vector files into a single output file.
 
@@ -97,18 +103,17 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
     # Auto-detect format from output filename if not specified
     sFormat = get_vector_format_from_filename(sFilename_out)
     if sFormat is None:
-        print('Could not determine output format from filename extension.')
-        print('Supported formats are:')
+        print("Could not determine output format from filename extension.")
+        print("Supported formats are:")
         print_supported_vector_formats()
         return
 
-
     if verbose:
-        print(f'=== Starting merge_files operation ===')
-        print(f'Input files: {len(aFilename_in)} files')
-        print(f'Output file: {sFilename_out}')
-        print(f'Copy attributes: {copy_attributes}')
-        print(f'Add ID field: {add_id_field}')
+        print(f"=== Starting merge_files operation ===")
+        print(f"Input files: {len(aFilename_in)} files")
+        print(f"Output file: {sFilename_out}")
+        print(f"Copy attributes: {copy_attributes}")
+        print(f"Add ID field: {add_id_field}")
 
     # Register all drivers
     ogr.RegisterAll()
@@ -116,15 +121,15 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
     # Get the driver based on format
     pDriver = ogr.GetDriverByName(sFormat)
     if pDriver is None:
-        print(f'{sFormat} driver not available.')
-        return    # Check if the output file exists and delete it if it does
+        print(f"{sFormat} driver not available.")
+        return  # Check if the output file exists and delete it if it does
     if os.path.exists(sFilename_out):
         # For shapefiles, we need to delete all associated files
-        if sFormat == 'ESRI Shapefile':
+        if sFormat == "ESRI Shapefile":
             # Get the base name without extension
             base_name = os.path.splitext(sFilename_out)[0]
             # Delete all shapefile components
-            for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.qpj', '.sbn', '.sbx']:
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg", ".qpj", ".sbn", ".sbx"]:
                 file_to_delete = base_name + ext
                 if os.path.exists(file_to_delete):
                     os.remove(file_to_delete)
@@ -134,7 +139,7 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
     # Create the output data source
     pDataset_out = pDriver.CreateDataSource(sFilename_out)
     if pDataset_out is None:
-        print('Dataset not created')
+        print("Dataset not created")
         return
 
     # Loop through each input file
@@ -144,19 +149,19 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
         # Open the input file
         pDataset_in = ogr.Open(sFilename_in)
         if pDataset_in is None:
-            print(f'Failed to open file: {sFilename_in}')
+            print(f"Failed to open file: {sFilename_in}")
             continue
 
         # Get the input layer
         pLayer_in = pDataset_in.GetLayer()
         if pLayer_in is None:
-            print(f'Failed to get layer from file: {sFilename_in}')
+            print(f"Failed to get layer from file: {sFilename_in}")
             continue
 
         # Obtain the geometry type
         iGeomType = pLayer_in.GetGeomType()
         if verbose:
-            print(f'Processing {sFilename_in} - Geometry type: {iGeomType}')
+            print(f"Processing {sFilename_in} - Geometry type: {iGeomType}")
 
         # Create the output layer based on the geometry type
         if iFlag_first == 1:
@@ -164,21 +169,33 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
             pSpatialRef = pLayer_in.GetSpatialRef()
 
             if iGeomType == ogr.wkbPoint:
-                pLayer_out = pDataset_out.CreateLayer('layer', srs=pSpatialRef, geom_type=ogr.wkbPoint)
+                pLayer_out = pDataset_out.CreateLayer(
+                    "layer", srs=pSpatialRef, geom_type=ogr.wkbPoint
+                )
             elif iGeomType == ogr.wkbLineString:
-                pLayer_out = pDataset_out.CreateLayer('layer', srs=pSpatialRef, geom_type=ogr.wkbLineString)
+                pLayer_out = pDataset_out.CreateLayer(
+                    "layer", srs=pSpatialRef, geom_type=ogr.wkbLineString
+                )
             elif iGeomType == ogr.wkbPolygon:
-                pLayer_out = pDataset_out.CreateLayer('layer', srs=pSpatialRef, geom_type=ogr.wkbPolygon)
+                pLayer_out = pDataset_out.CreateLayer(
+                    "layer", srs=pSpatialRef, geom_type=ogr.wkbPolygon
+                )
             elif iGeomType == ogr.wkbMultiPoint:
-                pLayer_out = pDataset_out.CreateLayer('layer', srs=pSpatialRef, geom_type=ogr.wkbMultiPoint)
+                pLayer_out = pDataset_out.CreateLayer(
+                    "layer", srs=pSpatialRef, geom_type=ogr.wkbMultiPoint
+                )
             elif iGeomType == ogr.wkbMultiLineString:
-                pLayer_out = pDataset_out.CreateLayer('layer', srs=pSpatialRef, geom_type=ogr.wkbMultiLineString)
+                pLayer_out = pDataset_out.CreateLayer(
+                    "layer", srs=pSpatialRef, geom_type=ogr.wkbMultiLineString
+                )
             elif iGeomType == ogr.wkbMultiPolygon:
-                pLayer_out = pDataset_out.CreateLayer('layer', srs=pSpatialRef, geom_type=ogr.wkbMultiPolygon)
+                pLayer_out = pDataset_out.CreateLayer(
+                    "layer", srs=pSpatialRef, geom_type=ogr.wkbMultiPolygon
+                )
             else:
-                print(f'Unsupported geometry type: {iGeomType}')
+                print(f"Unsupported geometry type: {iGeomType}")
                 sGeomType = ogr.GeometryTypeToName(iGeomType)
-                print('Geometry type not supported:', sGeomType)
+                print("Geometry type not supported:", sGeomType)
                 continue
 
             # Copy field definitions from the first layer (if copy_attributes is True)
@@ -187,16 +204,18 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
                 for i in range(pLayerDefn_in.GetFieldCount()):
                     pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
                     if pLayer_out.CreateField(pFieldDefn) != 0:
-                        print(f'Failed to create field {pFieldDefn.GetName()} in output layer')
+                        print(
+                            f"Failed to create field {pFieldDefn.GetName()} in output layer"
+                        )
                         return
 
             # Add an id field if requested and it doesn't exist
             if add_id_field:
                 pLayerDefn_in = pLayer_in.GetLayerDefn()
-                if not copy_attributes or pLayerDefn_in.GetFieldIndex('id') == -1:
-                    pField = ogr.FieldDefn('id', ogr.OFTInteger)
+                if not copy_attributes or pLayerDefn_in.GetFieldIndex("id") == -1:
+                    pField = ogr.FieldDefn("id", ogr.OFTInteger)
                     if pLayer_out.CreateField(pField) != 0:
-                        print('Failed to create id field in output layer')
+                        print("Failed to create id field in output layer")
                         return
 
             iFlag_first = 0
@@ -209,12 +228,12 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
         nSkipped = 0
 
         if verbose:
-            print(f'Processing {nFeatures} features from {sFilename_in}')
+            print(f"Processing {nFeatures} features from {sFilename_in}")
 
         for feature in pLayer_in:
             nProcessed += 1
             if verbose and nProcessed % 1000 == 0:
-                print(f'  Processed {nProcessed}/{nFeatures} features')
+                print(f"  Processed {nProcessed}/{nFeatures} features")
 
             # Copy the feature
             pFeature_new = ogr.Feature(pLayer_out.GetLayerDefn())
@@ -226,7 +245,7 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
                 pFeature_new.SetGeometry(original_geom)
             else:
                 if verbose:
-                    print(f'Warning: Feature {nProcessed} has no geometry, skipping')
+                    print(f"Warning: Feature {nProcessed} has no geometry, skipping")
                 nSkipped += 1
                 continue
 
@@ -246,7 +265,7 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
 
             # Set id for each feature (if add_id_field is True)
             if add_id_field:
-                pFeature_new.SetField('id', lid)
+                pFeature_new.SetField("id", lid)
             pLayer_out.CreateFeature(pFeature_new)
             lid = lid + 1
 
@@ -255,14 +274,15 @@ def merge_files(aFilename_in: List[str], sFilename_out: str, copy_attributes: bo
 
         # Print summary for this file
         if verbose:
-            print(f'Completed {sFilename_in}: {nProcessed} processed, {nSkipped} skipped')
+            print(
+                f"Completed {sFilename_in}: {nProcessed} processed, {nSkipped} skipped"
+            )
 
     # Clean up
     pDataset_out = None
     if verbose:
-        print('=== Merge operation completed ===')
-        print(f'Total features processed: {lid}')
-        print('Merge completed successfully.')
+        print("=== Merge operation completed ===")
+        print(f"Total features processed: {lid}")
+        print("Merge completed successfully.")
 
     return
-

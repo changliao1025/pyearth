@@ -1,17 +1,15 @@
-
 """
 Convert geographic/projected coordinates to raster pixel coordinates.
 
 This module provides utilities for converting world coordinates (geographic or projected)
 to pixel/line indices in a georeferenced raster using GDAL geotransform parameters.
 """
+
 from typing import Tuple, Union, List
 
 
 def world2Pixel(
-    pGeoMatrix_in: Union[Tuple, List],
-    dx_in: float,
-    dy_in: float
+    pGeoMatrix_in: Union[Tuple, List], dx_in: float, dy_in: float
 ) -> Tuple[int, int]:
     """Convert world coordinates to pixel indices using a GDAL geotransform.
 
@@ -117,11 +115,11 @@ def world2Pixel(
         )
 
     # Extract geotransform parameters
-    x_origin = pGeoMatrix_in[0]      # Upper-left X (longitude/easting)
-    pixel_width = pGeoMatrix_in[1]   # W-E pixel resolution (positive)
-    x_rotation = pGeoMatrix_in[2]    # Row rotation (typically 0)
-    y_origin = pGeoMatrix_in[3]      # Upper-left Y (latitude/northing)
-    y_rotation = pGeoMatrix_in[4]    # Column rotation (typically 0)
+    x_origin = pGeoMatrix_in[0]  # Upper-left X (longitude/easting)
+    pixel_width = pGeoMatrix_in[1]  # W-E pixel resolution (positive)
+    x_rotation = pGeoMatrix_in[2]  # Row rotation (typically 0)
+    y_origin = pGeoMatrix_in[3]  # Upper-left Y (latitude/northing)
+    y_rotation = pGeoMatrix_in[4]  # Column rotation (typically 0)
     pixel_height = pGeoMatrix_in[5]  # N-S pixel resolution (typically negative)
 
     # Validate pixel dimensions are non-zero

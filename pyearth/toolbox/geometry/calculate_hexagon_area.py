@@ -81,7 +81,9 @@ from typing import Union
 logger = logging.getLogger(__name__)
 
 
-def calculate_hexagon_area(dLength_edge_in: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+def calculate_hexagon_area(
+    dLength_edge_in: Union[float, np.ndarray],
+) -> Union[float, np.ndarray]:
     """
     Calculate the area of a regular hexagon from its edge length.
 
@@ -225,4 +227,3 @@ def calculate_hexagon_area(dLength_edge_in: Union[float, np.ndarray]) -> Union[f
         return float(area)
 
     return area
-

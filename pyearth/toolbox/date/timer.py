@@ -86,6 +86,7 @@ class TimerError(Exception):
         ...
     TimerError: Timer is not running. Use .start() to start it
     """
+
     pass
 
 
@@ -155,7 +156,7 @@ class pytimer:
         self,
         name: Optional[str] = None,
         use_logging: bool = False,
-        log_level: int = logging.INFO
+        log_level: int = logging.INFO,
     ):
         """
         Initialize a new timer.
@@ -492,7 +493,7 @@ class pytimer:
         return f"<pytimer{name_str} ({status})>"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Example usage and demonstrations
     print("pytimer Examples:\n")
 

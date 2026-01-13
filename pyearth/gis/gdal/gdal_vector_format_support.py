@@ -6,34 +6,36 @@ from osgeo import ogr
 from pyearth.system.filename import get_extension_from_path
 
 SUPPORTED_VECTOR_FORMATS = {
-    '.geojson': 'GeoJSON',
-    '.json': 'GeoJSON',
-    '.shp': 'ESRI Shapefile',
-    '.gpkg': 'GPKG',
-    '.kml': 'KML',
-    '.gml': 'GML',
-    '.sqlite': 'SQLite',
-    '.parquet': 'Parquet',
-    '.geoparquet': 'Parquet',
-    '.csv': 'CSV',
-    '.tab': 'MapInfo File',
-    '.mif': 'MapInfo File',
-    '.dxf': 'DXF',
-    '.gdb': 'OpenFileGDB'
+    ".geojson": "GeoJSON",
+    ".json": "GeoJSON",
+    ".shp": "ESRI Shapefile",
+    ".gpkg": "GPKG",
+    ".kml": "KML",
+    ".gml": "GML",
+    ".sqlite": "SQLite",
+    ".parquet": "Parquet",
+    ".geoparquet": "Parquet",
+    ".csv": "CSV",
+    ".tab": "MapInfo File",
+    ".mif": "MapInfo File",
+    ".dxf": "DXF",
+    ".gdb": "OpenFileGDB",
 }
 
 
 __all__ = [
-    'SUPPORTED_VECTOR_FORMATS',
-    'gdal_vector_format_support',
-    'get_available_vector_formats',
-    'print_supported_vector_formats',
-    'get_vector_format_from_extension',
-    'get_vector_driver',
-    'get_vector_driver_from_extension',
-    'check_parquet_support',
-    'has_parquet_support',
+    "SUPPORTED_VECTOR_FORMATS",
+    "gdal_vector_format_support",
+    "get_available_vector_formats",
+    "print_supported_vector_formats",
+    "get_vector_format_from_extension",
+    "get_vector_driver_from_filename",
+    "get_vector_driver_from_format",
+    "get_vector_format_from_filename",
+    "check_parquet_support",
+    "has_parquet_support",
 ]
+
 
 @lru_cache(maxsize=1)
 def get_available_vector_formats() -> dict[str, str]:
@@ -47,9 +49,9 @@ def get_available_vector_formats() -> dict[str, str]:
 
     for ext, format_name in SUPPORTED_VECTOR_FORMATS.items():
         # Special handling for Parquet/GeoParquet
-        if ext in ('.parquet', '.geoparquet'):
-            if check_parquet_support():
-                available_formats[ext] = check_parquet_support()
+        if ext in (".parquet", ".geoparquet"):
+            if check_parquet_support() is not None:
+                available_formats[ext] = "Parquet"  # Use the canonical name
         else:
             # Check if the driver is available
             driver = ogr.GetDriverByName(format_name)
@@ -57,6 +59,7 @@ def get_available_vector_formats() -> dict[str, str]:
                 available_formats[ext] = format_name
 
     return available_formats
+
 
 def gdal_vector_format_support() -> dict[str, str]:
     """
@@ -69,6 +72,7 @@ def gdal_vector_format_support() -> dict[str, str]:
     dict[str, str]: A dictionary of available vector formats mapping file extensions to OGR driver names.
     """
     return get_available_vector_formats()
+
 
 def print_supported_vector_formats() -> None:
     """
@@ -90,6 +94,7 @@ def print_supported_vector_formats() -> None:
         for ext, driver in unavailable_formats.items():
             print(f"  {ext}: {driver} (driver not found)")
 
+
 def get_vector_format_from_extension(sExtension: str) -> str:
     """
     Determine the OGR format string from file extension.
@@ -97,7 +102,7 @@ def get_vector_format_from_extension(sExtension: str) -> str:
     Only accepts extensions that are both in the supported list and have available drivers.
 
     Parameters:
-    filename (str): Input filename with extension.
+    sExtension (str): Input file extension (e.g., '.shp').
 
     Returns:
     str: Format string for OGR driver.
@@ -110,11 +115,14 @@ def get_vector_format_from_extension(sExtension: str) -> str:
     available_formats = get_available_vector_formats()
     if ext not in available_formats:
         if ext in SUPPORTED_VECTOR_FORMATS:
-            raise ValueError(f"File extension '{ext}' is supported but driver '{SUPPORTED_VECTOR_FORMATS[ext]}' is not available in current GDAL/OGR installation")
+            raise ValueError(
+                f"File extension '{ext}' is supported but driver '{SUPPORTED_VECTOR_FORMATS[ext]}' is not available in current GDAL/OGR installation"
+            )
         else:
             raise ValueError(f"Unsupported vector file extension: {ext}")
 
     return available_formats[ext]
+
 
 def get_vector_format_from_filename(filename: str) -> str:
     """
@@ -132,9 +140,12 @@ def get_vector_format_from_filename(filename: str) -> str:
     ValueError: If the file extension is not supported or driver is not available.
     """
     sExtension = get_extension_from_path(filename).lower()
-    if sExtension == '':
-        raise ValueError(f"Filename '{filename}' does not have an extension to determine vector format.")
+    if sExtension == "":
+        raise ValueError(
+            f"Filename '{filename}' does not have an extension to determine vector format."
+        )
     return get_vector_format_from_extension(sExtension)
+
 
 def get_vector_driver_from_format(file_format: str) -> ogr.Driver:
     """
@@ -154,12 +165,13 @@ def get_vector_driver_from_format(file_format: str) -> ogr.Driver:
         raise ValueError(f"Driver for format '{file_format}' not found.")
     return driver
 
+
 def get_vector_driver_from_filename(filename: str) -> ogr.Driver:
     """
     Get the OGR driver based on file extension.
 
     Parameters:
-    filename (str): Input filename with extension.
+    filename (str): Path to the input file.
 
     Returns:
     ogr.Driver: The OGR driver object corresponding to the file format.
@@ -168,10 +180,13 @@ def get_vector_driver_from_filename(filename: str) -> ogr.Driver:
     ValueError: If the file extension is not supported or driver is not found.
     """
     sExtension = get_extension_from_path(filename).lower()
-    if sExtension == '':
-        raise ValueError(f"Filename '{filename}' does not have an extension to determine vector format.")
+    if sExtension == "":
+        raise ValueError(
+            f"Filename '{filename}' does not have an extension to determine vector format."
+        )
     format_name = get_vector_format_from_extension(sExtension)
     return get_vector_driver_from_format(format_name)
+
 
 @lru_cache(maxsize=1)
 def check_parquet_support() -> Optional[str]:
@@ -197,9 +212,10 @@ def check_parquet_support() -> Optional[str]:
         if not name:
             continue
         lname = name.lower()
-        if 'parquet' in lname or 'arrow' in lname:
+        if "parquet" in lname or "arrow" in lname:
             return name
     return None
+
 
 def has_parquet_support() -> bool:
     """Return True if a Parquet/Arrow OGR driver is available."""

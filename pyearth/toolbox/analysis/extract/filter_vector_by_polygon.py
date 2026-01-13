@@ -82,7 +82,9 @@ from osgeo import osr, ogr
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
 
 
-def filter_vector_by_polygon(sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out):
+def filter_vector_by_polygon(
+    sFilename_vector_in, sFilename_polygon_in, sFilename_vector_out
+):
     """
     Filter vector features by the bounding box extent of a polygon layer.
 
@@ -253,7 +255,7 @@ def filter_vector_by_polygon(sFilename_vector_in, sFilename_polygon_in, sFilenam
     # Layer name: 'clipped' (arbitrary identifier, doesn't affect file access)
     # Geometry type: wkbPolygon (assumes input contains polygon features)
     # Note: For mixed geometry types, consider auto-detecting from input layer
-    pLayer_out = pDataSource_out.CreateLayer('clipped', geom_type=ogr.wkbPolygon)
+    pLayer_out = pDataSource_out.CreateLayer("clipped", geom_type=ogr.wkbPolygon)
 
     # Copy all field definitions from input layer to output layer
     # This preserves the complete attribute schema (field names, types, widths)
@@ -278,13 +280,17 @@ def filter_vector_by_polygon(sFilename_vector_in, sFilename_polygon_in, sFilenam
         # SetSpatialFilterRect parameters: (min_x, min_y, max_x, max_y)
         # Note: Order differs from GetExtent() - extent[0], extent[2], extent[1], extent[3]
         # Only features intersecting this rectangle will be returned in subsequent iterations
-        pLayer_in.SetSpatialFilterRect(aExtent_clip[0], aExtent_clip[2], aExtent_clip[1], aExtent_clip[3])
+        pLayer_in.SetSpatialFilterRect(
+            aExtent_clip[0], aExtent_clip[2], aExtent_clip[1], aExtent_clip[3]
+        )
         pass
     else:
         # Placeholder for exact polygon geometry filtering
         # This would use SetSpatialFilter(polygon_geometry) for precise filtering
         # More accurate but computationally more expensive than bounding box
-        if iFlag_option == 2: #use the outline of the clip layer, this is more accurate
+        if (
+            iFlag_option == 2
+        ):  # use the outline of the clip layer, this is more accurate
             pass
 
     # Iterate through spatially filtered features and copy them to output
@@ -303,8 +309,10 @@ def filter_vector_by_polygon(sFilename_vector_in, sFilename_polygon_in, sFilenam
         # Copy all attribute field values from input feature to output feature
         # Iterate through all fields and transfer values by field name
         for i in range(pLayer_out.GetLayerDefn().GetFieldCount()):
-            pFeature_out.SetField(pLayer_out.GetLayerDefn().GetFieldDefn(i).GetNameRef(),
-                                feature.GetField(i))
+            pFeature_out.SetField(
+                pLayer_out.GetLayerDefn().GetFieldDefn(i).GetNameRef(),
+                feature.GetField(i),
+            )
 
         # Write the feature to the output layer
         pLayer_out.CreateFeature(pFeature_out)

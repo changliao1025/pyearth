@@ -1,9 +1,12 @@
 import os
 from typing import Tuple
 from osgeo import ogr, gdal
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 
-def gdal_get_vector_boundary(sFilename_boundary_in: str) -> Tuple[str, Tuple[float, float, float, float]]:
+
+def gdal_get_vector_boundary(
+    sFilename_boundary_in: str,
+) -> Tuple[str, Tuple[float, float, float, float]]:
     """Extract the boundary geometry and extent from a vector file.
 
     This function reads a vector file and extracts the boundary geometry
@@ -48,7 +51,7 @@ def gdal_get_vector_boundary(sFilename_boundary_in: str) -> Tuple[str, Tuple[flo
     dataset = None
     try:
         # Get the appropriate driver based on file extension
-        driver = get_vector_driver_from_extension(sFilename_boundary_in)
+        driver = get_vector_driver_from_filename(sFilename_boundary_in)
 
         dataset = driver.Open(sFilename_boundary_in, gdal.GA_ReadOnly)
         if dataset is None:
@@ -71,11 +74,11 @@ def gdal_get_vector_boundary(sFilename_boundary_in: str) -> Tuple[str, Tuple[flo
 
             geometry_type = geometry.GetGeometryName()
 
-            if geometry_type == 'POLYGON':
+            if geometry_type == "POLYGON":
                 boundary_geom = geometry.Clone()
                 break
 
-            elif geometry_type == 'MULTIPOLYGON':
+            elif geometry_type == "MULTIPOLYGON":
                 # Create a new MultiPolygon with all sub-geometries
                 boundary_geom = ogr.Geometry(ogr.wkbMultiPolygon)
                 num_geometries = geometry.GetGeometryCount()
@@ -92,7 +95,9 @@ def gdal_get_vector_boundary(sFilename_boundary_in: str) -> Tuple[str, Tuple[flo
                 )
 
         if boundary_geom is None:
-            raise ValueError(f"No valid polygon geometry found in {sFilename_boundary_in}.")
+            raise ValueError(
+                f"No valid polygon geometry found in {sFilename_boundary_in}."
+            )
 
         boundary_wkt = boundary_geom.ExportToWkt()
         if not boundary_wkt:

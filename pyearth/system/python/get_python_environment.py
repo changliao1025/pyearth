@@ -100,13 +100,13 @@ def get_python_environment() -> Tuple[str, str, str]:
     # Check for conda environment
     # Method 1: Check for 'envs' directory in path
     components = str(python_path_obj).split(os.sep)
-    if 'envs' in components:
+    if "envs" in components:
         try:
-            envs_index = components.index('envs')
+            envs_index = components.index("envs")
             if envs_index + 1 < len(components):
                 env_name = components[envs_index + 1]
-                env_path = os.sep.join(components[:envs_index + 2])
-                env_type = 'conda'
+                env_path = os.sep.join(components[: envs_index + 2])
+                env_type = "conda"
 
                 # Validate path
                 env_path_obj = Path(env_path)
@@ -120,12 +120,12 @@ def get_python_environment() -> Tuple[str, str, str]:
             pass  # Fall through to other checks
 
     # Method 2: Check CONDA_DEFAULT_ENV variable (for conda base or named envs)
-    conda_env = os.environ.get('CONDA_DEFAULT_ENV')
+    conda_env = os.environ.get("CONDA_DEFAULT_ENV")
     if conda_env:
         # Use sys.prefix as the environment path for conda
         env_path = sys.prefix
         env_name = conda_env
-        env_type = 'conda'
+        env_type = "conda"
 
         env_path_obj = Path(env_path)
         if env_path_obj.exists() and env_path_obj.is_dir():
@@ -135,20 +135,20 @@ def get_python_environment() -> Tuple[str, str, str]:
     # Search up from python executable for pyvenv.cfg
     current = python_path_obj.parent
     for _ in range(3):  # Check up to 3 levels up
-        pyvenv_cfg = current / 'pyvenv.cfg'
+        pyvenv_cfg = current / "pyvenv.cfg"
         if pyvenv_cfg.exists():
             env_path = str(current)
             env_name = current.name
-            env_type = 'venv'
+            env_type = "venv"
             return env_path, env_name, env_type
         current = current.parent
 
     # Check for virtualenv (VIRTUAL_ENV variable)
-    virtual_env = os.environ.get('VIRTUAL_ENV')
+    virtual_env = os.environ.get("VIRTUAL_ENV")
     if virtual_env:
         env_path = virtual_env
         env_name = Path(virtual_env).name
-        env_type = 'virtualenv'
+        env_type = "virtualenv"
 
         env_path_obj = Path(env_path)
         if env_path_obj.exists() and env_path_obj.is_dir():
@@ -156,13 +156,13 @@ def get_python_environment() -> Tuple[str, str, str]:
 
     # Check for pyenv
     # Method 1: Check for 'versions' directory in path
-    if 'versions' in components:
+    if "versions" in components:
         try:
-            versions_index = components.index('versions')
+            versions_index = components.index("versions")
             if versions_index + 1 < len(components):
                 env_name = components[versions_index + 1]
-                env_path = os.sep.join(components[:versions_index + 2])
-                env_type = 'pyenv'
+                env_path = os.sep.join(components[: versions_index + 2])
+                env_type = "pyenv"
 
                 env_path_obj = Path(env_path)
                 if env_path_obj.exists() and env_path_obj.is_dir():
@@ -171,11 +171,11 @@ def get_python_environment() -> Tuple[str, str, str]:
             pass
 
     # Method 2: Check PYENV_VERSION variable
-    pyenv_version = os.environ.get('PYENV_VERSION')
+    pyenv_version = os.environ.get("PYENV_VERSION")
     if pyenv_version:
         env_path = sys.prefix
         env_name = pyenv_version
-        env_type = 'pyenv'
+        env_type = "pyenv"
 
         env_path_obj = Path(env_path)
         if env_path_obj.exists() and env_path_obj.is_dir():
@@ -184,8 +184,8 @@ def get_python_environment() -> Tuple[str, str, str]:
     # Default to system Python
     # Use the directory containing the Python executable
     env_path = str(python_path_obj.parent)
-    env_name = 'system'
-    env_type = 'system'
+    env_name = "system"
+    env_type = "system"
 
     env_path_obj = Path(env_path)
     if not env_path_obj.exists() or not env_path_obj.is_dir():
@@ -233,13 +233,10 @@ def get_conda_environment() -> Tuple[str, str]:
     """
     env_path, env_name, env_type = get_python_environment()
 
-    if env_type != 'conda':
+    if env_type != "conda":
         raise ValueError(
             f"Current Python environment is '{env_type}', not 'conda'. "
             f"Use get_python_environment() for non-conda environments."
         )
 
     return env_path, env_name
-
-
-

@@ -1,13 +1,10 @@
-
 import statistics
 from typing import Optional, Union, Tuple
 import numpy as np
 
 
 def search_neighbors(
-    iIndex_in: int,
-    aArray_in: np.ndarray,
-    iWindow_size_in: Optional[int] = None
+    iIndex_in: int, aArray_in: np.ndarray, iWindow_size_in: Optional[int] = None
 ) -> np.ndarray:
     """
     Extract neighboring values around a given index for gap filling operations.
@@ -71,7 +68,9 @@ def search_neighbors(
         raise TypeError(f"Input array must be a numpy array, got {type(aArray_in)}")
 
     if aArray_in.ndim != 1:
-        raise ValueError(f"Input array must be 1-dimensional, got {aArray_in.ndim}D array")
+        raise ValueError(
+            f"Input array must be 1-dimensional, got {aArray_in.ndim}D array"
+        )
 
     if len(aArray_in) == 0:
         raise IndexError("Input array cannot be empty")
@@ -80,13 +79,17 @@ def search_neighbors(
         raise TypeError(f"Index must be an integer, got {type(iIndex_in)}")
 
     if not (0 <= iIndex_in < len(aArray_in)):
-        raise ValueError(f"Index {iIndex_in} is out of bounds for array of length {len(aArray_in)}")
+        raise ValueError(
+            f"Index {iIndex_in} is out of bounds for array of length {len(aArray_in)}"
+        )
 
     # Handle window size
     if iWindow_size_in is None:
         iWindow_size = 1
     elif not isinstance(iWindow_size_in, int):
-        raise TypeError(f"Window size must be an integer or None, got {type(iWindow_size_in)}")
+        raise TypeError(
+            f"Window size must be an integer or None, got {type(iWindow_size_in)}"
+        )
     elif iWindow_size_in < 0:
         raise ValueError(f"Window size must be non-negative, got {iWindow_size_in}")
     else:
@@ -106,7 +109,7 @@ def search_neighbors(
 def gap_fill_by_window(
     aArray_in: np.ndarray,
     iWindow_size_in: Optional[int] = None,
-    min_good_neighbors: Optional[int] = None
+    min_good_neighbors: Optional[int] = None,
 ) -> np.ndarray:
     """
     Fill gaps (NaN values) in a 1D array using neighboring values within a sliding window.
@@ -166,7 +169,9 @@ def gap_fill_by_window(
         raise TypeError(f"Input array must be a numpy array, got {type(aArray_in)}")
 
     if aArray_in.ndim != 1:
-        raise ValueError(f"Input array must be 1-dimensional, got {aArray_in.ndim}D array")
+        raise ValueError(
+            f"Input array must be 1-dimensional, got {aArray_in.ndim}D array"
+        )
 
     if len(aArray_in) == 0:
         raise ValueError("Input array cannot be empty")
@@ -175,7 +180,9 @@ def gap_fill_by_window(
     if iWindow_size_in is None:
         iWindow_size = 1
     elif not isinstance(iWindow_size_in, int):
-        raise TypeError(f"Window size must be an integer or None, got {type(iWindow_size_in)}")
+        raise TypeError(
+            f"Window size must be an integer or None, got {type(iWindow_size_in)}"
+        )
     elif iWindow_size_in < 0:
         raise ValueError(f"Window size must be non-negative, got {iWindow_size_in}")
     else:
@@ -185,9 +192,13 @@ def gap_fill_by_window(
     if min_good_neighbors is None:
         min_good_neighbors = iWindow_size + 1
     elif not isinstance(min_good_neighbors, int):
-        raise TypeError(f"min_good_neighbors must be an integer or None, got {type(min_good_neighbors)}")
+        raise TypeError(
+            f"min_good_neighbors must be an integer or None, got {type(min_good_neighbors)}"
+        )
     elif min_good_neighbors <= 0:
-        raise ValueError(f"min_good_neighbors must be positive, got {min_good_neighbors}")
+        raise ValueError(
+            f"min_good_neighbors must be positive, got {min_good_neighbors}"
+        )
 
     # Create a copy to avoid modifying the original
     aArray_out = aArray_in.copy()

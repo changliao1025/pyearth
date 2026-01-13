@@ -82,7 +82,7 @@ from osgeo import gdal, ogr, osr
 from pyearth.gis.gdal.gdal_to_numpy_datatype import numpy_to_gdal_type
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_format_from_extension,
 )
 
 # Configure logging
@@ -92,8 +92,8 @@ logger = logging.getLogger(__name__)
 def vectorize_raster(
     sFilename_raster_in: str,
     sFilename_vector_out: str,
-    sFieldname: str = 'value',
-    sFieldtype: int = ogr.OFTInteger64
+    sFieldname: str = "value",
+    sFieldtype: int = ogr.OFTInteger64,
 ) -> bool:
     """
     Convert raster dataset to vector polygons with dominant value extraction.
@@ -292,14 +292,16 @@ def vectorize_raster(
     # Delete existing output file if present
     if os.path.exists(sFilename_vector_out):
         # Handle format-specific cleanup
-        if sFormat_out == 'ESRI Shapefile':
+        if sFormat_out == "ESRI Shapefile":
             # Delete all shapefile component files
             base_name = os.path.splitext(sFilename_vector_out)[0]
-            for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.shp.xml']:
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg", ".shp.xml"]:
                 component_file = base_name + ext
                 if os.path.exists(component_file):
                     os.remove(component_file)
-            logger.info(f"Removed existing shapefile components: {sFilename_vector_out}")
+            logger.info(
+                f"Removed existing shapefile components: {sFilename_vector_out}"
+            )
         else:
             # For other formats, use driver's delete method
             pDriver_vector.DeleteDataSource(sFilename_vector_out)
@@ -330,7 +332,9 @@ def vectorize_raster(
     # Get NoData value and data type
     nodata_value = pBand.GetNoDataValue()
     if nodata_value is None:
-        logger.warning("Raster has no NoData value defined - all pixels will be polygonized")
+        logger.warning(
+            "Raster has no NoData value defined - all pixels will be polygonized"
+        )
         nodata_value = -9999  # Default fallback
 
     logger.info(f"NoData value: {nodata_value}")
@@ -338,12 +342,8 @@ def vectorize_raster(
 
     # Create in-memory mask dataset
     logger.info("Creating mask for valid pixels")
-    mask_ds = gdal.GetDriverByName('MEM').Create(
-        '',
-        pDataset_raster.RasterXSize,
-        pDataset_raster.RasterYSize,
-        1,
-        gdal.GDT_Byte
+    mask_ds = gdal.GetDriverByName("MEM").Create(
+        "", pDataset_raster.RasterXSize, pDataset_raster.RasterYSize, 1, gdal.GDT_Byte
     )
     if mask_ds is None:
         logger.error("Could not create memory dataset for mask")
@@ -367,7 +367,9 @@ def vectorize_raster(
 
         valid_pixel_count = np.sum(mask_array)
         total_pixels = mask_array.size
-        logger.info(f"Valid pixels: {valid_pixel_count}/{total_pixels} ({100*valid_pixel_count/total_pixels:.1f}%)")
+        logger.info(
+            f"Valid pixels: {valid_pixel_count}/{total_pixels} ({100*valid_pixel_count/total_pixels:.1f}%)"
+        )
     except Exception as e:
         logger.error(f"Error creating mask array: {e}")
         pDataset_raster = None
@@ -383,7 +385,7 @@ def vectorize_raster(
         mask_ds = None
         return False
 
-    pLayer_out = pDataset_vector.CreateLayer('polygonized', spatialRef, ogr.wkbPolygon)
+    pLayer_out = pDataset_vector.CreateLayer("polygonized", spatialRef, ogr.wkbPolygon)
     if pLayer_out is None:
         logger.error("Could not create output layer")
         pDataset_raster = None
@@ -392,14 +394,16 @@ def vectorize_raster(
         return False
 
     # Create ID field
-    pField_defn_id = ogr.FieldDefn('id', ogr.OFTInteger64)
+    pField_defn_id = ogr.FieldDefn("id", ogr.OFTInteger64)
     pLayer_out.CreateField(pField_defn_id)
 
     # Create value field with specified type
     pField_defn_value = ogr.FieldDefn(sFieldname, sFieldtype)
     pLayer_out.CreateField(pField_defn_value)
 
-    logger.info(f"Output fields created: 'id' (Integer64), '{sFieldname}' ({sFieldtype})")
+    logger.info(
+        f"Output fields created: 'id' (Integer64), '{sFieldname}' ({sFieldtype})"
+    )
 
     # Perform polygonization
     logger.info("Polygonizing raster...")
@@ -411,12 +415,7 @@ def vectorize_raster(
 
     try:
         result = gdal.Polygonize(
-            pBand,
-            mask_band,
-            pLayer_out,
-            field_index,
-            [],
-            callback=polygonize_callback
+            pBand, mask_band, pLayer_out, field_index, [], callback=polygonize_callback
         )
 
         if result != 0:
@@ -469,13 +468,15 @@ def vectorize_raster(
                 yRes=abs(dPixelHeight),
                 outputBounds=aPolygon_extent,
                 dstSRS=spatialRef,
-                format='MEM',
-                resampleAlg='near',
+                format="MEM",
+                resampleAlg="near",
                 dstNodata=nodata_value,
-                outputType=eType_out
+                outputType=eType_out,
             )
 
-            pDataset_clip_warped = gdal.Warp('', sFilename_raster_in, options=pWrapOption)
+            pDataset_clip_warped = gdal.Warp(
+                "", sFilename_raster_in, options=pWrapOption
+            )
             if pDataset_clip_warped is None:
                 logger.warning(f"Could not clip raster for polygon {lID}, using NoData")
                 dominant_value = nodata_value
@@ -499,7 +500,9 @@ def vectorize_raster(
                             dominant_value = np.bincount(valid_data).argmax()
                         else:
                             # For float arrays, use unique value counting
-                            unique_values, counts = np.unique(valid_data, return_counts=True)
+                            unique_values, counts = np.unique(
+                                valid_data, return_counts=True
+                            )
                             dominant_value = unique_values[np.argmax(counts)]
                     else:
                         dominant_value = nodata_value
@@ -512,7 +515,7 @@ def vectorize_raster(
             dominant_value = nodata_value
 
         # Set polygon ID
-        pFeature.SetField('id', lID)
+        pFeature.SetField("id", lID)
 
         # Convert and set dominant value
         try:
@@ -539,5 +542,5 @@ def vectorize_raster(
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

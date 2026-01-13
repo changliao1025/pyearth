@@ -1,4 +1,6 @@
 import os
+
+
 def get_extension_from_filename(filename: str) -> str:
     """
     Extract the file extension from a given filename.
@@ -11,6 +13,7 @@ def get_extension_from_filename(filename: str) -> str:
     """
     _, ext = os.path.splitext(filename)
     return ext
+
 
 def get_extension_from_path(filepath: str) -> str:
     """
@@ -26,6 +29,7 @@ def get_extension_from_path(filepath: str) -> str:
     _, ext = os.path.splitext(basename)
     return ext
 
+
 def get_filename_from_path_without_extension(filepath: str) -> str:
     """
     Get the filename without its extension.
@@ -39,6 +43,7 @@ def get_filename_from_path_without_extension(filepath: str) -> str:
     basename = os.path.basename(filepath)
     name, _ = os.path.splitext(basename)
     return name
+
 
 def get_filename_without_extension(filename: str) -> str:
     """
@@ -55,7 +60,6 @@ def get_filename_without_extension(filename: str) -> str:
     return name
 
 
-
 def get_folder_path(filepath: str) -> str:
     """
     Get the folder path from a full file path.
@@ -67,4 +71,3 @@ def get_folder_path(filepath: str) -> str:
         str: The folder path containing the file.
     """
     return os.path.dirname(filepath)
-

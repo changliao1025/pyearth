@@ -11,8 +11,8 @@ include *.yaml
 recursive-include docs *.rst *.py *.txt *.in Makefile *.bat
 prune docs/_build
 
-# Include all Python source files
-recursive-include pyearth *.py
+# Include all Python source files and Cython files
+recursive-include pyearth *.py *.pyx *.pxd *.c
 
 # Include test files
 recursive-include tests *.py

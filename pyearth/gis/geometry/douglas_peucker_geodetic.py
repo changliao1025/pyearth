@@ -71,6 +71,7 @@ True
 from typing import List, Tuple
 from pyearth.gis.geometry.calculate_distance_to_line import calculate_distance_to_line
 
+
 def douglas_peucker_geodetic(aCoords_gcs, tolerance):
     """
     Simplify a polyline or polygon using the Douglas-Peucker algorithm with geodesic distance.
@@ -228,11 +229,13 @@ def douglas_peucker_geodetic(aCoords_gcs, tolerance):
     osgeo.ogr.Geometry.Simplify : GDAL's simplification (uses different algorithm)
     """
     # Input validation
-    if not hasattr(aCoords_gcs, '__len__'):
+    if not hasattr(aCoords_gcs, "__len__"):
         raise ValueError("aCoords_gcs must be a sequence of coordinate pairs")
 
     if len(aCoords_gcs) < 2:
-        raise ValueError(f"aCoords_gcs must contain at least 2 points, got {len(aCoords_gcs)}")
+        raise ValueError(
+            f"aCoords_gcs must contain at least 2 points, got {len(aCoords_gcs)}"
+        )
 
     if tolerance < 0:
         raise ValueError(f"tolerance must be non-negative, got {tolerance}")
@@ -309,13 +312,14 @@ def douglas_peucker_geodetic(aCoords_gcs, tolerance):
         dLatitude0 = point[1]
         dLongitude1 = start[0]  # Line segment start
         dLatitude1 = start[1]
-        dLongitude2 = end[0]    # Line segment end
+        dLongitude2 = end[0]  # Line segment end
         dLatitude2 = end[1]
 
         # Calculate geodesic perpendicular distance
         # Note: calculate_distance_to_line handles the geodesic calculation
         distance = calculate_distance_to_line(
-            dLongitude1, dLatitude1, dLongitude0, dLatitude0, dLongitude2, dLatitude2)
+            dLongitude1, dLatitude1, dLongitude0, dLatitude0, dLongitude2, dLatitude2
+        )
 
         return distance
 
@@ -366,5 +370,3 @@ def douglas_peucker_geodetic(aCoords_gcs, tolerance):
         simplified_points.append(simplified_points[0])
 
     return simplified_points
-
-

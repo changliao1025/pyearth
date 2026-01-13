@@ -54,14 +54,13 @@ References
 .. [2] Geographic coordinate system:
        https://en.wikipedia.org/wiki/Geographic_coordinate_system
 """
+
 import numpy as np
 from typing import Union, Tuple
 
 
 def convert_longitude_latitude_to_sphere_3d(
-    dLongitude_in: float,
-    dLatitude_in: float,
-    iFlag_radian: bool = False
+    dLongitude_in: float, dLatitude_in: float, iFlag_radian: bool = False
 ) -> np.ndarray:
     """Convert longitude/latitude to 3D Cartesian coordinates on a unit sphere.
 
@@ -159,7 +158,7 @@ def convert_longitude_latitude_to_sphere_3d(
         longitude_rad, latitude_rad = np.radians([longitude, latitude])
     else:
         # Input in radians - validate
-        if not -np.pi/2 <= latitude <= np.pi/2:
+        if not -np.pi / 2 <= latitude <= np.pi / 2:
             raise ValueError(
                 f"Latitude must be in range [-π/2, π/2] radians. Got {latitude} rad"
             )
@@ -186,7 +185,7 @@ def convert_longitude_latitude_to_sphere_3d(
 def convert_sphere_3d_to_longitude_latitude(
     x: Union[float, np.ndarray],
     y: Union[float, np.ndarray],
-    z: Union[float, np.ndarray]
+    z: Union[float, np.ndarray],
 ) -> Tuple[float, float]:
     """Convert 3D Cartesian coordinates to longitude/latitude coordinates.
 
@@ -346,6 +345,3 @@ def convert_sphere_3d_to_longitude_latitude(
     lat_deg = np.degrees(lat_rad)
 
     return float(lon_deg), float(lat_deg)
-
-
-

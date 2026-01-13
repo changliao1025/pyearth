@@ -257,7 +257,9 @@ def leap_year(iYear_in: int) -> bool:
 
     # Rule 2: Divisible by 100 (but not 400) -> NOT a leap year
     if iYear_in % 100 == 0:
-        logger.debug(f"Year {iYear_in} is not a leap year (divisible by 100 but not 400)")
+        logger.debug(
+            f"Year {iYear_in} is not a leap year (divisible by 100 but not 400)"
+        )
         return False
 
     # Rule 3: Divisible by 4 (but not 100) -> IS a leap year
@@ -268,5 +270,3 @@ def leap_year(iYear_in: int) -> bool:
     # Rule 4: All other years -> NOT a leap year
     logger.debug(f"Year {iYear_in} is not a leap year (not divisible by 4)")
     return False
-
-

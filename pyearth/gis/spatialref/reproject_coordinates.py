@@ -1,10 +1,10 @@
-
 """
 Coordinate reprojection utilities using GDAL/OSR.
 
 Functions for reprojecting coordinates between different spatial reference systems
 using Well-Known Text (WKT) projection definitions.
 """
+
 from typing import List, Tuple, Optional
 
 import osgeo
@@ -15,7 +15,7 @@ def reproject_coordinates(
     dx_in: float,
     dy_in: float,
     pProjection_source_in: str,
-    pProjection_target_in: Optional[str] = None
+    pProjection_target_in: Optional[str] = None,
 ) -> Tuple[float, float]:
     """Reproject a single coordinate pair from source to target projection.
 
@@ -69,23 +69,20 @@ def reproject_coordinates(
         x = float(dx_in)
         y = float(dy_in)
     except (TypeError, ValueError) as e:
-        raise ValueError(
-            f"Invalid coordinate values: x={dx_in}, y={dy_in}. Error: {e}"
-        )
+        raise ValueError(f"Invalid coordinate values: x={dx_in}, y={dy_in}. Error: {e}")
 
     if not isinstance(pProjection_source_in, str) or not pProjection_source_in.strip():
-        raise ValueError(
-            "Source projection must be a non-empty WKT string."
-        )
+        raise ValueError("Source projection must be a non-empty WKT string.")
 
     # Setup target spatial reference
     spatial_ref_target = osr.SpatialReference()
     try:
         if pProjection_target_in is not None:
-            if not isinstance(pProjection_target_in, str) or not pProjection_target_in.strip():
-                raise ValueError(
-                    "Target projection must be a non-empty WKT string."
-                )
+            if (
+                not isinstance(pProjection_target_in, str)
+                or not pProjection_target_in.strip()
+            ):
+                raise ValueError("Target projection must be a non-empty WKT string.")
             result = spatial_ref_target.ImportFromWkt(pProjection_target_in)
             if result != 0:
                 raise RuntimeError(
@@ -121,17 +118,13 @@ def reproject_coordinates(
     try:
         transform = osr.CoordinateTransformation(spatial_ref_source, spatial_ref_target)
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to create coordinate transformation: {e}"
-        )
+        raise RuntimeError(f"Failed to create coordinate transformation: {e}")
 
     # Transform coordinates
     try:
         x_out, y_out, z = transform.TransformPoint(x, y)
     except Exception as e:
-        raise ValueError(
-            f"Coordinate transformation failed for point ({x}, {y}): {e}"
-        )
+        raise ValueError(f"Coordinate transformation failed for point ({x}, {y}): {e}")
 
     return x_out, y_out
 
@@ -140,7 +133,7 @@ def reproject_coordinates_batch(
     aX_in: List[float],
     aY_in: List[float],
     pProjection_source_in: str,
-    pProjection_target_in: Optional[str] = None
+    pProjection_target_in: Optional[str] = None,
 ) -> Tuple[List[float], List[float]]:
     """Reproject multiple coordinate pairs from source to target projection.
 
@@ -214,18 +207,17 @@ def reproject_coordinates_batch(
         )
 
     if not isinstance(pProjection_source_in, str) or not pProjection_source_in.strip():
-        raise ValueError(
-            "Source projection must be a non-empty WKT string."
-        )
+        raise ValueError("Source projection must be a non-empty WKT string.")
 
     # Setup target spatial reference
     spatial_ref_target = osr.SpatialReference()
     try:
         if pProjection_target_in is not None:
-            if not isinstance(pProjection_target_in, str) or not pProjection_target_in.strip():
-                raise ValueError(
-                    "Target projection must be a non-empty WKT string."
-                )
+            if (
+                not isinstance(pProjection_target_in, str)
+                or not pProjection_target_in.strip()
+            ):
+                raise ValueError("Target projection must be a non-empty WKT string.")
             result = spatial_ref_target.ImportFromWkt(pProjection_target_in)
             if result != 0:
                 raise RuntimeError(
@@ -261,9 +253,7 @@ def reproject_coordinates_batch(
     try:
         transform = osr.CoordinateTransformation(spatial_ref_source, spatial_ref_target)
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to create coordinate transformation: {e}"
-        )
+        raise RuntimeError(f"Failed to create coordinate transformation: {e}")
 
     # Transform all coordinates
     aX_out = []
@@ -288,4 +278,3 @@ def reproject_coordinates_batch(
             )
 
     return aX_out, aY_out
-

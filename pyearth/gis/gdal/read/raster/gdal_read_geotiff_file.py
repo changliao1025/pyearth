@@ -5,7 +5,9 @@ import numpy as np
 from osgeo import gdal, osr
 
 
-def gdal_read_geotiff_file(sFilename_in: str, iFlag_metadata_only: int = 0) -> Dict[str, Any]:
+def gdal_read_geotiff_file(
+    sFilename_in: str, iFlag_metadata_only: int = 0
+) -> Dict[str, Any]:
     """Read a single-band GeoTIFF raster and return data with metadata.
 
     Parameters
@@ -49,7 +51,9 @@ def gdal_read_geotiff_file(sFilename_in: str, iFlag_metadata_only: int = 0) -> D
     try:
         geotransform = dataset.GetGeoTransform()
         if not geotransform:
-            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
+            raise ValueError(
+                f"Raster {sFilename_in} does not provide geotransform metadata."
+            )
 
         origin_x = geotransform[0]
         origin_y = geotransform[3]
@@ -62,19 +66,20 @@ def gdal_read_geotiff_file(sFilename_in: str, iFlag_metadata_only: int = 0) -> D
 
         projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
         if not projection_wkt:
-            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
-
+            raise ValueError(
+                f"Raster {sFilename_in} does not define spatial reference metadata."
+            )
 
         if iFlag_metadata_only == 1:
             return {
-                'pixelWidth': pixel_width,
-                'pixelHeight': pixel_height,
-                'originX': origin_x,
-                'originY': origin_y,
-                'nrow': nrow,
-                'ncolumn': ncolumn,
-                'geotransform': geotransform,
-                'projection': projection_wkt,
+                "pixelWidth": pixel_width,
+                "pixelHeight": pixel_height,
+                "originX": origin_x,
+                "originY": origin_y,
+                "nrow": nrow,
+                "ncolumn": ncolumn,
+                "geotransform": geotransform,
+                "projection": projection_wkt,
             }
 
         band = dataset.GetRasterBand(1)
@@ -89,23 +94,26 @@ def gdal_read_geotiff_file(sFilename_in: str, iFlag_metadata_only: int = 0) -> D
             raise RuntimeError(f"Failed to read raster data from {sFilename_in}.")
 
         return {
-            'dataOut': data,
-            'dataType': data_type,
-            'pixelWidth': pixel_width,
-            'pixelHeight': pixel_height,
-            'originX': origin_x,
-            'originY': origin_y,
-            'nrow': nrow,
-            'ncolumn': ncolumn,
-            'missingValue': missing_value,
-            'geotransform': geotransform,
-            'projection': projection_wkt,
+            "dataOut": data,
+            "dataType": data_type,
+            "pixelWidth": pixel_width,
+            "pixelHeight": pixel_height,
+            "originX": origin_x,
+            "originY": origin_y,
+            "nrow": nrow,
+            "ncolumn": ncolumn,
+            "missingValue": missing_value,
+            "geotransform": geotransform,
+            "projection": projection_wkt,
         }
     finally:
         band = None
         dataset = None
 
-def gdal_read_geotiff_file_multiple_band(sFilename_in: str, iFlag_metadata_only: int = 0) -> Dict[str, Any]:
+
+def gdal_read_geotiff_file_multiple_band(
+    sFilename_in: str, iFlag_metadata_only: int = 0
+) -> Dict[str, Any]:
     """Read a multi-band GeoTIFF raster and return stacked data with metadata.
 
     Parameters
@@ -150,7 +158,9 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in: str, iFlag_metadata_only:
     try:
         geotransform = dataset.GetGeoTransform()
         if not geotransform:
-            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
+            raise ValueError(
+                f"Raster {sFilename_in} does not provide geotransform metadata."
+            )
 
         origin_x = geotransform[0]
         origin_y = geotransform[3]
@@ -166,20 +176,20 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in: str, iFlag_metadata_only:
 
         projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
         if not projection_wkt:
-            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
-
-
+            raise ValueError(
+                f"Raster {sFilename_in} does not define spatial reference metadata."
+            )
 
         if iFlag_metadata_only == 1:
             return {
-                'pixelWidth': pixel_width,
-                'pixelHeight': pixel_height,
-                'originX': origin_x,
-                'originY': origin_y,
-                'nrow': nrow,
-                'ncolumn': ncolumn,
-                'geotransform': geotransform,
-                'projection': projection_wkt,
+                "pixelWidth": pixel_width,
+                "pixelHeight": pixel_height,
+                "originX": origin_x,
+                "originY": origin_y,
+                "nrow": nrow,
+                "ncolumn": ncolumn,
+                "geotransform": geotransform,
+                "projection": projection_wkt,
             }
 
         band = dataset.GetRasterBand(1)
@@ -203,23 +213,25 @@ def gdal_read_geotiff_file_multiple_band(sFilename_in: str, iFlag_metadata_only:
 
             band_data = band.ReadAsArray(0, 0, ncolumn, nrow)
             if band_data is None:
-                raise RuntimeError(f"Failed to read raster data from band {i_band + 1} of {sFilename_in}.")
+                raise RuntimeError(
+                    f"Failed to read raster data from band {i_band + 1} of {sFilename_in}."
+                )
 
             data[i_band, :, :] = band_data
 
         return {
-            'dataOut': data,
-            'dataType': data_type,
-            'pixelWidth': pixel_width,
-            'pixelHeight': pixel_height,
-            'originX': origin_x,
-            'originY': origin_y,
-            'nband': nband,
-            'nrow': nrow,
-            'ncolumn': ncolumn,
-            'missingValue': missing_value,
-            'geotransform': geotransform,
-            'projection': projection_wkt,
+            "dataOut": data,
+            "dataType": data_type,
+            "pixelWidth": pixel_width,
+            "pixelHeight": pixel_height,
+            "originX": origin_x,
+            "originY": origin_y,
+            "nband": nband,
+            "nrow": nrow,
+            "ncolumn": ncolumn,
+            "missingValue": missing_value,
+            "geotransform": geotransform,
+            "projection": projection_wkt,
         }
     finally:
         band = None

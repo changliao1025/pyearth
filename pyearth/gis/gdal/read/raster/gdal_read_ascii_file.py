@@ -2,6 +2,7 @@ import os
 from typing import Any, Optional, Tuple
 from osgeo import gdal
 
+
 def gdal_read_ascii_file(
     sFilename_in: str,
 ) -> Tuple[Any, float, float, float, int, int, Optional[float], Tuple[float, ...], str]:
@@ -18,7 +19,9 @@ def gdal_read_ascii_file(
     try:
         geotransform = dataset.GetGeoTransform()
         if not geotransform:
-            raise ValueError(f"Raster {sFilename_in} does not provide geotransform metadata.")
+            raise ValueError(
+                f"Raster {sFilename_in} does not provide geotransform metadata."
+            )
 
         origin_x = geotransform[0]
         origin_y = geotransform[3]
@@ -38,9 +41,9 @@ def gdal_read_ascii_file(
 
         projection_wkt = dataset.GetProjectionRef() or dataset.GetProjection()
         if not projection_wkt:
-            raise ValueError(f"Raster {sFilename_in} does not define spatial reference metadata.")
-
-
+            raise ValueError(
+                f"Raster {sFilename_in} does not define spatial reference metadata."
+            )
 
         return (
             data,

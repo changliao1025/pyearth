@@ -11,9 +11,10 @@ calculate_intersect_on_great_circle : Find closest point on great circle arc to 
 find_great_circle_intersection_with_meridian : Find latitude where great circle crosses a meridian
 project_point_onto_plane : Project 3D point onto plane
 
+
 Use Cases
 ---------
-- Mesh operations: Finding nearest point on an edge to a vertex
+- Mesh operations: Finding nearest point on a line to a point
 - Polygon splitting: Determining where polygons cross the International Date Line
 - Distance calculations: Computing shortest paths on Earth's surface
 - Geometric operations: Projections and intersections on spherical surfaces
@@ -38,17 +39,15 @@ References
 .. [2] Williams, E. "Aviation Formulary V1.47"
        http://www.edwilliams.org/avform147.htm
 """
+
 import numpy as np
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
     convert_longitude_latitude_to_sphere_3d,
-    convert_sphere_3d_to_longitude_latitude
+    convert_sphere_3d_to_longitude_latitude,
 )
 
 
-def project_point_onto_plane(
-    p: np.ndarray,
-    normal: np.ndarray
-) -> np.ndarray:
+def project_point_onto_plane(p: np.ndarray, normal: np.ndarray) -> np.ndarray:
     """Project a 3D point onto a plane defined by its normal vector.
 
     Given a point and a plane (defined by a normal vector passing through
@@ -129,13 +128,13 @@ def calculate_intersect_on_great_circle(
     dLatitude2_in: float,
     dLongitude3_in: float,
     dLatitude3_in: float,
-    iFlag_radian: bool = False
+    iFlag_radian: bool = False,
 ) -> tuple:
     """Calculate the closest point on a great circle arc to a query point.
 
     This function finds the point on the great circle arc between point1 and
     point3 that is closest to point2 (the query point). This is useful for
-    finding the nearest location on an edge to a given vertex in mesh operations.
+    finding the nearest location on a line to a given point in mesh operations.
 
     Parameters
     ----------
@@ -169,11 +168,11 @@ def calculate_intersect_on_great_circle(
 
     Notes
     -----
-    - The returned point is the orthogonal projection onto the great circle,
-      which may lie outside the arc segment between point1 and point3
-    - All calculations are performed on a unit sphere
-    - The great circle is defined by the plane through point1, point3,
-      and Earth's center
+        - The returned point is the orthogonal projection onto the great circle,
+            which may lie outside the arc segment between point1 and point3
+        - All calculations are performed on a unit sphere
+        - The great circle is defined by the plane through point1, point3,
+            and Earth's center
 
     Examples
     --------
@@ -230,11 +229,7 @@ def calculate_intersect_on_great_circle(
 
 
 def find_great_circle_intersection_with_meridian(
-    lon1: float,
-    lat1: float,
-    lon2: float,
-    lat2: float,
-    target_lon: float
+    lon1: float, lat1: float, lon2: float, lat2: float, target_lon: float
 ) -> tuple:
     """Find the latitude on a great circle arc at a specified longitude.
 
@@ -361,6 +356,3 @@ def find_great_circle_intersection_with_meridian(
     lat_deg = np.degrees(lat_rad)
 
     return (target_lon, float(lat_deg))
-
-
-

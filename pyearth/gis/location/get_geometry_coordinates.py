@@ -5,77 +5,16 @@ This module provides utilities for extracting coordinate arrays from various
 OGR geometry types. For polygon geometries, coordinates are automatically
 enforced to be in counter-clockwise (CCW) order following the right-hand rule.
 """
+
 from typing import List, Union
 import numpy as np
 from osgeo import ogr
+from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
 
 
-def check_ccw(coords: np.ndarray) -> bool:
-    """Determine if polygon coordinates are in counter-clockwise (CCW) order.
-
-    Uses the shoelace formula to calculate the signed area of a polygon.
-    A positive signed area indicates counter-clockwise orientation.
-
-    Parameters
-    ----------
-    coords : np.ndarray
-        Array of shape (n, 2) representing polygon coordinates in (x, y) format,
-        typically (longitude, latitude).
-
-    Returns
-    -------
-    bool
-        True if coordinates are in counter-clockwise order, False if clockwise.
-
-    Raises
-    ------
-    ValueError
-        If coords is not a 2D array with shape (n, 2) where n >= 3.
-
-    Notes
-    -----
-    - The shoelace formula computes: Area = 0.5 * sum(x[i]*y[i+1] - x[i+1]*y[i])
-    - Positive area indicates CCW, negative indicates CW
-    - For geographic coordinates, this assumes a planar approximation
-    - Minimum 3 points required for a valid polygon
-
-    Examples
-    --------
-    >>> # Square in CCW order
-    >>> coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])
-    >>> check_ccw(coords)
-    True
-
-    >>> # Square in CW order
-    >>> coords = np.array([[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]])
-    >>> check_ccw(coords)
-    False
-    """
-    if not isinstance(coords, np.ndarray):
-        raise ValueError("Coordinates must be a numpy array")
-    
-    if coords.ndim != 2 or coords.shape[1] != 2:
-        raise ValueError(
-            f"Coordinates must be a 2D array with shape (n, 2). Got shape {coords.shape}"
-        )
-    
-    if len(coords) < 3:
-        raise ValueError(
-            f"Polygon must have at least 3 points. Got {len(coords)} points"
-        )
-
-    # Shoelace formula to calculate signed area
-    x = coords[:, 0]  # X coordinates (longitude)
-    y = coords[:, 1]  # Y coordinates (latitude)
-    
-    # Calculate signed area: sum of cross products
-    signed_area = np.sum(x[:-1] * y[1:] - x[1:] * y[:-1]) + (x[-1] * y[0] - x[0] * y[-1])
-
-    # Positive signed area indicates CCW
-    return signed_area > 0
-
-
-def get_geometry_coordinates(geometry: ogr.Geometry) -> Union[np.ndarray, List[np.ndarray]]:
+def get_geometry_coordinates(
+    geometry: ogr.Geometry,
+) -> Union[np.ndarray, List[np.ndarray]]:
     """Extract coordinates from an OGR geometry object.
 
     Dispatches to appropriate handler based on geometry type. For polygon
@@ -138,15 +77,15 @@ def get_geometry_coordinates(geometry: ogr.Geometry) -> Union[np.ndarray, List[n
         raise ValueError(f"Invalid geometry object: {e}")
 
     # Dispatch to appropriate handler
-    if geometry_type == 'POINT':
+    if geometry_type == "POINT":
         return get_point_coords(geometry)
-    elif geometry_type == 'LINESTRING':
+    elif geometry_type == "LINESTRING":
         return get_linestring_coords(geometry)
-    elif geometry_type == 'POLYGON':
+    elif geometry_type == "POLYGON":
         return get_polygon_exterior_coords(geometry)
-    elif geometry_type == 'LINEARRING':
+    elif geometry_type == "LINEARRING":
         return get_linearring_coords(geometry)
-    elif geometry_type == 'MULTIPOLYGON':
+    elif geometry_type == "MULTIPOLYGON":
         return get_multipolygon_exterior_coords(geometry)
     else:
         raise ValueError(
@@ -224,13 +163,15 @@ def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
     coords_array = np.array(exterior_coords)
 
     # Ensure counter-clockwise order
-    if not check_ccw(coords_array):
+    if not check_counter_clockwise(coords_array):
         coords_array = coords_array[::-1]
 
     return coords_array
 
 
-def get_multipolygon_exterior_coords(multipolygon_geometry: ogr.Geometry) -> List[np.ndarray]:
+def get_multipolygon_exterior_coords(
+    multipolygon_geometry: ogr.Geometry,
+) -> List[np.ndarray]:
     """Extract exterior ring coordinates from all parts of a multipolygon.
 
     Each polygon part's coordinates are enforced to be in counter-clockwise order.
@@ -283,10 +224,8 @@ def get_multipolygon_exterior_coords(multipolygon_geometry: ogr.Geometry) -> Lis
     # Validate geometry type
     try:
         geometry_type = multipolygon_geometry.GetGeometryName()
-        if geometry_type != 'MULTIPOLYGON':
-            raise ValueError(
-                f"Expected MULTIPOLYGON geometry, got '{geometry_type}'"
-            )
+        if geometry_type != "MULTIPOLYGON":
+            raise ValueError(f"Expected MULTIPOLYGON geometry, got '{geometry_type}'")
     except Exception as e:
         raise ValueError(f"Invalid geometry object: {e}")
 
@@ -322,7 +261,7 @@ def get_multipolygon_exterior_coords(multipolygon_geometry: ogr.Geometry) -> Lis
             coords_array = np.array(part_coords)
 
             # Ensure counter-clockwise order
-            if not check_ccw(coords_array):
+            if not check_counter_clockwise(coords_array):
                 coords_array = coords_array[::-1]
 
             exterior_coords_list.append(coords_array)

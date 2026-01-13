@@ -58,14 +58,19 @@ References
        https://trs.jpl.nasa.gov/handle/2014/41271
 .. [3] L'Huilier, S.-A.-J. "Mémoire sur la polyèdrométrie", 1812.
 """
+
 import math
 import numpy as np
 from typing import Union, Optional, Tuple
 from osgeo import ogr
 from pyearth.system.define_global_variables import earth_radius
 
-from pyearth.gis.geometry.calculate_spherical_triangle_area import calculate_spherical_triangle_area
-from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import calculate_distance_based_on_longitude_latitude
+from pyearth.gis.geometry.calculate_spherical_triangle_area import (
+    calculate_spherical_triangle_area,
+)
+from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import (
+    calculate_distance_based_on_longitude_latitude,
+)
 
 
 def haversine(x: float) -> float:
@@ -110,13 +115,14 @@ def haversine(x: float) -> float:
     """
     return (1.0 - math.cos(x)) / 2.0
 
+
 def calculate_polygon_area(
     aLongitude_in: Union[list, np.ndarray],
     aLatitude_in: Union[list, np.ndarray],
     iFlag_algorithm: int = 2,
     iFlag_radian: bool = False,
     dRadius_in: Optional[float] = None,
-    dLine_threshold: Optional[float] = None
+    dLine_threshold: Optional[float] = None,
 ) -> float:
     """Calculate area of a spherical polygon on Earth's surface.
 
@@ -236,7 +242,6 @@ def calculate_polygon_area(
             f"Got {npoint} longitudes and {len(aLatitude_in)} latitudes."
         )
 
-
     if len(aLatitude_in) != npoint:
         raise ValueError(
             f"Longitude and latitude arrays must have same length. "
@@ -262,8 +267,10 @@ def calculate_polygon_area(
         aLength = np.zeros(npoint - 1)
         for i in range(npoint - 1):
             dLength = calculate_distance_based_on_longitude_latitude(
-                aLongitude_in[i], aLatitude_in[i],
-                aLongitude_in[i+1], aLatitude_in[i+1]
+                aLongitude_in[i],
+                aLatitude_in[i],
+                aLongitude_in[i + 1],
+                aLatitude_in[i + 1],
             )
             aLength[i] = dLength
 
@@ -279,14 +286,16 @@ def calculate_polygon_area(
     if iFlag_algorithm == 0:
         # Algorithm 0: Green's Theorem Line Integral
         # Get colatitude (surface distance as angle from origin)
-        a = (np.sin(aLatitude_radian_in/2)**2 +
-             np.cos(aLatitude_radian_in) * np.sin(aLongitude_radian_in/2)**2)
-        colat = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
+        a = (
+            np.sin(aLatitude_radian_in / 2) ** 2
+            + np.cos(aLatitude_radian_in) * np.sin(aLongitude_radian_in / 2) ** 2
+        )
+        colat = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
         # Azimuth of each point from arbitrary origin
         az = np.arctan2(
             np.cos(aLatitude_radian_in) * np.sin(aLongitude_radian_in),
-            np.sin(aLatitude_radian_in)
+            np.sin(aLatitude_radian_in),
         ) % (2 * np.pi)
 
         # Calculate azimuth differences
@@ -327,9 +336,7 @@ def calculate_polygon_area(
             aLongitude_temp = [dLongitude_root, dLongitude_a, dLongitude_b]
             aLatitude_temp = [dLatitude_root, dLatitude_a, dLatitude_b]
             dArea_triangle = calculate_spherical_triangle_area(
-                aLongitude_temp,
-                aLatitude_temp,
-                iFlag_radian=True
+                aLongitude_temp, aLatitude_temp, iFlag_radian=True
             )
             aArea[i - 1] = dArea_triangle
 
@@ -343,9 +350,7 @@ def calculate_polygon_area(
             dRadius = earth_radius
 
         dArea_m = spherical_polygon_area(
-            aLatitude_radian_in,
-            aLongitude_radian_in,
-            dRadius
+            aLatitude_radian_in, aLongitude_radian_in, dRadius
         )
         return float(dArea_m)
 
@@ -367,7 +372,6 @@ def calculate_polygon_area(
             dArea_m = area * earth_radius**2
 
         return float(dArea_m)
-
 
 
 def calculate_polygon_file_area(sFilename_polygon_in: str) -> float:
@@ -412,7 +416,7 @@ def calculate_polygon_file_area(sFilename_polygon_in: str) -> float:
     """
     from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 
-    pDriver = ogr.GetDriverByName('GeoJSON')
+    pDriver = ogr.GetDriverByName("GeoJSON")
     pDataSource = pDriver.Open(sFilename_polygon_in, 0)
 
     if pDataSource is None:
@@ -438,20 +442,14 @@ def calculate_polygon_file_area(sFilename_polygon_in: str) -> float:
 
         sGeometryType = pGeometry.GetGeometryName()
 
-        if sGeometryType == 'POLYGON':
+        if sGeometryType == "POLYGON":
             aCoords_gcs = get_geometry_coordinates(pGeometry)
-            dArea += calculate_polygon_area(
-                aCoords_gcs[:, 0],
-                aCoords_gcs[:, 1]
-            )
-        elif sGeometryType == 'MULTIPOLYGON':
+            dArea += calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
+        elif sGeometryType == "MULTIPOLYGON":
             for i in range(pGeometry.GetGeometryCount()):
                 pGeometry_temp = pGeometry.GetGeometryRef(i)
                 aCoords_gcs = get_geometry_coordinates(pGeometry_temp)
-                dArea += calculate_polygon_area(
-                    aCoords_gcs[:, 0],
-                    aCoords_gcs[:, 1]
-                )
+                dArea += calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
         # Skip unsupported geometry types
 
         pFeature = pLayer.GetNextFeature()
@@ -461,9 +459,7 @@ def calculate_polygon_file_area(sFilename_polygon_in: str) -> float:
 
 
 def spherical_polygon_area(
-    lat: Union[list, np.ndarray],
-    lon: Union[list, np.ndarray],
-    r: float
+    lat: Union[list, np.ndarray], lon: Union[list, np.ndarray], r: float
 ) -> float:
     """Calculate area of spherical polygon using Karney's method.
 
@@ -567,8 +563,12 @@ def spherical_polygon_area(
 
             # L'Huilier's formula for spherical excess
             # tan(E/4) = sqrt(tan(s/2) * tan((s-a)/2) * tan((s-b)/2) * tan((s-c)/2))
-            t = (math.tan(s / 2) * math.tan((s - a) / 2) *
-                 math.tan((s - b) / 2) * math.tan((s - c) / 2))
+            t = (
+                math.tan(s / 2)
+                * math.tan((s - a) / 2)
+                * math.tan((s - b) / 2)
+                * math.tan((s - c) / 2)
+            )
 
             excess = abs(4 * math.atan(math.sqrt(abs(t))))
 
@@ -580,4 +580,3 @@ def spherical_polygon_area(
 
     # Area = |spherical excess| * r²
     return abs(sum_excess) * r * r
-

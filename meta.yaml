@@ -1,9 +1,9 @@
 package:
   name: "pyearth"
-  version: "0.1.28"
+  version: "0.1.29"
 
 source:
-  git_rev: 0.1.28
+  git_rev: 0.1.29
   git_url: https://github.com/changliao1025/pyearth.git
 
 requirements:
@@ -33,7 +33,7 @@ build:
 about:
   home: https://github.com/changliao1025/pyearth
   license: BSD
-  license_familY: BSD
+  license_family: BSD
   license_file: LICENSE.md
   summary: "Python for Earth Science"
 

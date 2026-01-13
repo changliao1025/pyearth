@@ -1,45 +1,49 @@
-
 from datetime import datetime
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from pyearth.system.define_global_variables import *
-from pyearth.visual.color.create_diverge_rgb_color_hex import create_diverge_rgb_color_hex
+from pyearth.visual.color.create_diverge_rgb_color_hex import (
+    create_diverge_rgb_color_hex,
+)
 
 from pyearth.toolbox.data.list.list_alg import list_max, list_min
 
 
-def ladder_plot_xy_data(aX_all,
-                        aY_all,
-                        sFilename_out, iDPI_in=None,
-                        aFlag_trend_in=None,
-                        iReverse_y_in=None,
-                        iFlag_scientific_notation_x_in=None,
-                        iFlag_scientific_notation_y_in=None,
-                        iSize_x_in=None,
-                        iSize_y_in=None,
-                        ncolumn_in=None,
-                        dMax_x_in=None,
-                        dMin_x_in=None,
-                        dMax_y_in=None,
-                        dMin_y_in=None,
-                        dSpace_y_in=None,
-                        aMarker_in=None,
-                        aColor_in=None,
-                        aLinestyle_in=None,
-                        aLinewidth_in=None,
-                        aLabel_point_in=None,
-                        aTick_label_x_in=None,
-                        aLocation_legend_in=None,
-                        sLabel_x_in=None,
-                        sLabel_y_in=None,
-                        aLabel_legend_in=None,
-                        sLocation_legend_in=None,
-                        sFormat_x_in=None,
-                        sFormat_y_in=None,
-                        sFont_in=None,
-                        sTitle_in=None):
+def ladder_plot_xy_data(
+    aX_all,
+    aY_all,
+    sFilename_out,
+    iDPI_in=None,
+    aFlag_trend_in=None,
+    iReverse_y_in=None,
+    iFlag_scientific_notation_x_in=None,
+    iFlag_scientific_notation_y_in=None,
+    iSize_x_in=None,
+    iSize_y_in=None,
+    ncolumn_in=None,
+    dMax_x_in=None,
+    dMin_x_in=None,
+    dMax_y_in=None,
+    dMin_y_in=None,
+    dSpace_y_in=None,
+    aMarker_in=None,
+    aColor_in=None,
+    aLinestyle_in=None,
+    aLinewidth_in=None,
+    aLabel_point_in=None,
+    aTick_label_x_in=None,
+    aLocation_legend_in=None,
+    sLabel_x_in=None,
+    sLabel_y_in=None,
+    aLabel_legend_in=None,
+    sLocation_legend_in=None,
+    sFormat_x_in=None,
+    sFormat_y_in=None,
+    sFont_in=None,
+    sTitle_in=None,
+):
     """
     Plot a X-Y data
 
@@ -121,22 +125,22 @@ def ladder_plot_xy_data(aX_all,
     if sLabel_x_in is not None:
         sLabel_x = sLabel_x_in
     else:
-        sLabel_x = ''
+        sLabel_x = ""
 
     if sLabel_y_in is not None:
         sLabel_y = sLabel_y_in
     else:
-        sLabel_y = ''
+        sLabel_y = ""
 
     if aLabel_legend_in is not None:
         aLabel_legend = aLabel_legend_in
     else:
-        aLabel_legend = np.full(nData, '')
+        aLabel_legend = np.full(nData, "")
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
-        sTitle = ''
+        sTitle = ""
 
     if aMarker_in is not None:
         aMarker = aMarker_in
@@ -146,18 +150,18 @@ def ladder_plot_xy_data(aX_all,
     if aColor_in is not None:
         aColor = aColor_in
     else:
-        if (nData >= 3):
+        if nData >= 3:
             aColor = create_diverge_rgb_color_hex(nData)
         else:
             if nData == 2:
-                aColor = ['red', 'blue']
+                aColor = ["red", "blue"]
             else:
-                aColor = ['red']
+                aColor = ["red"]
 
     if aLinestyle_in is not None:
         aLinestyle = aLinestyle_in
     else:
-        aLinestyle = np.full(nData, '-')
+        aLinestyle = np.full(nData, "-")
 
     if aLinewidth_in is not None:
         aLinewidth = aLinewidth_in
@@ -182,7 +186,7 @@ def ladder_plot_xy_data(aX_all,
         dMin_y = dMin_y_in
     else:
         dMin_y = list_min(aY_all)  # if it has negative value, change here
-    if (dMax_y <= dMin_y):
+    if dMax_y <= dMin_y:
         return
 
     print(dMin_y)
@@ -215,9 +219,9 @@ def ladder_plot_xy_data(aX_all,
     else:
         sFont = "Times New Roman"
 
-    plt.rcParams['font.family'] = 'DeJavu Serif'
-    plt.rcParams['font.serif'] = sFont
-    plt.rcParams["mathtext.fontset"] = 'dejavuserif'
+    plt.rcParams["font.family"] = "DeJavu Serif"
+    plt.rcParams["font.serif"] = sFont
+    plt.rcParams["mathtext.fontset"] = "dejavuserif"
 
     fig = plt.figure(dpi=iDPI)
     fig.set_figwidth(iSize_x)
@@ -236,19 +240,22 @@ def ladder_plot_xy_data(aX_all,
         iFlag_format_y = 0
 
     # start loop for each data
-    for i in np.arange(1, nData+1):
+    for i in np.arange(1, nData + 1):
 
-        x1 = aX_all[i-1]
-        y1 = aY_all[i-1]
-        ax.step(x1, y1,
-                color=aColor[i-1], linestyle=aLinestyle[i -   1],
-                  linewidth=aLinewidth[i-1],
-                marker=aMarker[i-1],
-                label=aLabel_legend[i-1])
-
+        x1 = aX_all[i - 1]
+        y1 = aY_all[i - 1]
+        ax.step(
+            x1,
+            y1,
+            color=aColor[i - 1],
+            linestyle=aLinestyle[i - 1],
+            linewidth=aLinewidth[i - 1],
+            marker=aMarker[i - 1],
+            label=aLabel_legend[i - 1],
+        )
 
         # calculate linear regression
-        iFlag_trend = aFlag_trend[i-1]
+        iFlag_trend = aFlag_trend[i - 1]
         if iFlag_trend == 1:
             nan_index = np.where(y1 == missing_value)
             y1[nan_index] = np.nan
@@ -264,10 +271,10 @@ def ladder_plot_xy_data(aX_all,
             x2 = [mn, mx]
             y2 = poly1d_fn(x2)
             x2 = [datetime.fromtimestamp(i) for i in x2]
-            ax.plot(x2, y2, color='orange', linestyle='-.',  linewidth=0.5)
+            ax.plot(x2, y2, color="orange", linestyle="-.", linewidth=0.5)
 
-    ax.axis('on')
-    ax.grid(which='major', color='grey', linestyle='--', axis='y')
+    ax.axis("on")
+    ax.grid(which="major", color="grey", linestyle="--", axis="y")
 
     # ax.set_aspect(dRatio)  #this one set the y / x ratio
 
@@ -279,7 +286,7 @@ def ladder_plot_xy_data(aX_all,
 
     ax.set_xlabel(sLabel_x, fontsize=12)
     ax.set_ylabel(sLabel_y, fontsize=12)
-    ax.set_title(sTitle, loc='center', fontsize=15)
+    ax.set_title(sTitle, loc="center", fontsize=15)
 
     ax.set_xlim(dMin_x, dMax_x)
 
@@ -287,39 +294,38 @@ def ladder_plot_xy_data(aX_all,
     #    ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
     # else:
     #    ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1e'))
-    if (iFlag_format_x == 1):
+    if iFlag_format_x == 1:
         ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_x))
-    if (iFlag_format_y == 1):
+    if iFlag_format_y == 1:
         ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(sFormat_y))
 
-    if (iFlag_space_y == 0):
+    if iFlag_space_y == 0:
         ax.yaxis.set_major_locator(mpl.ticker.AutoLocator())
         ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
     else:
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(dSpace_y))
 
-    if (iReverse_y == 1):
+    if iReverse_y == 1:
         ax.set_ylim(dMax_y, dMin_y)
     else:
         ax.set_ylim(dMin_y, dMax_y)
         pass
 
-    #if iFlag_scientific_notation_x == 1:
+    # if iFlag_scientific_notation_x == 1:
     #    formatter = mpl.ticker.ScalarFormatter(useMathText=True)
     #    formatter.set_scientific(True)
     #    formatter.set_powerlimits((-1, 1))  # you might need to change here
     #    ax.xaxis.set_major_formatter(formatter)
-    #else:
+    # else:
     #    pass
-
-
 
     if iFlag_label == 1:
         aText = []
-        for i in np.arange(1, len(aLabel_point)+1, 1):
-            sLabel_point = aLabel_point[i-1]
+        for i in np.arange(1, len(aLabel_point) + 1, 1):
+            sLabel_point = aLabel_point[i - 1]
             aText.append(
-                ax.text(aX_all[1][i-1], aY_all[1][i-1], sLabel_point, color='red'))
+                ax.text(aX_all[1][i - 1], aY_all[1][i - 1], sLabel_point, color="red")
+            )
 
             pass
 
@@ -334,12 +340,11 @@ def ladder_plot_xy_data(aX_all,
         ax.set_xticklabels(xtick_labels, fontsize=8)
         pass
 
-    ax.legend(bbox_to_anchor=aLocation_legend,
-              loc=sLocation_legend,
-              fontsize=12,
-              ncol=ncolumn)
+    ax.legend(
+        bbox_to_anchor=aLocation_legend, loc=sLocation_legend, fontsize=12, ncol=ncolumn
+    )
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches="tight")
 
-    plt.close('all')
+    plt.close("all")
     plt.clf()

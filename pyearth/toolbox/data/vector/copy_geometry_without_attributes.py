@@ -71,8 +71,9 @@ logger = logging.getLogger(__name__)
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_extension,
-    get_vector_format_from_extension
+    get_vector_format_from_extension,
 )
+
 
 def copy_geometry_without_attributes(
     sFilename_in: str,
@@ -392,32 +393,24 @@ def copy_geometry_without_attributes(
 
     # Validate input filename
     if not isinstance(sFilename_in, str):
-        raise TypeError(
-            f"sFilename_in must be a string, got {type(sFilename_in)}"
-        )
+        raise TypeError(f"sFilename_in must be a string, got {type(sFilename_in)}")
 
     if not sFilename_in or sFilename_in.isspace():
         raise ValueError("sFilename_in cannot be empty")
 
     # Validate output filename
     if not isinstance(sFilename_out, str):
-        raise TypeError(
-            f"sFilename_out must be a string, got {type(sFilename_out)}"
-        )
+        raise TypeError(f"sFilename_out must be a string, got {type(sFilename_out)}")
 
     if not sFilename_out or sFilename_out.isspace():
         raise ValueError("sFilename_out cannot be empty")
 
     # Validate layer index
     if not isinstance(iLayer_index, int):
-        raise TypeError(
-            f"iLayer_index must be an integer, got {type(iLayer_index)}"
-        )
+        raise TypeError(f"iLayer_index must be an integer, got {type(iLayer_index)}")
 
     if iLayer_index < 0:
-        raise ValueError(
-            f"iLayer_index must be non-negative, got {iLayer_index}"
-        )
+        raise ValueError(f"iLayer_index must be non-negative, got {iLayer_index}")
 
     logger.info(
         f"Copying geometry without attributes: {sFilename_in} → {sFilename_out}"
@@ -428,9 +421,7 @@ def copy_geometry_without_attributes(
     # ========================================================================
 
     if not os.path.exists(sFilename_in):
-        raise FileNotFoundError(
-            f"Input file not found: {sFilename_in}"
-        )
+        raise FileNotFoundError(f"Input file not found: {sFilename_in}")
 
     logger.debug(f"Input file exists: {sFilename_in}")
 
@@ -442,9 +433,7 @@ def copy_geometry_without_attributes(
         logger.info(f"Using specified input format: {sFormat_in}")
         pDriver_in = ogr.GetDriverByName(sFormat_in)
         if pDriver_in is None:
-            raise RuntimeError(
-                f"Input GDAL driver '{sFormat_in}' not available"
-            )
+            raise RuntimeError(f"Input GDAL driver '{sFormat_in}' not available")
     else:
         # Try to get driver from extension for better format detection
         try:
@@ -472,7 +461,7 @@ def copy_geometry_without_attributes(
                 f"Cannot auto-detect output format from '{sFilename_out}': {e}. "
                 f"Defaulting to GeoJSON."
             )
-            sFormat_out = 'GeoJSON'
+            sFormat_out = "GeoJSON"
     else:
         logger.info(f"Using specified output format: {sFormat_out}")
 
@@ -483,17 +472,15 @@ def copy_geometry_without_attributes(
             # Fallback to getting driver by name
             pDriver_out = ogr.GetDriverByName(sFormat_out)
             if pDriver_out is None:
-                raise RuntimeError(
-                    f"Output GDAL driver '{sFormat_out}' not available"
-                )
+                raise RuntimeError(f"Output GDAL driver '{sFormat_out}' not available")
     except Exception as e:
         # Fallback to getting driver by name
-        logger.debug(f"get_vector_driver_from_extension failed: {e}, using GetDriverByName")
+        logger.debug(
+            f"get_vector_driver_from_extension failed: {e}, using GetDriverByName"
+        )
         pDriver_out = ogr.GetDriverByName(sFormat_out)
         if pDriver_out is None:
-            raise RuntimeError(
-                f"Output GDAL driver '{sFormat_out}' not available"
-            )
+            raise RuntimeError(f"Output GDAL driver '{sFormat_out}' not available")
 
     # ========================================================================
     # Open input dataset
@@ -508,9 +495,7 @@ def copy_geometry_without_attributes(
         if pDataset_in is None:
             raise ValueError(f"Could not open input file: {sFilename_in}")
     except Exception as e:
-        raise ValueError(
-            f"Failed to open input file '{sFilename_in}': {e}"
-        ) from e
+        raise ValueError(f"Failed to open input file '{sFilename_in}': {e}") from e
 
     logger.debug(f"Opened input dataset: {sFilename_in}")
 
@@ -523,8 +508,7 @@ def copy_geometry_without_attributes(
 
     if n_layers > 1:
         logger.warning(
-            f"Input file has {n_layers} layers. "
-            f"Only one layer will be copied."
+            f"Input file has {n_layers} layers. " f"Only one layer will be copied."
         )
 
     # Get layer by name or index
@@ -533,9 +517,7 @@ def copy_geometry_without_attributes(
         pLayer_in = pDataset_in.GetLayerByName(sLayer_name)
         if pLayer_in is None:
             pDataset_in = None
-            raise ValueError(
-                f"Layer '{sLayer_name}' not found in input file"
-            )
+            raise ValueError(f"Layer '{sLayer_name}' not found in input file")
     else:
         if iLayer_index >= n_layers:
             pDataset_in = None
@@ -552,9 +534,7 @@ def copy_geometry_without_attributes(
 
     layer_name_actual = pLayer_in.GetName()
     feature_count = pLayer_in.GetFeatureCount()
-    logger.info(
-        f"Input layer: '{layer_name_actual}', {feature_count} features"
-    )
+    logger.info(f"Input layer: '{layer_name_actual}', {feature_count} features")
 
     # ========================================================================
     # Get spatial reference and geometry type
@@ -593,9 +573,19 @@ def copy_geometry_without_attributes(
         logger.debug(f"Removing existing output file: {sFilename_out}")
 
         # For shapefiles, remove all associated files
-        if sFormat_out == 'ESRI Shapefile':
+        if sFormat_out == "ESRI Shapefile":
             base_name = os.path.splitext(sFilename_out)[0]
-            for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.qpj', '.sbn', '.sbx', '.shp.xml']:
+            for ext in [
+                ".shp",
+                ".shx",
+                ".dbf",
+                ".prj",
+                ".cpg",
+                ".qpj",
+                ".sbn",
+                ".sbx",
+                ".shp.xml",
+            ]:
                 file_to_delete = base_name + ext
                 if os.path.exists(file_to_delete):
                     os.remove(file_to_delete)
@@ -611,9 +601,7 @@ def copy_geometry_without_attributes(
             logger.debug(f"Created output directory: {output_dir}")
         except OSError as e:
             pDataset_in = None
-            raise OSError(
-                f"Cannot create output directory '{output_dir}': {e}"
-            ) from e
+            raise OSError(f"Cannot create output directory '{output_dir}': {e}") from e
 
     # Create output dataset
     try:
@@ -637,9 +625,7 @@ def copy_geometry_without_attributes(
 
     try:
         pLayer_out = pDataset_out.CreateLayer(
-            output_layer_name,
-            srs=pSRS,
-            geom_type=geometry_type
+            output_layer_name, srs=pSRS, geom_type=geometry_type
         )
 
         if pLayer_out is None:
@@ -647,9 +633,7 @@ def copy_geometry_without_attributes(
     except Exception as e:
         pDataset_in = None
         pDataset_out = None
-        raise RuntimeError(
-            f"Cannot create output layer: {e}"
-        ) from e
+        raise RuntimeError(f"Cannot create output layer: {e}") from e
 
     logger.debug("Output layer created (no attribute fields)")
 
@@ -719,4 +703,3 @@ def copy_geometry_without_attributes(
         logger.warning("No features were copied!")
 
     return sFilename_out
-

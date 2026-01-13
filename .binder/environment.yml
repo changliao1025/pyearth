@@ -1,0 +1,16 @@
+name: pyearth-binder
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.8
+  - numpy
+  - gdal
+  - matplotlib-base
+  - cartopy
+  - jupyter
+  - notebook
+  - ipykernel
+  - pip
+  - pip:
+    - -e .

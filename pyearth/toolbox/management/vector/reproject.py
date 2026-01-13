@@ -6,11 +6,16 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
     print_supported_vector_formats,
     get_vector_driver_from_format,
-    get_vector_driver_from_filename
+    get_vector_driver_from_filename,
 )
 
-def reproject_vector(input_file: str, output_file: str, target_projection: str,
-                    copy_attributes: bool = True) -> bool:
+
+def reproject_vector(
+    input_file: str,
+    output_file: str,
+    target_projection: str,
+    copy_attributes: bool = True,
+) -> bool:
     """
     Reproject vector geometries from one coordinate system to another.
 
@@ -93,29 +98,29 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
     """
     # Input validation
     if not os.path.exists(input_file):
-        raise FileNotFoundError(f'Input vector file does not exist: {input_file}')
+        raise FileNotFoundError(f"Input vector file does not exist: {input_file}")
 
     # Remove existing output file if it exists
     if os.path.exists(output_file):
         try:
             os.remove(output_file)
         except OSError as e:
-            print(f'Warning: Could not remove existing output file: {e}')
+            print(f"Warning: Could not remove existing output file: {e}")
 
     # Open input dataset
     input_dataset = ogr.Open(input_file, 0)  # Read-only
     if input_dataset is None:
-        raise RuntimeError(f'Could not open input file: {input_file}')
+        raise RuntimeError(f"Could not open input file: {input_file}")
 
     try:
         # Get input layer and spatial reference
         input_layer = input_dataset.GetLayer(0)
         if input_layer is None:
-            raise RuntimeError('Could not access layer in input file')
+            raise RuntimeError("Could not access layer in input file")
 
         source_srs = input_layer.GetSpatialRef()
         if source_srs is None:
-            print('Warning: Input file has no spatial reference defined')
+            print("Warning: Input file has no spatial reference defined")
             source_srs = osr.SpatialReference()  # Create default
 
         source_wkt = source_srs.ExportToWkt()
@@ -123,11 +128,13 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
         # Create target spatial reference
         target_srs = osr.SpatialReference()
         if target_srs.ImportFromWkt(target_projection) != 0:
-            raise ValueError(f'Invalid target projection WKT: {target_projection}')
+            raise ValueError(f"Invalid target projection WKT: {target_projection}")
 
         # Check if reprojection is needed
         if source_wkt == target_projection:
-            print('Input and target coordinate systems are identical - no reprojection needed')
+            print(
+                "Input and target coordinate systems are identical - no reprojection needed"
+            )
             return True
 
         # Handle GDAL 3+ axis order changes
@@ -138,24 +145,24 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
         # Create coordinate transformation
         transform = osr.CoordinateTransformation(source_srs, target_srs)
         if transform is None:
-            raise ValueError('Could not create coordinate transformation')
+            raise ValueError("Could not create coordinate transformation")
 
         # Get output driver
         output_driver = get_vector_driver_from_filename(output_file)
         if output_driver is None:
-            raise RuntimeError(f'Could not get driver for output file: {output_file}')
+            raise RuntimeError(f"Could not get driver for output file: {output_file}")
 
         # Create output dataset
         output_dataset = output_driver.CreateDataSource(output_file)
         if output_dataset is None:
-            raise RuntimeError(f'Could not create output file: {output_file}')
+            raise RuntimeError(f"Could not create output file: {output_file}")
 
         try:
             # Get geometry type from first feature
             input_layer.ResetReading()
             first_feature = input_layer.GetNextFeature()
             if first_feature is None:
-                print('Warning: Input file contains no features')
+                print("Warning: Input file contains no features")
                 return True
 
             geometry = first_feature.GetGeometryRef()
@@ -163,12 +170,10 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
 
             # Create output layer
             output_layer = output_dataset.CreateLayer(
-                'reprojected',
-                target_srs,
-                geom_type=geometry_type
+                "reprojected", target_srs, geom_type=geometry_type
             )
             if output_layer is None:
-                raise RuntimeError('Could not create output layer')
+                raise RuntimeError("Could not create output layer")
 
             # Copy field definitions if requested
             if copy_attributes:
@@ -176,7 +181,7 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
                 for i in range(input_defn.GetFieldCount()):
                     field_defn = input_defn.GetFieldDefn(i)
                     if output_layer.CreateField(field_defn) != 0:
-                        print(f'Warning: Failed to create field {field_defn.GetName()}')
+                        print(f"Warning: Failed to create field {field_defn.GetName()}")
 
             # Process all features
             feature_count = input_layer.GetFeatureCount()
@@ -188,7 +193,7 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
             while feature:
                 processed_count += 1
                 if processed_count % 1000 == 0:
-                    print(f'Processed {processed_count}/{feature_count} features')
+                    print(f"Processed {processed_count}/{feature_count} features")
 
                 # Get geometry and transform it
                 geometry = feature.GetGeometryRef()
@@ -199,7 +204,9 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
                         transform_result = transformed_geometry.Transform(transform)
 
                         if transform_result != 0:
-                            print(f'Warning: Failed to transform feature {processed_count}')
+                            print(
+                                f"Warning: Failed to transform feature {processed_count}"
+                            )
                             feature = input_layer.GetNextFeature()
                             continue
 
@@ -214,30 +221,35 @@ def reproject_vector(input_file: str, output_file: str, target_projection: str,
 
                             for i in range(input_defn.GetFieldCount()):
                                 field_name = input_defn.GetFieldDefn(i).GetName()
-                                output_field_index = output_defn.GetFieldIndex(field_name)
+                                output_field_index = output_defn.GetFieldIndex(
+                                    field_name
+                                )
                                 if output_field_index >= 0:
                                     output_feature.SetField(
-                                        field_name,
-                                        feature.GetField(field_name)
+                                        field_name, feature.GetField(field_name)
                                     )
 
                         # Add feature to output layer
                         if output_layer.CreateFeature(output_feature) != 0:
-                            print(f'Warning: Failed to create output feature {processed_count}')
+                            print(
+                                f"Warning: Failed to create output feature {processed_count}"
+                            )
 
                         output_feature = None
 
                     except Exception as e:
-                        print(f'Warning: Error processing feature {processed_count}: {e}')
+                        print(
+                            f"Warning: Error processing feature {processed_count}: {e}"
+                        )
                 else:
-                    print(f'Warning: Feature {processed_count} has no geometry')
+                    print(f"Warning: Feature {processed_count} has no geometry")
 
                 feature = input_layer.GetNextFeature()
 
             # Flush changes
             output_dataset.FlushCache()
 
-            print(f'Successfully reprojected {processed_count} features')
+            print(f"Successfully reprojected {processed_count} features")
             return True
 
         finally:

@@ -44,7 +44,9 @@ def gdal_get_raster_extent(sFilename_in: str) -> Tuple[float, float, float, floa
             geotransform = ds.GetGeoTransform()
 
         if not geotransform:
-            raise ValueError(f"Raster {sFilename_in} does not contain geotransform metadata.")
+            raise ValueError(
+                f"Raster {sFilename_in} does not contain geotransform metadata."
+            )
 
         raster_width = ds.RasterXSize
         raster_height = ds.RasterYSize
@@ -73,4 +75,3 @@ def gdal_get_raster_extent(sFilename_in: str) -> Tuple[float, float, float, floa
         max_y = min(max_y, 90.0)
 
     return min_x, max_x, min_y, max_y
-

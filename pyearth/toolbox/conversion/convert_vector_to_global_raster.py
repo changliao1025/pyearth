@@ -88,7 +88,7 @@ def convert_vector_to_global_raster(
     dResolution_x_in: float,
     dResolution_y_in: float,
     iFlag_boundary_only_in: int = 0,
-    dFill_value_in: float = 2
+    dFill_value_in: float = 2,
 ) -> None:
     """
     Convert vector dataset to global-extent raster with WGS84 geographic coordinates.
@@ -257,10 +257,14 @@ def convert_vector_to_global_raster(
     """
     # Validate input parameters
     if dResolution_x_in <= 0 or dResolution_y_in <= 0:
-        raise ValueError(f"Resolution must be positive. Got x={dResolution_x_in}, y={dResolution_y_in}")
+        raise ValueError(
+            f"Resolution must be positive. Got x={dResolution_x_in}, y={dResolution_y_in}"
+        )
 
     if dResolution_x_in > 10 or dResolution_y_in > 10:
-        logger.warning(f"Very coarse resolution specified: {dResolution_x_in}° x {dResolution_y_in}°")
+        logger.warning(
+            f"Very coarse resolution specified: {dResolution_x_in}° x {dResolution_y_in}°"
+        )
 
     # Validate input file exists
     if not os.path.exists(sFilename_vector_in):
@@ -292,11 +296,15 @@ def convert_vector_to_global_raster(
         raise RuntimeError("Could not access layer in vector file")
 
     nFeature_count = pLayer_clip.GetFeatureCount()
-    logger.info(f"Processing vector file with {nFeature_count} features: {sFilename_vector_in}")
+    logger.info(
+        f"Processing vector file with {nFeature_count} features: {sFilename_vector_in}"
+    )
 
     # Get data extent (informational only - we'll use global extent)
     dLon_min, dLon_max, dLat_min, dLat_max = pLayer_clip.GetExtent()
-    logger.info(f"Input extent: ({dLon_min:.4f}, {dLat_min:.4f}) to ({dLon_max:.4f}, {dLat_max:.4f})")
+    logger.info(
+        f"Input extent: ({dLon_min:.4f}, {dLat_min:.4f}) to ({dLon_max:.4f}, {dLat_max:.4f})"
+    )
 
     # Force global extent (WGS84 geographic bounds)
     # This ensures consistent grid alignment for global datasets
@@ -335,7 +343,9 @@ def convert_vector_to_global_raster(
     ncolumn = int(nright - nleft)
 
     logger.info(f"Output dimensions: {ncolumn} columns x {nrow} rows")
-    logger.info(f"Rasterizing with resolution {dResolution_x_in}° x {dResolution_y_in}°")
+    logger.info(
+        f"Rasterizing with resolution {dResolution_x_in}° x {dResolution_y_in}°"
+    )
 
     # Estimate output file size
     estimated_size_mb = (nrow * ncolumn) / (1024 * 1024)
@@ -359,7 +369,7 @@ def convert_vector_to_global_raster(
             nRow_in=nrow,
             nColumn_in=ncolumn,
             iFlag_boundary_only_in=iFlag_boundary_only_in,
-            dFill_value_in=dFill_value_in
+            dFill_value_in=dFill_value_in,
         )
         logger.info("Rasterization completed successfully")
         logger.info(f"Output written to: {sFilename_tif_out}")
@@ -371,7 +381,3 @@ def convert_vector_to_global_raster(
         pDataSource_clip = None
 
     return None
-
-
-if __name__ == '__main__':
-    pass

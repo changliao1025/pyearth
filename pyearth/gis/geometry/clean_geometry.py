@@ -57,9 +57,7 @@ from osgeo import ogr
 
 
 def clean_geometry(
-    geometry: Optional[ogr.Geometry],
-    tolerance: float = 1e-6,
-    verbose: bool = False
+    geometry: Optional[ogr.Geometry], tolerance: float = 1e-6, verbose: bool = False
 ) -> Optional[ogr.Geometry]:
     """
     Clean geometry artifacts and issues that can occur after spatial operations.
@@ -181,7 +179,7 @@ def clean_geometry(
         original_type = geometry.GetGeometryName()
 
         # Step 1: Remove duplicate vertices and fix self-intersections
-        if hasattr(geometry, 'MakeValid'):
+        if hasattr(geometry, "MakeValid"):
             # Use MakeValid if available (GDAL 3.0+)
             # This is the preferred method as it handles complex cases better
             geometry = geometry.MakeValid()
@@ -202,7 +200,9 @@ def clean_geometry(
             if simplified is not None:
                 geometry = simplified
             elif verbose:
-                print("Warning: Simplify operation returned None, keeping previous geometry")
+                print(
+                    "Warning: Simplify operation returned None, keeping previous geometry"
+                )
 
         # Step 3: Remove slivers using small negative then positive buffer
         # This removes very thin areas that might appear as lines
@@ -216,12 +216,18 @@ def clean_geometry(
                 if buffered is not None:
                     geometry = buffered
                 elif verbose:
-                    print("Warning: Positive buffer returned None, keeping previous geometry")
+                    print(
+                        "Warning: Positive buffer returned None, keeping previous geometry"
+                    )
             elif verbose:
-                print("Warning: Negative buffer resulted in empty geometry, skipping sliver removal")
+                print(
+                    "Warning: Negative buffer resulted in empty geometry, skipping sliver removal"
+                )
         except Exception as e:
             if verbose:
-                print(f"Warning: Buffer operation failed: {str(e)}, skipping sliver removal")
+                print(
+                    f"Warning: Buffer operation failed: {str(e)}, skipping sliver removal"
+                )
 
         # Check if geometry became None after buffering
         if geometry is None:
@@ -233,17 +239,23 @@ def clean_geometry(
         current_type = geometry.GetGeometryName()
         if current_type != original_type:
             if verbose:
-                print(f"Warning: Geometry type changed from {original_type} to {current_type} during cleaning")
+                print(
+                    f"Warning: Geometry type changed from {original_type} to {current_type} during cleaning"
+                )
 
         # Step 5: Final validation
         if not geometry.IsValid():
             if verbose:
-                print("Warning: Geometry still invalid after cleaning, applying final buffer fix")
+                print(
+                    "Warning: Geometry still invalid after cleaning, applying final buffer fix"
+                )
             final_fix = geometry.Buffer(0)
             if final_fix is not None:
                 geometry = final_fix
             elif verbose:
-                print("Warning: Final buffer fix returned None, returning previous geometry")
+                print(
+                    "Warning: Final buffer fix returned None, returning previous geometry"
+                )
 
         return geometry
 

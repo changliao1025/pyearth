@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def slerp(n1, n2, t):
     """
     Spherical linear interpolation between two n-vectors.
@@ -29,83 +30,98 @@ def slerp(n1, n2, t):
 
     return n1 * factor1 + n2 * factor2
 
-def split_flowline_by_length(aFlowline_in, dDistance):
 
-    aFlowline_out=list()
-    nFlowline = len(aFlowline_in)
-    for i in range(nFlowline):
-        pFlowline = aFlowline_in[i]
-        pFlowline_out = pFlowline.split_by_length(dDistance)
-        aFlowline_out.append(pFlowline_out)
+def split_polyline_by_length(aFlowline_in, dDistance):
 
-    return aFlowline_out
+    aPolyline_out = list()
+    nPolyline = len(aFlowline_in)
+    for i in range(nPolyline):
+        pPolyline = aFlowline_in[i]
+        pPolyline_out = pPolyline.split_by_length(dDistance)
+        aPolyline_out.append(pPolyline_out)
 
-def split_edge_by_length(pEdge_in, dLength_in, tolerance=1e-6):
+    return aPolyline_out
+
+
+def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6):
     """
-    Split an edge into smaller segments with maximum length constraint.
+    Split a line into smaller segments with maximum length constraint.
 
     Uses optimal segmentation instead of recursive binary division for better
     performance and more even segment distribution.
 
     Args:
-        pEdge_in: Input edge to split
+        pLine_in: Input line to split
         dLength_in: Maximum length for each segment
         tolerance: Relative tolerance for length comparison
 
     Returns:
-        List of edge segments
+        List of line segments
 
     Raises:
         ValueError: If length threshold is not positive
-        AttributeError: If edge doesn't have required attributes
+        AttributeError: If line doesn't have required attributes
     """
-    from pyflowline.classes.edge import pyedge
+    from pyearth.toolbox.mesh.line import pyline
 
     # Input validation
     if dLength_in <= 0:
         raise ValueError("Length threshold must be positive")
 
-    if not hasattr(pEdge_in, 'dLength'):
-        raise AttributeError("Edge must have dLength attribute")
+    if not hasattr(pLine_in, "dLength"):
+        raise AttributeError("Line must have dLength attribute")
 
-    dLength_total = pEdge_in.dLength
+    dLength_total = pLine_in.dLength
 
-    # Early return for edges that are already short enough
+    # Early return for lines that are already short enough
     if dLength_total <= dLength_in * (1 + tolerance):
-        return [pEdge_in]
+        return [pLine_in]
 
     # Calculate optimal number of segments
     nSegments = int(np.ceil(dLength_total / dLength_in))
 
-    pVertex_start = pEdge_in.pVertex_start
-    pVertex_end = pEdge_in.pVertex_end
+    pPoint_start = pLine_in.pPoint_start
+    pPoint_end = pLine_in.pPoint_end
 
-    n1 = pVertex_start.toNvector()
-    n2 = pVertex_end.toNvector()
+    n1 = pPoint_start.toNvector()
+    n2 = pPoint_end.toNvector()
 
-    aEdge_out = []
+    aLine_out = []
 
     # Create evenly spaced segments using spherical interpolation
+
     for i in range(nSegments):
         t1 = i / nSegments
         t2 = (i + 1) / nSegments
 
         # Handle endpoints to avoid unnecessary interpolation
         if i == 0:
-            pVertex_start_seg = pVertex_start
+            pPoint_start_seg = pPoint_start
         else:
             mid1 = slerp(n1, n2, t1)
-            pVertex_start_seg = mid1.toLatLon()
+            pPoint_start_seg = mid1.toLatLon()
 
         if i == nSegments - 1:
-            pVertex_end_seg = pVertex_end
+            pPoint_end_seg = pPoint_end
         else:
             mid2 = slerp(n1, n2, t2)
-            pVertex_end_seg = mid2.toLatLon()
+            pPoint_end_seg = mid2.toLatLon()
 
-        # Create edge segment
-        pEdge = pyedge(pVertex_start_seg, pVertex_end_seg)
-        aEdge_out.append(pEdge)
+        # Check for degenerate segments (same start and end points)
+        if pPoint_start_seg == pPoint_end_seg:
+            # Skip degenerate segments or use a small offset
+            print(f"Warning: Segment {i} has identical start and end points")
+            print(
+                f"  Start: ({pPoint_start_seg.dLongitude_degree}, {pPoint_start_seg.dLatitude_degree})"
+            )
+            print(
+                f"  End: ({pPoint_end_seg.dLongitude_degree}, {pPoint_end_seg.dLatitude_degree})"
+            )
+            print(f"  t1={t1}, t2={t2}, nSegments={nSegments}")
+            continue
 
-    return aEdge_out
+        # Create line segment
+        pLine = pyline(pPoint_start_seg, pPoint_end_seg)
+        aLine_out.append(pLine)
 
+    return aLine_out

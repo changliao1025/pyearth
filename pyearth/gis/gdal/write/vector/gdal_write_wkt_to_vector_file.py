@@ -2,14 +2,14 @@ import os
 from typing import Optional
 
 from osgeo import ogr
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import (
+    get_vector_format_from_filename,
+    get_vector_driver_from_filename,
+)
 
 
 def gdal_write_wkt_to_vector_file(
-    wkt: str,
-    sFilename_out: str,
-    layer_name: str = "geometry",
-    overwrite: bool = True
+    wkt: str, sFilename_out: str, layer_name: str = "geometry", overwrite: bool = True
 ) -> None:
     """Save a WKT geometry to a vector file.
 
@@ -52,7 +52,7 @@ def gdal_write_wkt_to_vector_file(
         os.remove(sFilename_out)
 
     # Get the appropriate driver based on file extension
-    driver = get_vector_driver_from_extension(sFilename_out)
+    driver = get_vector_driver_from_filename(sFilename_out)
 
     # Create geometry from WKT first to infer geometry type
     geometry = ogr.CreateGeometryFromWkt(wkt)
@@ -74,7 +74,9 @@ def gdal_write_wkt_to_vector_file(
         # Create layer with appropriate geometry type
         layer = dataset.CreateLayer(layer_name, geom_type=geom_type)
         if layer is None:
-            raise RuntimeError(f"Could not create layer in output dataset: {sFilename_out}")
+            raise RuntimeError(
+                f"Could not create layer in output dataset: {sFilename_out}"
+            )
 
         # Create and configure feature
         feature = ogr.Feature(layer.GetLayerDefn())
@@ -83,7 +85,9 @@ def gdal_write_wkt_to_vector_file(
         # Write feature to layer
         result = layer.CreateFeature(feature)
         if result != ogr.OGRERR_NONE:
-            raise RuntimeError(f"Could not create feature in output layer: {sFilename_out}")
+            raise RuntimeError(
+                f"Could not create feature in output layer: {sFilename_out}"
+            )
 
     finally:
         # Clean up in reverse order

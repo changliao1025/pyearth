@@ -1,21 +1,23 @@
-
 import numpy as np
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-def cdf_plot(aData,
-             sFilename_out,
-             iSize_x_in=None,
-             iSize_y_in=None,
-             iDPI_in=None,
-             dMin_x_in=None,
-             dMax_x_in=None,
-             dSpace_x_in=None,
-             sLabel_x_in=None,
-             sLabel_y_in=None,
-             sTitle_in=None,
-             sLabel_legend_in=None):
+
+def cdf_plot(
+    aData,
+    sFilename_out,
+    iSize_x_in=None,
+    iSize_y_in=None,
+    iDPI_in=None,
+    dMin_x_in=None,
+    dMax_x_in=None,
+    dSpace_x_in=None,
+    sLabel_x_in=None,
+    sLabel_y_in=None,
+    sTitle_in=None,
+    sLabel_legend_in=None,
+):
     """
     Draw a histogram for single dataset
     """
@@ -52,22 +54,22 @@ def cdf_plot(aData,
     if sLabel_x_in is not None:
         sLabel_x = sLabel_x_in
     else:
-        sLabel_x = ''
+        sLabel_x = ""
 
     if sLabel_y_in is not None:
         sLabel_y = sLabel_y_in
     else:
-        sLabel_y = ''
+        sLabel_y = ""
 
     if sTitle_in is not None:
         sTitle = sTitle_in
     else:
-        sTitle = ''
+        sTitle = ""
 
     if sLabel_legend_in is not None:
         sLabel_legend = sLabel_legend_in
     else:
-        sLabel_legend = ''
+        sLabel_legend = ""
 
     good_index = np.where((aData >= dMin_x) & (aData <= dMax_x))
 
@@ -81,7 +83,7 @@ def cdf_plot(aData,
     rect_histogram = [left, bottom, width, height]
 
     ax_cdf = plt.axes(rect_histogram)
-    ax_cdf.tick_params(direction='in', top=True, right=True)
+    ax_cdf.tick_params(direction="in", top=True, right=True)
 
     aData = aData[good_index]
 
@@ -98,23 +100,31 @@ def cdf_plot(aData,
 
     ax_cdf.set_xlim(dMin_x, dMax_x)
 
-    ax_cdf.axis('on')
-    ax_cdf.grid(which='major', color='white', linestyle='-', axis='y')
+    ax_cdf.axis("on")
+    ax_cdf.grid(which="major", color="white", linestyle="-", axis="y")
 
-    handles = [mpl.patches.Rectangle(
-        (0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)] * 1
+    handles = [
+        mpl.patches.Rectangle((0, 0), 1, 1, fc="white", ec="white", lw=0, alpha=0)
+    ] * 1
 
     # create the corresponding number of labels (= the text you want to display)
     labels = []
     labels.append(sLabel_legend)
     # create the legend, supressing the blank space of the empty line symbol    and the
     # padding between symbol and label by setting handlelenght and  handletextpad
-    ax_cdf.legend(handles, labels, loc="upper right", fontsize=12,
-                  fancybox=True, framealpha=0.7,
-                  handlelength=0, handletextpad=0)
+    ax_cdf.legend(
+        handles,
+        labels,
+        loc="upper right",
+        fontsize=12,
+        fancybox=True,
+        framealpha=0.7,
+        handlelength=0,
+        handletextpad=0,
+    )
 
     ax_cdf.set_title(sTitle)
 
-    plt.savefig(sFilename_out, bbox_inches='tight')
+    plt.savefig(sFilename_out, bbox_inches="tight")
 
-    plt.close('all')
+    plt.close("all")

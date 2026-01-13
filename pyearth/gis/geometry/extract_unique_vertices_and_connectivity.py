@@ -111,7 +111,10 @@ import numpy as np
 from typing import List, Tuple, Dict
 from collections import defaultdict
 
-def extract_unique_vertices_and_connectivity(aCell_vertex_x, aCell_vertex_y, dTolerance=1e-10):
+
+def extract_unique_vertices_and_connectivity(
+    aCell_vertex_x, aCell_vertex_y, dTolerance=1e-10
+):
     """
     Extract unique vertices and connectivity from mesh cell coordinates.
 
@@ -330,13 +333,15 @@ def extract_unique_vertices_and_connectivity(aCell_vertex_x, aCell_vertex_y, dTo
         y_arr = np.asarray(y_coords, dtype=np.float64)
 
         if len(x_arr) != len(y_arr):
-            raise ValueError(f"Mismatched coordinate array lengths in cell: {len(x_arr)} vs {len(y_arr)}")
+            raise ValueError(
+                f"Mismatched coordinate array lengths in cell: {len(x_arr)} vs {len(y_arr)}"
+            )
 
         cell_size = len(x_arr)
         cell_sizes.append(cell_size)
 
-        all_x[idx:idx + cell_size] = x_arr
-        all_y[idx:idx + cell_size] = y_arr
+        all_x[idx : idx + cell_size] = x_arr
+        all_y[idx : idx + cell_size] = y_arr
         idx += cell_size
 
         # Trim arrays to actual size (in case estimate was too high)
@@ -345,22 +350,24 @@ def extract_unique_vertices_and_connectivity(aCell_vertex_x, aCell_vertex_y, dTo
 
     # Create structured array of coordinate pairs for efficient unique detection
     # Structured arrays allow NumPy to compare (x, y) pairs as single entities
-    vertex_dtype = np.dtype([('x', np.float64), ('y', np.float64)])
+    vertex_dtype = np.dtype([("x", np.float64), ("y", np.float64)])
     all_vertices = np.empty(len(all_x), dtype=vertex_dtype)
-    all_vertices['x'] = all_x
-    all_vertices['y'] = all_y
+    all_vertices["x"] = all_x
+    all_vertices["y"] = all_y
 
     # Find unique vertices using NumPy's optimized unique function
     # return_inverse gives mapping from original vertices to unique vertex indices
     unique_vertices, inverse_indices = np.unique(all_vertices, return_inverse=True)
 
     # Extract unique x and y coordinates from structured array
-    xv = unique_vertices['x']
-    yv = unique_vertices['y']
+    xv = unique_vertices["x"]
+    yv = unique_vertices["y"]
 
     # Create lookup dictionary: (x, y) tuple -> vertex index
     # Useful for quickly finding vertex index from coordinates
-    vertex_to_index = {(float(v['x']), float(v['y'])): i for i, v in enumerate(unique_vertices)}
+    vertex_to_index = {
+        (float(v["x"]), float(v["y"])): i for i, v in enumerate(unique_vertices)
+    }
 
     # Build connectivity array: maps each cell to its vertex indices
     # Array is padded with -1 for cells with fewer vertices than maximum
@@ -373,7 +380,7 @@ def extract_unique_vertices_and_connectivity(aCell_vertex_x, aCell_vertex_y, dTo
     start_idx = 0
     for i, cell_size in enumerate(cell_sizes):
         # Map this cell's vertices to their indices in the unique vertex array
-        connectivity[i, :cell_size] = inverse_indices[start_idx:start_idx + cell_size]
+        connectivity[i, :cell_size] = inverse_indices[start_idx : start_idx + cell_size]
         start_idx += cell_size
 
     return xv, yv, connectivity, vertex_to_index

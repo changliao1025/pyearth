@@ -4,6 +4,7 @@ Exclude vector features by polygon with support for multiple vector formats.
 This module provides functionality to exclude (remove) features from a vector file
 that fall within or intersect a polygon boundary - the inverse of clipping.
 """
+
 import os
 import logging
 from typing import Optional
@@ -21,9 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def exclude_vector_by_polygon_file(
-    sFilename_vector_in: str,
-    sFilename_polygon_in: str,
-    sFilename_vector_out: str
+    sFilename_vector_in: str, sFilename_polygon_in: str, sFilename_vector_out: str
 ) -> None:
     """
     Exclude (remove) vector features that fall within a polygon boundary.
@@ -58,7 +57,7 @@ def exclude_vector_by_polygon_file(
         ...     'rural_roads.gpkg'  # Only roads outside urban area
         ... )
     """
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("Starting vector exclusion operation")
     logger.info(f"Input vector: {sFilename_vector_in}")
     logger.info(f"Exclusion polygon: {sFilename_polygon_in}")
@@ -67,7 +66,9 @@ def exclude_vector_by_polygon_file(
     try:
         # Validate input files
         if not os.path.exists(sFilename_vector_in):
-            raise FileNotFoundError(f"Input vector file not found: {sFilename_vector_in}")
+            raise FileNotFoundError(
+                f"Input vector file not found: {sFilename_vector_in}"
+            )
 
         if not os.path.exists(sFilename_polygon_in):
             raise FileNotFoundError(f"Polygon file not found: {sFilename_polygon_in}")
@@ -80,7 +81,9 @@ def exclude_vector_by_polygon_file(
         # Open input vector dataset
         pDataset_source = ogr.Open(sFilename_vector_in)
         if pDataset_source is None:
-            raise RuntimeError(f"Could not open input vector file: {sFilename_vector_in}")
+            raise RuntimeError(
+                f"Could not open input vector file: {sFilename_vector_in}"
+            )
 
         pLayer_source = pDataset_source.GetLayer()
         if pLayer_source is None:
@@ -96,7 +99,9 @@ def exclude_vector_by_polygon_file(
             pProjection_target = None
         else:
             pProjection_target = pSpatial_reference_target.ExportToWkt()
-            logger.info(f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}")
+            logger.info(
+                f"Target projection: {pSpatial_reference_target.GetName() if pSpatial_reference_target else 'Unknown'}"
+            )
 
         # Open exclusion polygon file
         pDataset_clip = ogr.Open(sFilename_polygon_in)
@@ -110,7 +115,9 @@ def exclude_vector_by_polygon_file(
         pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
         if pSpatial_reference_clip is not None:
             pProjection_clip = pSpatial_reference_clip.ExportToWkt()
-            logger.info(f"Polygon projection: {pSpatial_reference_clip.GetName() if pSpatial_reference_clip else 'Unknown'}")
+            logger.info(
+                f"Polygon projection: {pSpatial_reference_clip.GetName() if pSpatial_reference_clip else 'Unknown'}"
+            )
         else:
             pProjection_clip = None
             logger.warning("Polygon has no spatial reference")
@@ -128,7 +135,9 @@ def exclude_vector_by_polygon_file(
             pDataset_clip = None
             pLayer_clip = None
             logger.info("Multiple polygons detected, merging into single feature...")
-            sFilename_clip_new = sFilename_polygon_in.replace(sExtension_clip, '_merged' + sExtension_clip)
+            sFilename_clip_new = sFilename_polygon_in.replace(
+                sExtension_clip, "_merged" + sExtension_clip
+            )
             merge_features(sFilename_polygon_in, sFilename_clip_new)
             sFilename_polygon_in = sFilename_clip_new
 
@@ -140,7 +149,11 @@ def exclude_vector_by_polygon_file(
                 pProjection_clip = pSpatial_reference_clip.ExportToWkt()
 
         # Handle projection mismatch
-        if pProjection_target is not None and pProjection_clip is not None and pProjection_target != pProjection_clip:
+        if (
+            pProjection_target is not None
+            and pProjection_clip is not None
+            and pProjection_target != pProjection_clip
+        ):
             logger.info("Projection mismatch detected, reprojecting polygon...")
             pDataset_clip = None
             pLayer_clip = None
@@ -148,9 +161,13 @@ def exclude_vector_by_polygon_file(
             sFolder = os.path.dirname(sFilename_polygon_in)
             sName = os.path.basename(sFilename_polygon_in)
             sName_no_extension = os.path.splitext(sName)[0]
-            sFilename_clip_out = os.path.join(sFolder, sName_no_extension + '_transformed' + sExtension_clip)
+            sFilename_clip_out = os.path.join(
+                sFolder, sName_no_extension + "_transformed" + sExtension_clip
+            )
 
-            reproject_vector(sFilename_polygon_in, sFilename_clip_out, pProjection_target)
+            reproject_vector(
+                sFilename_polygon_in, sFilename_clip_out, pProjection_target
+            )
             pDataset_clip = ogr.Open(sFilename_clip_out)
             pLayer_clip = pDataset_clip.GetLayer(0)
             logger.info("Polygon reprojected")
@@ -190,9 +207,7 @@ def exclude_vector_by_polygon_file(
 
         # Create output layer
         pLayer_excluded = pDataset_excluded.CreateLayer(
-            'layer',
-            pSpatial_reference_target,
-            geom_type=output_geom_type
+            "layer", pSpatial_reference_target, geom_type=output_geom_type
         )
         if pLayer_excluded is None:
             raise RuntimeError("Could not create output layer")
@@ -230,7 +245,9 @@ def exclude_vector_by_polygon_file(
                 pGeometry_difference = pGeometry_source.Difference(pPolygon_clip)
 
                 if pGeometry_difference is None or pGeometry_difference.IsEmpty():
-                    logger.debug("Difference resulted in empty geometry, excluding feature")
+                    logger.debug(
+                        "Difference resulted in empty geometry, excluding feature"
+                    )
                     excluded_count += 1
                     continue
 
@@ -245,14 +262,16 @@ def exclude_vector_by_polygon_file(
                     for i in range(pFeature.GetFieldCount()):
                         pFeature_excluded.SetField(
                             pFeature.GetFieldDefnRef(i).GetNameRef(),
-                            pFeature.GetField(i)
+                            pFeature.GetField(i),
                         )
 
                     pLayer_excluded.CreateFeature(pFeature_excluded)
                     trimmed_count += 1
                 else:
                     sGeomType_diff = ogr.GeometryTypeToName(iGeomType_difference)
-                    logger.debug(f"Difference geometry type mismatch: {sGeomType_diff}, excluding")
+                    logger.debug(
+                        f"Difference geometry type mismatch: {sGeomType_diff}, excluding"
+                    )
                     excluded_count += 1
             else:
                 # Feature is entirely outside the exclusion polygon - KEEP it
@@ -262,8 +281,7 @@ def exclude_vector_by_polygon_file(
                 # Copy attributes
                 for i in range(pFeature.GetFieldCount()):
                     pFeature_excluded.SetField(
-                        pFeature.GetFieldDefnRef(i).GetNameRef(),
-                        pFeature.GetField(i)
+                        pFeature.GetFieldDefnRef(i).GetNameRef(), pFeature.GetField(i)
                     )
 
                 pLayer_excluded.CreateFeature(pFeature_excluded)
@@ -282,15 +300,15 @@ def exclude_vector_by_polygon_file(
 
     finally:
         # Clean up resources
-        if 'pDataset_source' in locals():
+        if "pDataset_source" in locals():
             pDataset_source = None
-        if 'pDataset_clip' in locals():
+        if "pDataset_clip" in locals():
             pDataset_clip = None
-        if 'pDataset_excluded' in locals():
+        if "pDataset_excluded" in locals():
             pDataset_excluded = None
-        if 'pSpatial_reference_clip' in locals():
+        if "pSpatial_reference_clip" in locals():
             pSpatial_reference_clip = None
-        if 'pSpatial_reference_target' in locals():
+        if "pSpatial_reference_target" in locals():
             pSpatial_reference_target = None
 
     return

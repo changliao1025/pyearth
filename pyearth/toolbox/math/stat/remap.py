@@ -1,8 +1,14 @@
 import numpy as np
 from typing import Union, Optional
 
-def remap(x: Union[float, int], oMin: Union[float, int], oMax: Union[float, int],
-          nMin: Union[float, int], nMax: Union[float, int]) -> Optional[float]:
+
+def remap(
+    x: Union[float, int],
+    oMin: Union[float, int],
+    oMax: Union[float, int],
+    nMin: Union[float, int],
+    nMax: Union[float, int],
+) -> Optional[float]:
     """
     Remap a value from one range to another range.
 

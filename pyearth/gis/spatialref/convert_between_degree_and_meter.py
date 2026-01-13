@@ -1,7 +1,10 @@
 import numpy as np
 from pyearth.system.define_global_variables import earth_radius
 
-def degree_to_meter(dResolution_degree_in: float, dLatitude_mean_in: float = 0.0) -> float:
+
+def degree_to_meter(
+    dResolution_degree_in: float, dLatitude_mean_in: float = 0.0
+) -> float:
     """Convert angular resolution in degrees to linear resolution in meters.
 
     Converts degrees to meters at a given latitude, accounting for the Earth's
@@ -43,7 +46,9 @@ def degree_to_meter(dResolution_degree_in: float, dLatitude_mean_in: float = 0.0
     return float(resolution_meter)
 
 
-def meter_to_degree(dResolution_meter_in: float, dLatitude_mean_in: float = 0.0) -> float:
+def meter_to_degree(
+    dResolution_meter_in: float, dLatitude_mean_in: float = 0.0
+) -> float:
     """Convert linear resolution in meters to angular resolution in degrees.
 
     Converts meters to degrees at a given latitude, accounting for the Earth's

@@ -1,6 +1,7 @@
 """
 Clip raster by polygon file with support for multiple vector formats.
 """
+
 import os
 import sys
 import logging
@@ -11,7 +12,7 @@ from osgeo import gdal, ogr, osr
 from pyearth.toolbox.management.vector.merge_features import merge_features
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
 from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,9 +24,9 @@ def clip_raster_by_polygon_file(
     sFilename_polygon_in: str,
     sFilename_raster_out: str,
     iFlag_use_raster_extent: int = 0,
-    sFormat_in: str = 'GTiff',
+    sFormat_in: str = "GTiff",
     missing_value: float = -9999,
-    resample_algorithm: str = 'near'
+    resample_algorithm: str = "near",
 ) -> None:
     """
     Clip a raster by a polygon file with support for multiple vector formats.
@@ -82,7 +83,7 @@ def clip_raster_by_polygon_file(
         if sFormat_in is not None:
             sDriverName = sFormat_in
         else:
-            sDriverName = 'GTiff'
+            sDriverName = "GTiff"
 
         pDriver_raster = gdal.GetDriverByName(sDriverName)
         if pDriver_raster is None:
@@ -90,7 +91,7 @@ def clip_raster_by_polygon_file(
 
         # Get vector driver using multi-format support
         try:
-            pDriver_vector = get_vector_driver_from_extension(sFilename_polygon_in)
+            pDriver_vector = get_vector_format_from_filename(sFilename_polygon_in)
             logger.info(f"Using vector driver for polygon file")
         except ValueError as e:
             raise RuntimeError(f"Unsupported polygon file format: {e}")
@@ -98,21 +99,21 @@ def clip_raster_by_polygon_file(
         # Read raster data and metadata
         logger.info("Reading raster metadata...")
         dummy = gdal_read_geotiff_file(sFilename_raster_in)
-        aData = dummy['dataOut']
-        eType = dummy['dataType']
-        dPixelWidth = dummy['pixelWidth']
-        dPixelHeight = dummy['pixelHeight']
-        dOriginX = dummy['originX']
-        dOriginY = dummy['originY']
-        nrow = dummy['nrow']
-        ncolumn = dummy['ncolumn']
-        dMissing_value = dummy['missingValue']
+        aData = dummy["dataOut"]
+        eType = dummy["dataType"]
+        dPixelWidth = dummy["pixelWidth"]
+        dPixelHeight = dummy["pixelHeight"]
+        dOriginX = dummy["originX"]
+        dOriginY = dummy["originY"]
+        nrow = dummy["nrow"]
+        ncolumn = dummy["ncolumn"]
+        dMissing_value = dummy["missingValue"]
 
         if dMissing_value is None:
             dMissing_value = missing_value
 
         eType_out = gdal.GDT_Int16  # Support missing value
-        pProjection_target = dummy['projection']
+        pProjection_target = dummy["projection"]
         min_x, max_x, min_y, max_y = gdal_get_raster_extent(sFilename_raster_in)
 
         aRaster_extent = [min_x, min_y, max_x, max_y]
@@ -148,7 +149,9 @@ def clip_raster_by_polygon_file(
             pDataset_clip = None
             pLayer_clip = None
             logger.info("Multiple polygons detected, merging into single feature...")
-            sFilename_clip_new = sFilename_polygon_in.replace(sExtension_vector, '_merged' + sExtension_vector)
+            sFilename_clip_new = sFilename_polygon_in.replace(
+                sExtension_vector, "_merged" + sExtension_vector
+            )
             merge_features(sFilename_polygon_in, sFilename_clip_new)
             sFilename_polygon_in = sFilename_clip_new
 
@@ -159,7 +162,9 @@ def clip_raster_by_polygon_file(
         # Get spatial reference and geometry
         pSpatial_reference_clip = pLayer_clip.GetSpatialRef()
         pProjection_clip = pSpatial_reference_clip.ExportToWkt()
-        logger.info(f"Polygon spatial reference: {pSpatial_reference_clip.GetName() if pSpatial_reference_clip else 'Unknown'}")
+        logger.info(
+            f"Polygon spatial reference: {pSpatial_reference_clip.GetName() if pSpatial_reference_clip else 'Unknown'}"
+        )
 
         pLayer_clip.ResetReading()
         pFeature_clip = pLayer_clip.GetNextFeature()
@@ -172,12 +177,16 @@ def clip_raster_by_polygon_file(
 
         # Handle projection mismatch
         if pProjection_target != pProjection_clip:
-            logger.info("Projection mismatch detected, transforming polygon to raster projection...")
+            logger.info(
+                "Projection mismatch detected, transforming polygon to raster projection..."
+            )
             pSRS_source = pSpatial_reference_clip
             pSRS_target = pSpatial_reference_target
 
             # Create coordinate transformation
-            pCoordinateTransform = osr.CoordinateTransformation(pSRS_source, pSRS_target)
+            pCoordinateTransform = osr.CoordinateTransformation(
+                pSRS_source, pSRS_target
+            )
 
             # Clone and transform polygon
             pPolygon_transformed = pPolygon.Clone()
@@ -194,7 +203,7 @@ def clip_raster_by_polygon_file(
 
         # Prepare for clipping
         pPolygonWKT = pPolygon.ExportToWkt()
-        create_options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
+        create_options = ["COMPRESS=DEFLATE", "PREDICTOR=2"]
 
         # Set up warp options
         if iFlag_use_raster_extent == 1:
@@ -206,10 +215,10 @@ def clip_raster_by_polygon_file(
                 yRes=abs(dPixelHeight),
                 outputBounds=aRaster_extent,
                 dstSRS=pSpatial_reference_target,
-                format='MEM',
+                format="MEM",
                 resampleAlg=resample_algorithm,
                 dstNodata=dMissing_value,
-                outputType=eType_out
+                outputType=eType_out,
             )
         else:
             logger.info("Clipping to polygon extent...")
@@ -219,15 +228,15 @@ def clip_raster_by_polygon_file(
                 xRes=dPixelWidth,
                 yRes=abs(dPixelHeight),
                 dstSRS=pSpatial_reference_target,
-                format='MEM',
+                format="MEM",
                 resampleAlg=resample_algorithm,
                 dstNodata=dMissing_value,
-                outputType=eType_out
+                outputType=eType_out,
             )
 
         # Perform clipping
         logger.info("Warping raster...")
-        pDataset_clip_warped = gdal.Warp('', sFilename_raster_in, options=pWrapOption)
+        pDataset_clip_warped = gdal.Warp("", sFilename_raster_in, options=pWrapOption)
         if pDataset_clip_warped is None:
             raise RuntimeError("Raster warping failed")
 
@@ -251,7 +260,7 @@ def clip_raster_by_polygon_file(
             iNewHeigh,
             1,
             eType_out,
-            options=create_options
+            options=create_options,
         )
         if pDataset_clip is None:
             raise RuntimeError(f"Could not create output file: {sFilename_raster_out}")
@@ -277,18 +286,13 @@ def clip_raster_by_polygon_file(
 
     finally:
         # Clean up resources
-        if 'pDataset_clip' in locals():
+        if "pDataset_clip" in locals():
             pDataset_clip = None
-        if 'pDataset_clip_warped' in locals():
+        if "pDataset_clip_warped" in locals():
             pDataset_clip_warped = None
-        if 'pSpatial_reference_target' in locals():
+        if "pSpatial_reference_target" in locals():
             pSpatial_reference_target = None
-        if 'pSpatial_reference_clip' in locals():
+        if "pSpatial_reference_clip" in locals():
             pSpatial_reference_clip = None
 
     return
-
-
-
-
-

@@ -66,14 +66,17 @@ from osgeo import gdal, osr, gdalconst
 import logging
 
 from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
-from pyearth.gis.gdal.read.raster.gdal_get_raster_spatial_reference import gdal_get_raster_spatial_reference_wkt
+from pyearth.gis.gdal.read.raster.gdal_get_raster_spatial_reference import (
+    gdal_get_raster_spatial_reference_wkt,
+)
 from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 from pyearth.gis.gdal.gdal_raster_format_support import (
-    get_raster_driver_from_extension,
-    get_raster_format_from_extension,
+    get_raster_driver_from_filename,
 )
+
 gdal.UseExceptions()
-#set default spatial reference
+# set default spatial reference
+
 
 def resample_raster(
     sFilename_in,
@@ -82,7 +85,7 @@ def resample_raster(
     dResolution_y,
     pProjection_target_in=None,
     iData_type=gdalconst.GDT_Int16,
-    sResampleAlg='MODE',
+    sResampleAlg="MODE",
     dMissing_value_source=255,
     dMissing_value_target=-9999,
     iFlag_overwrite=True,
@@ -149,7 +152,9 @@ def resample_raster(
     """
     logger = logging.getLogger(__name__)
     if iFlag_verbose:
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
 
     # defaults and validation
     default_srs = osr.SpatialReference()
@@ -157,58 +162,64 @@ def resample_raster(
     sProjection_default = default_srs.ExportToWkt()
 
     if not os.path.exists(sFilename_in):
-        raise FileNotFoundError(f'Input raster not found: {sFilename_in}')
+        raise FileNotFoundError(f"Input raster not found: {sFilename_in}")
 
     # handle output overwrite
     if os.path.exists(sFilename_out):
         if os.path.getsize(sFilename_out) == 0:
             if iFlag_verbose:
-                logger.info('Removing empty output file: %s', sFilename_out)
+                logger.info("Removing empty output file: %s", sFilename_out)
             os.remove(sFilename_out)
         else:
             if iFlag_overwrite:
                 if iFlag_verbose:
-                    logger.info('Overwriting output file: %s', sFilename_out)
+                    logger.info("Overwriting output file: %s", sFilename_out)
                 os.remove(sFilename_out)
             else:
-                raise FileExistsError(f'Output exists: {sFilename_out}')
+                raise FileExistsError(f"Output exists: {sFilename_out}")
     else:
         if iFlag_verbose:
-            logger.info('Creating output file: %s', sFilename_out)
+            logger.info("Creating output file: %s", sFilename_out)
 
     # open input and get projection
     src_ds = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
     if src_ds is None:
-        raise RuntimeError(f'Cannot open input raster: {sFilename_in}')
+        raise RuntimeError(f"Cannot open input raster: {sFilename_in}")
 
     pProjection_source = gdal_get_raster_spatial_reference_wkt(sFilename_in)
     src_srs = osr.SpatialReference()
     src_srs.ImportFromWkt(pProjection_source)
 
-    pProjection_target = pProjection_target_in if pProjection_target_in is not None else pProjection_source
+    pProjection_target = (
+        pProjection_target_in
+        if pProjection_target_in is not None
+        else pProjection_source
+    )
     tgt_srs = osr.SpatialReference()
     tgt_srs.ImportFromWkt(pProjection_target)
     if int(gdal.__version__[0]) >= 3:
-        src_srs.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
-        tgt_srs.SetAxisMappingStrategy(osgeo.osr.OAMS_TRADITIONAL_GIS_ORDER)
+        src_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        tgt_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     # warp in-memory
     warp_opts = gdal.WarpOptions(
         cropToCutline=False,
         xRes=dResolution_x,
         yRes=dResolution_y,
-        dstSRS=tgt_srs.ExportToWkt(),
-        format='MEM',
+        dstSRS=tgt_srs,
+        format="MEM",
         resampleAlg=sResampleAlg,
+        srcNodata=dMissing_value_source,  # Source NoData value
+        dstNodata=dMissing_value_target,  # Target NoData value
     )
-    warped = gdal.Warp('', src_ds, options=warp_opts)
+    warped = gdal.Warp("", src_ds, options=warp_opts)
     if warped is None:
-        raise RuntimeError('GDAL warp failed')
+        raise RuntimeError("GDAL warp failed")
 
     gt = warped.GetGeoTransform()
     arr = warped.ReadAsArray()
     if arr is None:
-        raise RuntimeError('Failed to read warped data')
+        raise RuntimeError("Failed to read warped data")
 
     # handle multi-band
     if arr.ndim == 3:
@@ -221,14 +232,21 @@ def resample_raster(
 
     # choose driver from extension
     try:
-        driver = get_raster_driver_from_extension(sFilename_out)
+        driver = get_raster_driver_from_filename(sFilename_out)
     except Exception:
-        driver = gdal.GetDriverByName('GTiff')
+        driver = gdal.GetDriverByName("GTiff")
     if driver is None:
-        raise RuntimeError('No suitable GDAL driver found for output')
+        raise RuntimeError("No suitable GDAL driver found for output")
 
-    creation_options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
-    out_ds = driver.Create(sFilename_out, out_w, out_h, out_bands, eType=iData_type, options=creation_options)
+    creation_options = ["COMPRESS=DEFLATE", "PREDICTOR=2"]
+    out_ds = driver.Create(
+        sFilename_out,
+        out_w,
+        out_h,
+        out_bands,
+        eType=iData_type,
+        options=creation_options,
+    )
     out_ds.SetGeoTransform(gt)
     out_ds.SetProjection(tgt_srs.ExportToWkt())
 
@@ -249,11 +267,13 @@ def resample_raster(
         if dMissing_value_source is not None:
             try:
                 if np.issubdtype(band_arr.dtype, np.floating):
-                    mask = np.isclose(band_arr, dMissing_value_source, rtol=1e-9, atol=1e-9)
+                    mask = np.isclose(
+                        band_arr, dMissing_value_source, rtol=1e-9, atol=1e-9
+                    )
                 else:
-                    mask = (band_arr == dMissing_value_source)
+                    mask = band_arr == dMissing_value_source
             except Exception:
-                mask = (band_arr == dMissing_value_source)
+                mask = band_arr == dMissing_value_source
             band_arr[mask] = dMissing_value_target
             out_ds.GetRasterBand(ib).SetNoDataValue(dMissing_value_target)
 
@@ -267,12 +287,12 @@ def resample_raster(
     src_ds = None
 
     return {
-        'success': True,
-        'output_file': sFilename_out,
-        'output_width': out_w,
-        'output_height': out_h,
-        'output_bands': out_bands,
-        'output_projection': tgt_srs.ExportToWkt(),
-        'resampling_algorithm': sResampleAlg,
-        'driver': driver.ShortName if hasattr(driver, 'ShortName') else None,
+        "success": True,
+        "output_file": sFilename_out,
+        "output_width": out_w,
+        "output_height": out_h,
+        "output_bands": out_bands,
+        "output_projection": tgt_srs.ExportToWkt(),
+        "resampling_algorithm": sResampleAlg,
+        "driver": driver.ShortName if hasattr(driver, "ShortName") else None,
     }

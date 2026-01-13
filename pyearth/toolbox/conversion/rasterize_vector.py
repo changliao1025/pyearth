@@ -97,7 +97,7 @@ def rasterize_vector(
     dMax_y_in: Optional[float] = None,
     nRow_in: Optional[int] = None,
     nColumn_in: Optional[int] = None,
-    pProjection_target_in: Optional[str] = None
+    pProjection_target_in: Optional[str] = None,
 ) -> None:
     """
     Convert vector dataset to raster with flexible parameter control.
@@ -323,13 +323,15 @@ def rasterize_vector(
     try:
         pDatasource_vector = ogr.Open(sFilename_vector_in)
     except RuntimeError as e:
-        raise RuntimeError(f"Could not open vector file: {sFilename_vector_in}. Error: {e}")
+        raise RuntimeError(
+            f"Could not open vector file: {sFilename_vector_in}. Error: {e}"
+        )
 
     if pDatasource_vector is None:
         raise RuntimeError(f"Could not open vector file: {sFilename_vector_in}")
 
     # Create memory data source for boundary operations
-    pDatasource_boundary = ogr.GetDriverByName('Memory').CreateDataSource('out')
+    pDatasource_boundary = ogr.GetDriverByName("MEM").CreateDataSource("out")
     if pDatasource_boundary is None:
         logger.warning("Could not create memory data source for boundary operations")
 
@@ -346,10 +348,14 @@ def rasterize_vector(
     else:
         iFlag_use_field_value = iFlag_use_field_value_in
         if iFlag_use_field_value == 1 and sAttribute_name is None:
-            raise ValueError("sAttribute_name_in must be specified when iFlag_use_field_value_in=1")
+            raise ValueError(
+                "sAttribute_name_in must be specified when iFlag_use_field_value_in=1"
+            )
 
     dField_value = dField_value_in if dField_value_in is not None else 1
-    iFlag_boundary_only = iFlag_boundary_only_in if iFlag_boundary_only_in is not None else 1
+    iFlag_boundary_only = (
+        iFlag_boundary_only_in if iFlag_boundary_only_in is not None else 1
+    )
     dFill_value = dFill_value_in if dFill_value_in is not None else 1
 
     # Get vector layer and spatial reference
@@ -368,7 +374,11 @@ def rasterize_vector(
         pProjection_source = pSpatialRef_source.ExportToWkt()
 
     # Determine target projection
-    pProjection_target = pProjection_target_in if pProjection_target_in is not None else pProjection_source
+    pProjection_target = (
+        pProjection_target_in
+        if pProjection_target_in is not None
+        else pProjection_source
+    )
 
     pSpatialRef_target = osr.SpatialReference()
     if pProjection_target:
@@ -409,19 +419,21 @@ def rasterize_vector(
     logger.info(f"Geometry type: {sGeometry_type}")
 
     iFlag_point = 0
-    if sGeometry_type == 'POINT':
+    if sGeometry_type == "POINT":
         logger.info("Point geometry detected - using point rasterization")
         iFlag_point = 1
         iFlag_boundary_only = 1
-    elif sGeometry_type == 'LINESTRING':
+    elif sGeometry_type == "LINESTRING":
         logger.info("Polyline geometry detected - using boundary-only mode")
         iFlag_boundary_only = 1
-    elif sGeometry_type == 'POLYGON':
+    elif sGeometry_type == "POLYGON":
         logger.info("Polygon geometry detected")
-    elif sGeometry_type == 'MULTIPOLYGON':
+    elif sGeometry_type == "MULTIPOLYGON":
         logger.info("Multi-polygon geometry detected")
     else:
-        logger.warning(f"Unknown geometry type: {sGeometry_type} - treating as boundary-only")
+        logger.warning(
+            f"Unknown geometry type: {sGeometry_type} - treating as boundary-only"
+        )
         iFlag_boundary_only = 1
 
     # Log rasterization mode
@@ -442,8 +454,10 @@ def rasterize_vector(
         ncolumn = int((dMax_x - dMin_x) / dResolution_x)
 
     if nrow <= 0 or ncolumn <= 0:
-        raise ValueError(f"Invalid raster dimensions: {ncolumn} columns x {nrow} rows. "
-                        f"Check resolution values (x={dResolution_x}, y={dResolution_y})")
+        raise ValueError(
+            f"Invalid raster dimensions: {ncolumn} columns x {nrow} rows. "
+            f"Check resolution values (x={dResolution_x}, y={dResolution_y})"
+        )
 
     logger.info(f"Output dimensions: {ncolumn} columns x {nrow} rows")
 
@@ -451,18 +465,15 @@ def rasterize_vector(
     bytes_per_pixel = gdal.GetDataTypeSize(iDataType) // 8
     estimated_size_mb = (nrow * ncolumn * bytes_per_pixel) / (1024 * 1024)
     if estimated_size_mb > 100:
-        logger.warning(f"Large output file expected: ~{estimated_size_mb:.1f} MB (uncompressed)")
+        logger.warning(
+            f"Large output file expected: ~{estimated_size_mb:.1f} MB (uncompressed)"
+        )
 
     # Create output raster dataset
-    pRaster_Driver = gdal.GetDriverByName('GTiff')
-    options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
+    pRaster_Driver = gdal.GetDriverByName("GTiff")
+    options = ["COMPRESS=DEFLATE", "PREDICTOR=2"]
     pDatasource_raster = pRaster_Driver.Create(
-        sFilename_raster_out,
-        ncolumn,
-        nrow,
-        1,
-        eType=iDataType,
-        options=options
+        sFilename_raster_out, ncolumn, nrow, 1, eType=iDataType, options=options
     )
 
     if pDatasource_raster is None:
@@ -470,7 +481,9 @@ def rasterize_vector(
 
     # Set geotransform (georeferencing)
     # Format: (top-left X, pixel width, rotation, top-left Y, rotation, -pixel height)
-    pDatasource_raster.SetGeoTransform((dMin_x, dResolution_x, 0, dMax_y, 0, -dResolution_y))
+    pDatasource_raster.SetGeoTransform(
+        (dMin_x, dResolution_x, 0, dMax_y, 0, -dResolution_y)
+    )
 
     # Get raster band and initialize
     band = pDatasource_raster.GetRasterBand(1)
@@ -488,7 +501,9 @@ def rasterize_vector(
             # Use attribute field values
             if iFlag_boundary_only == 0:
                 # Fill mode with attribute values
-                pLayer_boundary = pDatasource_boundary.CreateLayer('boundary', srs=pSpatialRef_source)
+                pLayer_boundary = pDatasource_boundary.CreateLayer(
+                    "boundary", srs=pSpatialRef_source
+                )
                 pLayer_vector.ResetReading()
                 for pFeature in pLayer_vector:
                     geometry = pFeature.GetGeometryRef()
@@ -499,31 +514,48 @@ def rasterize_vector(
 
                 # Rasterize filled polygons
                 gdal.RasterizeLayer(
-                    pDatasource_raster, [1], pLayer_vector,
-                    None, None, burn_values=[dField_value],
-                    options=["ALL_TOUCHED=TRUE"]
+                    pDatasource_raster,
+                    [1],
+                    pLayer_vector,
+                    None,
+                    None,
+                    burn_values=[dField_value],
+                    options=["ALL_TOUCHED=TRUE"],
                 )
                 # Rasterize boundaries
                 gdal.RasterizeLayer(
-                    pDatasource_raster, [1], pLayer_boundary,
-                    None, None,
-                    options=["ALL_TOUCHED=TRUE"]
+                    pDatasource_raster,
+                    [1],
+                    pLayer_boundary,
+                    None,
+                    None,
+                    options=["ALL_TOUCHED=TRUE"],
                 )
             else:
                 # Boundary-only or point mode with attribute values
                 if iFlag_point == 1:
-                    gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_vector, burn_values=[dField_value])
+                    gdal.RasterizeLayer(
+                        pDatasource_raster,
+                        [1],
+                        pLayer_vector,
+                        burn_values=[dField_value],
+                    )
                 else:
                     gdal.RasterizeLayer(
-                        pDatasource_raster, [1], pLayer_vector,
-                        None, None,
-                        options=["ALL_TOUCHED=TRUE", "ATTRIBUTE=" + sAttribute_name]
+                        pDatasource_raster,
+                        [1],
+                        pLayer_vector,
+                        None,
+                        None,
+                        options=["ALL_TOUCHED=TRUE", "ATTRIBUTE=" + sAttribute_name],
                     )
         else:
             # Use constant burn values
             if iFlag_boundary_only == 0:
                 # Fill mode with constant values
-                pLayer_boundary = pDatasource_boundary.CreateLayer('boundary', srs=pSpatialRef_source)
+                pLayer_boundary = pDatasource_boundary.CreateLayer(
+                    "boundary", srs=pSpatialRef_source
+                )
                 pLayer_vector.ResetReading()
                 nFeatureCount = pLayer_vector.GetFeatureCount()
                 for pFeature in pLayer_vector:
@@ -535,25 +567,42 @@ def rasterize_vector(
 
                 # Rasterize filled polygons
                 gdal.RasterizeLayer(
-                    pDatasource_raster, [1], pLayer_vector,
-                    None, None, burn_values=[dFill_value],
-                    options=["ALL_TOUCHED=TRUE"]
+                    pDatasource_raster,
+                    [1],
+                    pLayer_vector,
+                    None,
+                    None,
+                    burn_values=[dFill_value],
+                    options=["ALL_TOUCHED=TRUE"],
                 )
                 # Rasterize boundaries (potentially different value)
                 gdal.RasterizeLayer(
-                    pDatasource_raster, [1], pLayer_boundary,
-                    None, None, burn_values=[dField_value],
-                    options=["ALL_TOUCHED=TRUE"]
+                    pDatasource_raster,
+                    [1],
+                    pLayer_boundary,
+                    None,
+                    None,
+                    burn_values=[dField_value],
+                    options=["ALL_TOUCHED=TRUE"],
                 )
             else:
                 # Boundary-only or point mode with constant value
                 if iFlag_point == 1:
-                    gdal.RasterizeLayer(pDatasource_raster, [1], pLayer_vector, burn_values=[dField_value])
+                    gdal.RasterizeLayer(
+                        pDatasource_raster,
+                        [1],
+                        pLayer_vector,
+                        burn_values=[dField_value],
+                    )
                 else:
                     gdal.RasterizeLayer(
-                        pDatasource_raster, [1], pLayer_vector,
-                        None, None, burn_values=[dField_value],
-                        options=["ALL_TOUCHED=TRUE"]
+                        pDatasource_raster,
+                        [1],
+                        pLayer_vector,
+                        None,
+                        None,
+                        burn_values=[dField_value],
+                        options=["ALL_TOUCHED=TRUE"],
                     )
     except Exception as e:
         logger.error(f"Rasterization failed: {e}")
@@ -575,4 +624,3 @@ def rasterize_vector(
     logger.info(f"Output written to: {sFilename_raster_out}")
 
     return None
-

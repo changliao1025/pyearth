@@ -1,6 +1,7 @@
 import os
 from osgeo import ogr
 
+
 def gdal_validate_polygon_file(filename: str) -> bool:
     """
     Check if a given polygon file is valid.
@@ -28,7 +29,7 @@ def gdal_validate_polygon_file(filename: str) -> bool:
             if geometry is None:
                 return False
 
-            if geometry.GetGeometryName() != 'POLYGON':
+            if geometry.GetGeometryName() != "POLYGON":
                 return False
 
             if not geometry.IsValid():

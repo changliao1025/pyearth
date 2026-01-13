@@ -1,7 +1,9 @@
 
 cimport cython
 from libc.math cimport M_PI, sin, cos, asin, acos, sqrt, abs
+cimport numpy as cnp
 import numpy as np
+from pyearth.gis.location.kernel cimport convert_longitude_latitude_to_sphere_3d
 
 """ Low-level function for pyflowline
 """
@@ -12,37 +14,76 @@ import numpy as np
 cdef double dRadius = 6378137.0
 
 @cython.boundscheck(False)
-cpdef double calculate_distance_based_on_longitude_latitude(
-    double dLongitude1_in, double dLatitude1_in,
-    double dLongitude2_in, double dLatitude2_in,
-    bint bFlag_radian=False
+cpdef calculate_distance_based_on_longitude_latitude(
+    dLongitude1_in, dLatitude1_in,
+    dLongitude2_in, dLatitude2_in,
+    bFlag_radian=False
 ):
     """
     Calculate the great circle distance between two points on the earth.
+    Automatically handles both scalar and array inputs.
 
     Parameters
     ----------
-    dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in : double
+    dLongitude1_in, dLatitude1_in, dLongitude2_in, dLatitude2_in : double or array-like
         Coordinates of the two points. In degrees by default, or radians if bFlag_radian=True.
+        Can be scalars or arrays.
     bFlag_radian : bint, optional
         If True, input coordinates are in radians. If False (default), input is in degrees.
 
     Returns
     -------
-    double
-        Great circle distance in meters.
+    double or np.ndarray
+        Great circle distance in meters. Returns scalar if inputs are scalars, array if inputs are arrays.
     """
+    # Check if inputs are arrays
+    try:
+        # Try to access shape attribute to detect arrays
+        if (hasattr(dLongitude1_in, 'shape') or hasattr(dLatitude1_in, 'shape') or
+            hasattr(dLongitude2_in, 'shape') or hasattr(dLatitude2_in, 'shape')):
+            # Convert to numpy arrays and use the numpy version
+            import numpy as np
+            lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+            lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+            lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+            lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+            return calculate_distance_based_on_longitude_latitude_numpy(
+                lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+
+        # If we can iterate over the inputs, they might be lists/tuples
+        try:
+            iter(dLongitude1_in)
+            # Convert to numpy arrays and use the numpy version
+            import numpy as np
+            lon1_arr = np.asarray(dLongitude1_in, dtype=np.float64)
+            lat1_arr = np.asarray(dLatitude1_in, dtype=np.float64)
+            lon2_arr = np.asarray(dLongitude2_in, dtype=np.float64)
+            lat2_arr = np.asarray(dLatitude2_in, dtype=np.float64)
+            return calculate_distance_based_on_longitude_latitude_numpy(
+                lon1_arr, lat1_arr, lon2_arr, lat2_arr, bFlag_radian)
+        except TypeError:
+            pass  # Not iterable, proceed with scalar calculation
+
+    except:
+        pass  # Any error, proceed with scalar calculation
+
+    # Scalar calculation
     cdef double lon1, lat1, lon2, lat2
+    cdef double dLongitude1_scalar = <double>dLongitude1_in
+    cdef double dLatitude1_scalar = <double>dLatitude1_in
+    cdef double dLongitude2_scalar = <double>dLongitude2_in
+    cdef double dLatitude2_scalar = <double>dLatitude2_in
+
     if not bFlag_radian:
-        lon1 = dLongitude1_in / 180.0 * M_PI
-        lat1 = dLatitude1_in / 180.0 * M_PI
-        lon2 = dLongitude2_in / 180.0 * M_PI
-        lat2 = dLatitude2_in / 180.0 * M_PI
+        lon1 = dLongitude1_scalar / 180.0 * M_PI
+        lat1 = dLatitude1_scalar / 180.0 * M_PI
+        lon2 = dLongitude2_scalar / 180.0 * M_PI
+        lat2 = dLatitude2_scalar / 180.0 * M_PI
     else:
-        lon1 = dLongitude1_in
-        lat1 = dLatitude1_in
-        lon2 = dLongitude2_in
-        lat2 = dLatitude2_in
+        lon1 = dLongitude1_scalar
+        lat1 = dLatitude1_scalar
+        lon2 = dLongitude2_scalar
+        lat2 = dLatitude2_scalar
     cdef double dLongtitude_diff = lon2 - lon1
     cdef double dLatitude_diff = lat2 - lat1
     cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
@@ -52,7 +93,7 @@ cpdef double calculate_distance_based_on_longitude_latitude(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef np.ndarray calculate_distance_based_on_longitude_latitude_array(
+cpdef cnp.ndarray[cnp.float64_t, ndim=1] calculate_distance_based_on_longitude_latitude_array(
     double[:] dLongitude1_in, double[:] dLatitude1_in,
     double[:] dLongitude2_in, double[:] dLatitude2_in,
     bint bFlag_radian=False
@@ -74,8 +115,10 @@ cpdef np.ndarray calculate_distance_based_on_longitude_latitude_array(
     """
     cdef int i
     cdef int n = dLongitude1_in.shape[0]
-    cdef np.ndarray result = np.zeros(n, dtype=np.float64)
+    cdef cnp.ndarray[cnp.float64_t, ndim=1] result = np.zeros(n, dtype=np.float64)
     cdef double lon1, lat1, lon2, lat2
+    cdef double dLongtitude_diff, dLatitude_diff
+    cdef double a, b, c
     for i in range(n):
         if not bFlag_radian:
             lon1 = dLongitude1_in[i] / 180.0 * M_PI
@@ -87,11 +130,11 @@ cpdef np.ndarray calculate_distance_based_on_longitude_latitude_array(
             lat1 = dLatitude1_in[i]
             lon2 = dLongitude2_in[i]
             lat2 = dLatitude2_in[i]
-        cdef double dLongtitude_diff = lon2 - lon1
-        cdef double dLatitude_diff = lat2 - lat1
-        cdef double a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
-        cdef double b = 2 * asin(sqrt(a))
-        cdef double c = b * dRadius
+        dLongtitude_diff = lon2 - lon1
+        dLatitude_diff = lat2 - lat1
+        a = sin(dLatitude_diff/2)*sin(dLatitude_diff/2) + cos(lat1) * cos(lat2) * sin(dLongtitude_diff/2)*sin(dLongtitude_diff/2)
+        b = 2 * asin(sqrt(a))
+        c = b * dRadius
         result[i] = c
     return result
 
@@ -154,7 +197,7 @@ cpdef calculate_angle_between_vectors_coordinates(double x1, double y1, double z
     return f
 
 @cython.boundscheck(False)  # deactivate bnds checking
-cpdef calculate_angle_betwen_vertex(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):
+cpdef calculate_angle_between_point(dLongitude_degree1_in, dLatitude_degree1_in, dLongitude_degree2_in, dLatitude_degree2_in, dLongitude_degree3_in, dLatitude_degree3_in):
     #all in degree
 
     cdef double angle3deg
@@ -165,9 +208,9 @@ cpdef calculate_angle_betwen_vertex(dLongitude_degree1_in, dLatitude_degree1_in,
     cdef double x5, y5, z5
 
     # The points in 3D space
-    x1, y1, z1 = longlat_to_3d(dLongitude_degree1_in, dLatitude_degree1_in)
-    x2, y2, z2 = longlat_to_3d(dLongitude_degree2_in, dLatitude_degree2_in)
-    x3, y3, z3 = longlat_to_3d(dLongitude_degree3_in, dLatitude_degree3_in)
+    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
+    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
+    x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
     # Vectors in 3D space
 
     x4 = x1 - x2
@@ -200,9 +243,9 @@ def calculate_distance_to_plane(double dLongitude_degree1_in, double dLatitude_d
     cdef double distance
 
     # Convert the three points to 3D coordinates
-    x1, y1, z1 = longlat_to_3d(dLongitude_degree1_in, dLatitude_degree1_in)
-    x2, y2, z2 = longlat_to_3d(dLongitude_degree2_in, dLatitude_degree2_in)
-    x3, y3, z3 = longlat_to_3d(dLongitude_degree3_in, dLatitude_degree3_in)
+    x1, y1, z1 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree1_in, dLatitude_degree1_in)
+    x2, y2, z2 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree2_in, dLatitude_degree2_in)
+    x3, y3, z3 = convert_longitude_latitude_to_sphere_3d(dLongitude_degree3_in, dLatitude_degree3_in)
 
     # Calculate two vectors on the plane
     v1_x = x2 - x1

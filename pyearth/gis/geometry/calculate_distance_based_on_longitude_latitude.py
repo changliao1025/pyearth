@@ -2,12 +2,15 @@ import numpy as np
 from pyearth.system.define_global_variables import earth_radius
 from typing import Union, List
 
-def calculate_distance_based_on_longitude_latitude(aLongitude_from: Union[float, list, np.ndarray],
-                                                       aLatitude_from: Union[float, list, np.ndarray],
-                                                       aLongitude_to: Union[float, list, np.ndarray],
-                                                       aLatitude_to: Union[float, list, np.ndarray],
-                                                       bUnits_are_radians: bool = False,
-                                                       dRadius_in: float = None) -> Union[float, np.ndarray]:
+
+def calculate_distance_based_on_longitude_latitude(
+    aLongitude_from: Union[float, list, np.ndarray],
+    aLatitude_from: Union[float, list, np.ndarray],
+    aLongitude_to: Union[float, list, np.ndarray],
+    aLatitude_to: Union[float, list, np.ndarray],
+    bUnits_are_radians: bool = False,
+    dRadius_in: float = None,
+) -> Union[float, np.ndarray]:
     """
     Calculate the great circle distances between arrays of points
     on the earth using the haversine formula.
@@ -47,7 +50,12 @@ def calculate_distance_based_on_longitude_latitude(aLongitude_from: Union[float,
     dlon = dLongitude_radian_to - dLongitude_radian_from
     dlat = dLatitude_radian_to - dLatitude_radian_from
 
-    a = np.sin(dlat/2)**2 + np.cos(dLatitude_radian_from) * np.cos(dLatitude_radian_to) * np.sin(dlon/2)**2
+    a = (
+        np.sin(dlat / 2) ** 2
+        + np.cos(dLatitude_radian_from)
+        * np.cos(dLatitude_radian_to)
+        * np.sin(dlon / 2) ** 2
+    )
     c = 2 * np.arcsin(np.sqrt(a))
 
     if bUnits_are_radians:

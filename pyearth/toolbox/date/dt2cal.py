@@ -268,7 +268,9 @@ def dt2cal(dt: np.ndarray) -> np.ndarray:
         logger.error("Input array is empty")
         raise ValueError("Input array cannot be empty")
 
-    logger.debug(f"Converting datetime64 array of shape {dt.shape} to calendar components")
+    logger.debug(
+        f"Converting datetime64 array of shape {dt.shape} to calendar components"
+    )
 
     # Allocate output array
     # Shape is input shape + (7,) for the 7 calendar components
