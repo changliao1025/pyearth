@@ -1,5 +1,5 @@
 {% set name = "pyearth" %}
-{% set version = "0.1.29" %}
+{% set version = "0.2.0" %}
 {% set git_rev = "v" + version %}
 {% set python_min = "3.8" %}
 
@@ -28,8 +28,6 @@ requirements:
     - gdal
     - matplotlib-base
     - cartopy
-    - geographiclib
-    - shapely
 
 test:
   imports:

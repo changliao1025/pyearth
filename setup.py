@@ -9,7 +9,7 @@ DESCRIPTION = "Python for Earth Science."
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.29"
+VERSION = "0.2.0"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
@@ -18,8 +18,6 @@ REQUIRED = [
     "gdal",
     "matplotlib",
     "cartopy",
-    "geographiclib",
-    "shapely",
 ]
 
 CLASSIFY = [
@@ -83,5 +81,18 @@ setup(
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
         "spatial": ["rtree"],
         "cython": ["Cython>=0.29.0", "numpy"],
+        "geovista": ["geovista", "pyvista"],
+        "geodesic": ["geographiclib"],
+        "all": [
+            "requests",
+            "netCDF4",
+            "pandas",
+            "scipy",
+            "statsmodels",
+            "rtree",
+            "geovista",
+            "pyvista",
+            "geographiclib",
+        ],
     },
 )

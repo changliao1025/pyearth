@@ -8,8 +8,6 @@ dependencies:
   - gdal
   - matplotlib-base
   - cartopy
-  - geographiclib
-  - shapely
   - pip
   - pip:
     - -e .
