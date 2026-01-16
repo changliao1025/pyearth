@@ -28,6 +28,8 @@ requirements:
     - gdal
     - matplotlib-base
     - cartopy
+    - geographiclib
+    - shapely
 
 test:
   imports:

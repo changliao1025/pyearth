@@ -18,6 +18,8 @@ REQUIRED = [
     "gdal",
     "matplotlib",
     "cartopy",
+    "geographiclib",
+    "shapely",
 ]
 
 CLASSIFY = [
