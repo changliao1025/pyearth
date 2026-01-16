@@ -18,6 +18,7 @@ REQUIRED = [
     "gdal",
     "matplotlib",
     "cartopy",
+    "Cython>=0.29.0",
 ]
 
 CLASSIFY = [
@@ -33,7 +34,7 @@ CLASSIFY = [
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 
-# Optional Cython extensions (not built by default)
+# Cython extensions (built by default)
 extensions = [
     Extension(
         "pyearth.gis.geometry.kernel",
@@ -50,8 +51,6 @@ extensions = [
         library_dirs=[],
     ),
 ]
-
-# To build Cython extensions, run: python setup.py build_ext --inplace
 
 try:
     with io.open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
@@ -77,10 +76,11 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     classifiers=CLASSIFY,
+    ext_modules=extensions,
+    setup_requires=["Cython>=0.29.0", "numpy"],
     extras_require={
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
         "spatial": ["rtree"],
-        "cython": ["Cython>=0.29.0", "numpy"],
         "geovista": ["geovista", "pyvista"],
         "geodesic": ["geographiclib"],
         "all": [
