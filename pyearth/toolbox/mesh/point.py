@@ -2,7 +2,7 @@ import json
 from json import JSONEncoder
 import importlib.util
 import numpy as np
-from geographiclib.geodesic import Geodesic
+
 from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
     export_point_as_polygon_file,
 )
@@ -171,6 +171,7 @@ class pypoint(object):
 
     def calculate_buffer_zone_point(self, dRadius, dBearing=90):
         # Create a geodesic object
+        from geographiclib.geodesic import Geodesic
         geod = Geodesic.WGS84  # the default is WGS84
         # Calculate the geodesic buffer
         pPoint_buffer = geod.Direct(
@@ -186,6 +187,7 @@ class pypoint(object):
 
     def calculate_buffer_zone_circle(self, dRadius, nPoint=360, sFilename_out=None):
         # Create a geodesic object
+        from geographiclib.geodesic import Geodesic
         geod = Geodesic.WGS84  # the default is WGS84
         aPoint = []
         # Calculate the geodesic buffer

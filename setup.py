@@ -2,13 +2,14 @@ import io
 import os
 
 from setuptools import setup, find_packages, Extension
+import numpy
 
 NAME = "pyearth"
 DESCRIPTION = "Python for Earth Science."
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.1.29"
+VERSION = "0.2.0"
 REQUIRES_PYTHON = ">=3.8.0"
 KEYWORDS = "Earth Science"
 
@@ -37,14 +38,14 @@ extensions = [
     Extension(
         "pyearth.gis.geometry.kernel",
         ["pyearth/gis/geometry/kernel.pyx"],
-        include_dirs=[],
+        include_dirs=[numpy.get_include()],
         libraries=[],
         library_dirs=[],
     ),
     Extension(
         "pyearth.gis.location.kernel",
         ["pyearth/gis/location/kernel.pyx"],
-        include_dirs=[],
+        include_dirs=[numpy.get_include()],
         libraries=[],
         library_dirs=[],
     ),
@@ -80,5 +81,18 @@ setup(
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
         "spatial": ["rtree"],
         "cython": ["Cython>=0.29.0", "numpy"],
+        "geovista": ["geovista", "pyvista"],
+        "geodesic": ["geographiclib"],
+        "all": [
+            "requests",
+            "netCDF4",
+            "pandas",
+            "scipy",
+            "statsmodels",
+            "rtree",
+            "geovista",
+            "pyvista",
+            "geographiclib",
+        ],
     },
 )
