@@ -2,6 +2,7 @@ import io
 import os
 
 from setuptools import setup, find_packages, Extension
+from Cython.Build import cythonize
 import numpy
 
 NAME = "pyearth"
@@ -76,7 +77,7 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     classifiers=CLASSIFY,
-    ext_modules=extensions,
+    ext_modules=cythonize(extensions, compiler_directives={'language_level': "3"}),
     setup_requires=["Cython>=0.29.0", "numpy"],
     extras_require={
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
