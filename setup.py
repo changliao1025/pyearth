@@ -24,7 +24,7 @@ KEYWORDS = "Earth Science"
 REQUIRED = [
     "numpy",
     "gdal",
-    "matplotlib-base",
+    "matplotlib",
     "cartopy",
 ]
 
