@@ -18,7 +18,7 @@ AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
 VERSION = "0.2.0"
-REQUIRES_PYTHON = ">=3.8.0"
+REQUIRES_PYTHON = ">=3.9.0"
 KEYWORDS = "Earth Science"
 
 REQUIRED = [
