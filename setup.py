@@ -3,14 +3,7 @@ import os
 
 from setuptools import setup, find_packages, Extension
 
-# Try to import numpy - required for building extensions
-try:
-    import numpy
-except ImportError:
-    raise RuntimeError(
-        "NumPy is required to build the pyearth extension modules. "
-        "Please install numpy before installing or building pyearth."
-    )
+import numpy
 
 # Try to import Cython, but don't fail if it's not available
 try:
@@ -31,9 +24,8 @@ KEYWORDS = "Earth Science"
 REQUIRED = [
     "numpy",
     "gdal",
-    "matplotlib",
+    "matplotlib-base",
     "cartopy",
-    "Cython>=0.29.0",
 ]
 
 CLASSIFY = [
@@ -98,7 +90,7 @@ setup(
     include_package_data=True,
     classifiers=CLASSIFY,
     ext_modules=cythonize(extensions, compiler_directives={'language_level': "3"}) if HAVE_CYTHON else extensions,
-    setup_requires=["numpy"],
+    setup_requires=["numpy", "Cython>=0.29.0"],
     extras_require={
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
         "spatial": ["rtree"],
