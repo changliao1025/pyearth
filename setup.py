@@ -3,12 +3,14 @@ import os
 
 from setuptools import setup, find_packages, Extension
 
-# Try to import numpy, but don't fail if it's not available
+# Try to import numpy - required for building extensions
 try:
     import numpy
-    HAVE_NUMPY = True
 except ImportError:
-    HAVE_NUMPY = False
+    raise RuntimeError(
+        "NumPy is required to build the pyearth extension modules. "
+        "Please install numpy before installing or building pyearth."
+    )
 
 # Try to import Cython, but don't fail if it's not available
 try:
@@ -16,9 +18,6 @@ try:
     HAVE_CYTHON = True
 except ImportError:
     HAVE_CYTHON = False
-    def cythonize(extensions, **_ignore):
-        """Dummy cythonize function when Cython is not available"""
-        return extensions
 
 NAME = "pyearth"
 DESCRIPTION = "Python for Earth Science."
@@ -62,30 +61,17 @@ else:
         "pyearth.gis.location.kernel": ["pyearth/gis/location/kernel.c"],
     }
 
-# Build extensions list with numpy include dirs if available
-if HAVE_NUMPY:
-    extensions = [
-        Extension(
-            name,
-            sources,
-            include_dirs=[numpy.get_include()],
-            libraries=[],
-            library_dirs=[],
-        )
-        for name, sources in ext_sources.items()
-    ]
-else:
-    # Fallback without numpy.get_include() - will be resolved during actual build
-    extensions = [
-        Extension(
-            name,
-            sources,
-            include_dirs=[],
-            libraries=[],
-            library_dirs=[],
-        )
-        for name, sources in ext_sources.items()
-    ]
+# Build extensions list; NumPy is required for header includes
+extensions = [
+    Extension(
+        name,
+        sources,
+        include_dirs=[numpy.get_include()],
+        libraries=[],
+        library_dirs=[],
+    )
+    for name, sources in ext_sources.items()
+]
 
 try:
     with io.open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
