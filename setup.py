@@ -2,8 +2,23 @@ import io
 import os
 
 from setuptools import setup, find_packages, Extension
-from Cython.Build import cythonize
-import numpy
+
+# Try to import numpy, but don't fail if it's not available
+try:
+    import numpy
+    HAVE_NUMPY = True
+except ImportError:
+    HAVE_NUMPY = False
+
+# Try to import Cython, but don't fail if it's not available
+try:
+    from Cython.Build import cythonize
+    HAVE_CYTHON = True
+except ImportError:
+    HAVE_CYTHON = False
+    def cythonize(extensions, **_ignore):
+        """Dummy cythonize function when Cython is not available"""
+        return extensions
 
 NAME = "pyearth"
 DESCRIPTION = "Python for Earth Science."
@@ -35,23 +50,42 @@ CLASSIFY = [
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 
-# Cython extensions (built by default)
-extensions = [
-    Extension(
-        "pyearth.gis.geometry.kernel",
-        ["pyearth/gis/geometry/kernel.pyx"],
-        include_dirs=[numpy.get_include()],
-        libraries=[],
-        library_dirs=[],
-    ),
-    Extension(
-        "pyearth.gis.location.kernel",
-        ["pyearth/gis/location/kernel.pyx"],
-        include_dirs=[numpy.get_include()],
-        libraries=[],
-        library_dirs=[],
-    ),
-]
+# Cython extensions (build from .pyx if Cython available, otherwise from .c files)
+if HAVE_CYTHON:
+    ext_sources = {
+        "pyearth.gis.geometry.kernel": ["pyearth/gis/geometry/kernel.pyx"],
+        "pyearth.gis.location.kernel": ["pyearth/gis/location/kernel.pyx"],
+    }
+else:
+    ext_sources = {
+        "pyearth.gis.geometry.kernel": ["pyearth/gis/geometry/kernel.c"],
+        "pyearth.gis.location.kernel": ["pyearth/gis/location/kernel.c"],
+    }
+
+# Build extensions list with numpy include dirs if available
+if HAVE_NUMPY:
+    extensions = [
+        Extension(
+            name,
+            sources,
+            include_dirs=[numpy.get_include()],
+            libraries=[],
+            library_dirs=[],
+        )
+        for name, sources in ext_sources.items()
+    ]
+else:
+    # Fallback without numpy.get_include() - will be resolved during actual build
+    extensions = [
+        Extension(
+            name,
+            sources,
+            include_dirs=[],
+            libraries=[],
+            library_dirs=[],
+        )
+        for name, sources in ext_sources.items()
+    ]
 
 try:
     with io.open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
@@ -77,8 +111,8 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     classifiers=CLASSIFY,
-    ext_modules=cythonize(extensions, compiler_directives={'language_level': "3"}),
-    setup_requires=["Cython>=0.29.0", "numpy"],
+    ext_modules=cythonize(extensions, compiler_directives={'language_level': "3"}) if HAVE_CYTHON else extensions,
+    setup_requires=["numpy"],
     extras_require={
         "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
         "spatial": ["rtree"],
