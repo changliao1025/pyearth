@@ -17,15 +17,18 @@ DESCRIPTION = "Python for Earth Science."
 AUTHOR = "Chang Liao"
 AUTHOR_EMAIL = "changliao.climate@gmail.com"
 URL = "https://github.com/changliao1025/pyearth"
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 REQUIRES_PYTHON = ">=3.9.0"
 KEYWORDS = "Earth Science"
 
 REQUIRED = [
     "numpy",
     "gdal",
-    "matplotlib",
-    "cartopy",
+    "netCDF4",
+    "pandas",
+    "scipy",
+    "rtree",
+    "geographiclib",
 ]
 
 CLASSIFY = [
@@ -92,20 +95,6 @@ setup(
     ext_modules=cythonize(extensions, compiler_directives={'language_level': "3"}) if HAVE_CYTHON else extensions,
     setup_requires=["numpy", "Cython>=0.29.0"],
     extras_require={
-        "statistics": ["requests", "netCDF4", "pandas", "scipy", "statsmodels"],
-        "spatial": ["rtree"],
-        "geovista": ["geovista", "pyvista"],
-        "geodesic": ["geographiclib"],
-        "all": [
-            "requests",
-            "netCDF4",
-            "pandas",
-            "scipy",
-            "statsmodels",
-            "rtree",
-            "geovista",
-            "pyvista",
-            "geographiclib",
-        ],
+
     },
 )

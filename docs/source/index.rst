@@ -6,6 +6,18 @@
 Welcome to pyearth documentation!
 ==============================================
 
+.. note::
+   PyEarth has been restructured as part of the **EarthSuite** ecosystem.
+   Some functionality has been moved to separate focused packages:
+
+   - **earthviz** - 2D visualization (matplotlib/cartopy)
+   - **earthviz3d** - 3D visualization with GeoVista
+   - **earthhelper** - Data retrieval and HPC utilities
+   - **earthmesh** - Mesh generation tools
+   - **rivergraph** - River network graph algorithms
+
+   PyEarth now focuses on core GIS operations, spatial toolbox, and system utilities.
+
 Contents:
 
 .. toctree::
@@ -16,7 +28,6 @@ Contents:
    algorithm/gis/gis.rst
    algorithm/system/system.rst
    algorithm/toolbox/toolbox.rst
-   algorithm/visual/visual.rst
    algorithm/api
 
 Indices and tables
