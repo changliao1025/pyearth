@@ -65,7 +65,7 @@ pip install pyearth
 
 #### Building from Source
 
-If you want to build from source with Cython extensions for maximum performance:
+PyEarth now uses modern `pyproject.toml` configuration. To build from source with Cython extensions for maximum performance:
 
 ```bash
 # Clone the repository
@@ -75,13 +75,19 @@ cd pyearth
 # Install dependencies
 conda install numpy gdal netcdf4 pandas scipy rtree geographiclib cython
 
-# Build and install
+# Build and install (modern way)
 pip install -e .
+
+# Or build a distributable package
+pip install build
+python -m build
 ```
 
 For Cython compilation, you'll need a C compiler:
 - On Linux/macOS: `gcc` or `clang` (usually pre-installed)
 - On Windows: Install conda's compilers: `conda install -c conda-forge c-compiler`
+
+**Note:** PyEarth has migrated from `setup.py` to the modern `pyproject.toml` standard. See [MIGRATION_TO_PYPROJECT.md](MIGRATION_TO_PYPROJECT.md) for details on why this is better.
 
 ### Content
 
