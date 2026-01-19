@@ -8,14 +8,14 @@ Every hiker/camper would love to have a leatherman pocket knife around because i
 This is why I developed PyEarth, a lightweight Python package to support various Earth science tasks.
 I use it in my daily work, and nearly all my research papers use it in some way.
 
-**Note:** PyEarth has been restructured and is now part of the **EarthSuite** ecosystem. To keep each package lightweight and focused, PyEarth has been split into several specialized packages:
+**Note:** PyEarth has been restructured and is now part of the **PyEarthSuite** ecosystem. To keep each package lightweight and focused, PyEarth has been split into several specialized packages:
 
-- **earthhelper** - Helper utilities for data access (NWIS, NLDI, GSIM) and HPC operations
-- **earthmesh** - Mesh generation and manipulation tools
-- **earthviz** - 2D visualization utilities
-- **earthviz3d** - 3D visualization with GeoVista
-- **rivergraph** - River network graph algorithms and data structures
 - **pyearth** (this package) - Core GIS operations, spatial toolbox, and system utilities
+- **pyearthviz** - 2D visualization utilities
+- **pyearthviz3d** - 3D visualization with GeoVista
+- **pyearthriver** - River network graph algorithms and data structures
+- **pyearthmesh** - Mesh generation and manipulation tools (currently not implemented)
+- **pyearthhelp** - Helper utilities for data access (NWIS, NLDI, GSIM) and HPC operations
 
 This modular approach allows you to install only what you need while maintaining the ability to use all packages together.
 
@@ -129,11 +129,13 @@ Performance-critical geometry and location calculations are accelerated with Cyt
 
 PyEarth works seamlessly with other EarthSuite packages:
 
-- **[earthhelper](../earthhelper)** - Data retrieval and HPC job management
-- **[earthmesh](../earthmesh)** - Advanced mesh generation tools
-- **[earthviz](../earthviz)** - 2D plotting and visualization
-- **[earthviz3d](../earthviz3d)** - 3D globe visualization with GeoVista
-- **[rivergraph](../rivergraph)** - River network topology and graph algorithms
+
+
+- **[pyearthviz](../pyearthviz)** - 2D plotting and visualization
+- **[pyearthviz3d](../pyearthviz3d)** - 3D globe visualization with GeoVista
+- **[pyearthriver](../pyearthriver)** - River network topology and graph algorithms
+- **[pyearthmesh](../pyearthmesh)** - Advanced mesh generation tools
+- **[pyearthhelp](../pyearthhelp)** - Data retrieval and HPC job management
 
 ### Acknowledgment
 
