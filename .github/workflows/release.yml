@@ -33,7 +33,7 @@ jobs:
 
     - name: Verify version matches tag
       run: |
-        PACKAGE_VERSION=$(grep 'VERSION = ' setup.py | cut -d '"' -f 2)
+        PACKAGE_VERSION=$(grep '^version = ' pyproject.toml | cut -d '"' -f 2)
         TAG_VERSION=${GITHUB_REF#refs/tags/v}
         echo "Package version: $PACKAGE_VERSION"
         echo "Tag version: $TAG_VERSION"

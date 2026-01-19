@@ -2,7 +2,7 @@ include MANIFEST.in
 include README.md
 include LICENSE.md
 include setup.py
-include setup.cfg
+include build_backend.py
 include pyproject.toml
 include *.yml
 include *.yaml

@@ -1,1 +1,0 @@
-# GeoVista visualization tools
