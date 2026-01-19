@@ -64,7 +64,6 @@ test = [
 ]
 
 [tool.setuptools]
-packages = ["pyearth"]
 include-package-data = true
 
 [tool.setuptools.packages.find]
