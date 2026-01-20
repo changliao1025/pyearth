@@ -33,6 +33,7 @@ dependencies = [
     "netCDF4",
     "pandas",
     "scipy",
+    "statsmodels",
     "rtree",
     "geographiclib",
 ]

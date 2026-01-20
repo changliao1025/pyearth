@@ -1,0 +1,59 @@
+{% set name = "pyearth" %}
+{% set version = "0.2.1" %}
+{% set git_rev = "main" %}
+{% set python_min = "3.9" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  git_rev: {{ git_rev }}
+  git_url: https://github.com/changliao1025/pyearth
+
+build:
+  number: 0
+  script: python -m pip install . -vv --no-build-isolation
+  skip: true  # [win and vc<14]
+
+requirements:
+  build:
+    - {{ stdlib("c") }}
+    - {{ compiler('c') }}
+  host:
+    - pip
+    - python
+    - setuptools
+    - numpy
+    - cython >=0.29.0
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - gdal
+    - netcdf4
+    - pandas
+    - scipy
+    - statsmodels
+    - rtree
+    - geographiclib
+
+test:
+  imports:
+    - pyearth
+    - pyearth.gis.geometry.kernel
+    - pyearth.gis.location.kernel
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/changliao1025/pyearth
+  summary: Python for Earth Science.
+  license: BSD-3-Clause
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - changliao1025
+  feedstock-name: {{ name|lower }}
