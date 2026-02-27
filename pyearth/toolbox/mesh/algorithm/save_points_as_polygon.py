@@ -12,7 +12,7 @@ def save_points_as_polygon(aPoint_in, sFilename_out):
     pDataset = pDriver.CreateDataSource(sFilename_out)
     pSrcSpatialRef = osr.SpatialReference()
     pSrcSpatialRef.ImportFromEPSG(4326)
-    pLayer = pDataset.CreateLayer('buffer_ploygon', pSrcSpatialRef, geom_type=ogr.wkbPolygon)
+    pLayer = pDataset.CreateLayer('buffer_polygon', pSrcSpatialRef, geom_type=ogr.wkbPolygon)
     aLon = list()
     aLat = list()
     ring = ogr.Geometry(ogr.wkbLinearRing)
