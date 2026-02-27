@@ -475,7 +475,15 @@ class pypolygon:
         Returns:
             list: A list of buffer zone points
         """
-        import alphashape
+        try:
+            import alphashape
+        except ImportError as exc:
+            raise ImportError(
+                "The 'alphashape' package is required to use "
+                "'calculate_buffer_zone_polygon_alpha'. "
+                "Please install it (e.g., as an optional dependency) "
+                "and try again."
+            ) from exc
         if sFilename_out is not None:
             if os.path.exists(sFilename_out):
                 os.remove(sFilename_out)
