@@ -403,7 +403,7 @@ class pypolygon:
         aPoint_2d = list()
         spatial_ref = osr.SpatialReference()
         spatial_ref.ImportFromEPSG(4326)  # Example: WGS84
-        for i in range(self.nEdge):
+        for i in range(self.nLine):
             pLine = self.aLine[i]
             aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
@@ -436,7 +436,7 @@ class pypolygon:
                     pGeometry = ogr.Geometry(ogr.wkbPolygon)
                     pGeometry.AssignSpatialReference(spatial_ref)
                     pRing = ogr.Geometry(ogr.wkbLinearRing)
-                    for pPoint in ppCircle.aVertex_circle:
+                    for pPoint in ppCircle.aPoint_circle:
                         pRing.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
                         pass
                     pRing.CloseRings()
@@ -489,7 +489,7 @@ class pypolygon:
         aLongitude_degree = list()
         aLatitude_degree = list()
         aPoint_2d = list()
-        for i in range(self.nEdge):
+        for i in range(self.nLine):
             pLine = self.aLine[i]
             aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
@@ -570,7 +570,7 @@ class pypolygon:
         aLongitude_degree = list()
         aLatitude_degree = list()
         aPoint_2d = list()
-        for i in range(self.nEdge):
+        for i in range(self.nLine):
             edge = self.aEdge[i]
             aPoint, aPoint_center, aPoint_circle, aCircle = edge.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
