@@ -21,14 +21,14 @@ def save_points_as_polygon(aPoint_in, sFilename_out):
         aLon.append(pVertex.dLongitude_degree)
         aLat.append(pVertex.dLatitude_degree)
 
-    ring.AddPoint(aPoint_in[0].dLongitude_degree, aPoint_in[0].dLatitude_degree)
+    ring.CloseRings()
     pArea_field = ogr.FieldDefn('area', ogr.OFTReal)
     pArea_field.SetWidth(20)
     pArea_field.SetPrecision(2)
     pLayer.CreateField(pArea_field)
     pLayerDefn = pLayer.GetLayerDefn()
     pFeature = ogr.Feature(pLayerDefn)
-    #add the first point to close the ring
+    # close the ring geometry before creating the polygon
     dArea = calculate_polygon_area(aLon, aLat)
     pPolygon = ogr.Geometry(ogr.wkbPolygon)
     pPolygon.AddGeometry(ring)
