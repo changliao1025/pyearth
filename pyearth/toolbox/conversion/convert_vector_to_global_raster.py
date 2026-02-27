@@ -75,7 +75,7 @@ import logging
 from typing import Optional
 import numpy as np
 from osgeo import ogr, osr, gdal
-
+from pyearth.system.define_global_variables import sPath_proj_lib
 from pyearth.toolbox.conversion.rasterize_vector import rasterize_vector
 
 # Configure logging

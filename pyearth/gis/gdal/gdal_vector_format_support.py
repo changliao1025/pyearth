@@ -20,6 +20,7 @@ SUPPORTED_VECTOR_FORMATS = {
     ".mif": "MapInfo File",
     ".dxf": "DXF",
     ".gdb": "OpenFileGDB",
+    ".fgb": "FlatGeobuf",
 }
 
 
@@ -32,6 +33,7 @@ __all__ = [
     "get_vector_driver_from_filename",
     "get_vector_driver_from_format",
     "get_vector_format_from_filename",
+    "get_extension_from_vector_format",
     "check_parquet_support",
     "has_parquet_support",
 ]
@@ -147,7 +149,45 @@ def get_vector_format_from_filename(filename: str) -> str:
     return get_vector_format_from_extension(sExtension)
 
 
-def get_vector_driver_from_format(file_format: str) -> ogr.Driver:
+def get_extension_from_vector_format(format_name: str) -> str:
+    """
+    Convert a GDAL vector format name to its corresponding file extension.
+
+    Parameters:
+    format_name (str): The GDAL/OGR driver name (e.g., 'GeoJSON', 'ESRI Shapefile', 'GPKG').
+
+    Returns:
+    str: The file extension (e.g., '.geojson', '.shp', '.gpkg').
+
+    Raises:
+    ValueError: If the format name is not found in the supported formats or if multiple
+                extensions map to the same format (in which case the first found is returned).
+
+    Examples:
+    >>> get_extension_from_vector_format('GeoJSON')
+    '.geojson'
+    >>> get_extension_from_vector_format('ESRI Shapefile')
+    '.shp'
+    >>> get_extension_from_vector_format('GPKG')
+    '.gpkg'
+    """
+    # Create a reverse mapping from format names to extensions
+    format_to_extension = {}
+    for ext, fmt in SUPPORTED_VECTOR_FORMATS.items():
+        if fmt not in format_to_extension:
+            format_to_extension[fmt] = ext
+
+    # Look up the extension
+    if format_name not in format_to_extension:
+        raise ValueError(
+            f"Format '{format_name}' not found in supported vector formats. "
+            f"Available formats: {', '.join(sorted(set(SUPPORTED_VECTOR_FORMATS.values())))}"
+        )
+
+    return format_to_extension[format_name]
+
+
+def get_vector_driver_from_format(file_format: str) :
     """
     Get the OGR driver based on the provided vector file format.
 
@@ -166,7 +206,7 @@ def get_vector_driver_from_format(file_format: str) -> ogr.Driver:
     return driver
 
 
-def get_vector_driver_from_filename(filename: str) -> ogr.Driver:
+def get_vector_driver_from_filename(filename: str) :
     """
     Get the OGR driver based on file extension.
 

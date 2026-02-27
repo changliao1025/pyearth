@@ -9,6 +9,7 @@ dependencies:
   - netcdf4
   - pandas
   - scipy
+  - statsmodels
   - rtree
   - geographiclib
   - cython>=0.29.0

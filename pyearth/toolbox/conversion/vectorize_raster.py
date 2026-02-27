@@ -81,8 +81,8 @@ from osgeo import gdal, ogr, osr
 
 from pyearth.gis.gdal.gdal_to_numpy_datatype import numpy_to_gdal_type
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_driver_from_extension,
-    get_vector_format_from_extension,
+    get_vector_driver_from_filename,
+    get_vector_format_from_filename,
 )
 
 # Configure logging
@@ -267,8 +267,8 @@ def vectorize_raster(
 
     # Get vector driver based on output file extension
     try:
-        pDriver_vector = get_vector_driver_from_extension(sFilename_vector_out)
-        sFormat_out = get_vector_format_from_extension(sFilename_vector_out)
+        pDriver_vector = get_vector_driver_from_filename(sFilename_vector_out)
+        sFormat_out = get_vector_format_from_filename(sFilename_vector_out)
         logger.info(f"Output format: {sFormat_out}")
     except ValueError as e:
         logger.error(f"Unsupported output format: {e}")
