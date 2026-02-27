@@ -14,7 +14,15 @@
 
 import sys
 import os
-import tomli
+
+# Try to import tomli for Python < 3.11, tomllib for Python >= 3.11
+try:
+    import tomllib as toml_lib
+except ImportError:
+    try:
+        import tomli as toml_lib
+    except ImportError:
+        toml_lib = None
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -24,17 +32,18 @@ import tomli
 # Read version from pyproject.toml
 def get_version():
     """Read version from pyproject.toml"""
-    try:
-        # Try tomli for Python < 3.11
-        import tomli as toml_lib
-    except ImportError:
-        # Use tomllib for Python >= 3.11
-        import tomllib as toml_lib
+    if toml_lib is None:
+        # Fallback if no TOML library is available
+        return "0.2.1"
 
-    pyproject_path = os.path.join(os.path.dirname(__file__), '..', '..', 'pyproject.toml')
-    with open(pyproject_path, 'rb') as f:
-        pyproject_data = toml_lib.load(f)
-    return pyproject_data['project']['version']
+    try:
+        pyproject_path = os.path.join(os.path.dirname(__file__), '..', '..', 'pyproject.toml')
+        with open(pyproject_path, 'rb') as f:
+            pyproject_data = toml_lib.load(f)
+        return pyproject_data['project']['version']
+    except (FileNotFoundError, KeyError, Exception):
+        # Fallback if pyproject.toml is missing or malformed
+        return "0.2.1"
 
 # -- General configuration ------------------------------------------------
 
@@ -70,9 +79,34 @@ if read_the_docs_build:
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-# ...
-extensions = ["sphinx.ext.autodoc", "breathe"]
-# ...
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",  # Support for Google and NumPy style docstrings
+    "sphinx.ext.viewcode",  # Add links to source code
+    "sphinx.ext.intersphinx",  # Link to other project documentation
+    "breathe"
+]
+
+# Intersphinx mapping to link to other projects
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'gdal': ('https://gdal.org/', None),
+}
+
+# Napoleon settings for better docstring support
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_type_aliases = None
 
 # Breathe Configuration
 breathe_default_project = "pyearth"

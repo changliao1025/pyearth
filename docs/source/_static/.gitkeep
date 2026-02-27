@@ -1,0 +1,3 @@
+# Placeholder file to ensure _static directory is tracked by git
+# This directory contains custom static files for Sphinx documentation
+# Add custom CSS, JavaScript, or image files here as needed
