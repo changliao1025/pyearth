@@ -212,6 +212,7 @@ def reproject_raster(
     out_x = warped.RasterXSize
     out_y = warped.RasterYSize
     out_bands = warped.RasterCount or 1
+    logger.info("Reprojected raster size: %d x %d, bands: %d", out_x, out_y, out_bands)
 
     # pick driver from extension (fallback to GTiff)
     try:

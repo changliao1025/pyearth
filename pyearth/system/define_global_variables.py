@@ -213,7 +213,7 @@ def _configure_proj_lib() -> Optional[str]:
 
 
 # Configure PROJ library on module import
-_proj_lib_path = _configure_proj_lib()
+sPath_proj_lib = _configure_proj_lib()
 
 
 def print_environment_info(verbose: bool = True) -> None:
@@ -258,8 +258,8 @@ def print_environment_info(verbose: bool = True) -> None:
     if verbose:
         print(f"Environment Path: {sConda_env_path}")
 
-    if _proj_lib_path:
-        print(f"\n✓ PROJ_LIB: {_proj_lib_path}")
+    if sPath_proj_lib:
+        print(f"\n✓ PROJ_LIB: {sPath_proj_lib}")
     else:
         print("\n⚠ PROJ_LIB: Not found (coordinate transformations may be limited)")
 

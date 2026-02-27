@@ -82,8 +82,7 @@ from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_
 from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
 from pyearth.gis.gdal.gdal_raster_format_support import (
-    get_raster_driver_from_extension,
-    get_raster_format_from_extension,
+    get_raster_driver_from_filename,
 )
 
 
@@ -172,7 +171,7 @@ def merge_rasters(
     # ----------------------- Prepare output -----------------------
     # Determine output format and driver
     try:
-        pDriver_out = get_raster_driver_from_extension(sFilename_merge_out)
+        pDriver_out = get_raster_driver_from_filename(sFilename_merge_out)
     except Exception:
         # fallback to GTiff for safety
         pDriver_out = gdal.GetDriverByName("GTiff")

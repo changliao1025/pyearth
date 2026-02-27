@@ -11,11 +11,11 @@ I use it in my daily work, and nearly all my research papers use it in some way.
 **Note:** PyEarth has been restructured and is now part of the **PyEarthSuite** ecosystem. To keep each package lightweight and focused, PyEarth has been split into several specialized packages:
 
 - **pyearth** (this package) - Core GIS operations, spatial toolbox, and system utilities
-- **pyearthviz** - 2D visualization utilities
-- **pyearthviz3d** - 3D visualization with GeoVista
-- **pyearthriver** - River network graph algorithms and data structures
-- **pyearthmesh** - Mesh generation and manipulation tools (currently not implemented)
-- **pyearthhelp** - Helper utilities for data access (NWIS, NLDI, GSIM) and HPC operations
+- **[pyearthviz](https://github.com/changliao1025/pyearthviz)** - 2D visualization utilities
+- **[pyearthviz3d](https://github.com/changliao1025/pyearthviz3d)** - 3D visualization with GeoVista
+- **[pyearthriver](https://github.com/changliao1025/pyearthriver)** - River network graph algorithms and data structures
+- **[pyearthmesh](https://github.com/changliao1025/pyearthmesh)** - Mesh generation and manipulation tools
+- **[pyearthhelp](https://github.com/changliao1025/pyearthhelp)** - Helper utilities for data access (NWIS, NLDI, GSIM) and HPC operations
 
 This modular approach allows you to install only what you need while maintaining the ability to use all packages together.
 
@@ -28,7 +28,7 @@ It is versatile, supporting various tasks such as GIS operations, data processin
 It is designed to be a general-purpose library inspired by the popular IDL Coyote library. Some of the code structure is inspired by the ArcGIS toolbox.
 
 If you find this package useful, please cite it in your work.
-You can also support it by [buying me a coffee](https://www.buymeacoffee.com/changliao) or sponsoring it on [GitHub].
+You can also support it by [buying me a coffee](https://www.buymeacoffee.com/changliao) or sponsoring it on [GitHub](https://github.com/sponsors/changliao).
 
 ### Dependency
 

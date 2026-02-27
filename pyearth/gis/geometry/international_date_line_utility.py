@@ -678,8 +678,17 @@ def check_cross_international_date_line_polygon(
             (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
         )
 
-        # If no actual edge crossings, adjust IDL vertices and return False
-        if not (np.any(eastward_crossings) or np.any(westward_crossings)):
+        # Check if polygon spans both hemispheres (excluding IDL vertices)
+        non_idl_lons = lons[~idl_vertices]
+        has_eastern = np.any((non_idl_lons > 0) & (non_idl_lons < 180))
+        has_western = np.any(non_idl_lons < 0)
+        spans_both_hemispheres = has_eastern and has_western
+
+        # If no actual edge crossings but polygon spans both hemispheres, it crosses IDL
+        if spans_both_hemispheres:
+            # This is a true IDL crossing with vertices on the meridian
+            return True, None
+        elif not (np.any(eastward_crossings) or np.any(westward_crossings)):
             # Adjust vertices that are exactly on the IDL by slightly moving them
             IDL_OFFSET = 1e-6  # Small offset to move points just off the IDL
             idl_indices = np.where(idl_vertices)[0]
