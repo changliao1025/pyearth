@@ -9,7 +9,6 @@ from pyearth.toolbox.mesh.line import pyline
 from pyearth.toolbox.mesh.polyline import pypolyline
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.toolbox.mesh.algorithm.save_points_as_polygon import save_points_as_polygon
-from pyearth.gis.spatialref.utm_utility import get_utm_spatial_reference_wkt
 from pyearth.gis.spatialref.convert_between_degree_and_meter import meter_to_degree
 
 class PolygonClassEncoder(JSONEncoder):
