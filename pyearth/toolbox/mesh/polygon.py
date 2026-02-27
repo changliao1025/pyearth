@@ -566,8 +566,24 @@ class pypolygon:
         Returns:
             list: A list of buffer zone points
         """
-        import geopandas
-        import alphashape
+        try:
+            import geopandas  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise ImportError(
+                "The 'geopandas' package is required to use "
+                "'calculate_buffer_zone_polygon_alpha_gdf'. "
+                "Please install it, for example via 'pip install geopandas', "
+                "or avoid calling this method."
+            ) from exc
+        try:
+            import alphashape  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise ImportError(
+                "The 'alphashape' package is required to use "
+                "'calculate_buffer_zone_polygon_alpha_gdf'. "
+                "Please install it, for example via 'pip install alphashape', "
+                "or avoid calling this method."
+            ) from exc
         if sFilename_out is not None:
             if os.path.exists(sFilename_out):
                 os.remove(sFilename_out)
