@@ -1,7 +1,7 @@
 {% set name = "pyearth" %}
 {% set version = "0.2.2" %}
 {% set git_rev = "main" %}
-{% set python_min = "3.10" %}
+{% set python_min = "3.9" %}
 
 package:
   name: {{ name|lower }}
