@@ -10,7 +10,7 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
 )
 
 
-def merge_files(
+def merge_vector_files(
     aFilename_in: List[str],
     sFilename_out: str,
     copy_attributes: bool = False,
@@ -78,7 +78,7 @@ def merge_files(
     --------
     Basic merge without attributes:
 
-    >>> merge_files(
+    >>> merge_vector_files(
     ...     ['input1.shp', 'input2.shp'],
     ...     'merged_output.shp',
     ...     copy_attributes=False,
@@ -87,7 +87,7 @@ def merge_files(
 
     Merge with attributes preserved:
 
-    >>> merge_files(
+    >>> merge_vector_files(
     ...     ['data/polygons1.geojson', 'data/polygons2.geojson'],
     ...     'combined_polygons.gpkg',
     ...     copy_attributes=True,
@@ -109,7 +109,7 @@ def merge_files(
         return
 
     if verbose:
-        print(f"=== Starting merge_files operation ===")
+        print(f"=== Starting merge_vector_files operation ===")
         print(f"Input files: {len(aFilename_in)} files")
         print(f"Output file: {sFilename_out}")
         print(f"Copy attributes: {copy_attributes}")
@@ -158,8 +158,8 @@ def merge_files(
             print(f"Failed to get layer from file: {sFilename_in}")
             continue
 
-        # Obtain the geometry type
-        iGeomType = pLayer_in.GetGeomType()
+        # Obtain the geometry type, flattened to 2D base type
+        iGeomType = ogr.GT_Flatten(pLayer_in.GetGeomType())
         if verbose:
             print(f"Processing {sFilename_in} - Geometry type: {iGeomType}")
 

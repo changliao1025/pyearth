@@ -18,7 +18,7 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
 def remove_small_polygon(
     sFilename_vector_in: str,
     sFilename_vector_out: str,
-    dThreshold_in: Union[float, int],
+    dThreshold_in: Union[float, int], # in square meters
     iFlag_algorithm: int = 2,
     verbose: bool = True,
     progress_interval: int = 1000,
@@ -38,7 +38,7 @@ def remove_small_polygon(
     sFilename_vector_out : str
         Path where the filtered output vector file will be created.
     dThreshold_in : float or int
-        Minimum area threshold in square kilometers. Polygons with areas
+        Minimum area threshold in square meters. Polygons with areas
         less than or equal to this value will be removed.
     iFlag_algorithm : int, optional
         Algorithm flag for area calculation (default is 2 for geodesic).

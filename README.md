@@ -126,9 +126,9 @@ Performance-critical geometry and location calculations are accelerated with Cyt
 - `pyearth.gis.geometry.kernel` - Fast geometry operations
 - `pyearth.gis.location.kernel` - Efficient location calculations
 
-### Related Packages in EarthSuite
+### Related Packages in PyEarthSuite
 
-PyEarth works seamlessly with other EarthSuite packages:
+PyEarth works seamlessly with other PyEarthSuite packages:
 
 
 

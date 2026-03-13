@@ -5,7 +5,7 @@ from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
     find_great_circle_intersection_with_meridian,
 )
 from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
-
+from pyearth.gis.geometry.pole_check import polygon_includes_pole
 Coord = Tuple[float, float]
 
 
@@ -660,6 +660,22 @@ def check_cross_international_date_line_polygon(
     idl_vertices = np.zeros_like(lons, dtype=bool)
     idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < 1e-10
 
+    # Track hemisphere support using only non-IDL vertices.
+    non_idl_lons = lons[~idl_vertices]
+    has_eastern = np.any((non_idl_lons > 0) & (non_idl_lons < 180.0))
+    has_western = np.any((non_idl_lons < 0) & (non_idl_lons > -180.0))
+    spans_both_hemispheres = has_eastern and has_western
+
+    idl_touch_positive = np.any(np.abs(lons[idl_vertices] - 180.0) < 1e-10)
+    idl_touch_negative = np.any(np.abs(lons[idl_vertices] + 180.0) < 1e-10)
+    touches_both_idl_sides = idl_touch_positive and idl_touch_negative
+
+    # A polygon enclosing either pole necessarily crosses the IDL.
+    if polygon_includes_pole(coords_updated, pole="north") or polygon_includes_pole(
+        coords_updated, pole="south"
+    ):
+        return True, None
+
     # If there are vertices on IDL, check if there are actual edge crossings
     if np.any(idl_vertices):
         lons_next = np.roll(lons, -1)
@@ -678,14 +694,8 @@ def check_cross_international_date_line_polygon(
             (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
         )
 
-        # Check if polygon spans both hemispheres (excluding IDL vertices)
-        non_idl_lons = lons[~idl_vertices]
-        has_eastern = np.any((non_idl_lons > 0) & (non_idl_lons < 180))
-        has_western = np.any(non_idl_lons < 0)
-        spans_both_hemispheres = has_eastern and has_western
-
         # If no actual edge crossings but polygon spans both hemispheres, it crosses IDL
-        if spans_both_hemispheres:
+        if touches_both_idl_sides or spans_both_hemispheres:
             # This is a true IDL crossing with vertices on the meridian
             return True, None
         elif not (np.any(eastward_crossings) or np.any(westward_crossings)):

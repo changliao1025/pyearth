@@ -376,7 +376,7 @@ class pypolyline:
         aCircle_out = list()
         for i in range(self.nLine):
             line = self.aLine[i]
-            aPoint, aPoint_center, aPoint_circle, aCircle = (
+            _, aPoint, aPoint_center, aPoint_circle, aCircle = (
                 line.calculate_buffer_zone_polygon(dRadius)
             )
             aCircle_out.append(aCircle)

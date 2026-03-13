@@ -296,7 +296,7 @@ Management
    from pyearth.toolbox.management.raster.resample import resample_raster
 
    # Vector management
-   from pyearth.toolbox.management.vector.merge_files import merge_files
+   from pyearth.toolbox.management.vector.merge_vector_files import merge_vector_files
    from pyearth.toolbox.management.vector.merge_features import merge_features
    from pyearth.toolbox.management.vector.reproject import reproject_vector
    from pyearth.toolbox.management.vector.fields import (
@@ -384,8 +384,8 @@ Working with Vectors
    convert_vector_format('input.shp', 'output.geojson')
 
    # Merge files
-   from pyearth.toolbox.management.vector.merge_files import merge_files
-   merge_files(['file1.shp', 'file2.shp'], 'merged.shp')
+   from pyearth.toolbox.management.vector.merge_vector_files import merge_vector_files
+   merge_vector_files(['file1.shp', 'file2.shp'], 'merged.shp')
 
 Coordinate Operations
 =====================

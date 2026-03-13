@@ -14,16 +14,22 @@ from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
 
 def get_geometry_coordinates(
     geometry: ogr.Geometry,
+    enforce_ccw: bool = False,
 ) -> Union[np.ndarray, List[np.ndarray]]:
     """Extract coordinates from an OGR geometry object.
 
     Dispatches to appropriate handler based on geometry type. For polygon
-    geometries, ensures coordinates are in counter-clockwise (CCW) order.
+    geometries, coordinates can optionally be enforced to be in
+    counter-clockwise (CCW) order.
 
     Parameters
     ----------
     geometry : ogr.Geometry
         OGR geometry object from which to extract coordinates.
+    enforce_ccw : bool, default=False
+        If True, polygon and multipolygon exterior rings are returned in
+        counter-clockwise order. If False, coordinates are returned in the
+        original geometry order.
 
     Returns
     -------
@@ -82,11 +88,11 @@ def get_geometry_coordinates(
     elif geometry_type == "LINESTRING":
         return get_linestring_coords(geometry)
     elif geometry_type == "POLYGON":
-        return get_polygon_exterior_coords(geometry)
+        return get_polygon_exterior_coords(geometry, enforce_ccw=enforce_ccw)
     elif geometry_type == "LINEARRING":
         return get_linearring_coords(geometry)
     elif geometry_type == "MULTIPOLYGON":
-        return get_multipolygon_exterior_coords(geometry)
+        return get_multipolygon_exterior_coords(geometry, enforce_ccw=enforce_ccw)
     else:
         raise ValueError(
             f"Unsupported geometry type: '{geometry_type}'. "
@@ -94,19 +100,23 @@ def get_geometry_coordinates(
         )
 
 
-def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
-    """Extract exterior ring coordinates from a polygon, enforcing CCW order.
+def get_polygon_exterior_coords(
+    polygon_geometry: ogr.Geometry, enforce_ccw: bool = False
+) -> np.ndarray:
+    """Extract exterior ring coordinates from a polygon.
 
     Parameters
     ----------
     polygon_geometry : ogr.Geometry
         OGR Polygon geometry object.
+    enforce_ccw : bool, default=False
+        If True, reverse the extracted exterior ring when needed so the
+        returned coordinates are counter-clockwise.
 
     Returns
     -------
     np.ndarray
-        Array of shape (n, 2) containing exterior ring coordinates in
-        counter-clockwise order.
+        Array of shape (n, 2) containing exterior ring coordinates.
 
     Raises
     ------
@@ -118,7 +128,7 @@ def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
     Notes
     -----
     - Only extracts the exterior ring; holes/interior rings are ignored
-    - Automatically reverses coordinate order if clockwise
+    - Optionally reverses coordinate order if clockwise
     - Returns (longitude, latitude) or (x, y) coordinate pairs
 
     Examples
@@ -162,8 +172,8 @@ def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
     # Convert to numpy array
     coords_array = np.array(exterior_coords)
 
-    # Ensure counter-clockwise order
-    if not check_counter_clockwise(coords_array):
+    # Ensure counter-clockwise order when requested
+    if enforce_ccw and not check_counter_clockwise(coords_array):
         coords_array = coords_array[::-1]
 
     return coords_array
@@ -171,15 +181,20 @@ def get_polygon_exterior_coords(polygon_geometry: ogr.Geometry) -> np.ndarray:
 
 def get_multipolygon_exterior_coords(
     multipolygon_geometry: ogr.Geometry,
+    enforce_ccw: bool = False,
 ) -> List[np.ndarray]:
     """Extract exterior ring coordinates from all parts of a multipolygon.
 
-    Each polygon part's coordinates are enforced to be in counter-clockwise order.
+    Each polygon part's coordinates can optionally be enforced to be in
+    counter-clockwise order.
 
     Parameters
     ----------
     multipolygon_geometry : ogr.Geometry
         OGR MultiPolygon geometry object.
+    enforce_ccw : bool, default=False
+        If True, reverse each exterior ring when needed so returned
+        coordinates are counter-clockwise.
 
     Returns
     -------
@@ -197,7 +212,7 @@ def get_multipolygon_exterior_coords(
     Notes
     -----
     - Only extracts exterior rings; holes/interior rings are ignored
-    - Each polygon part is independently enforced to CCW order
+    - Each polygon part can be independently enforced to CCW order
     - Empty parts are skipped with a warning
 
     Examples
@@ -260,8 +275,8 @@ def get_multipolygon_exterior_coords(
             # Convert to numpy array
             coords_array = np.array(part_coords)
 
-            # Ensure counter-clockwise order
-            if not check_counter_clockwise(coords_array):
+            # Ensure counter-clockwise order when requested
+            if enforce_ccw and not check_counter_clockwise(coords_array):
                 coords_array = coords_array[::-1]
 
             exterior_coords_list.append(coords_array)

@@ -2,7 +2,8 @@ import json
 from json import JSONEncoder
 import importlib.util
 import numpy as np
-
+from typing import List, Tuple
+from osgeo import ogr
 from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
     export_point_as_polygon_file,
 )
@@ -17,7 +18,7 @@ else:
         calculate_distance_based_on_longitude_latitude,
     )
 
-iPrecision_default = 12  # used for comparison
+iPrecision_default = 8  # ~1 mm in latitude degrees (1e-8 deg ~= 1.11 mm)
 
 
 class PointClassEncoder(JSONEncoder):
@@ -200,17 +201,43 @@ class pypoint(object):
         point0["dLongitude_degree"] = pPoint_buffer["lon2"]
         point0["dLatitude_degree"] = pPoint_buffer["lat2"]
         pPoint_out = pypoint(point0)
-        return pPoint_out
 
-    def calculate_buffer_zone_circle(self, dRadius, nPoint=360, sFilename_out=None):
+        #convert the point to a wkt string
+        sWkt_buffer_point = pPoint_out.towkt()
+
+        return sWkt_buffer_point
+
+    def calculate_buffer_zone_circle(
+        self, dRadius, nPoint=360,
+        iFlag_support_antimeridian_in=0,
+        sFilename_out=None
+    ) -> Tuple[str, List["pypoint"]]:
+        """
+        Calculate a buffer zone circle around a point using geodesic distances.
+
+        Args:
+            dRadius (float): Buffer radius in meters.
+            nPoint (int): Number of points to approximate the circle (default: 360).
+            sFilename_out (Optional[str]): Output file path for the buffer polygon.
+
+        Returns:
+            Tuple containing:
+                - str: WKT representation of the buffer polygon
+                - List[pypoint]: Points around the circle boundary
+        """
+        if nPoint < 3:
+            raise ValueError("nPoint must be at least 3 to form a polygon.")
+
         # Create a geodesic object
         from geographiclib.geodesic import Geodesic
+
         geod = Geodesic.WGS84  # the default is WGS84
         aPoint = []
+
         # Calculate the geodesic buffer
-        for i in range(0, 360, 360 // nPoint):
+        for dBearing in np.linspace(0.0, 360.0, num=nPoint, endpoint=False):
             pPoint_buffer = geod.Direct(
-                self.dLatitude_degree, self.dLongitude_degree, i, dRadius
+                self.dLatitude_degree, self.dLongitude_degree, dBearing, dRadius
             )
             point0 = dict()
             point0["dLongitude_degree"] = pPoint_buffer["lon2"]
@@ -218,11 +245,61 @@ class pypoint(object):
             pPoint_out = pypoint(point0)
             aPoint.append(pPoint_out)
 
-        if sFilename_out is not None:
-            # save as a geojson file
-            export_point_as_polygon_file(aPoint, sFilename_out)
+        if np.max([p.dLongitude_degree for p in aPoint]) - np.min([p.dLongitude_degree for p in aPoint]) > 180:
+            iFlag_cross_idl = 1
+        else:
+            iFlag_cross_idl = 0
 
-        return aPoint
+        if iFlag_support_antimeridian_in ==1:
+            #split int two parts if cross the antimeridian
+            aPoint_part1 = [p for p in aPoint if p.dLongitude_degree >= 0]
+            aPoint_part2 = [p for p in aPoint if p.dLongitude_degree < 0]
+            #create a multi polygon wkt string
+            pGeometry = ogr.Geometry(ogr.wkbMultiPolygon)
+            if len(aPoint_part1) >= 3:
+                pPolygon1 = ogr.Geometry(ogr.wkbPolygon)
+                pRing1 = ogr.Geometry(ogr.wkbLinearRing)
+                for p in aPoint_part1:
+                    pRing1.AddPoint(p.dLongitude_degree, p.dLatitude_degree)
+                pRing1.CloseRings()
+                pPolygon1.AddGeometry(pRing1)
+                pGeometry.AddGeometry(pPolygon1)
+            if len(aPoint_part2) >= 3:
+                pPolygon2 = ogr.Geometry(ogr.wkbPolygon)
+                pRing2 = ogr.Geometry(ogr.wkbLinearRing)
+                for p in aPoint_part2:
+                    pRing2.AddPoint(p.dLongitude_degree, p.dLatitude_degree)
+                pRing2.CloseRings()
+                pPolygon2.AddGeometry(pRing2)
+                pGeometry.AddGeometry(pPolygon2)
+            pGeometry.FlattenTo2D()  # Ensure the geometry is 2D for WKT export
+            sWkt_buffer_polygon = pGeometry.ExportToWkt()
+        else:
+            if iFlag_cross_idl == 1:
+                if self.dLongitude_degree >= 0:
+                    #drop points with longitude < 0
+                    aPoint = [p for p in aPoint if p.dLongitude_degree >= 0]
+                else:
+                    #drop points with longitude > 0
+                    aPoint = [p for p in aPoint if p.dLongitude_degree <= 0]
+                pass
+            else:
+                pass
+            if sFilename_out is not None:
+                # save as a geojson file
+                export_point_as_polygon_file(aPoint, sFilename_out)
+
+            # Use OGR for robust polygon WKT generation.
+            pGeometry = ogr.Geometry(ogr.wkbPolygon)
+            pRing = ogr.Geometry(ogr.wkbLinearRing)
+            for p in aPoint:
+                pRing.AddPoint(p.dLongitude_degree, p.dLatitude_degree)
+            pRing.CloseRings()
+            pGeometry.AddGeometry(pRing)
+            pGeometry.FlattenTo2D()  # Ensure the geometry is 2D for WKT export
+            sWkt_buffer_polygon = pGeometry.ExportToWkt()
+
+        return sWkt_buffer_polygon, aPoint
 
     def calculate_xyz(self):
         """

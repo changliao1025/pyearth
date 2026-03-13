@@ -215,7 +215,7 @@ Vector Management
 File Operations
 ---------------
 
-* **merge_files** - Merge multiple vector files into one
+* **merge_vector_files** - Merge multiple vector files into one
 * **merge_features** - Merge/dissolve features within a file
 * **remove_small_polygon** - Remove polygons below size threshold
 * **reproject_vector** - Reproject vector to different coordinate system
@@ -236,10 +236,10 @@ Polygon Calculations
 
 .. code-block:: python
 
-   from pyearth.toolbox.management.vector.merge_files import merge_files
+   from pyearth.toolbox.management.vector.merge_vector_files import merge_vector_files
 
    # Merge multiple shapefiles
-   merge_files(
+   merge_vector_files(
        ['region1.shp', 'region2.shp', 'region3.shp'],
        'merged_regions.shp'
    )
@@ -449,11 +449,11 @@ Example 4: Merge and Reproject Vectors
 
 .. code-block:: python
 
-   from pyearth.toolbox.management.vector.merge_files import merge_files
+   from pyearth.toolbox.management.vector.merge_vector_files import merge_vector_files
    from pyearth.toolbox.management.vector.reproject import reproject_vector
 
    # Merge multiple region files
-   merge_files(
+   merge_vector_files(
        ['region_north.shp', 'region_south.shp', 'region_east.shp'],
        'all_regions.shp'
    )
