@@ -86,7 +86,7 @@ from pyearth.gis.gdal.gdal_raster_format_support import (
 )
 
 
-def merge_rasters(
+def merge_raster_files(
     aFilename_rasters: List[str],
     sFilename_merge_out: str,
     dResolution_x: float,

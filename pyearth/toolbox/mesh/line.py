@@ -4,6 +4,7 @@ from json import JSONEncoder
 import numpy as np
 import importlib.util
 from typing import List, Tuple, Optional
+from osgeo import ogr
 from pyearth.toolbox.mesh.point import pypoint
 from pyearth.toolbox.mesh.circle import pycircle
 from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
@@ -388,7 +389,7 @@ class pyline:
         nPoint: int = 36,
         sFilename_out: Optional[str] = None,
         sFolder_out: Optional[str] = None,
-    ) -> Tuple[List[pypoint], List[pypoint], List[pypoint], List[pycircle]]:
+    ) -> Tuple[str, List[pypoint], List[pypoint], List[pypoint], List[pycircle]]:
         """
         Calculate a buffer zone polygon around this line.
 
@@ -400,6 +401,7 @@ class pyline:
 
         Returns:
             Tuple containing:
+                - str: WKT representation of the buffer polygon
                 - List[pypoint]: Vertices of the buffer polygon
                 - List[pypoint]: Center points used
                 - List[pypoint]: All circle points generated
@@ -413,10 +415,10 @@ class pyline:
         if nPoint < 3:
             raise ValueError("Number of points must be at least 3.")
 
-        if self.dLength < dRadius * 2.0:
+        if self.dLength < dRadius * 1.5:
             aEdge = [self]
         else:
-            aEdge = self.split_by_length(dRadius * 2.0)
+            aEdge = self.split_by_length(dRadius)
 
         aPoint_out = []
         aPoint_center = []
@@ -429,13 +431,15 @@ class pyline:
 
             aPoint_center.extend([pPoint_start, pPoint_end])
 
-            aPoint_start_buffer = pPoint_start.calculate_buffer_zone_circle(
+            _, aPoint_start_buffer = pPoint_start.calculate_buffer_zone_circle(
                 dRadius, nPoint
             )
             pEdge.pCircle_start = pycircle(pPoint_start, aPoint_start_buffer)
             aPoint_circle.extend(aPoint_start_buffer)
 
-            aPoint_end_buffer = pPoint_end.calculate_buffer_zone_circle(dRadius, nPoint)
+            _, aPoint_end_buffer = pPoint_end.calculate_buffer_zone_circle(
+                dRadius, nPoint
+            )
             pEdge.pCircle_end = pycircle(pPoint_end, aPoint_end_buffer)
             aPoint_circle.extend(aPoint_end_buffer)
 
@@ -466,7 +470,17 @@ class pyline:
         if sFilename_out:
             export_point_as_polygon_file(aPoint_out, sFilename_out)
 
-        return aPoint_out, aPoint_center, aPoint_circle, aCircle
+        # Generate WKT from polygon points
+        pGeometry = ogr.Geometry(ogr.wkbPolygon)
+        pRing = ogr.Geometry(ogr.wkbLinearRing)
+        for p in aPoint_out:
+            pRing.AddPoint(p.dLongitude_degree, p.dLatitude_degree)
+        pRing.CloseRings()
+        pGeometry.AddGeometry(pRing)
+        pGeometry.FlattenTo2D()
+        sWkt_buffer_polygon = pGeometry.ExportToWkt()
+
+        return sWkt_buffer_polygon, aPoint_out, aPoint_center, aPoint_circle, aCircle
 
     def __eq__(self, other: object) -> bool:
         """

@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Union
-
+from pyearth.toolbox.data.remove_duplicate_closure import remove_duplicate_closure as remove_duplicate_closure
 
 def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     x, y = coords[:, 0], coords[:, 1]
@@ -12,6 +12,66 @@ def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
 
     signed_area = 0.5 * np.sum(x * y_rolled - x_rolled * y)
     return signed_area
+
+
+def calculate_signed_area_spherical_polar(
+    coords: np.ndarray, pole: str = "north"
+) -> float:
+    """Calculate signed spherical area for polygons enclosing a pole.
+
+    The polygon is projected with Lambert azimuthal equal-area (LAEA) centered
+    on the requested pole, then planar signed area is computed with the
+    shoelace formula. With unit sphere radius, output area is in steradians.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Polygon coordinates as (lon, lat) degrees.
+    pole : str, default="north"
+        Polar center for projection, either "north" or "south".
+
+    Returns
+    -------
+    float
+        Signed spherical area (steradians on unit sphere).
+    """
+    if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
+        raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
+
+    if len(coords) < 3:
+        return 0.0
+
+    arr = remove_duplicate_closure(coords)
+    if len(arr) < 3:
+        return 0.0
+
+    lon_rad = np.deg2rad(arr[:, 0])
+    lat_rad = np.deg2rad(arr[:, 1])
+
+    cos_lat = np.cos(lat_rad)
+    sin_lat = np.sin(lat_rad)
+
+    pole_lc = pole.lower()
+    if pole_lc == "north":
+        # LAEA centered at +90 deg latitude
+        denom = 1.0 + sin_lat
+        # Avoid divide-by-zero at antipode (not expected for pole-enclosing cells)
+        denom = np.maximum(denom, 1.0e-15)
+        k = np.sqrt(2.0 / denom)
+        x = k * cos_lat * np.sin(lon_rad)
+        y = -k * cos_lat * np.cos(lon_rad)
+    elif pole_lc == "south":
+        # LAEA centered at -90 deg latitude
+        denom = 1.0 - sin_lat
+        denom = np.maximum(denom, 1.0e-15)
+        k = np.sqrt(2.0 / denom)
+        x = k * cos_lat * np.sin(lon_rad)
+        y = k * cos_lat * np.cos(lon_rad)
+    else:
+        raise ValueError("pole must be either 'north' or 'south'")
+
+    projected = np.column_stack((x, y))
+    return calculate_signed_area_shoelace(projected)
 
 
 def check_counter_clockwise(coords: np.ndarray) -> bool:
@@ -31,6 +91,7 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
         check_cross_international_date_line_polygon,
         unwrap_longitudes,
     )
+    from pyearth.gis.geometry.pole_check import polygon_includes_pole
 
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
@@ -38,15 +99,20 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     if len(coords) < 3:
         return True  # Degenerate case
 
-    # Check if polygon crosses the International Date Line
-    iFlag_cross, _ = check_cross_international_date_line_polygon(coords)
-    if iFlag_cross:
-        coords_unwrapped = unwrap_longitudes(coords)
-        # Calculate signed area using optimized shoelace formula
-        signed_area = calculate_signed_area_shoelace(coords_unwrapped)
+    if polygon_includes_pole(coords, pole="north"):
+        signed_area = calculate_signed_area_spherical_polar(coords, pole="north")
+    elif polygon_includes_pole(coords, pole="south"):
+        signed_area = calculate_signed_area_spherical_polar(coords, pole="south")
     else:
-        # Standard case: calculate signed area directly
-        signed_area = calculate_signed_area_shoelace(coords)
+        # Check if polygon crosses the International Date Line
+        iFlag_cross, _ = check_cross_international_date_line_polygon(coords)
+        if iFlag_cross:
+            coords_unwrapped = unwrap_longitudes(coords)
+            # Calculate signed area using optimized shoelace formula
+            signed_area = calculate_signed_area_shoelace(coords_unwrapped)
+        else:
+            # Standard case: calculate signed area directly
+            signed_area = calculate_signed_area_shoelace(coords)
     return signed_area > 0
 
 

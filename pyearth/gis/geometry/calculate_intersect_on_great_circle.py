@@ -339,17 +339,24 @@ def find_great_circle_intersection_with_meridian(
 
     # We have: A * cos(lat) + B * sin(lat) = 0
     # This can be written as: tan(lat) = -A / B (if B != 0)
+    #
+    # If B ~= 0, the great-circle plane contains the Earth's rotation axis,
+    # so the great circle passes through both poles. In that case the target
+    # meridian intersection is a pole, and tiny non-zero A values are usually
+    # just floating-point noise.
+    tolerance = 1e-8
 
-    if abs(B) < 1e-10:
-        # Great circle plane is perpendicular to z-axis (equatorial great circle)
-        if abs(A) < 1e-10:
-            # Degenerate case - return equator point
-            return (target_lon, 0.0)
-        else:
-            raise ValueError(
-                f"Great circle does not intersect meridian at {target_lon}° "
-                "(great circle is equatorial)"
-            )
+    if abs(B) < tolerance:
+        mean_lat = 0.5 * (lat1 + lat2)
+        fallback_lat = 90.0 if mean_lat >= 0.0 else -90.0
+
+        if abs(A) < tolerance:
+            # The target meridian lies nearly in the great-circle plane.
+            # Return a stable representative point on the relevant pole side.
+            return (target_lon, fallback_lat)
+
+        # Pole-passing great circle: every meridian intersects it at the poles.
+        return (target_lon, fallback_lat)
 
     # Calculate latitude
     lat_rad = np.arctan2(-A, B)

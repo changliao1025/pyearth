@@ -16,7 +16,7 @@ class pynvector(object):
         pynvector: Normalized n-vector
     """
 
-    def __init__(self, aParameter, use_high_precision=False):
+    def __init__(self, aParameter, use_high_precision=False, normalize=True):
         self.use_high_precision = use_high_precision
         dtype = np.float128 if use_high_precision else np.float64
 
@@ -25,14 +25,15 @@ class pynvector(object):
         self.dY = dtype(aParameter.get("y", 0.0))
         self.dZ = dtype(aParameter.get("z", 0.0))
 
-        # Normalize to unit length
-        length = self.length()
-        if length > 0:
-            self.dX /= length
-            self.dY /= length
-            self.dZ /= length
-        else:
-            self.dX = self.dY = self.dZ = dtype(0.0)  # Normalize zero vector to zero
+        # Normalize to unit length unless this is an intermediate linear-combination value.
+        if normalize:
+            length = self.length()
+            if length > 0:
+                self.dX /= length
+                self.dY /= length
+                self.dZ /= length
+            else:
+                self.dX = self.dY = self.dZ = dtype(0.0)  # Normalize zero vector to zero
 
     def length(self):
         return np.sqrt(self.dX * self.dX + self.dY * self.dY + self.dZ * self.dZ)
@@ -47,7 +48,8 @@ class pynvector(object):
         """Scalar multiplication of nvector."""
         return pynvector(
             {"x": self.dX * scalar, "y": self.dY * scalar, "z": self.dZ * scalar},
-            use_high_precision=self.use_high_precision
+            use_high_precision=self.use_high_precision,
+            normalize=False,
         )
 
     def __rmul__(self, scalar):
@@ -60,19 +62,22 @@ class pynvector(object):
         if length > 0:
             return pynvector(
                 {"x": self.dX / length, "y": self.dY / length, "z": self.dZ / length},
-                use_high_precision=self.use_high_precision
+                use_high_precision=self.use_high_precision,
+                normalize=False,
             )
         else:
             dtype = np.float128 if self.use_high_precision else np.float64
             return pynvector({"x": dtype(0.0), "y": dtype(0.0), "z": dtype(0.0)},
-                           use_high_precision=self.use_high_precision)
+                           use_high_precision=self.use_high_precision,
+                           normalize=False)
 
     def __add__(self, other):
         if not isinstance(other, pynvector):
             return NotImplemented
         return pynvector(
             {"x": self.dX + other.dX, "y": self.dY + other.dY, "z": self.dZ + other.dZ},
-            use_high_precision=self.use_high_precision
+            use_high_precision=self.use_high_precision,
+            normalize=False,
         )
 
     def __repr__(self):
@@ -93,17 +98,21 @@ class pynvector(object):
         """
         from pyearth.toolbox.mesh.point import pypoint
 
-        # Perform calculations in high precision if enabled
-        if self.use_high_precision:
-            # Ensure we're working with float128
-            x = np.float128(self.dX)
-            y = np.float128(self.dY)
-            z = np.float128(self.dZ)
-            lat_rad = np.arctan2(z, np.sqrt(x**2 + y**2))
-            lon_rad = np.arctan2(y, x)
-        else:
-            lat_rad = np.arctan2(self.dZ, np.sqrt(self.dX**2 + self.dY**2))
-            lon_rad = np.arctan2(self.dY, self.dX)
+        dtype = np.float128 if self.use_high_precision else np.float64
+
+        # Re-normalize in the target precision to reduce drift before conversion.
+        x = dtype(self.dX)
+        y = dtype(self.dY)
+        z = dtype(self.dZ)
+        norm = np.sqrt(x * x + y * y + z * z)
+
+        if norm > dtype(0.0):
+            x = x / norm
+            y = y / norm
+            z = z / norm
+
+        lat_rad = np.arctan2(z, np.sqrt(x * x + y * y))
+        lon_rad = np.arctan2(y, x)
 
         # Always return as float64 for storage
         return pypoint(

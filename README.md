@@ -1,7 +1,8 @@
 ### PyEarth
 
 [![DOI](https://zenodo.org/badge/67889575.svg)](https://zenodo.org/badge/latestdoi/67889575)
-[![Downloads](https://static.pepy.tech/badge/pyearth)](https://pepy.tech/project/pyearth)
+[![PyPI Downloads](https://static.pepy.tech/badge/pyearth)](https://pepy.tech/project/pyearth)
+[![Conda Downloads](https://anaconda.org/conda-forge/pyearthviz3d/badges/downloads.svg)](https://anaconda.org/conda-forge/pyearthviz3d)
 
 Every hiker/camper would love to have a leatherman pocket knife around because it is lightweight, versatile and reliable, sometimes life saving.
 
@@ -125,9 +126,9 @@ Performance-critical geometry and location calculations are accelerated with Cyt
 - `pyearth.gis.geometry.kernel` - Fast geometry operations
 - `pyearth.gis.location.kernel` - Efficient location calculations
 
-### Related Packages in EarthSuite
+### Related Packages in PyEarthSuite
 
-PyEarth works seamlessly with other EarthSuite packages:
+PyEarth works seamlessly with other PyEarthSuite packages:
 
 
 

@@ -4,9 +4,12 @@ from json import JSONEncoder
 from typing import List, Tuple, Optional
 import numpy as np
 from osgeo import ogr, osr
+
 from pyearth.toolbox.mesh.point import pypoint
+from pyearth.toolbox.mesh.circle import pycircle
 from pyearth.toolbox.mesh.line import pyline
 from pyearth.toolbox.mesh.polyline import pypolyline
+from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.toolbox.mesh.algorithm.save_points_as_polygon import save_points_as_polygon
 from pyearth.gis.spatialref.convert_between_degree_and_meter import meter_to_degree
@@ -381,7 +384,7 @@ class pypolygon:
     def calculate_buffer_zone_polygon(self, dRadius,
                                       sFilename_out = None,
                                       sFolder_out=None,
-                                      iFlag_algorithm=1):
+                                      iFlag_algorithm=1)-> Tuple[str, List[pypoint], List[pycircle]]:
         """
         Calculate the buffer zone polygon
 
@@ -389,7 +392,10 @@ class pypolygon:
             dRadius (float): The buffer zone distance
 
         Returns:
-            list: A list of buffer zone points
+            Tuple containing:
+                - str: WKT representation of the buffer polygon
+                - list: A list of buffer zone points
+                - list: Circle objects
         """
         if sFilename_out is not None:
             if os.path.exists(sFilename_out):
@@ -404,7 +410,7 @@ class pypolygon:
         spatial_ref.ImportFromEPSG(4326)  # Example: WGS84
         for i in range(self.nLine):
             pLine = self.aLine[i]
-            aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
+            sWkt, aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
             for pPoint in aPoint:
                 aLongitude_degree.append(pPoint.dLongitude_degree)
@@ -428,8 +434,7 @@ class pypolygon:
 
         if iFlag_algorithm == 1:
             #create a polygon geometry
-            pGeometry_merge = ogr.Geometry(ogr.wkbPolygon)
-            pGeometry_merge.AssignSpatialReference(spatial_ref)
+            pGeometry_merge = None
             for pCircle in aCircle_out:
                 for ppCircle in pCircle:
                     pGeometry = ogr.Geometry(ogr.wkbPolygon)
@@ -440,27 +445,55 @@ class pypolygon:
                         pass
                     pRing.CloseRings()
                     pGeometry.AddGeometry(pRing)
-                    pGeometry_merge = pGeometry_merge.Union(pGeometry)
+                    if pGeometry_merge is None:
+                        pGeometry_merge = pGeometry.Clone()
+                    else:
+                        pGeometry_merge = pGeometry_merge.Union(pGeometry)
             #now export the polygon
             aPoint_dummy = list()
-            ring = pGeometry_merge.GetGeometryRef(0)  # Get the exterior ring
-            npoints = ring.GetPointCount()
-            for i in range(npoints):
-                point = ring.GetPoint(i)
-                point0= dict()
-                point0['dLongitude_degree'] = point[0]
-                point0['dLatitude_degree'] = point[1]
-                pVertex_out = pypoint(point0)
-                aPoint_dummy.append(pVertex_out)
-            if sFilename_out is not None:
+            npoints = 0
+            pGeometry_out = None
+            if pGeometry_merge is not None and not pGeometry_merge.IsEmpty():
+                sGeometry_name = pGeometry_merge.GetGeometryName().upper()
+                if sGeometry_name == 'POLYGON':
+                    pGeometry_out = pGeometry_merge
+                elif sGeometry_name == 'MULTIPOLYGON':
+                    # Use the largest polygon when union returns disjoint pieces.
+                    dArea_max = -1.0
+                    for iPart in range(pGeometry_merge.GetGeometryCount()):
+                        pPart = pGeometry_merge.GetGeometryRef(iPart)
+                        if pPart is None:
+                            continue
+                        aCoords_gcs = get_geometry_coordinates(pPart)
+                        dArea_part = calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
+                        if dArea_part > dArea_max:
+                            dArea_max = dArea_part
+                            pGeometry_out = pPart
+
+            if pGeometry_out is not None:
+                ring = pGeometry_out.GetGeometryRef(0)  # Exterior ring
+                if ring is not None:
+                    npoints = ring.GetPointCount()
+                    for i in range(npoints):
+                        point = ring.GetPoint(i)
+                        point0= dict()
+                        point0['dLongitude_degree'] = point[0]
+                        point0['dLatitude_degree'] = point[1]
+                        pVertex_out = pypoint(point0)
+                        aPoint_dummy.append(pVertex_out)
+
+            if sFilename_out is not None and len(aPoint_dummy) > 0:
                 save_points_as_polygon(aPoint_dummy, sFilename_out)
 
+            # Generate WKT from merged polygon
+            pGeometry_out.FlattenTo2D()  # Ensure geometry is 2D for WKT export
+            sWkt_buffer_polygon = pGeometry_out.ExportToWkt()
         else:
             #use my own algorithm, which is the circle
-
+            sWkt_buffer_polygon = ""
             pass
 
-        return aPoint_out, aCircle_out
+        return sWkt_buffer_polygon, aPoint_out, aCircle_out
 
     def calculate_buffer_zone_polygon_alpha(self, dRadius,
                                             sFilename_out = None,
@@ -498,7 +531,7 @@ class pypolygon:
         aPoint_2d = list()
         for i in range(self.nLine):
             pLine = self.aLine[i]
-            aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
+            _, aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
             for pPoint in aPoint:
                 aLongitude_degree.append(pPoint.dLongitude_degree)
@@ -595,7 +628,7 @@ class pypolygon:
         aPoint_2d = list()
         for i in range(self.nLine):
             edge = self.aEdge[i]
-            aPoint, aPoint_center, aPoint_circle, aCircle = edge.calculate_buffer_zone_polygon(dRadius)
+            _, aPoint, aPoint_center, aPoint_circle, aCircle = edge.calculate_buffer_zone_polygon(dRadius)
             aCircle_out.append(aCircle)
             for pPoint in aPoint:
                 aLongitude_degree.append(pPoint.dLongitude_degree)
