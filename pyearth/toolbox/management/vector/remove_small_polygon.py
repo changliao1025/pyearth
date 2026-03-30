@@ -14,6 +14,7 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_format,
 )
 
+IDL_threshold = 1e-3  # Degrees from antimeridian
 
 def remove_small_polygon(
     sFilename_vector_in: str,
@@ -343,14 +344,30 @@ def _process_single_polygon(
             ]
         )
 
-        # Calculate area
+        # Check if polygon is close to the antimeridian line (180° or -180°)
+        # If it is, keep it regardless of area since it might be split and actual area is larger
+        lon_coords = aCoords_outer[:, 0]
+
+        is_near_antimeridian = np.any( np.abs(np.abs(lon_coords[:-1]) - 180.0) < IDL_threshold )
+
+        if is_near_antimeridian:
+            # Keep polygon near antimeridian without area check
+            pass
+        else:
+            # Calculate area
+            dArea = calculate_polygon_area(
+                aCoords_outer[:, 0], aCoords_outer[:, 1], iFlag_algorithm
+            )
+            dAreakm = dArea / 1e6  # Convert to square kilometers
+
+            if dArea <= dThreshold:
+                return False
+
+        # Recalculate area for output field (needed for both cases)
         dArea = calculate_polygon_area(
             aCoords_outer[:, 0], aCoords_outer[:, 1], iFlag_algorithm
         )
         dAreakm = dArea / 1e6  # Convert to square kilometers
-
-        if dArea <= dThreshold:
-            return False
 
         # Create output polygon with all rings
         pGeometry_out = ogr.Geometry(ogr.wkbPolygon)

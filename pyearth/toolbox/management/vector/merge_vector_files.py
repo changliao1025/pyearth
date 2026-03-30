@@ -5,8 +5,6 @@ from osgeo import gdal, osr, ogr, gdalconst
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
     print_supported_vector_formats,
-    get_vector_driver_from_format,
-    get_vector_driver_from_filename,
 )
 
 
@@ -163,6 +161,8 @@ def merge_vector_files(
         if verbose:
             print(f"Processing {sFilename_in} - Geometry type: {iGeomType}")
 
+        pLayerDefn_in = pLayer_in.GetLayerDefn()
+        nFieldCount_in = pLayerDefn_in.GetFieldCount()
         # Create the output layer based on the geometry type
         if iFlag_first == 1:
             # Set spatial reference system from first input layer
@@ -200,14 +200,19 @@ def merge_vector_files(
 
             # Copy field definitions from the first layer (if copy_attributes is True)
             if copy_attributes:
-                pLayerDefn_in = pLayer_in.GetLayerDefn()
-                for i in range(pLayerDefn_in.GetFieldCount()):
+                for i in range(nFieldCount_in):
                     pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
-                    if pLayer_out.CreateField(pFieldDefn) != 0:
-                        print(
-                            f"Failed to create field {pFieldDefn.GetName()} in output layer"
-                        )
-                        return
+                    sFieldName = pFieldDefn.GetName()
+                    # Skip GeoParquet bbox columns exposed as regular fields by GDAL
+                    if sFieldName.startswith('geometry_bbox') or sFieldName.startswith('__bbox'):
+                        continue
+                    else:
+                        print(f"Adding field to output layer: {sFieldName}")
+                        if pLayer_out.CreateField(pFieldDefn) != 0:
+                            print(
+                            f"Failed to create field {sFieldName} in output layer"
+                            )
+                            return
 
             # Add an id field if requested and it doesn't exist
             if add_id_field:
@@ -230,6 +235,8 @@ def merge_vector_files(
         if verbose:
             print(f"Processing {nFeatures} features from {sFilename_in}")
 
+        pLayerDefn_out = pLayer_out.GetLayerDefn()
+        nFieldCount_out = pLayerDefn_out.GetFieldCount()
         for feature in pLayer_in:
             nProcessed += 1
             if verbose and nProcessed % 1000 == 0:
@@ -251,12 +258,12 @@ def merge_vector_files(
 
             # Copy field values from the original feature (if copy_attributes is True)
             if copy_attributes:
-                pLayerDefn_in = pLayer_in.GetLayerDefn()
-                pLayerDefn_out = pLayer_out.GetLayerDefn()
-
-                for i in range(pLayerDefn_in.GetFieldCount()):
+                for i in range(nFieldCount_in):
                     pFieldDefn_in = pLayerDefn_in.GetFieldDefn(i)
                     sFieldName = pFieldDefn_in.GetName()
+                    # Skip GeoParquet bbox columns — present in layer defn but not fetchable from features
+                    if sFieldName.startswith('geometry_bbox') or sFieldName.startswith('__bbox'):
+                        continue
 
                     # Check if the field exists in the output layer
                     iFieldIndex_out = pLayerDefn_out.GetFieldIndex(sFieldName)
