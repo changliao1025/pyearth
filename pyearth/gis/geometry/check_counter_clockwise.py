@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Union
-from pyearth.toolbox.data.remove_duplicate_closure import remove_duplicate_closure as remove_duplicate_closure
+from pyearth.toolbox.data.remove_duplicate_closure import remove_duplicate_closure
 
 def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     x, y = coords[:, 0], coords[:, 1]
