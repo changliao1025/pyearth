@@ -42,14 +42,6 @@ jobs:
           exit 1
         fi
 
-    - name: Publish to Test PyPI (optional)
-      if: github.event.release.prerelease
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TEST }}
-      run: |
-        twine upload --repository testpypi dist/*
-
     - name: Publish to PyPI
       if: "!github.event.release.prerelease"
       env:
