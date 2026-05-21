@@ -1,7 +1,7 @@
 """
 Union overlapping polygons in a polygon file.
 
-This module provides functionality to dissolve overlapping polygons while keeping
+This module provides functionality to union overlapping polygons while keeping
 non-overlapping polygons as individual features.
 """
 
@@ -18,20 +18,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def union_polygon_file(sFilename_in, sFilename_out, bFill_holes=False):
+def union_polygon_file(sFilename_in, sFilename_out):
     """
     Union overlapping polygons while keeping non-overlapping polygons separate.
 
     This function processes a polygon file and:
     - Groups overlapping polygons together
-    - Unions/dissolves each group of overlapping polygons
+    - Unions each group of overlapping polygons into a single polygon
     - Keeps non-overlapping polygons as individual features
+    - Preserves holes/voids between overlapping polygons
 
     Args:
         sFilename_in: Path to input polygon file
         sFilename_out: Path to output polygon file
-        bFill_holes: If True, fills holes/voids between overlapping polygons.
-                     If False (default), preserves holes using Shapely's unary_union.
 
     Returns:
         None
@@ -41,16 +40,12 @@ def union_polygon_file(sFilename_in, sFilename_out, bFill_holes=False):
         FileNotFoundError: If input file doesn't exist
 
     Example:
-        >>> # Preserve holes between polygons
-        >>> union_polygon_file('input.geojson', 'output.geojson', bFill_holes=False)
-        >>> # Fill all holes/voids
-        >>> union_polygon_file('input.geojson', 'output.geojson', bFill_holes=True)
+        >>> union_polygon_file('input_polygons.geojson', 'output_polygons.geojson')
     """
     logger.info("=" * 80)
     logger.info("Starting polygon union operation")
     logger.info(f"Input file: {sFilename_in}")
     logger.info(f"Output file: {sFilename_out}")
-    logger.info(f"Fill holes: {bFill_holes}")
 
     # Validate input file
     if not os.path.exists(sFilename_in):
@@ -156,41 +151,10 @@ def union_polygon_file(sFilename_in, sFilename_out, bFill_holes=False):
             feature_out = None
             single_polygon_count += 1
         else:
-            # Multiple overlapping polygons - union them
-            if bFill_holes:
-                # Use GDAL Union - fills all holes/voids
-                union_geometry = geometries[polygon_indices[0]].Clone()
-                for idx in polygon_indices[1:]:
-                    union_geometry = union_geometry.Union(geometries[idx])
-
-                logger.info(f"  Unioned {len(polygon_indices)} overlapping polygons (holes filled)")
-            else:
-                # Use Shapely unary_union - preserves holes/voids
-                try:
-                    from shapely.geometry import shape, mapping
-                    from shapely.ops import unary_union
-
-                    # Convert OGR geometries to Shapely
-                    shapely_polygons = []
-                    for idx in polygon_indices:
-                        geom_json = geometries[idx].ExportToJson()
-                        shapely_geom = shape(eval(geom_json))
-                        shapely_polygons.append(shapely_geom)
-
-                    # Perform unary_union (preserves holes)
-                    union_result = unary_union(shapely_polygons)
-
-                    # Convert back to OGR
-                    geom_json = mapping(union_result)
-                    union_geometry = ogr.CreateGeometryFromJson(str(geom_json))
-
-                    logger.info(f"  Unioned {len(polygon_indices)} overlapping polygons (holes preserved)")
-                except ImportError:
-                    logger.warning("Shapely not available, falling back to GDAL Union (will fill holes)")
-                    union_geometry = geometries[polygon_indices[0]].Clone()
-                    for idx in polygon_indices[1:]:
-                        union_geometry = union_geometry.Union(geometries[idx])
-                    logger.info(f"  Unioned {len(polygon_indices)} overlapping polygons (holes filled)")
+            # Multiple overlapping polygons - union them using GDAL
+            union_geometry = geometries[polygon_indices[0]].Clone()
+            for idx in polygon_indices[1:]:
+                union_geometry = union_geometry.Union(geometries[idx])
 
             # Handle potential MultiPolygon result
             if union_geometry is not None and not union_geometry.IsEmpty():
@@ -212,6 +176,8 @@ def union_polygon_file(sFilename_in, sFilename_out, bFill_holes=False):
                     pLayer_out.CreateFeature(feature_out)
                     feature_out = None
                     union_polygon_count += 1
+
+            logger.info(f"  Unioned {len(polygon_indices)} overlapping polygons")
 
     # Clean up
     pDataset = None
