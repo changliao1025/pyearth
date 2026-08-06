@@ -87,11 +87,7 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     bool
         True if vertices are in counter-clockwise order, False otherwise.
     """
-    from pyearth.gis.geometry.international_date_line_utility import (
-        check_cross_international_date_line_polygon,
-        unwrap_longitudes,
-    )
-    from pyearth.gis.geometry.pole_check import polygon_includes_pole
+    from pyearth.gis.geometry.idl_handler import IdlHandler
 
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
@@ -104,15 +100,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     elif polygon_includes_pole(coords, pole="south"):
         signed_area = calculate_signed_area_spherical_polar(coords, pole="south")
     else:
-        # Check if polygon crosses the International Date Line
-        iFlag_cross, _ = check_cross_international_date_line_polygon(coords)
-        if iFlag_cross:
-            coords_unwrapped = unwrap_longitudes(coords)
-            # Calculate signed area using optimized shoelace formula
-            signed_area = calculate_signed_area_shoelace(coords_unwrapped)
-        else:
-            # Standard case: calculate signed area directly
-            signed_area = calculate_signed_area_shoelace(coords)
+        # Use IdlHandler for IDL-aware CCW check
+        return IdlHandler.check_counter_clockwise(coords)
     return signed_area > 0
 
 
