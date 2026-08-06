@@ -1,5 +1,7 @@
 {
     "python.pythonPath": "/bin/python3",
     "editor.renderWhitespace": "all",
-    "workbench.colorTheme": "Tomorrow Night Blue"
+    "workbench.colorTheme": "Tomorrow Night Blue",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
