@@ -23,7 +23,7 @@ Usage:
 from __future__ import annotations
 
 import numpy as np
-from osgeo import ogr
+from osgeo import ogr, srs
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Tuple, Union
@@ -285,41 +285,6 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
     if western_arr.size:
         western_arr = _reverse_if_cw(western_arr)
     return [eastern_arr, western_arr]
-
-
-def _reorder_vertices_until_valid(vertices: list) -> list:
-    """Reorder polygon vertices by rotation until OGR reports validity."""
-    if not vertices:
-        return []
-    for i, v in enumerate(vertices):
-        lon, lat = float(v[0]), float(v[1])
-        if not (-180 <= lon <= 180):
-            raise ValueError(f"Longitude {lon} at vertex {i} out of range")
-        if not (-90 <= lat <= 90):
-            raise ValueError(f"Latitude {lat} at vertex {i} out of range")
-    if len(vertices) < 3:
-        raise ValueError("Polygon must have at least 3 vertices")
-    if vertices[0] != vertices[-1]:
-        vertices = vertices + [vertices[0]]
-    n_points = len(vertices) - 1
-    current = vertices.copy()
-    for _ in range(n_points + 1):
-        try:
-            ring = ogr.Geometry(ogr.wkbLinearRing)
-            for lon, lat in current:
-                ring.AddPoint(float(lon), float(lat))
-            ring.CloseRings()
-            poly = ogr.Geometry(ogr.wkbPolygon)
-            poly.AddGeometry(ring)
-            if poly.IsValid():
-                return current + [current[0]]
-        except Exception:
-            pass
-        current = current[1:] + [current[0]]
-    raise ValueError(
-        "Cannot form a valid polygon by rotating vertices. "
-        "The input may be self-intersecting or invalid."
-    )
 
 
 def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geometry]:
