@@ -23,7 +23,7 @@ Usage:
 from __future__ import annotations
 
 import numpy as np
-from osgeo import ogr, srs
+from osgeo import ogr, osr
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Tuple, Union
@@ -147,6 +147,8 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
     # Vertices on the IDL (exclude closure point to avoid double-counting)
     idl_vertices = np.zeros_like(lons, dtype=bool)
     idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < IDL_TOLERANCE
+    # Closure point matches first vertex (if first is on IDL, closure is too)
+    idl_vertices[-1] = idl_vertices[0]
 
     # Hemisphere support from non-IDL vertices
     non_idl_lons = lons[~idl_vertices]
@@ -178,7 +180,7 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
             (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
         )
 
-        if touches_both_idl_sides or spans_both_hemispheres:
+        if spans_both_hemispheres or touches_both_idl_sides:
             return True, None
         elif not (np.any(eastward_crossings) or np.any(westward_crossings)):
             # Nudge IDL vertices into the dominant hemisphere
@@ -217,7 +219,47 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
 
 
 def _unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
-    """Unwrap longitudes relative to the first vertex."""
+    """Unwrap longitudes relative to the first vertex so they are continuous.
+
+    Adjusts longitude values to ensure they are all within 180 degrees of the
+    first coordinate, preventing artificial jumps when calculating polygon areas
+    or orientation across the International Date Line.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Array of shape (n, 2) representing polygon coordinates in
+        (longitude, latitude) format.
+
+    Returns
+    -------
+    np.ndarray
+        Array with unwrapped longitude coordinates, same shape as input.
+        Latitudes are unchanged.
+
+    Notes
+    -----
+    The algorithm uses the first longitude as a reference and shifts any
+    subsequent longitude that differs by more than 180°:
+
+    - If ``lon - ref > 180``: subtract 360° (move from eastern to western side)
+    - If ``lon - ref < -180``: add 360° (move from western to eastern side)
+
+    This produces a continuous longitude sequence suitable for the shoelace
+    formula or other calculations that assume no wrap-around.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> # Polygon crossing the IDL: longitudes jump from -170 to 170
+    >>> coords = np.array([[-170.0, 10.0],
+    ...                    [ 170.0, 20.0],
+    ...                    [-160.0, 30.0]])
+    >>> unwrapped = _unwrap_longitudes(coords)
+    >>> unwrapped[:, 0]
+    array([-170., -190., -160.])
+    # Now longitudes are continuous: no jump > 180° between consecutive vertices
+    """
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
     result = coords.copy()
@@ -230,7 +272,52 @@ def _unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
 
 
 def _shift_western_by_360(coords: np.ndarray, cutoff: float = DEFAULT_CUTOFF) -> np.ndarray:
-    """Shift western-hemisphere longitudes by +360 for continuous [0,360] range."""
+    """Shift western-hemisphere longitudes by +360° for a continuous [0, 360] range.
+
+    Converts polygons that cross the International Date Line from the standard
+    [-180, 180] longitude system to a continuous [0, 360] system by adding 360°
+    to all longitudes below a cutoff threshold.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Array of shape (n, 2) representing polygon coordinates in
+        (longitude, latitude) format.
+    cutoff : float, optional
+        Longitude threshold below which vertices are shifted. Default is -150°,
+        which targets western Pacific longitudes near the IDL.
+
+    Returns
+    -------
+    np.ndarray
+        Array with shifted longitudes, same shape as input.
+        Latitudes are unchanged.
+
+    Notes
+    -----
+    Unlike :func:`_unwrap_longitudes` (which is relative to the first vertex),
+    this function uses an absolute cutoff to identify vertices that should be
+    shifted. It is designed for the ``WRAP_TO_360`` strategy where you want all
+    longitudes in a continuous positive range.
+
+    The cutoff of -150° works for typical IDL-crossing polygons in the Pacific:
+
+    - Longitudes < -150° are shifted to [210°, 360°]
+    - Longitudes >= -150° remain unchanged
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> # Polygon crossing the IDL: some vertices in western hemisphere
+    >>> coords = np.array([[ 170.0, -10.0],
+    ...                    [-170.0,  10.0],
+    ...                    [-160.0,  20.0],
+    ...                    [ 160.0,  30.0]])
+    >>> shifted = _shift_western_by_360(coords)
+    >>> shifted[:, 0]
+    array([170., 190., 200., 160.])
+    # Western longitudes (-170, -160) shifted to 190, 200
+    """
     result = coords.copy()
     mask = result[:, 0] < cutoff
     result[mask, 0] += 360.0
@@ -286,7 +373,7 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
         np.where(eastward)[0].tolist() + np.where(westward)[0].tolist()
     )
     if len(crossing_edge_indices) != 2:
-        if np.any(lons < 0):
+        if np.any(lons[~idl_vtx] < 0):
             for i in range(len(coords) - 1):
                 if abs(abs(lons[i]) - 180.0) < IDL_TOLERANCE:
                     coords[i, 0] = -180.0 + IDL_OFFSET
