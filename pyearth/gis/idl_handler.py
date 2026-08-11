@@ -107,36 +107,93 @@ def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     return 0.5 * np.sum(x * y_rolled - x_rolled * y)
 
 
-def _detect_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]:
-    """Internal IDL-crossing detection logic."""
+def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]:
+    """Detect whether polygon coordinates cross the International Date Line.
+
+    Distinguishes between actual IDL edge crossings and vertices that merely
+    lie on the ±180° meridian.  Vertices on the IDL without edge crossings are
+    nudged slightly into the dominant hemisphere.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Polygon coordinates as an (n, 2) array of (longitude, latitude).
+
+    Returns
+    -------
+    tuple[bool, np.ndarray or None]
+        ``(True, None)`` — actual IDL edge crossing (or pole-enclosing polygon).
+        ``(False, adjusted_coords)`` — no crossing; IDL-touching vertices nudged.
+        ``(False, None)`` — too few vertices to form a polygon.
+
+    Raises
+    ------
+    ValueError
+        If *coords* is not a 2-D array with shape (n, 2).
+    """
+    from pyearth.gis.polar_handler import polygon_includes_pole
+
     if not isinstance(coords, np.ndarray) or coords.ndim != 2:
         raise ValueError("coords must be a 2D numpy array")
     if coords.shape[1] != 2:
         raise ValueError("coords must have 2 columns (lon, lat)")
     if len(coords) < 3:
         return False, None
-    lons = coords[:, 0]
-    idl_vertices = np.abs(np.abs(lons) - 180.0) < IDL_TOLERANCE
+
+    coords_updated = coords.copy()
+    lons = coords_updated[:, 0]
+    lats = coords_updated[:, 1]
+
+    # Vertices on the IDL (exclude closure point to avoid double-counting)
+    idl_vertices = np.zeros_like(lons, dtype=bool)
+    idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < IDL_TOLERANCE
+
+    # Hemisphere support from non-IDL vertices
+    non_idl_lons = lons[~idl_vertices]
+    has_eastern = np.any((non_idl_lons > 0) & (non_idl_lons < 180.0))
+    has_western = np.any((non_idl_lons < 0) & (non_idl_lons > -180.0))
+    spans_both_hemispheres = has_eastern and has_western
+
+    idl_touch_positive = np.any(np.abs(lons[idl_vertices] - 180.0) < IDL_TOLERANCE)
+    idl_touch_negative = np.any(np.abs(lons[idl_vertices] + 180.0) < IDL_TOLERANCE)
+    touches_both_idl_sides = idl_touch_positive and idl_touch_negative
+
+    # A polygon enclosing either pole necessarily crosses the IDL
+    if polygon_includes_pole(coords_updated, pole="north") or polygon_includes_pole(
+        coords_updated, pole="south"
+    ):
+        return True, None
+
     if np.any(idl_vertices):
         lons_next = np.roll(lons, -1)
-        eastward_crossings = ((lons > 0) & (lons_next < 0)) & ~idl_vertices & ~np.roll(idl_vertices, -1)
-        westward_crossings = ((lons < 0) & (lons_next > 0)) & ~idl_vertices & ~np.roll(idl_vertices, -1)
-        touches_both = bool(np.any(lons > 0)) and bool(np.any(lons < 0))
-        spans_both = bool(abs(lons.max() - lons.min()) >= 180.0)
-        if touches_both or spans_both:
+
+        eastward_crossings = (
+            (lons > 0)
+            & (lons < 180.0)
+            & (lons_next < 0)
+            & ~idl_vertices
+            & ~np.roll(idl_vertices, -1)
+        )
+        westward_crossings = (
+            (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
+        )
+
+        if touches_both_idl_sides or spans_both_hemispheres:
             return True, None
         elif not (np.any(eastward_crossings) or np.any(westward_crossings)):
-            coords_updated = coords.copy()
+            # Nudge IDL vertices into the dominant hemisphere
             for idx in np.where(idl_vertices)[0]:
                 prev_idx = (idx - 1) % len(coords_updated)
                 next_idx = (idx + 1) % len(coords_updated)
                 prev_lon = coords_updated[prev_idx, 0]
                 next_lon = coords_updated[next_idx, 0]
+
                 neighbor_lons = []
                 if abs(abs(prev_lon) - 180.0) > IDL_TOLERANCE:
                     neighbor_lons.append(prev_lon)
                 if abs(abs(next_lon) - 180.0) > IDL_TOLERANCE:
                     neighbor_lons.append(next_lon)
+
                 if neighbor_lons:
                     positive_n = sum(1 for lon in neighbor_lons if lon > 0)
                     if positive_n >= len(neighbor_lons) / 2:
@@ -392,7 +449,7 @@ class IdlHandler:
 
     def detect(self, coords: np.ndarray) -> IdlResult:
         """Detect whether a polygon crosses the IDL."""
-        crosses, adjusted = _detect_crossing(coords)
+        crosses, adjusted = _detect_id_crossing(coords)
         result = IdlResult(crosses_idl=crosses, adjusted_coords=adjusted)
         if crosses and self.strategy == IdlStrategy.SPLIT:
             result.sub_polygons = _split_international_date_line_polygon(coords)
@@ -406,7 +463,7 @@ class IdlHandler:
             coords = self._extract_coords(ogr_geom)
         except (ValueError, AttributeError):
             return [ogr_geom]
-        crosses, _ = _detect_crossing(coords)
+        crosses, _ = _detect_id_crossing(coords)
         if not crosses:
             return [ogr_geom]
         if self.strategy == IdlStrategy.DROP:
@@ -433,7 +490,7 @@ class IdlHandler:
 
         Handles IDL crossings by unwrapping longitudes first if needed.
         """
-        crosses, _ = _detect_crossing(coords)
+        crosses, _ = _detect_id_crossing(coords)
         if crosses:
             unwrapped = _unwrap_longitudes(coords)
             return _check_ccw(unwrapped)
