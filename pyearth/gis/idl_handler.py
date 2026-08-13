@@ -148,7 +148,7 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
     idl_vertices = np.zeros_like(lons, dtype=bool)
     idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < IDL_TOLERANCE
     # Closure point matches first vertex (if first is on IDL, closure is too)
-    idl_vertices[-1] = idl_vertices[0]
+    idl_vertices[-1] = idl_vertices[0]  
 
     # Hemisphere support from non-IDL vertices
     non_idl_lons = lons[~idl_vertices]
@@ -180,13 +180,18 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
             (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
         )
 
-        if spans_both_hemispheres or touches_both_idl_sides:
-            return True, None
-        elif not (np.any(eastward_crossings) or np.any(westward_crossings)):
-            # Nudge IDL vertices into the dominant hemisphere
+        def _nudge_idl_vertices_and_return_false() -> Tuple[bool, np.ndarray]:
             for idx in np.where(idl_vertices)[0]:
-                prev_idx = (idx - 1) % len(coords_updated)
-                next_idx = (idx + 1) % len(coords_updated)
+                if idx == 0:
+                    prev_idx = len(coords_updated) - 2
+                    next_idx = idx + 1
+                else:
+                    if idx == len(coords_updated) - 1:
+                        prev_idx = idx - 1
+                        next_idx = 0
+                    else:
+                        prev_idx = (idx - 1) % len(coords_updated)
+                        next_idx = (idx + 1) % len(coords_updated)
                 prev_lon = coords_updated[prev_idx, 0]
                 next_lon = coords_updated[next_idx, 0]
 
@@ -208,6 +213,19 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
                     else:
                         coords_updated[idx, 0] = -180.0 + IDL_OFFSET
             return False, coords_updated
+
+        if touches_both_idl_sides:
+            if spans_both_hemispheres:
+                return True, None
+            else:
+                return True, None
+
+        if idl_touch_negative and np.any(lons > 0):
+            return True, None
+        elif idl_touch_positive and np.any(lons < 0):
+            return True, None
+        elif not (np.any(eastward_crossings) or np.any(westward_crossings)):
+            return _nudge_idl_vertices_and_return_false()
         else:
             return True, None
     else:
@@ -349,6 +367,19 @@ def _ensure_valid_range(coords: np.ndarray) -> np.ndarray:
     return result
 
 
+def _close_ring_if_needed(coords: np.ndarray) -> np.ndarray:
+    """Append the first vertex to close a polygon ring when needed."""
+    if coords.size == 0:
+        return coords
+    if not isinstance(coords, np.ndarray):
+        coords = np.asarray(coords, dtype=np.float64)
+    if coords.ndim != 2 or coords.shape[1] != 2:
+        raise ValueError("coords must be a 2D array with shape (n, 2)")
+    if coords.shape[0] >= 2 and not np.allclose(coords[0], coords[-1]):
+        return np.vstack([coords, coords[0]])
+    return coords
+
+
 def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.ndarray]:
     """Split a polygon crossing the IDL into eastern and western sub-polygons."""
     from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
@@ -372,63 +403,71 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
     crossing_edge_indices = (
         np.where(eastward)[0].tolist() + np.where(westward)[0].tolist()
     )
-    if len(crossing_edge_indices) != 2:
+    #check how many vertices are on the IDL, exclude the closure point to avoid double-counting   
+            
+    if len(crossing_edge_indices) != 2: #only touching? this should have fixed already in the detect function
         if np.any(lons[~idl_vtx] < 0):
             for i in range(len(coords) - 1):
                 if abs(abs(lons[i]) - 180.0) < IDL_TOLERANCE:
                     coords[i, 0] = -180.0 + IDL_OFFSET
-            western = _ensure_valid_range(coords[:-1].copy())
+            western = _close_ring_if_needed(_ensure_valid_range(coords[:-1].copy()))
             eastern = np.empty((0, 2), dtype=np.float64)
         else:
             for i in range(len(coords) - 1):
                 if abs(abs(lons[i]) - 180.0) < IDL_TOLERANCE:
                     coords[i, 0] = 180.0 - IDL_OFFSET
-            eastern = _ensure_valid_range(coords[:-1].copy())
+            eastern = _close_ring_if_needed(_ensure_valid_range(coords[:-1].copy()))
             western = np.empty((0, 2), dtype=np.float64)
         return [eastern, western]
-    lat_map = {}
-    for edge_idx in crossing_edge_indices:
-        i_cur, i_nxt = edge_idx, (edge_idx + 1) % (len(coords) - 1)
-        lon_a, lat_a = coords[i_cur, 0], coords[i_cur, 1]
-        lon_b, lat_b = coords[i_nxt, 0], coords[i_nxt, 1]
-        intersection_result = find_great_circle_intersection_with_meridian(
-            lon_a, lat_a, lon_b, lat_b
-        )
-        if intersection_result is not None:
-            lat_map[edge_idx] = intersection_result
-    EASTERN_BOUNDARY = 180.0 - IDL_OFFSET
-    WESTERN_BOUNDARY = -180.0 + IDL_OFFSET
-    def _boundary_for(sub_list):
-        if not sub_list:
+    else:
+        lat_map = {}
+        for edge_idx in crossing_edge_indices:
+            i_cur, i_nxt = edge_idx, (edge_idx + 1) % (len(coords) - 1)
+            lon_a, lat_a = coords[i_cur, 0], coords[i_cur, 1]
+            lon_b, lat_b = coords[i_nxt, 0], coords[i_nxt, 1]
+            intersection_result = find_great_circle_intersection_with_meridian(
+                lon_a, lat_a, lon_b, lat_b
+            )
+            if intersection_result is not None:
+                lat_map[edge_idx] = intersection_result
+        EASTERN_BOUNDARY = 180.0 - IDL_OFFSET
+        WESTERN_BOUNDARY = -180.0 + IDL_OFFSET
+        def _boundary_for(sub_list):
+            if not sub_list:
+                return WESTERN_BOUNDARY
+            if any(pt[0] > 0 for pt in sub_list):
+                return EASTERN_BOUNDARY
             return WESTERN_BOUNDARY
-        if any(pt[0] > 0 for pt in sub_list):
-            return EASTERN_BOUNDARY
-        return WESTERN_BOUNDARY
-    def _snap_append(lst, lon, lat):
-        if abs(abs(lon) - 180.0) < IDL_TOLERANCE:
-            lon = _boundary_for(lst)
-        lst.append([lon, lat])
-    eastern_pts: list = []
-    western_pts: list = []
-    active = eastern_pts
-    inactive = western_pts
-    for i in range(len(coords) - 1):
-        _snap_append(active, coords[i, 0], coords[i, 1])
-        if i in lat_map:
-            lat_cross = lat_map[i]
-            active.append([_boundary_for(active), lat_cross])
-            active, inactive = inactive, active
-            active.append([_boundary_for(active), lat_cross])
-    for pts in (eastern_pts, western_pts):
-        if len(pts) >= 2 and not np.allclose(pts[0], pts[-1]):
-            pts.append(list(pts[0]))
-    eastern_arr = _ensure_valid_range(np.array(eastern_pts)) if eastern_pts else np.empty((0, 2), dtype=np.float64)
-    western_arr = _ensure_valid_range(np.array(western_pts)) if western_pts else np.empty((0, 2), dtype=np.float64)
-    if eastern_arr.size:
-        eastern_arr = _reverse_if_cw(eastern_arr)
-    if western_arr.size:
-        western_arr = _reverse_if_cw(western_arr)
-    return [eastern_arr, western_arr]
+        def _snap_append(lst, lon, lat):
+            if abs(abs(lon) - 180.0) < IDL_TOLERANCE:
+                lon = _boundary_for(lst)
+            lst.append([lon, lat])
+        eastern_pts: list = []
+        western_pts: list = []
+        active = eastern_pts
+        inactive = western_pts
+        for i in range(len(coords) - 1):
+            _snap_append(active, coords[i, 0], coords[i, 1])
+            if i in lat_map:
+                lat_cross = lat_map[i]
+                active.append([_boundary_for(active), lat_cross])
+                active, inactive = inactive, active
+                active.append([_boundary_for(active), lat_cross])
+        eastern_arr = (
+            _close_ring_if_needed(_ensure_valid_range(np.array(eastern_pts)))
+            if eastern_pts
+            else np.empty((0, 2), dtype=np.float64)
+        )
+        western_arr = (
+            _close_ring_if_needed(_ensure_valid_range(np.array(western_pts)))
+            if western_pts
+            else np.empty((0, 2), dtype=np.float64)
+        )
+        if eastern_arr.size:
+            eastern_arr = _reverse_if_cw(eastern_arr)
+        if western_arr.size:
+            western_arr = _reverse_if_cw(western_arr)
+        return [eastern_arr, western_arr]
 
 
 def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geometry]:
@@ -600,6 +639,7 @@ class IdlHandler:
     @staticmethod
     def _coords_to_ogr(coords: np.ndarray, srs=None) -> ogr.Geometry:
         """Convert a numpy (lon, lat) array to an OGR Polygon."""
+        coords = _close_ring_if_needed(coords)
         ring = ogr.Geometry(ogr.wkbLinearRing)
         for lon, lat in coords[:-1]:
             ring.AddPoint(lon, lat)
