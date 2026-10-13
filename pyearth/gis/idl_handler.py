@@ -594,8 +594,10 @@ class IdlHandler:
         self.idl_tolerance = idl_tolerance
         self.idl_offset = idl_offset
 
-    def detect(self, coords: np.ndarray) -> IdlResult:
-        """Detect whether a polygon crosses the IDL."""
+    def detect(self, coords: Union[np.ndarray, ogr.Geometry]) -> IdlResult:
+        """Detect whether a polygon or OGR geometry crosses the IDL."""
+        if isinstance(coords, ogr.Geometry):
+            coords = self._extract_coords(coords)
         crosses, adjusted = _detect_id_crossing(coords)
         result = IdlResult(crosses_idl=crosses, adjusted_coords=adjusted)
         if crosses and self.strategy == IdlStrategy.SPLIT:
@@ -675,101 +677,3 @@ class IdlHandler:
         if srs is not None:
             poly.AssignSpatialReference(srs)
         return poly
-
-
-# ---------------------------------------------------------------------------
-# Module-level convenience functions
-# ---------------------------------------------------------------------------
-def split_international_date_line_polygon_coordinates(
-    coords: np.ndarray,
-) -> List[np.ndarray]:
-    """Split polygon coordinates crossing the IDL into [eastern, western] polygons.
-
-    Parameters
-    ----------
-    coords : np.ndarray
-        Array of shape (n, 2) with (longitude, latitude) coordinates.
-
-    Returns
-    -------
-    List[np.ndarray]
-        [eastern_polygon, western_polygon] coordinate arrays.
-    """
-    return _split_international_date_line_polygon(coords)
-
-
-def check_cross_international_date_line_geometry(geom: ogr.Geometry) -> bool:
-    """Check whether an OGR geometry crosses the International Date Line.
-
-    Parameters
-    ----------
-    geom : ogr.Geometry
-        Input OGR geometry.
-
-    Returns
-    -------
-    bool
-        True if the geometry crosses the IDL, False otherwise.
-    """
-    if geom is None:
-        return False
-    try:
-        coords = IdlHandler._extract_coords(geom)
-    except Exception:
-        return False
-    crosses, _ = _detect_id_crossing(coords)
-    return crosses
-
-
-def check_cross_international_date_line_polygon(
-    coords: np.ndarray,
-) -> Tuple[bool, Optional[np.ndarray]]:
-    """Check whether polygon coordinates cross the International Date Line.
-
-    Parameters
-    ----------
-    coords : np.ndarray
-        Array of shape (n, 2) with (longitude, latitude) coordinates.
-
-    Returns
-    -------
-    Tuple[bool, Optional[np.ndarray]]
-        (crosses_idl, adjusted_coords_if_touching)
-    """
-    return _detect_id_crossing(coords)
-
-
-def convert_international_date_line_polygon_to_unwrapped_polygon(
-    geom: ogr.Geometry,
-) -> Optional[ogr.Geometry]:
-    """Convert an IDL-crossing OGR polygon by shifting western longitudes +360.
-
-    Parameters
-    ----------
-    geom : ogr.Geometry
-        Input OGR geometry.
-
-    Returns
-    -------
-    Optional[ogr.Geometry]
-        Unwrapped geometry or None if invalid.
-    """
-    return _convert_to_unwrapped_polygon(geom)
-
-
-def unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
-    """Unwrap longitudes so they are continuous across the IDL.
-
-    Parameters
-    ----------
-    coords : np.ndarray
-        Array of shape (n, 2) with (longitude, latitude) coordinates.
-
-    Returns
-    -------
-    np.ndarray
-        Array with unwrapped longitude coordinates.
-    """
-    return _unwrap_longitudes(coords)
-
-

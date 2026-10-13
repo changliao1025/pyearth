@@ -147,9 +147,7 @@ International Date Line
    from pyearth.gis.idl_handler import (
        IdlHandler,
        IdlStrategy,
-       check_cross_international_date_line_geometry,
-       split_international_date_line_polygon_coordinates,
-       unwrap_longitudes
+       IdlResult
    )
 
 Simplification

@@ -204,12 +204,9 @@ Great Circle Operations
 International Date Line Handling
 =================================
 
-* **check_cross_international_date_line_geometry** - Check if geometry crosses IDL
-* **check_cross_international_date_line_polygon** - Check polygon IDL crossing
-* **split_international_date_line_polygon_coordinates** - Split polygon at IDL
-* **convert_international_date_line_polygon_to_unwrapped_polygon** - Unwrap IDL polygon
-* **unwrap_longitudes** - Unwrap longitude coordinates
-* **reorder_international_date_line_polygon_vertices** - Reorder vertices for IDL
+* **IdlHandler** - Centralized IDL processor with configurable strategies
+* **IdlStrategy** - Strategy enumeration (CHECK_ONLY, SPLIT, WRAP_TO_360, UNWRAP, DROP, REORDER)
+* **IdlResult** - Dataclass encapsulating detection and transformation outputs
 
 Geometry Type Utilities
 ========================
@@ -338,20 +335,21 @@ Example 3: Handle International Date Line
 
 .. code-block:: python
 
-   from pyearth.gis.idl_handler import (
-       check_cross_international_date_line_geometry,
-       split_international_date_line_polygon_coordinates
-   )
+   from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
    from osgeo import ogr
+   import numpy as np
 
-   # Check if geometry crosses IDL
+   handler = IdlHandler(strategy=IdlStrategy.SPLIT)
+
+   # Fix an OGR geometry crossing the IDL
    geometry = ogr.CreateGeometryFromWkt('POLYGON((170 10, -170 10, -170 -10, 170 -10, 170 10))')
-   crosses_idl = check_cross_international_date_line_geometry(geometry)
+   fixed_geometries = handler.fix(geometry)
 
-   if crosses_idl:
-       # Split the polygon at IDL
-       coords = np.array([[170, 10], [-170, 10], [-170, -10], [170, -10], [170, 10]])
-       split_coords = split_international_date_line_polygon_coordinates(coords)
+   # Or detect and split polygon coordinates
+   coords = np.array([[170, 10], [-170, 10], [-170, -10], [170, -10], [170, 10]])
+   result = handler.detect(coords)
+   if result.crosses_idl:
+       eastern, western = result.sub_polygons
 
 Example 4: Work with Vector Files
 ==================================

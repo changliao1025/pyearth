@@ -6,10 +6,6 @@ from pyearth.gis.idl_handler import (
     IdlHandler,
     IdlStrategy,
     IdlResult,
-    check_cross_international_date_line_geometry,
-    check_cross_international_date_line_polygon,
-    split_international_date_line_polygon_coordinates,
-    unwrap_longitudes,
 )
 
 
@@ -19,7 +15,7 @@ def test_idl_handler_detect_crossing():
         [170.0, -10.0],
         [170.0,  10.0],
         [-170.0, 10.0],
-        [-170.0,-10.0],
+        [-170.0, -10.0],
         [170.0, -10.0],
     ])
     handler = IdlHandler(strategy=IdlStrategy.CHECK_ONLY)
@@ -46,7 +42,7 @@ def test_idl_handler_split_strategy():
         [170.0, -10.0],
         [170.0,  10.0],
         [-170.0, 10.0],
-        [-170.0,-10.0],
+        [-170.0, -10.0],
         [170.0, -10.0],
     ])
     handler = IdlHandler(strategy=IdlStrategy.SPLIT)
@@ -71,9 +67,12 @@ def test_idl_handler_split_starting_western():
         [-170.0, 10.0],
         [-170.0, -10.0],
     ])
-    sub_polys = split_international_date_line_polygon_coordinates(coords)
-    assert len(sub_polys) == 2
-    eastern, western = sub_polys
+    handler = IdlHandler(strategy=IdlStrategy.SPLIT)
+    result = handler.detect(coords)
+    assert result.crosses_idl is True
+    assert result.sub_polygons is not None
+    assert len(result.sub_polygons) == 2
+    eastern, western = result.sub_polygons
     assert np.all(eastern[:, 0] > 0)
     assert np.all(western[:, 0] < 0)
     assert np.allclose(eastern[0], eastern[-1])
@@ -118,7 +117,8 @@ def test_idl_handler_fix_ogr_geometry():
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
 
-    assert check_cross_international_date_line_geometry(poly) is True
+    check_handler = IdlHandler(strategy=IdlStrategy.CHECK_ONLY)
+    assert check_handler.detect(poly).crosses_idl is True
 
     # Test SPLIT
     split_handler = IdlHandler(strategy=IdlStrategy.SPLIT)
