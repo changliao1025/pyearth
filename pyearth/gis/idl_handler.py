@@ -5,7 +5,7 @@ that cross the International Date Line (IDL). It consolidates all IDL-related
 operations into a single class with well-defined strategies.
 
 Usage:
-    from pyearth.gis.geometry.idl_handler import IdlHandler, IdlStrategy
+    from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
 
     handler = IdlHandler(IdlStrategy.SPLIT)
 
@@ -348,14 +348,13 @@ def _check_ccw(coords: np.ndarray) -> bool:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
     if len(coords) < 3:
         return True
-    return calculate_signed_area_shoelace(coords) > 0
+    return bool(calculate_signed_area_shoelace(coords) > 0)
 
 
 def _reverse_if_cw(coords: np.ndarray) -> np.ndarray:
-    """Reverse vertex order if clockwise, keeping closure point intact."""
+    """Reverse vertex order if clockwise."""
     if not _check_ccw(coords):
-        unclosed = coords[:-1]
-        return np.vstack([unclosed[::-1], coords[-1:]]).copy()
+        return coords[::-1].copy()
     return coords
 
 
@@ -386,6 +385,8 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
         find_great_circle_intersection_with_meridian,
     )
     coords = np.array(aCoord_gcs, dtype=np.float64)
+    if coords.ndim != 2 or coords.shape[1] != 2:
+        raise ValueError("coords must be a 2D array with shape (n, 2)")
     if coords.shape[0] < 4:
         raise ValueError("Polygon must have at least 3 unique vertices plus closure")
     if not np.allclose(coords[0], coords[-1]):
@@ -403,56 +404,74 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
     crossing_edge_indices = (
         np.where(eastward)[0].tolist() + np.where(westward)[0].tolist()
     )
-    #check how many vertices are on the IDL, exclude the closure point to avoid double-counting   
-            
-    if len(crossing_edge_indices) != 2: #only touching? this should have fixed already in the detect function
-        if np.any(lons[~idl_vtx] < 0):
-            for i in range(len(coords) - 1):
-                if abs(abs(lons[i]) - 180.0) < IDL_TOLERANCE:
-                    coords[i, 0] = -180.0 + IDL_OFFSET
-            western = _close_ring_if_needed(_ensure_valid_range(coords[:-1].copy()))
-            eastern = np.empty((0, 2), dtype=np.float64)
-        else:
-            for i in range(len(coords) - 1):
-                if abs(abs(lons[i]) - 180.0) < IDL_TOLERANCE:
-                    coords[i, 0] = 180.0 - IDL_OFFSET
-            eastern = _close_ring_if_needed(_ensure_valid_range(coords[:-1].copy()))
+
+    if len(crossing_edge_indices) != 2:
+        non_idl = lons[~idl_vtx]
+        eastern_count = int(np.sum((non_idl > 0) & (non_idl < 180.0)))
+        western_count = int(np.sum((non_idl < 0) & (non_idl > -180.0)))
+        coords_norm = coords.copy()
+        if eastern_count >= western_count:
+            for i in range(len(coords_norm) - 1):
+                if abs(abs(coords_norm[i, 0]) - 180.0) < IDL_TOLERANCE:
+                    coords_norm[i, 0] = 180.0 - IDL_OFFSET
+            eastern = _close_ring_if_needed(_ensure_valid_range(coords_norm[:-1].copy()))
             western = np.empty((0, 2), dtype=np.float64)
+        else:
+            for i in range(len(coords_norm) - 1):
+                if abs(abs(coords_norm[i, 0]) - 180.0) < IDL_TOLERANCE:
+                    coords_norm[i, 0] = -180.0 + IDL_OFFSET
+            western = _close_ring_if_needed(_ensure_valid_range(coords_norm[:-1].copy()))
+            eastern = np.empty((0, 2), dtype=np.float64)
         return [eastern, western]
     else:
-        lat_map = {}
-        for edge_idx in crossing_edge_indices:
-            i_cur, i_nxt = edge_idx, (edge_idx + 1) % (len(coords) - 1)
-            lon_a, lat_a = coords[i_cur, 0], coords[i_cur, 1]
-            lon_b, lat_b = coords[i_nxt, 0], coords[i_nxt, 1]
-            intersection_result = find_great_circle_intersection_with_meridian(
-                lon_a, lat_a, lon_b, lat_b
-            )
-            if intersection_result is not None:
-                lat_map[edge_idx] = intersection_result
         EASTERN_BOUNDARY = 180.0 - IDL_OFFSET
         WESTERN_BOUNDARY = -180.0 + IDL_OFFSET
-        def _boundary_for(sub_list):
-            if not sub_list:
-                return WESTERN_BOUNDARY
-            if any(pt[0] > 0 for pt in sub_list):
-                return EASTERN_BOUNDARY
-            return WESTERN_BOUNDARY
+
+        lat_map = {}
+        for edge_idx in crossing_edge_indices:
+            i_cur = edge_idx
+            i_nxt = (edge_idx + 1) % (len(coords) - 1)
+            lon_a, lat_a = float(coords[i_cur, 0]), float(coords[i_cur, 1])
+            lon_b, lat_b = float(coords[i_nxt, 0]), float(coords[i_nxt, 1])
+            if lon_a > 0:
+                _, lat_cross = find_great_circle_intersection_with_meridian(
+                    lon_a, lat_a, lon_b, lat_b, 180.0
+                )
+            else:
+                _, lat_cross = find_great_circle_intersection_with_meridian(
+                    lon_b, lat_b, lon_a, lat_a, 180.0
+                )
+            lat_map[edge_idx] = lat_cross
+
+        eastern_pts: list = []
+        western_pts: list = []
+
+        first_lon = float(coords[0, 0])
+        if first_lon >= 0:
+            active, inactive = eastern_pts, western_pts
+        else:
+            active, inactive = western_pts, eastern_pts
+
+        def _boundary_for(coords_list):
+            return EASTERN_BOUNDARY if coords_list is eastern_pts else WESTERN_BOUNDARY
+
         def _snap_append(lst, lon, lat):
             if abs(abs(lon) - 180.0) < IDL_TOLERANCE:
                 lon = _boundary_for(lst)
             lst.append([lon, lat])
-        eastern_pts: list = []
-        western_pts: list = []
-        active = eastern_pts
-        inactive = western_pts
+
+        _snap_append(active, float(coords[0, 0]), float(coords[0, 1]))
+
         for i in range(len(coords) - 1):
-            _snap_append(active, coords[i, 0], coords[i, 1])
             if i in lat_map:
                 lat_cross = lat_map[i]
                 active.append([_boundary_for(active), lat_cross])
                 active, inactive = inactive, active
                 active.append([_boundary_for(active), lat_cross])
+
+            next_idx = i + 1
+            _snap_append(active, float(coords[next_idx, 0]), float(coords[next_idx, 1]))
+
         eastern_arr = (
             _close_ring_if_needed(_ensure_valid_range(np.array(eastern_pts)))
             if eastern_pts
@@ -476,7 +495,7 @@ def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geo
         raise ValueError("Input geometry cannot be None")
     srs = None
     try:
-        srs = geometry_in.CloneSRG()
+        srs = geometry_in.GetSpatialReference()
     except Exception:
         srs = None
     n_geom = geometry_in.GetGeometryCount()
@@ -485,7 +504,7 @@ def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geo
         for i in range(n_geom):
             part = geometry_in.GetGeometryRef(i)
             if part is not None:
-                converted = _convert_single_idl_polygon(part)
+                converted = _convert_single_idl_polygon(part, srs=srs)
                 if converted is not None:
                     parts.append(converted)
         if parts:
@@ -494,10 +513,12 @@ def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geo
                 multi.AddGeometry(p)
             return multi if len(parts) > 1 else parts[0]
         return None
-    return _convert_single_idl_polygon(geometry_in)
+    return _convert_single_idl_polygon(geometry_in, srs=srs)
 
 
-def _convert_single_idl_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geometry]:
+def _convert_single_idl_polygon(
+    geometry_in: ogr.Geometry, srs: Optional[osr.SpatialReference] = None
+) -> Optional[ogr.Geometry]:
     """Convert a single IDL-crossing polygon by shifting western longitudes +360."""
     if geometry_in.GetGeometryType() != ogr.wkbPolygon:
         return None
@@ -554,7 +575,7 @@ class IdlHandler:
 
     Examples
     --------
-    >>> from pyearth.gis.geometry.idl_handler import IdlHandler, IdlStrategy
+    >>> from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
     >>> handler = IdlHandler(IdlStrategy.SPLIT)
     >>> result = handler.detect(np.array([[170, -10], [170, 10], [-170, 10], [-170, -10], [170, -10]]))
     >>> result.crosses_idl
@@ -594,16 +615,21 @@ class IdlHandler:
             return [ogr_geom]
         if self.strategy == IdlStrategy.DROP:
             return []
+        srs = None
+        try:
+            srs = ogr_geom.GetSpatialReference()
+        except Exception:
+            srs = None
         if self.strategy == IdlStrategy.SPLIT:
             sub_polys = _split_international_date_line_polygon(coords)
             results = []
             for sp in sub_polys:
                 if sp.size > 0 and len(sp) >= 3:
-                    results.append(self._coords_to_ogr(sp, ogr_geom.CloneSRG()))
+                    results.append(self._coords_to_ogr(sp, srs))
             return results
         if self.strategy == IdlStrategy.WRAP_TO_360:
             unwrapped = _shift_western_by_360(coords, self.longitude_cutoff)
-            return [self._coords_to_ogr(unwrapped, ogr_geom.CloneSRG())]
+            return [self._coords_to_ogr(unwrapped, srs)]
         return [ogr_geom]
 
     def unwrap(self, coords: np.ndarray) -> np.ndarray:
@@ -649,4 +675,101 @@ class IdlHandler:
         if srs is not None:
             poly.AssignSpatialReference(srs)
         return poly
+
+
+# ---------------------------------------------------------------------------
+# Module-level convenience functions
+# ---------------------------------------------------------------------------
+def split_international_date_line_polygon_coordinates(
+    coords: np.ndarray,
+) -> List[np.ndarray]:
+    """Split polygon coordinates crossing the IDL into [eastern, western] polygons.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Array of shape (n, 2) with (longitude, latitude) coordinates.
+
+    Returns
+    -------
+    List[np.ndarray]
+        [eastern_polygon, western_polygon] coordinate arrays.
+    """
+    return _split_international_date_line_polygon(coords)
+
+
+def check_cross_international_date_line_geometry(geom: ogr.Geometry) -> bool:
+    """Check whether an OGR geometry crosses the International Date Line.
+
+    Parameters
+    ----------
+    geom : ogr.Geometry
+        Input OGR geometry.
+
+    Returns
+    -------
+    bool
+        True if the geometry crosses the IDL, False otherwise.
+    """
+    if geom is None:
+        return False
+    try:
+        coords = IdlHandler._extract_coords(geom)
+    except Exception:
+        return False
+    crosses, _ = _detect_id_crossing(coords)
+    return crosses
+
+
+def check_cross_international_date_line_polygon(
+    coords: np.ndarray,
+) -> Tuple[bool, Optional[np.ndarray]]:
+    """Check whether polygon coordinates cross the International Date Line.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Array of shape (n, 2) with (longitude, latitude) coordinates.
+
+    Returns
+    -------
+    Tuple[bool, Optional[np.ndarray]]
+        (crosses_idl, adjusted_coords_if_touching)
+    """
+    return _detect_id_crossing(coords)
+
+
+def convert_international_date_line_polygon_to_unwrapped_polygon(
+    geom: ogr.Geometry,
+) -> Optional[ogr.Geometry]:
+    """Convert an IDL-crossing OGR polygon by shifting western longitudes +360.
+
+    Parameters
+    ----------
+    geom : ogr.Geometry
+        Input OGR geometry.
+
+    Returns
+    -------
+    Optional[ogr.Geometry]
+        Unwrapped geometry or None if invalid.
+    """
+    return _convert_to_unwrapped_polygon(geom)
+
+
+def unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
+    """Unwrap longitudes so they are continuous across the IDL.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Array of shape (n, 2) with (longitude, latitude) coordinates.
+
+    Returns
+    -------
+    np.ndarray
+        Array with unwrapped longitude coordinates.
+    """
+    return _unwrap_longitudes(coords)
+
 

@@ -87,7 +87,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     bool
         True if vertices are in counter-clockwise order, False otherwise.
     """
-    from pyearth.gis.geometry.idl_handler import IdlHandler
+    from pyearth.gis.idl_handler import IdlHandler
+    from pyearth.gis.polar_handler import polygon_includes_pole
 
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
@@ -101,8 +102,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
         signed_area = calculate_signed_area_spherical_polar(coords, pole="south")
     else:
         # Use IdlHandler for IDL-aware CCW check
-        return IdlHandler.check_counter_clockwise(coords)
-    return signed_area > 0
+        return bool(IdlHandler.check_counter_clockwise(coords))
+    return bool(signed_area > 0)
 
 
 def get_polygon_orientation(coords: np.ndarray) -> str:
