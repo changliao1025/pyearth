@@ -62,14 +62,17 @@ Usage Questions
 5. How do I handle International Date Line issues?
 ---------------------------------------------------
 
-   PyEarth includes utilities for handling geometries that cross the International Date Line:
+   PyEarth provides an IDL handler for detecting and transforming geometries that cross the International Date Line:
 
    .. code-block:: python
 
-      from pyearth.gis.geometry.international_date_line_utility import (
-          check_cross_international_date_line_geometry,
-          split_international_date_line_polygon_coordinates
-      )
+      from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
+
+      # Detect and split crossing polygons
+      handler = IdlHandler(strategy=IdlStrategy.SPLIT)
+      result = handler.detect(coords)
+      if result.crosses_idl:
+          eastern, western = result.sub_polygons
 
 6. Which coordinate system should I use?
 -----------------------------------------

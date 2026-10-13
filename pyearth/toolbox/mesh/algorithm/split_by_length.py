@@ -83,7 +83,7 @@ def split_polyline_by_length(aFlowline_in, dDistance):
     return aPolyline_out
 
 
-def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precision=True):
+def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precision=False):
     """
     Split a line into smaller segments with maximum length constraint.
 
@@ -94,7 +94,7 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precisio
         pLine_in: Input line to split
         dLength_in: Maximum length for each segment (meters)
         tolerance: Relative tolerance for length comparison (default: 1e-6)
-        use_high_precision: Use float128 for conversions (default: True)
+        use_high_precision: Use float128 for conversions (default: False)
 
     Returns:
         List of line segments

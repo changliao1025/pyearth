@@ -408,6 +408,8 @@ class pypolyline:
             export_point_as_polygon_file(aPoint_out, sFilename_out)
 
         sWkt_buffer_polygon = pUnionPolygon.ExportToWkt()
+        if sWkt_buffer_polygon is None:
+            raise ValueError("Failed to generate buffer polygon WKT.")
 
         return sWkt_buffer_polygon, aPoint_out, aCircle_out
 
@@ -549,6 +551,7 @@ class pypolyline:
                 self.aPoint[i].dLongitude_degree, self.aPoint[i].dLatitude_degree
             )
 
+        pGeometry.FlattenTo2D()
         sWKT = pGeometry.ExportToWkt()
         pGeometry = None
         self.wkt = sWKT

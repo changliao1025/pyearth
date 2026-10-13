@@ -10,7 +10,7 @@ from osgeo import ogr, osr
 from pyearth.system.define_global_variables import *
 from pyearth.toolbox.management.vector.reproject import reproject_vector
 from pyearth.toolbox.management.vector.merge_features import merge_features
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_extension
+from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
 
 # Configure logging
@@ -73,8 +73,8 @@ def clip_vector_by_polygon_file(
     try:
         # Get drivers using multi-format support
         try:
-            pDriver_vector_in = get_vector_driver_from_extension(sFilename_vector_in)
-            pDriver_vector_out = get_vector_driver_from_extension(sFilename_vector_out)
+            pDriver_vector_in = get_vector_driver_from_filename(sFilename_vector_in)
+            pDriver_vector_out = get_vector_driver_from_filename(sFilename_vector_out)
             logger.info("Vector drivers initialized")
         except ValueError as e:
             raise RuntimeError(f"Unsupported file format: {e}")
@@ -366,7 +366,7 @@ def clip_vector_by_polygon_files(
 
         # Get output driver from extension
         sExtension_out = os.path.splitext(sFilename_vector_out)[1]
-        pDriver_out = get_vector_driver_from_extension(sExtension_out)
+        pDriver_out = get_vector_driver_from_filename(sFilename_vector_out)
         if pDriver_out is None:
             raise RuntimeError(f"Could not get driver for extension: {sExtension_out}")
 
