@@ -148,7 +148,7 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
     idl_vertices = np.zeros_like(lons, dtype=bool)
     idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < IDL_TOLERANCE
     # Closure point matches first vertex (if first is on IDL, closure is too)
-    idl_vertices[-1] = idl_vertices[0]  
+    idl_vertices[-1] = idl_vertices[0]
 
     # Hemisphere support from non-IDL vertices
     non_idl_lons = lons[~idl_vertices]
@@ -404,7 +404,6 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
     crossing_edge_indices = (
         np.where(eastward)[0].tolist() + np.where(westward)[0].tolist()
     )
-
     if len(crossing_edge_indices) != 2:
         non_idl = lons[~idl_vtx]
         eastern_count = int(np.sum((non_idl > 0) & (non_idl < 180.0)))
