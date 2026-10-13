@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from pyearth.toolbox.data.remove_duplicate_closure import (
+from pyearth.gis.geometry.remove_duplicate_closure import (
     remove_duplicate_closure as remove_duplicate_closure,
 )
 

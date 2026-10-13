@@ -1,5 +1,10 @@
 import numpy as np
 import logging
+from pyearth.toolbox.mesh.nvector import pynvector
+from pyearth.toolbox.mesh.algorithm.convert_nvector_point import (
+    point_to_nvector,
+    nvector_to_point,
+)
 
 # Configure logger for this module
 logger = logging.getLogger(__name__)
@@ -17,7 +22,6 @@ def slerp(n1, n2, t):
     Returns:
         Interpolated n-vector
     """
-    from pyearth.toolbox.mesh.nvector import pynvector
 
     use_high_precision = getattr(n1, "use_high_precision", False)
     dtype = np.float128 if use_high_precision else np.float64
@@ -111,8 +115,6 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precisio
         The adaptive segmentation limits the number of segments based on numerical
         precision to prevent creating segments that cannot be distinguished.
     """
-    from pyearth.toolbox.mesh.line import pyline
-
     # Input validation
     if dLength_in <= 0:
         raise ValueError("Length threshold must be positive")
@@ -153,8 +155,8 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precisio
     pPoint_end = pLine_in.pPoint_end
 
     # Use high precision for n-vector conversion if requested
-    n1 = pPoint_start.toNvector(use_high_precision=use_high_precision)
-    n2 = pPoint_end.toNvector(use_high_precision=use_high_precision)
+    n1 = point_to_nvector(pPoint_start, use_high_precision=use_high_precision)
+    n2 = point_to_nvector(pPoint_end, use_high_precision=use_high_precision)
 
     aLine_out = []
 
@@ -171,7 +173,7 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precisio
             pPoint_end_seg = pPoint_end
         else:
             mid2 = slerp(n1, n2, t2)
-            pPoint_end_seg = mid2.toLatLon()
+            pPoint_end_seg = nvector_to_point(mid2)
 
         # Check for degenerate segments (nearly same start and end points)
         dSeg_candidate = pPoint_start_seg.calculate_distance(pPoint_end_seg)
@@ -196,7 +198,7 @@ def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precisio
 
         # Create line segment with error handling
         try:
-            pLine = pyline(pPoint_start_seg, pPoint_end_seg)
+            pLine = pLine_in.__class__(pPoint_start_seg, pPoint_end_seg)
             aLine_out.append(pLine)
             pPoint_start_seg = pPoint_end_seg
         except ValueError as e:

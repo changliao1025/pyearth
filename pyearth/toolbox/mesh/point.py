@@ -88,49 +88,7 @@ class pypoint(object):
     def __str__(self):
         return f"({self.dLongitude_degree}, {self.dLatitude_degree}, {self.dElevation})"
 
-    def toNvector(self, use_high_precision=False):
-        """
-        Convert geographic coordinates to n-vector representation.
 
-        Uses high precision (float128) for trigonometric calculations when enabled
-        to maintain accuracy during spherical interpolation operations.
-
-        Note: replicated in LatLon_NvectorEllipsoidal
-
-        Args:
-            use_high_precision (bool): Use float128 for calculations (default: False)
-
-        Returns:
-            pynvector: An n-vector object with unit length
-        """
-        from pyearth.toolbox.mesh.nvector import pynvector
-
-        # Use high precision if requested
-        if use_high_precision:
-            dtype = np.float128
-            a = dtype(self.dLatitude_radian)
-            b = dtype(self.dLongitude_radian)
-        else:
-            a = self.dLatitude_radian
-            b = self.dLongitude_radian
-
-        # Calculate n-vector components
-        c = np.sin(a)
-        e = np.cos(a)
-        d = np.sin(b)
-        f = np.cos(b)
-
-        # Right-handed vector: x -> 0°E,0°N; y -> 90°E,0°N, z -> 90°N
-        x = e * f
-        y = e * d
-        z = c
-
-        point = dict()
-        point["x"] = x
-        point["y"] = y
-        point["z"] = z
-        pNvector = pynvector(point, use_high_precision=use_high_precision)
-        return pNvector
 
     def __hash__(self):
         return hash(

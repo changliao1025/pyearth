@@ -643,11 +643,9 @@ class IdlHandler:
 
         Handles IDL crossings by unwrapping longitudes first if needed.
         """
-        crosses, _ = _detect_id_crossing(coords)
-        if crosses:
-            unwrapped = _unwrap_longitudes(coords)
-            return _check_ccw(unwrapped)
-        return _check_ccw(coords)
+        from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
+
+        return check_counter_clockwise(coords)
 
     @staticmethod
     def calculate_signed_area(coords: np.ndarray) -> float:

@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Union
-from pyearth.toolbox.data.remove_duplicate_closure import remove_duplicate_closure
+from pyearth.gis.geometry.remove_duplicate_closure import remove_duplicate_closure
 
 def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     x, y = coords[:, 0], coords[:, 1]
@@ -74,6 +74,30 @@ def calculate_signed_area_spherical_polar(
     return calculate_signed_area_shoelace(projected)
 
 
+def unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
+    """Unwrap longitudes relative to the first vertex so they are continuous across the IDL.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Array of shape (n, 2) representing polygon coordinates as (lon, lat).
+
+    Returns
+    -------
+    np.ndarray
+        Array with unwrapped longitude coordinates, same shape as input.
+    """
+    if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
+        raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
+    result = coords.copy()
+    lons = result[:, 0]
+    ref_lon = lons[0]
+    diff = lons - ref_lon
+    lons[diff > 180.0] -= 360.0
+    lons[diff < -180.0] += 360.0
+    return result
+
+
 def check_counter_clockwise(coords: np.ndarray) -> bool:
     """Check if polygon coordinates are in counter-clockwise order.
 
@@ -87,7 +111,6 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     bool
         True if vertices are in counter-clockwise order, False otherwise.
     """
-    from pyearth.gis.idl_handler import IdlHandler
     from pyearth.gis.polar_handler import polygon_includes_pole
 
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
@@ -101,8 +124,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     elif polygon_includes_pole(coords, pole="south"):
         signed_area = calculate_signed_area_spherical_polar(coords, pole="south")
     else:
-        # Use IdlHandler for IDL-aware CCW check
-        return bool(IdlHandler.check_counter_clockwise(coords))
+        unwrapped = unwrap_longitudes(coords)
+        signed_area = calculate_signed_area_shoelace(unwrapped)
     return bool(signed_area > 0)
 
 

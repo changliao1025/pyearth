@@ -86,38 +86,4 @@ class pynvector(object):
     def __str__(self):
         return f"[{self.dX:.4f}, {self.dY:.4f}, {self.dZ:.4f}]"
 
-    def toLatLon(self):
-        """
-        Convert n-vector back to latitude/longitude coordinates.
 
-        Uses high precision (float128) for intermediate calculations if enabled,
-        but always returns float64 coordinates for pypoint storage.
-
-        Returns:
-            pypoint: Point with latitude and longitude in degrees
-        """
-        from pyearth.toolbox.mesh.point import pypoint
-
-        dtype = np.float128 if self.use_high_precision else np.float64
-
-        # Re-normalize in the target precision to reduce drift before conversion.
-        x = dtype(self.dX)
-        y = dtype(self.dY)
-        z = dtype(self.dZ)
-        norm = np.sqrt(x * x + y * y + z * z)
-
-        if norm > dtype(0.0):
-            x = x / norm
-            y = y / norm
-            z = z / norm
-
-        lat_rad = np.arctan2(z, np.sqrt(x * x + y * y))
-        lon_rad = np.arctan2(y, x)
-
-        # Always return as float64 for storage
-        return pypoint(
-            {
-                "dLongitude_degree": float(np.degrees(lon_rad)),
-                "dLatitude_degree": float(np.degrees(lat_rad)),
-            }
-        )
