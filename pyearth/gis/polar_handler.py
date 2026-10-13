@@ -268,7 +268,7 @@ def polygon_includes_pole(
 
     # A polygon cannot enclose a pole if its vertices are entirely in the opposite hemisphere
     lats = arr[:, 1]
-    if pole_type == PoleType.NORTH and (np.all(lats <= 0.0) or np.mean(lats) <= 0.0):
+    if pole_type == PoleType.NORTH and np.all(lats <= 0.0):
         return False
     if pole_type == PoleType.SOUTH and (np.all(lats >= 0.0) or np.mean(lats) >= 0.0):
         return False
