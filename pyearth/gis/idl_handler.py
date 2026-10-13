@@ -5,7 +5,7 @@ that cross the International Date Line (IDL). It consolidates all IDL-related
 operations into a single class with well-defined strategies.
 
 Usage:
-    from pyearth.gis.geometry.idl_handler import IdlHandler, IdlStrategy
+    from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
 
     handler = IdlHandler(IdlStrategy.SPLIT)
 
@@ -148,7 +148,7 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
     idl_vertices = np.zeros_like(lons, dtype=bool)
     idl_vertices[:-1] = np.abs(np.abs(lons[:-1]) - 180.0) < IDL_TOLERANCE
     # Closure point matches first vertex (if first is on IDL, closure is too)
-    idl_vertices[-1] = idl_vertices[0]  
+    idl_vertices[-1] = idl_vertices[0]
 
     # Hemisphere support from non-IDL vertices
     non_idl_lons = lons[~idl_vertices]
@@ -403,8 +403,8 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
     crossing_edge_indices = (
         np.where(eastward)[0].tolist() + np.where(westward)[0].tolist()
     )
-    #check how many vertices are on the IDL, exclude the closure point to avoid double-counting   
-            
+    #check how many vertices are on the IDL, exclude the closure point to avoid double-counting
+
     if len(crossing_edge_indices) != 2: #only touching? this should have fixed already in the detect function
         if np.any(lons[~idl_vtx] < 0):
             for i in range(len(coords) - 1):
@@ -554,7 +554,7 @@ class IdlHandler:
 
     Examples
     --------
-    >>> from pyearth.gis.geometry.idl_handler import IdlHandler, IdlStrategy
+    >>> from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
     >>> handler = IdlHandler(IdlStrategy.SPLIT)
     >>> result = handler.detect(np.array([[170, -10], [170, 10], [-170, 10], [-170, -10], [170, -10]]))
     >>> result.crosses_idl

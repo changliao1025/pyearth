@@ -87,7 +87,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
     bool
         True if vertices are in counter-clockwise order, False otherwise.
     """
-    from pyearth.gis.geometry.idl_handler import IdlHandler
+    from pyearth.gis.idl_handler import IdlHandler
+    from pyearth.gis.polar_handler import polygon_includes_pole
 
     if not isinstance(coords, np.ndarray) or coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D numpy array with shape (n, 2)")
