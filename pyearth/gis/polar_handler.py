@@ -266,6 +266,13 @@ def polygon_includes_pole(
     except ValueError:
         raise ValueError("pole must be either 'south' or 'north'")
 
+    # A polygon cannot enclose a pole if its vertices are entirely in the opposite hemisphere
+    lats = arr[:, 1]
+    if pole_type == PoleType.NORTH and np.all(lats <= 0.0):
+        return False
+    if pole_type == PoleType.SOUTH and (np.all(lats >= 0.0) or np.mean(lats) >= 0.0):
+        return False
+
     projected = _project_to_polar_plane(arr, pole_type)
     origin = np.array([0.0, 0.0])
 
@@ -349,6 +356,20 @@ class PolarHandler:
 
         projected = _project_to_polar_plane(arr, self._pole)
         origin = np.array([0.0, 0.0])
+
+        lats = arr[:, 1]
+        if self._pole == PoleType.NORTH and (np.all(lats <= 0.0) or np.mean(lats) <= 0.0):
+            return PolarResult(
+                includes_pole=False,
+                pole=self._pole,
+                projected_coords=projected,
+            )
+        if self._pole == PoleType.SOUTH and (np.all(lats >= 0.0) or np.mean(lats) >= 0.0):
+            return PolarResult(
+                includes_pole=False,
+                pole=self._pole,
+                projected_coords=projected,
+            )
 
         includes = _point_in_polygon_2d(
             origin,

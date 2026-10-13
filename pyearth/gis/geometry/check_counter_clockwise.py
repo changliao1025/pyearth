@@ -102,8 +102,8 @@ def check_counter_clockwise(coords: np.ndarray) -> bool:
         signed_area = calculate_signed_area_spherical_polar(coords, pole="south")
     else:
         # Use IdlHandler for IDL-aware CCW check
-        return IdlHandler.check_counter_clockwise(coords)
-    return signed_area > 0
+        return bool(IdlHandler.check_counter_clockwise(coords))
+    return bool(signed_area > 0)
 
 
 def get_polygon_orientation(coords: np.ndarray) -> str:
