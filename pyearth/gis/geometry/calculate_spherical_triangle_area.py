@@ -49,6 +49,8 @@ from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import 
     calculate_distance_based_on_longitude_latitude,
 )
 
+__all__ = ["calculate_spherical_triangle_area"]
+
 
 def calculate_spherical_triangle_area(
     aLongitude_in: Union[List[float], np.ndarray],

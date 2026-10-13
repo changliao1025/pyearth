@@ -70,8 +70,8 @@ from osgeo import ogr, osr
 logger = logging.getLogger(__name__)
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_driver_from_extension,
-    get_vector_format_from_extension,
+    get_vector_driver_from_filename,
+    get_vector_format_from_filename,
 )
 
 
@@ -435,11 +435,11 @@ def copy_geometry_without_attributes(
         if pDriver_in is None:
             raise RuntimeError(f"Input GDAL driver '{sFormat_in}' not available")
     else:
-        # Try to get driver from extension for better format detection
+        # Try to get driver from filename for better format detection
         try:
-            pDriver_in = get_vector_driver_from_extension(sFilename_in)
+            pDriver_in = get_vector_driver_from_filename(sFilename_in)
             if pDriver_in is not None:
-                sFormat_detected = get_vector_format_from_extension(sFilename_in)
+                sFormat_detected = get_vector_format_from_filename(sFilename_in)
                 logger.debug(f"Auto-detected input format: {sFormat_detected}")
             else:
                 logger.debug("Could not auto-detect input format, will use ogr.Open()")
@@ -452,9 +452,9 @@ def copy_geometry_without_attributes(
     # ========================================================================
 
     if sFormat_out is None:
-        # Auto-detect from extension using library function
+        # Auto-detect from filename using library function
         try:
-            sFormat_out = get_vector_format_from_extension(sFilename_out)
+            sFormat_out = get_vector_format_from_filename(sFilename_out)
             logger.info(f"Auto-detected output format: {sFormat_out}")
         except Exception as e:
             logger.warning(
@@ -467,7 +467,7 @@ def copy_geometry_without_attributes(
 
     # Get output driver using library function
     try:
-        pDriver_out = get_vector_driver_from_extension(sFilename_out)
+        pDriver_out = get_vector_driver_from_filename(sFilename_out)
         if pDriver_out is None:
             # Fallback to getting driver by name
             pDriver_out = ogr.GetDriverByName(sFormat_out)
@@ -476,7 +476,7 @@ def copy_geometry_without_attributes(
     except Exception as e:
         # Fallback to getting driver by name
         logger.debug(
-            f"get_vector_driver_from_extension failed: {e}, using GetDriverByName"
+            f"get_vector_driver_from_filename failed: {e}, using GetDriverByName"
         )
         pDriver_out = ogr.GetDriverByName(sFormat_out)
         if pDriver_out is None:

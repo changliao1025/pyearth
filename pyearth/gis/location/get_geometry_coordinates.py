@@ -11,6 +11,15 @@ import numpy as np
 from osgeo import ogr
 from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
 
+__all__ = [
+    "get_geometry_coordinates",
+    "get_polygon_exterior_coords",
+    "get_multipolygon_exterior_coords",
+    "get_linestring_coords",
+    "get_point_coords",
+    "get_linearring_coords",
+]
+
 
 def get_geometry_coordinates(
     geometry: ogr.Geometry,

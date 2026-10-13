@@ -1,33 +1,38 @@
+"""Read text-based configuration file utility."""
+
 import os
+from typing import Dict
 
 
-def read_configuration_file(sFilename_configuration_in):
+def read_configuration_file(sFilename_configuration_in: str) -> Dict[str, str]:
     """
-    Read a text based configuration file
+    Read a text-based comma-separated key,value configuration file.
 
-    Args:
-        sFilename_configuration_in (string): The filename of the configuration file
+    Parameters
+    ----------
+    sFilename_configuration_in : str
+        Path to the configuration file.
 
-    Returns:
-        dict: The content in the configuration file
+    Returns
+    -------
+    dict
+        Dictionary mapping keys to values.
     """
+    if not os.path.exists(sFilename_configuration_in):
+        raise FileNotFoundError(
+            f"The configuration file does not exist: {sFilename_configuration_in}"
+        )
 
-    if os.path.exists(sFilename_configuration_in):
-        pass
-    else:
-        print("The xml file does not exist!")
-        return
+    config_out: Dict[str, str] = {}
+    with open(sFilename_configuration_in, "r", encoding="utf-8", errors="ignore") as ifs:
+        for line in ifs:
+            line_str = line.strip()
+            if not line_str or line_str.startswith("#"):
+                continue
+            parts = line_str.split(",", 1)
+            if len(parts) == 2:
+                key = parts[0].strip()
+                val = parts[1].strip()
+                config_out[key] = val
 
-    aConfig_out = {}
-    ifs = open(sFilename_configuration_in, "r")
-    for sLine in ifs:
-        sDummy = sLine.split(",")
-        if len(sDummy) == 2:
-            print(sDummy)
-            sKey = (sDummy[0]).strip()
-            sValue = (sDummy[1]).strip()
-            aConfig_out[sKey] = sValue
-        else:
-            pass
-    ifs.close()
-    return aConfig_out
+    return config_out

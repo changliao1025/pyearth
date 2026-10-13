@@ -7,23 +7,26 @@ from pyearth.toolbox.mesh.point import pypoint
 from pyearth.toolbox.mesh.nvector import pynvector
 
 
+_HIGH_PRECISION_DTYPE = getattr(np, "float128", np.longdouble)
+
+
 def point_to_nvector(pPoint: pypoint, use_high_precision: bool = False) -> pynvector:
     """
     Convert a pypoint object to an n-vector representation.
 
-    Uses high precision (float128) for trigonometric calculations when enabled
+    Uses high precision for trigonometric calculations when enabled
     to maintain accuracy during spherical interpolation operations.
 
     Args:
         pPoint (pypoint): Point with geographic coordinates in degrees.
-        use_high_precision (bool): Use float128 for calculations (default: False).
+        use_high_precision (bool): Use extended precision for calculations (default: False).
 
     Returns:
         pynvector: An n-vector object with unit length.
     """
 
     if use_high_precision:
-        dtype = np.float128
+        dtype = _HIGH_PRECISION_DTYPE
         a = dtype(pPoint.dLatitude_radian)
         b = dtype(pPoint.dLongitude_radian)
     else:
@@ -58,7 +61,7 @@ def nvector_to_point(pNvector: pynvector) -> pypoint:
         pypoint: Point with latitude and longitude in degrees.
     """
 
-    dtype = np.float128 if pNvector.use_high_precision else np.float64
+    dtype = _HIGH_PRECISION_DTYPE if pNvector.use_high_precision else np.float64
 
     # Re-normalize in target precision to reduce drift before conversion
     x = dtype(pNvector.dX)

@@ -10,6 +10,9 @@ from pyearth.toolbox.mesh.algorithm.convert_nvector_point import (
 logger = logging.getLogger(__name__)
 
 
+_HIGH_PRECISION_DTYPE = getattr(np, "float128", np.longdouble)
+
+
 def slerp(n1, n2, t):
     """
     Spherical linear interpolation between two n-vectors.
@@ -24,7 +27,7 @@ def slerp(n1, n2, t):
     """
 
     use_high_precision = getattr(n1, "use_high_precision", False)
-    dtype = np.float128 if use_high_precision else np.float64
+    dtype = _HIGH_PRECISION_DTYPE if use_high_precision else np.float64
     eps = dtype(1e-18 if use_high_precision else 1e-12)
 
     dot_product = dtype(np.clip(n1.dot(n2), -1.0, 1.0))

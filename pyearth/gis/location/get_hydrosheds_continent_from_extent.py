@@ -8,6 +8,8 @@ codes (af, as, au, etc.) for organizing global hydrological datasets.
 
 from typing import Tuple, List, Optional, Union
 
+__all__ = ["get_hydrosheds_continent_from_extent"]
+
 
 def _box_area(box: Tuple[float, float, float, float]) -> float:
     """Calculate area of an axis-aligned bounding box.

@@ -1,49 +1,49 @@
+"""Raster validity verification utilities using GDAL band checksums."""
+
 import os
-import logging
-from typing import Union
-from pathlib import Path
+from typing import Optional, Union
 from osgeo import gdal
+
+PathLike = Union[str, os.PathLike]
+
+__all__ = ["gdal_check_raster_valid"]
 
 
 def gdal_check_raster_valid(
-    sFilename_in: Union[str, Path], print_err: bool = False
+    filename: Optional[PathLike] = None,
+    print_err: bool = False,
+    **kwargs,
 ) -> bool:
-    """Check if a raster file is valid by computing band checksums.
-
-    This function attempts to open a raster and compute checksums for all bands
-    as a quick validity test. While not infallible, it should capture most cases
-    of corrupted or invalid raster files.
+    """Check if a raster file is valid by computing checksums for all raster bands.
 
     Parameters
     ----------
-    sFilename_in : str or Path
+    filename : str or os.PathLike
         Path to the raster file to validate.
-    print_err : bool, optional
-        If True, print GDAL error messages to stdout. Default is False.
+    print_err : bool, default=False
+        If True, print GDAL error messages if validation fails.
 
     Returns
     -------
     bool
-        True if the raster is valid (all band checksums computed successfully),
+        True if all raster bands can be opened and checksums computed successfully,
         False otherwise.
-
-    Notes
-    -----
-    Adapted from https://lists.osgeo.org/pipermail/gdal-dev/2013-November/037520.html
-    This check reads through all raster bands to compute checksums, which may be
-    slow for large files. Returns False if the file doesn't exist or can't be opened.
     """
+    if filename is None:
+        filename = kwargs.get("sFilename_in")
 
-    sFilename_in = str(sFilename_in)
+    if filename is None:
+        return False
 
-    if not os.path.exists(sFilename_in):
+    filepath = os.fspath(filename)
+    if not os.path.exists(filepath):
         if print_err:
-            print(f"File does not exist: {sFilename_in}")
+            print(f"File does not exist: {filepath}")
         return False
 
     dataset = None
     try:
-        dataset = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
+        dataset = gdal.Open(filepath, gdal.GA_ReadOnly)
         if dataset is None:
             if print_err:
                 error_msg = gdal.GetLastErrorMsg()
@@ -55,7 +55,7 @@ def gdal_check_raster_valid(
         band_count = dataset.RasterCount
         if band_count < 1:
             if print_err:
-                print(f"Raster has no bands: {sFilename_in}")
+                print(f"Raster has no bands: {filepath}")
             return False
 
         for i in range(band_count):
@@ -65,19 +65,15 @@ def gdal_check_raster_valid(
                     print(f"Unable to access band {i + 1}")
                 return False
             band.Checksum()
+            band = None
 
         return True
 
-    except RuntimeError as e:
-        if print_err:
-            error_msg = gdal.GetLastErrorMsg()
-            print(f"GDAL error: {error_msg if error_msg else str(e)}")
-        return False
-
     except Exception as e:
         if print_err:
-            print(f"Unexpected error validating raster: {str(e)}")
+            print(f"Error validating raster: {e}")
         return False
 
     finally:
         dataset = None
+

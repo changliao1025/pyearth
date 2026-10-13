@@ -81,7 +81,7 @@ References
        http://www.idlcoyote.com/map_tips/lonconvert.html
 """
 
-from typing import Union, overload
+from typing import Union, Sequence, overload
 import numpy as np
 
 
@@ -248,128 +248,23 @@ def convert_360_to_180(
     .. [1] IDL Coyote longitude conversion:
            http://www.idlcoyote.com/map_tips/lonconvert.html
     """
-    # Check if input is a scalar (float or int)
+__all__ = [
+    "convert_360_to_180",
+    "convert_180_to_360",
+]
+
+
+def convert_360_to_180(longitude_degree_in: Union[float, Sequence[float], np.ndarray]) -> Union[float, np.ndarray]:
+    """Convert longitude value(s) from [0°, 360°] range to [-180°, 180°] range."""
     if isinstance(longitude_degree_in, (int, float)):
-        longitude_out = ((longitude_degree_in + 180) % 360) - 180
-        return float(longitude_out)
-
-    # Handle array-like inputs (numpy arrays, lists, tuples)
+        return float(((longitude_degree_in + 180.0) % 360.0) - 180.0)
     longitude_array = np.asarray(longitude_degree_in)
-    longitude_out = ((longitude_array + 180) % 360) - 180
-    return longitude_out
+    return ((longitude_array + 180.0) % 360.0) - 180.0
 
 
-def convert_180_to_360(longitude_degree_in: float) -> float:
-    """
-    Convert longitude from [-180°, 180°] range to [0°, 360°] range.
-
-    This function converts longitude values from the standard western/eastern
-    hemisphere system [-180°, 180°] to the continuous eastward system [0°, 360°].
-    The conversion uses modulo arithmetic to handle values outside the expected
-    range and ensure consistent wrapping.
-
-    Parameters
-    ----------
-    longitude_degree_in : float
-        Input longitude in degrees, expected to be in the range [-180°, 180°],
-        but values outside this range are automatically wrapped. Can be any
-        real number.
-
-    Returns
-    -------
-    float
-        Longitude in degrees in the range [0°, 360°]. The value 0° and 360°
-        represent the same meridian (Prime Meridian).
-
-    Notes
-    -----
-    **Conversion Formula**:
-
-        longitude_out = (longitude_in + 360) % 360
-
-    This formula works by:
-    1. Shifting input by +360° to handle negative values
-    2. Taking modulo 360 to wrap to [0°, 360°] range
-
-    **Examples of Conversion**:
-
-    - 0° → 0° (Prime Meridian)
-    - 90° → 90° (Eastern hemisphere)
-    - -90° → 270° (Western hemisphere becomes eastern)
-    - 180° → 180° (International Date Line)
-    - -180° → 180° (International Date Line)
-
-    **Handling Out-of-Range Values**:
-
-    Values outside [-180°, 180°] are automatically wrapped:
-    - 270° → 270° (already in target range)
-    - -200° → 160° (wraps to eastern hemisphere)
-    - 400° → 40° (wraps around once)
-
-    **Why This Conversion Is Useful**:
-
-    The [0°, 360°] system is particularly useful for:
-    - Global datasets without discontinuity at International Date Line
-    - Climate models and ocean circulation data
-    - Computational domains spanning the Pacific Ocean
-    - Avoiding negative longitude values in certain algorithms
-
-    Warnings
-    --------
-    For longitude values at exactly -180°, this function returns 180° rather
-    than 0°. The ±180° meridian and 0° meridian are on opposite sides of Earth.
-
-    Examples
-    --------
-    Convert typical longitude values:
-
-    >>> convert_180_to_360(0.0)
-    0.0
-    >>> convert_180_to_360(90.0)
-    90.0
-    >>> convert_180_to_360(-90.0)
-    270.0
-    >>> convert_180_to_360(180.0)
-    180.0
-    >>> convert_180_to_360(-180.0)
-    180.0
-
-    Handle values outside expected range:
-
-    >>> convert_180_to_360(270.0)
-    270.0
-    >>> convert_180_to_360(-270.0)
-    90.0
-    >>> convert_180_to_360(450.0)
-    90.0
-
-    Convert coordinates for Pacific-centered map:
-
-    >>> # Los Angeles: 118°W
-    >>> lon = convert_180_to_360(-118.0)
-    >>> print(f"{lon}°E")
-    242.0°E
-
-    >>> # Tokyo: 140°E
-    >>> lon = convert_180_to_360(140.0)
-    >>> print(f"{lon}°E")
-    140.0°E
-
-    Use with global climate data:
-
-    >>> # Convert western hemisphere longitudes for global grid
-    >>> san_francisco = convert_180_to_360(-122.4)  # 122.4°W → 237.6°E
-    >>> new_york = convert_180_to_360(-74.0)  # 74°W → 286°E
-    >>> london = convert_180_to_360(-0.1)  # 0.1°W → 359.9°E
-
-    See Also
-    --------
-    convert_360_to_180 : Inverse conversion ([0, 360] to [-180, 180])
-
-    References
-    ----------
-    .. [1] IDL Coyote longitude conversion:
-           http://www.idlcoyote.com/map_tips/lonconvert.html
-    """
-    longitude_out = (longitude_degree_in + 360.0) % 360.0
-    return longitude_out
+def convert_180_to_360(longitude_degree_in: Union[float, Sequence[float], np.ndarray]) -> Union[float, np.ndarray]:
+    """Convert longitude from [-180°, 180°] range to [0°, 360°] range."""
+    if isinstance(longitude_degree_in, (int, float)):
+        return float((longitude_degree_in + 360.0) % 360.0)
+    longitude_array = np.asarray(longitude_degree_in)
+    return (longitude_array + 360.0) % 360.0

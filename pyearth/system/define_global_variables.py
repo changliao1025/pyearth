@@ -95,17 +95,56 @@ Modifying global variables in this module may affect behavior across the entire
 PyEarth package. Exercise caution when changing values.
 """
 
+import getpass
 import os
 import platform
+import sys
 from pathlib import Path
-import getpass
 from typing import Optional
+
 from pyearth.system.python.get_python_environment import get_python_environment
 
+__all__ = [
+    "sPlatform_os",
+    "sUsername",
+    "sWorkspace_home",
+    "sWorkspace_scratch",
+    "slash",
+    "sMachine",
+    "sExtension_txt",
+    "sExtension_envi",
+    "sExtension_tiff",
+    "sExtension_header",
+    "sExtension_netcdf",
+    "sExtension_shapefile",
+    "sExtension_json",
+    "sExtension_png",
+    "sExtension_jpg",
+    "sExtension_ps",
+    "sExtension_vtk",
+    "missing_value",
+    "nmonth",
+    "iMonth_start",
+    "iMonth_end",
+    "mms2mmd",
+    "feet2meter",
+    "inch2mm",
+    "cms2cmd",
+    "earth_radius",
+    "sConda_env_path",
+    "sConda_env_name",
+    "sConda_env_type",
+    "sPath_proj_lib",
+    "print_environment_info",
+]
 
 # Platform and user information
 sPlatform_os = platform.system()
-sUsername = getpass.getuser()
+try:
+    sUsername = getpass.getuser()
+except Exception:
+    sUsername = os.environ.get("USER", os.environ.get("USERNAME", "unknown"))
+
 sWorkspace_home = str(Path.home())
 
 # Platform-specific configuration
@@ -113,19 +152,15 @@ if sPlatform_os == "Windows":
     slash = "\\"
     sMachine = "windows"
     sWorkspace_scratch = "C:\\scratch"
-else:  # Linux or Unix-like systems
+else:
     slash = "/"
-
     if sPlatform_os == "Linux":
         sMachine = "linux"
-        sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
     elif sPlatform_os == "Darwin":
         sMachine = "mac"
-        sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
     else:
         sMachine = "unix"
-        sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
-
+    sWorkspace_scratch = os.path.join(sWorkspace_home, "scratch")
 
 # Data file type extensions
 sExtension_txt = ".txt"
@@ -142,71 +177,78 @@ sExtension_jpg = ".jpg"
 sExtension_ps = ".ps"
 sExtension_vtk = ".vtk"
 
-
 # Constant values
 missing_value = -9999.0
-nmonth = 12  # Number of months in a year
+nmonth = 12
 
 # Time period defaults
-iMonth_start = 1  # January (1-based indexing)
-iMonth_end = 12  # December (1-based indexing)
+iMonth_start = 1
+iMonth_end = 12
 
 # Unit conversion factors
 mms2mmd = 24 * 3600.0  # mm/s to mm/day
 feet2meter = 0.3048  # feet to meters
 inch2mm = 25.4  # inches to millimeters
-cms2cmd = 24 * 3600  # cm/s to cm/day
+cms2cmd = 24 * 3600.0  # cm/s to cm/day
 
-# Earth parameters (WGS84)
-earth_radius = 6378137.0  # Equatorial radius in meters
+# Earth parameters (WGS84 equatorial radius)
+earth_radius = 6378137.0
 
-
-# Python environment detection
-sConda_env_path, sConda_env_name, sConda_env_type = get_python_environment()
+# Python environment detection with safe fallback
+try:
+    sConda_env_path, sConda_env_name, sConda_env_type = get_python_environment()
+except Exception:
+    sConda_env_path = sys.prefix
+    sConda_env_name = "system"
+    sConda_env_type = "system"
 
 
 def _configure_proj_lib() -> Optional[str]:
-    """
-    Configure PROJ_LIB environment variable for PROJ library data.
+    """Configure PROJ_LIB and PROJ_DATA environment variables for PROJ library data.
 
-    Searches for the PROJ data directory in standard installation locations
-    based on the detected Python environment. Sets the PROJ_LIB environment
-    variable if found.
+    Searches for the PROJ data directory in environment variables and standard
+    installation locations. Sets both PROJ_LIB and PROJ_DATA if found.
 
     Returns
     -------
     Optional[str]
         Path to PROJ data directory if found, None otherwise.
-
-    Notes
-    -----
-    Search order:
-    1. <env>/share/proj (Linux/Mac conda/venv)
-    2. <env>/Library/share/proj (Windows conda-forge)
-    3. <env>/Lib/site-packages/pyproj/proj_dir/share/proj (PyPI pyproj)
-
-    This function is called automatically when the module is imported.
     """
-    # Check for PROJ data directory in multiple possible locations
-    proj_paths = [
-        os.path.join(sConda_env_path, "share", "proj"),  # Linux/Mac typical
-        os.path.join(
-            sConda_env_path, "Library", "share", "proj"
-        ),  # Windows conda-forge
-        os.path.join(
-            sConda_env_path,
-            "Lib",
-            "site-packages",
-            "pyproj",
-            "proj_dir",
-            "share",
-            "proj",
-        ),  # PyPI pyproj
-    ]
+    # 1. Check existing environment variables first
+    for env_var in ("PROJ_DATA", "PROJ_LIB"):
+        val = os.environ.get(env_var)
+        if val and os.path.isdir(val):
+            os.environ["PROJ_LIB"] = val
+            os.environ["PROJ_DATA"] = val
+            return val
 
-    for proj_path in proj_paths:
-        if os.path.exists(proj_path) and os.path.isdir(proj_path):
+    # 2. Check standard search locations based on environment path and sys.prefix
+    search_roots = [sConda_env_path]
+    if sys.prefix not in search_roots:
+        search_roots.append(sys.prefix)
+
+    candidate_paths = []
+    for root in search_roots:
+        candidate_paths.extend([
+            os.path.join(root, "share", "proj"),
+            os.path.join(root, "Library", "share", "proj"),
+            os.path.join(root, "Lib", "site-packages", "pyproj", "proj_dir", "share", "proj"),
+            os.path.join(
+                root,
+                "lib",
+                f"python{sys.version_info.major}.{sys.version_info.minor}",
+                "site-packages",
+                "pyproj",
+                "proj_dir",
+                "share",
+                "proj",
+            ),
+        ])
+
+    for proj_path in candidate_paths:
+        if os.path.isdir(proj_path):
             os.environ["PROJ_LIB"] = proj_path
+            os.environ["PROJ_DATA"] = proj_path
             return proj_path
 
     return None
@@ -217,8 +259,7 @@ sPath_proj_lib = _configure_proj_lib()
 
 
 def print_environment_info(verbose: bool = True) -> None:
-    """
-    Print system and environment configuration information.
+    """Print system and environment configuration information.
 
     Displays platform details, Python environment information, and
     PROJ library configuration status.
@@ -228,21 +269,6 @@ def print_environment_info(verbose: bool = True) -> None:
     verbose : bool, default=True
         If True, prints detailed information including all paths and
         constants. If False, prints only essential environment info.
-
-    Examples
-    --------
-    >>> from pyearth.system.define_global_variables import print_environment_info
-    >>> print_environment_info()
-    === PyEarth Environment Configuration ===
-    Platform: Linux (linux)
-    User: username
-    Home: /home/username
-    ...
-
-    >>> # Brief output
-    >>> print_environment_info(verbose=False)
-    Python Environment: conda (myenv)
-    PROJ_LIB: /path/to/proj
     """
     print("=== PyEarth Environment Configuration ===")
     print(f"Platform: {sPlatform_os} ({sMachine})")
@@ -259,15 +285,16 @@ def print_environment_info(verbose: bool = True) -> None:
         print(f"Environment Path: {sConda_env_path}")
 
     if sPath_proj_lib:
-        print(f"\n✓ PROJ_LIB: {sPath_proj_lib}")
+        print(f"\n✓ PROJ_LIB / PROJ_DATA: {sPath_proj_lib}")
     else:
-        print("\n⚠ PROJ_LIB: Not found (coordinate transformations may be limited)")
+        print("\n⚠ PROJ data directory: Not found (coordinate transformations may be limited)")
 
     if verbose:
-        print(f"\nConstants:")
+        print("\nConstants:")
         print(f"  Earth radius: {earth_radius:,.0f} m")
         print(f"  Missing value: {missing_value}")
-        print(f"\nSupported formats:")
+        print("\nSupported formats:")
         print(f"  Raster: {sExtension_tiff}, {sExtension_envi}, {sExtension_netcdf}")
         print(f"  Vector: {sExtension_shapefile}, {sExtension_json}")
         print(f"  Image: {sExtension_png}, {sExtension_jpg}")
+

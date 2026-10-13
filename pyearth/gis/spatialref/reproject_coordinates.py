@@ -1,38 +1,111 @@
-"""
-Coordinate reprojection utilities using GDAL/OSR.
+"""Coordinate reprojection utilities using GDAL/OSR.
 
 Functions for reprojecting coordinates between different spatial reference systems
-using Well-Known Text (WKT) projection definitions.
+using Well-Known Text (WKT), EPSG codes, or SpatialReference objects.
 """
 
-from typing import List, Tuple, Optional
-
-import osgeo
+from typing import List, Optional, Sequence, Tuple, Union
 from osgeo import osr
+
+osr.UseExceptions()
+
+__all__ = [
+    "reproject_coordinates",
+    "reproject_coordinates_batch",
+]
+
+SpatialRefLike = Union[str, osr.SpatialReference, int]
+
+
+def _build_spatial_reference(
+    projection: Optional[SpatialRefLike], is_target: bool = False
+) -> osr.SpatialReference:
+    """Construct an osr.SpatialReference from WKT, EPSG code, or existing SpatialReference."""
+    if projection is None:
+        if is_target:
+            sr = osr.SpatialReference()
+            sr.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+            sr.ImportFromEPSG(4326)
+            return sr
+        raise ValueError("Source projection cannot be None.")
+
+    sr = osr.SpatialReference()
+    sr.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+    if isinstance(projection, osr.SpatialReference):
+        cloned = projection.Clone()
+        cloned.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        return cloned
+
+    if isinstance(projection, int):
+        try:
+            sr.ImportFromEPSG(projection)
+            return sr
+        except Exception as e:
+            raise RuntimeError(f"Failed to import EPSG:{projection}: {e}") from e
+
+    if isinstance(projection, str):
+        proj_str = projection.strip()
+        if not proj_str:
+            raise ValueError("Projection string cannot be empty.")
+
+        # Check if it's an EPSG string
+        proj_upper = proj_str.upper()
+        if proj_upper.startswith("EPSG:"):
+            try:
+                code = int(proj_upper.split(":")[1].strip())
+                sr.ImportFromEPSG(code)
+                return sr
+            except (ValueError, IndexError):
+                pass
+        elif proj_str.isdigit():
+            try:
+                sr.ImportFromEPSG(int(proj_str))
+                return sr
+            except Exception:
+                pass
+
+        # Try WKT import
+        try:
+            if sr.ImportFromWkt(proj_str) == 0:
+                return sr
+        except Exception:
+            pass
+
+        # Try user input (handles PROJ, URN, etc.)
+        try:
+            if sr.SetFromUserInput(proj_str) == 0:
+                return sr
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to parse projection '{proj_str[:50]}...': {e}"
+            ) from e
+
+    raise ValueError(f"Unsupported projection type: {type(projection).__name__}")
 
 
 def reproject_coordinates(
-    dx_in: float,
-    dy_in: float,
-    pProjection_source_in: str,
-    pProjection_target_in: Optional[str] = None,
+    x: Optional[float] = None,
+    y: Optional[float] = None,
+    source_projection: Optional[SpatialRefLike] = None,
+    target_projection: Optional[SpatialRefLike] = None,
+    **kwargs,
 ) -> Tuple[float, float]:
     """Reproject a single coordinate pair from source to target projection.
 
-    Transforms coordinates between spatial reference systems using WKT
-    (Well-Known Text) projection definitions. If no target projection is
-    specified, coordinates are reprojected to WGS84 (EPSG:4326).
+    Transforms coordinates between spatial reference systems. If no target
+    projection is specified, coordinates are reprojected to WGS84 (EPSG:4326).
 
     Parameters
     ----------
-    dx_in : float
+    x : float
         X coordinate (longitude or easting) in source projection.
-    dy_in : float
+    y : float
         Y coordinate (latitude or northing) in source projection.
-    pProjection_source_in : str
-        WKT string defining the source spatial reference system.
-    pProjection_target_in : str, optional
-        WKT string defining the target spatial reference system.
+    source_projection : str, int, or osr.SpatialReference
+        Definition of the source spatial reference system (WKT, EPSG, etc.).
+    target_projection : str, int, or osr.SpatialReference, optional
+        Definition of the target spatial reference system.
         If None, defaults to WGS84 (EPSG:4326).
 
     Returns
@@ -43,238 +116,123 @@ def reproject_coordinates(
     Raises
     ------
     ValueError
-        If WKT strings are invalid or coordinate transformation fails.
+        If coordinates are invalid or transformation fails.
     RuntimeError
-        If spatial reference import or transformation setup fails.
-
-    Notes
-    -----
-    - Automatically handles GDAL 3+ axis order changes using traditional GIS order
-    - Z coordinate is computed but not returned (use for 2D transformations)
-    - For batch operations, use `reproject_coordinates_batch` for better performance
-
-    Examples
-    --------
-    >>> # Reproject UTM to WGS84
-    >>> utm_wkt = 'PROJCS["WGS 84 / UTM zone 10N",...]'
-    >>> x_wgs, y_wgs = reproject_coordinates(500000, 4649776, utm_wkt)
-    >>> # x_wgs ≈ -122.0, y_wgs ≈ 42.0
-
-    See Also
-    --------
-    reproject_coordinates_batch : Reproject multiple coordinate pairs efficiently
+        If spatial reference setup fails.
     """
+    if x is None:
+        x = kwargs.get("dx_in")
+    if y is None:
+        y = kwargs.get("dy_in")
+    if source_projection is None:
+        source_projection = kwargs.get("pProjection_source_in")
+    if target_projection is None and "pProjection_target_in" in kwargs:
+        target_projection = kwargs.get("pProjection_target_in")
+
+    if x is None or y is None:
+        raise ValueError("Both x and y coordinates must be provided.")
+
     try:
-        # Validate inputs
-        x = float(dx_in)
-        y = float(dy_in)
+        x_val = float(x)
+        y_val = float(y)
     except (TypeError, ValueError) as e:
-        raise ValueError(f"Invalid coordinate values: x={dx_in}, y={dy_in}. Error: {e}")
+        raise ValueError(f"Invalid coordinate values: x={x}, y={y}. Error: {e}") from e
 
-    if not isinstance(pProjection_source_in, str) or not pProjection_source_in.strip():
-        raise ValueError("Source projection must be a non-empty WKT string.")
+    sr_source = _build_spatial_reference(source_projection, is_target=False)
+    sr_target = _build_spatial_reference(target_projection, is_target=True)
 
-    # Setup target spatial reference
-    spatial_ref_target = osr.SpatialReference()
     try:
-        if pProjection_target_in is not None:
-            if (
-                not isinstance(pProjection_target_in, str)
-                or not pProjection_target_in.strip()
-            ):
-                raise ValueError("Target projection must be a non-empty WKT string.")
-            result = spatial_ref_target.ImportFromWkt(pProjection_target_in)
-            if result != 0:
-                raise RuntimeError(
-                    f"Failed to import target projection WKT. Error code: {result}"
-                )
-        else:
-            # Default to WGS84
-            result = spatial_ref_target.ImportFromEPSG(4326)
-            if result != 0:
-                raise RuntimeError(
-                    f"Failed to import WGS84 (EPSG:4326). Error code: {result}"
-                )
+        transform = osr.CoordinateTransformation(sr_source, sr_target)
     except Exception as e:
-        raise RuntimeError(f"Error setting up target spatial reference: {e}")
+        raise RuntimeError(f"Failed to create coordinate transformation: {e}") from e
 
-    # Setup source spatial reference
-    spatial_ref_source = osr.SpatialReference()
     try:
-        result = spatial_ref_source.ImportFromWkt(pProjection_source_in)
-        if result != 0:
-            raise RuntimeError(
-                f"Failed to import source projection WKT. Error code: {result}"
-            )
+        x_out, y_out, _ = transform.TransformPoint(x_val, y_val)
     except Exception as e:
-        raise RuntimeError(f"Error importing source projection: {e}")
+        raise ValueError(
+            f"Coordinate transformation failed for point ({x_val}, {y_val}): {e}"
+        ) from e
 
-    # Handle GDAL 3+ axis order (https://github.com/OSGeo/gdal/issues/1546)
-    if int(osgeo.__version__[0]) >= 3:
-        spatial_ref_source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-        spatial_ref_target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    # Create coordinate transformation
-    try:
-        transform = osr.CoordinateTransformation(spatial_ref_source, spatial_ref_target)
-    except Exception as e:
-        raise RuntimeError(f"Failed to create coordinate transformation: {e}")
-
-    # Transform coordinates
-    try:
-        x_out, y_out, z = transform.TransformPoint(x, y)
-    except Exception as e:
-        raise ValueError(f"Coordinate transformation failed for point ({x}, {y}): {e}")
-
-    return x_out, y_out
+    return float(x_out), float(y_out)
 
 
 def reproject_coordinates_batch(
-    aX_in: List[float],
-    aY_in: List[float],
-    pProjection_source_in: str,
-    pProjection_target_in: Optional[str] = None,
+    x_coordinates: Optional[Sequence[float]] = None,
+    y_coordinates: Optional[Sequence[float]] = None,
+    source_projection: Optional[SpatialRefLike] = None,
+    target_projection: Optional[SpatialRefLike] = None,
+    **kwargs,
 ) -> Tuple[List[float], List[float]]:
     """Reproject multiple coordinate pairs from source to target projection.
 
     Efficiently transforms a batch of coordinates between spatial reference systems
-    using WKT (Well-Known Text) projection definitions. This function creates the
-    transformation once and applies it to all coordinate pairs, making it more
-    efficient than calling `reproject_coordinates` repeatedly.
+    using GDAL's vectorized C++ transformation pipeline.
 
     Parameters
     ----------
-    aX_in : List[float]
-        List of X coordinates (longitude or easting) in source projection.
-    aY_in : List[float]
-        List of Y coordinates (latitude or northing) in source projection.
-        Must have the same length as aX_in.
-    pProjection_source_in : str
-        WKT string defining the source spatial reference system.
-    pProjection_target_in : str, optional
-        WKT string defining the target spatial reference system.
+    x_coordinates : Sequence[float]
+        X coordinates (longitudes or eastings) in source projection.
+    y_coordinates : Sequence[float]
+        Y coordinates (latitudes or northings) in source projection.
+        Must have the same length as x_coordinates.
+    source_projection : str, int, or osr.SpatialReference
+        Definition of the source spatial reference system.
+    target_projection : str, int, or osr.SpatialReference, optional
+        Definition of the target spatial reference system.
         If None, defaults to WGS84 (EPSG:4326).
 
     Returns
     -------
     Tuple[List[float], List[float]]
-        Tuple of (x_out, y_out) lists containing transformed coordinates
-        in target projection.
+        Tuple of (x_out, y_out) lists containing transformed coordinates.
 
     Raises
     ------
     ValueError
-        If input coordinate lists have different lengths, are empty,
-        or if WKT strings are invalid.
+        If coordinate sequences have mismatched lengths or are empty.
     RuntimeError
-        If spatial reference import or transformation setup fails.
-
-    Notes
-    -----
-    - Automatically handles GDAL 3+ axis order changes using traditional GIS order
-    - More efficient than calling `reproject_coordinates` in a loop
-    - Returns lists in the same order as inputs
-    - Z coordinates are computed but not returned
-
-    Examples
-    --------
-    >>> # Reproject multiple UTM points to WGS84
-    >>> utm_wkt = 'PROJCS["WGS 84 / UTM zone 10N",...]'
-    >>> x_utm = [500000, 510000, 520000]
-    >>> y_utm = [4649776, 4650000, 4650224]
-    >>> x_wgs, y_wgs = reproject_coordinates_batch(x_utm, y_utm, utm_wkt)
-    >>> # Returns lists of transformed coordinates
-
-    See Also
-    --------
-    reproject_coordinates : Reproject a single coordinate pair
+        If spatial reference setup fails.
     """
-    # Validate input lists
-    if not isinstance(aX_in, (list, tuple)) or not isinstance(aY_in, (list, tuple)):
-        raise ValueError(
-            "Input coordinates must be lists or tuples. "
-            f"Got types: x={type(aX_in).__name__}, y={type(aY_in).__name__}"
-        )
+    if x_coordinates is None:
+        x_coordinates = kwargs.get("aX_in")
+    if y_coordinates is None:
+        y_coordinates = kwargs.get("aY_in")
+    if source_projection is None:
+        source_projection = kwargs.get("pProjection_source_in")
+    if target_projection is None and "pProjection_target_in" in kwargs:
+        target_projection = kwargs.get("pProjection_target_in")
 
-    n_points = len(aX_in)
+    if x_coordinates is None or y_coordinates is None:
+        raise ValueError("Both x_coordinates and y_coordinates must be provided.")
+
+    n_points = len(x_coordinates)
     if n_points == 0:
-        raise ValueError("Input coordinate lists cannot be empty.")
-
-    if len(aY_in) != n_points:
+        raise ValueError("Input coordinate sequences cannot be empty.")
+    if len(y_coordinates) != n_points:
         raise ValueError(
-            f"Coordinate lists must have the same length. "
-            f"Got x={n_points}, y={len(aY_in)}"
+            f"Coordinate sequences must have the same length. "
+            f"Got x={n_points}, y={len(y_coordinates)}"
         )
 
-    if not isinstance(pProjection_source_in, str) or not pProjection_source_in.strip():
-        raise ValueError("Source projection must be a non-empty WKT string.")
-
-    # Setup target spatial reference
-    spatial_ref_target = osr.SpatialReference()
     try:
-        if pProjection_target_in is not None:
-            if (
-                not isinstance(pProjection_target_in, str)
-                or not pProjection_target_in.strip()
-            ):
-                raise ValueError("Target projection must be a non-empty WKT string.")
-            result = spatial_ref_target.ImportFromWkt(pProjection_target_in)
-            if result != 0:
-                raise RuntimeError(
-                    f"Failed to import target projection WKT. Error code: {result}"
-                )
-        else:
-            # Default to WGS84
-            result = spatial_ref_target.ImportFromEPSG(4326)
-            if result != 0:
-                raise RuntimeError(
-                    f"Failed to import WGS84 (EPSG:4326). Error code: {result}"
-                )
-    except Exception as e:
-        raise RuntimeError(f"Error setting up target spatial reference: {e}")
+        pts = [(float(x), float(y)) for x, y in zip(x_coordinates, y_coordinates)]
+    except (TypeError, ValueError) as e:
+        raise ValueError(f"Invalid coordinate in batch: {e}") from e
 
-    # Setup source spatial reference
-    spatial_ref_source = osr.SpatialReference()
+    sr_source = _build_spatial_reference(source_projection, is_target=False)
+    sr_target = _build_spatial_reference(target_projection, is_target=True)
+
     try:
-        result = spatial_ref_source.ImportFromWkt(pProjection_source_in)
-        if result != 0:
-            raise RuntimeError(
-                f"Failed to import source projection WKT. Error code: {result}"
-            )
+        transform = osr.CoordinateTransformation(sr_source, sr_target)
     except Exception as e:
-        raise RuntimeError(f"Error importing source projection: {e}")
+        raise RuntimeError(f"Failed to create coordinate transformation: {e}") from e
 
-    # Handle GDAL 3+ axis order (https://github.com/OSGeo/gdal/issues/1546)
-    if int(osgeo.__version__[0]) >= 3:
-        spatial_ref_source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-        spatial_ref_target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    # Create coordinate transformation
     try:
-        transform = osr.CoordinateTransformation(spatial_ref_source, spatial_ref_target)
+        transformed = transform.TransformPoints(pts)
     except Exception as e:
-        raise RuntimeError(f"Failed to create coordinate transformation: {e}")
+        raise ValueError(f"Batch coordinate transformation failed: {e}") from e
 
-    # Transform all coordinates
-    aX_out = []
-    aY_out = []
+    x_out = [pt[0] for pt in transformed]
+    y_out = [pt[1] for pt in transformed]
 
-    for i in range(n_points):
-        try:
-            x = float(aX_in[i])
-            y = float(aY_in[i])
-        except (TypeError, ValueError) as e:
-            raise ValueError(
-                f"Invalid coordinate at index {i}: x={aX_in[i]}, y={aY_in[i]}. Error: {e}"
-            )
-
-        try:
-            x_out, y_out, z = transform.TransformPoint(x, y)
-            aX_out.append(x_out)
-            aY_out.append(y_out)
-        except Exception as e:
-            raise ValueError(
-                f"Coordinate transformation failed at index {i} for point ({x}, {y}): {e}"
-            )
-
-    return aX_out, aY_out
+    return x_out, y_out

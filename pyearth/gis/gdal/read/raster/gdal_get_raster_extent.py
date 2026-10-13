@@ -1,41 +1,56 @@
+"""Raster spatial extent calculation utilities using GDAL."""
+
 import os
-from typing import Tuple
+from typing import Optional, Tuple, Union
 from osgeo import gdal
+
 from pyearth.gis.spatialref.is_wgs84_projection import is_wgs84_projection
 
+PathLike = Union[str, os.PathLike]
 
-def gdal_get_raster_extent(sFilename_in: str) -> Tuple[float, float, float, float]:
-    """
-    Compute the spatial extent of a raster dataset.
+__all__ = ["gdal_get_raster_extent"]
+
+
+def gdal_get_raster_extent(
+    filename: Optional[PathLike] = None,
+    **kwargs,
+) -> Tuple[float, float, float, float]:
+    """Compute the spatial extent of a raster dataset.
 
     Parameters
     ----------
-    sFilename_in : str
+    filename : str or os.PathLike
         Path to the raster file readable by GDAL.
 
     Returns
     -------
     tuple of float
         ``(min_x, max_x, min_y, max_y)`` in the dataset's coordinate system.
-        For rasters in EPSG:4326, the result is clamped to the global longitude
-        and latitude bounds of ``[-180, 180]`` and ``[-90, 90]`` respectively.
+        For rasters in WGS84 (EPSG:4326), the result is clamped to global
+        bounds ``[-180.0, 180.0]`` and ``[-90.0, 90.0]``.
 
     Raises
     ------
     FileNotFoundError
-        If ``sFilename_in`` does not exist.
+        If the file does not exist.
     RuntimeError
         If GDAL cannot open the file.
     ValueError
         If the raster does not define a valid geotransform.
     """
+    if filename is None:
+        filename = kwargs.get("sFilename_in")
 
-    if not os.path.exists(sFilename_in):
-        raise FileNotFoundError(f"File {sFilename_in} does not exist.")
+    if filename is None:
+        raise ValueError("Filename must be provided.")
 
-    ds = gdal.Open(sFilename_in, gdal.GA_ReadOnly)
+    filepath = os.fspath(filename)
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"File {filepath} does not exist.")
+
+    ds = gdal.Open(filepath, gdal.GA_ReadOnly)
     if ds is None:
-        raise RuntimeError(f"Unable to open raster {sFilename_in}.")
+        raise RuntimeError(f"Unable to open raster {filepath}.")
 
     try:
         try:
@@ -45,7 +60,7 @@ def gdal_get_raster_extent(sFilename_in: str) -> Tuple[float, float, float, floa
 
         if not geotransform:
             raise ValueError(
-                f"Raster {sFilename_in} does not contain geotransform metadata."
+                f"Raster {filepath} does not contain geotransform metadata."
             )
 
         raster_width = ds.RasterXSize
@@ -68,7 +83,7 @@ def gdal_get_raster_extent(sFilename_in: str) -> Tuple[float, float, float, floa
     finally:
         ds = None
 
-    if is_wgs84_projection(projection):
+    if projection and is_wgs84_projection(projection):
         min_x = max(min_x, -180.0)
         max_x = min(max_x, 180.0)
         min_y = max(min_y, -90.0)

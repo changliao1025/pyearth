@@ -1,141 +1,191 @@
+"""Export points and point collections to vector GIS files."""
+
 import os
-from typing import List, Optional, Any
+from pathlib import Path
+from typing import Any, List, Optional, Tuple, Union
 
 from osgeo import ogr, osr
-from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
+from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
+
+ogr.UseExceptions()
+osr.UseExceptions()
+
+PathLike = Union[str, os.PathLike]
+
+__all__ = [
+    "export_point_to_vector_file",
+    "export_point_as_polygon_file",
+]
+
+
+def _resolve_spatial_reference(
+    srs: Optional[Union[osr.SpatialReference, int, str]], default_epsg: int = 4326
+) -> osr.SpatialReference:
+    """Resolve an EPSG code, WKT string, or SpatialReference instance."""
+    if srs is None:
+        spatial_ref = osr.SpatialReference()
+        spatial_ref.ImportFromEPSG(default_epsg)
+        return spatial_ref
+    if isinstance(srs, osr.SpatialReference):
+        return srs
+    spatial_ref = osr.SpatialReference()
+    if isinstance(srs, int):
+        spatial_ref.ImportFromEPSG(srs)
+        return spatial_ref
+    if isinstance(srs, str):
+        try:
+            spatial_ref.ImportFromWkt(srs)
+            return spatial_ref
+        except Exception:
+            spatial_ref.SetFromUserInput(srs)
+            return spatial_ref
+    spatial_ref.ImportFromEPSG(default_epsg)
+    return spatial_ref
+
+
+def _extract_point_coords(point: Any, projected: bool) -> Tuple[float, float]:
+    """Extract (x, y) or (lon, lat) from points (objects, dicts, tuples)."""
+    if isinstance(point, (tuple, list)):
+        if len(point) < 2:
+            raise ValueError(
+                f"Point tuple or list must contain at least 2 elements: {point}"
+            )
+        return float(point[0]), float(point[1])
+
+    if isinstance(point, dict):
+        if projected:
+            x = point.get("dx", point.get("x"))
+            y = point.get("dy", point.get("y"))
+        else:
+            x = point.get(
+                "dLongitude_degree",
+                point.get("longitude", point.get("lon", point.get("x"))),
+            )
+            y = point.get(
+                "dLatitude_degree",
+                point.get("latitude", point.get("lat", point.get("y"))),
+            )
+        if x is not None and y is not None:
+            return float(x), float(y)
+        raise ValueError(f"Could not extract coordinates from point dict: {point}")
+
+    if projected:
+        if hasattr(point, "dx") and hasattr(point, "dy"):
+            return float(point.dx), float(point.dy)
+        if hasattr(point, "x") and hasattr(point, "y"):
+            return float(point.x), float(point.y)
+    else:
+        if hasattr(point, "dLongitude_degree") and hasattr(point, "dLatitude_degree"):
+            return float(point.dLongitude_degree), float(point.dLatitude_degree)
+        if hasattr(point, "longitude") and hasattr(point, "latitude"):
+            return float(point.longitude), float(point.latitude)
+        if hasattr(point, "x") and hasattr(point, "y"):
+            return float(point.x), float(point.y)
+
+    raise ValueError(f"Point object missing coordinate attributes: {point}")
 
 
 def export_point_to_vector_file(
     aPoint_in: List[Any],
-    sFilename_vector_in: str,
+    sFilename_vector_in: PathLike,
     iFlag_projected_in: Optional[int] = None,
-    pSpatial_reference_in: Optional[osr.SpatialReference] = None,
-    aAttribute_data: Optional[List[int]] = None,
+    pSpatial_reference_in: Optional[Union[osr.SpatialReference, int, str]] = None,
+    aAttribute_data: Optional[List[Any]] = None,
     overwrite: bool = True,
 ) -> None:
-    """Export points to a vector file.
+    """Export a list of points to a vector GIS file.
 
     Parameters
     ----------
     aPoint_in : list
-        List of point objects with coordinate information. Each point must have:
-        - For geographic (iFlag_projected_in=0): dLongitude_degree, dLatitude_degree
-        - For projected (iFlag_projected_in=1): dx, dy
-    sFilename_vector_in : str
-        Output filename with extension. Format is determined from extension.
-        Supports GeoJSON, Shapefile, GeoPackage, KML, etc.
+        List of point objects, dicts, or tuples with coordinates.
+    sFilename_vector_in : PathLike
+        Output filename. Format determined from extension (GeoJSON, SHP, GPKG, etc.).
     iFlag_projected_in : int, optional
-        Coordinate system flag: 0 for geographic, 1 for projected.
-        Default is 0 (geographic).
-    pSpatial_reference_in : osr.SpatialReference, optional
-        Spatial reference system. If None, defaults to WGS84 (EPSG:4326).
-    aAttribute_data : list of int, optional
-        Optional connectivity attribute data for each point.
+        0 for geographic coordinates (default), 1 for projected coordinates.
+    pSpatial_reference_in : osr.SpatialReference, int, or str, optional
+        Spatial reference system. Defaults to EPSG:4326 (WGS84).
+    aAttribute_data : list, optional
+        Optional attribute data (connectivity, ID, or value) for each point.
     overwrite : bool, optional
         If True, overwrite existing file. Default is True.
 
     Raises
     ------
     ValueError
-        If aPoint_in is empty or if file extension is not supported.
+        If point list is empty or coordinates cannot be extracted.
     FileExistsError
-        If the output file exists and overwrite is False.
+        If output file exists and overwrite is False.
     RuntimeError
         If dataset, layer, or feature creation fails.
-
-    Notes
-    -----
-    - Creates a point layer with 'pointid' field (1-based index)
-    - If aAttribute_data is provided, adds 'connectivity' field
-    - Automatically determines output format from file extension
     """
-
     if not aPoint_in:
         raise ValueError("Point list cannot be empty.")
 
-    # Handle overwrite
-    if os.path.exists(sFilename_vector_in):
+    filename_str = os.fspath(sFilename_vector_in)
+    parent_dir = os.path.dirname(os.path.abspath(filename_str))
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
+    driver = get_vector_driver_from_filename(filename_str)
+
+    if os.path.exists(filename_str):
         if not overwrite:
-            raise FileExistsError(f"Output file already exists: {sFilename_vector_in}")
-        os.remove(sFilename_vector_in)
+            raise FileExistsError(f"Output file already exists: {filename_str}")
+        try:
+            driver.DeleteDataSource(filename_str)
+        except Exception:
+            if os.path.isfile(filename_str):
+                os.remove(filename_str)
 
-    # Set defaults
-    iFlag_projected = 0 if iFlag_projected_in is None else iFlag_projected_in
+    is_projected = bool(iFlag_projected_in == 1)
+    spatial_ref = _resolve_spatial_reference(pSpatial_reference_in)
 
-    if pSpatial_reference_in is None:
-        spatial_ref = osr.SpatialReference()
-        spatial_ref.ImportFromEPSG(4326)  # WGS84 lat/lon
-    else:
-        spatial_ref = pSpatial_reference_in
-
-    # Get driver from file extension
-    driver = get_vector_driver_from_filename(sFilename_vector_in)
-
-    iFlag_attribute = aAttribute_data is not None
-    attribute_data = aAttribute_data if aAttribute_data is not None else []
+    has_attributes = aAttribute_data is not None
+    attribute_data = aAttribute_data if has_attributes else []
 
     dataset = None
     layer = None
     feature = None
 
     try:
-        # Create dataset and layer
-        dataset = driver.CreateDataSource(sFilename_vector_in)
+        dataset = driver.CreateDataSource(filename_str)
         if dataset is None:
-            raise RuntimeError(
-                f"Could not create output dataset: {sFilename_vector_in}"
-            )
+            raise RuntimeError(f"Could not create output dataset: {filename_str}")
 
         layer = dataset.CreateLayer("point", spatial_ref, ogr.wkbPoint)
         if layer is None:
             raise RuntimeError(
-                f"Could not create layer in output dataset: {sFilename_vector_in}"
+                f"Could not create layer in output dataset: {filename_str}"
             )
 
-        # Create fields
         layer.CreateField(ogr.FieldDefn("pointid", ogr.OFTInteger64))
-        if iFlag_attribute:
+        if has_attributes:
             layer.CreateField(ogr.FieldDefn("connectivity", ogr.OFTInteger64))
 
         layer_defn = layer.GetLayerDefn()
-        feature = ogr.Feature(layer_defn)
 
-        # Add points as features
         for point_id, pPoint in enumerate(aPoint_in):
-            point = ogr.Geometry(ogr.wkbPoint)
+            x, y = _extract_point_coords(pPoint, is_projected)
 
-            if iFlag_projected == 1:
-                if not hasattr(pPoint, "dx") or not hasattr(pPoint, "dy"):
-                    raise ValueError(
-                        f"Point {point_id} missing dx or dy attributes for projected coordinates."
-                    )
-                point.AddPoint(pPoint.dx, pPoint.dy)
-            else:
-                if not hasattr(pPoint, "dLongitude_degree") or not hasattr(
-                    pPoint, "dLatitude_degree"
-                ):
-                    raise ValueError(f"Point {point_id} missing coordinate attributes.")
-                point.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
+            point_geom = ogr.Geometry(ogr.wkbPoint)
+            point_geom.AddPoint(x, y)
 
-            geometry = ogr.CreateGeometryFromWkb(point.ExportToWkb())
-            if geometry is None:
-                raise RuntimeError(f"Could not create geometry for point {point_id}.")
+            feat = ogr.Feature(layer_defn)
+            feat.SetGeometry(point_geom)
+            feat.SetField("pointid", point_id + 1)
 
-            feature.SetGeometry(geometry)
-            feature.SetField("pointid", point_id + 1)
+            if has_attributes and point_id < len(attribute_data):
+                feat.SetField("connectivity", int(attribute_data[point_id]))
 
-            if iFlag_attribute:
-                if point_id >= len(attribute_data):
-                    raise ValueError(f"Attribute data missing for point {point_id}.")
-                feature.SetField("connectivity", int(attribute_data[point_id]))
-
-            result = layer.CreateFeature(feature)
+            result = layer.CreateFeature(feat)
             if result != ogr.OGRERR_NONE:
-                raise RuntimeError(f"Could not create feature for point {point_id}.")
+                raise RuntimeError(
+                    f"Could not create feature for point index {point_id} in {filename_str}."
+                )
 
         dataset.FlushCache()
-
     finally:
         feature = None
         layer = None
@@ -144,118 +194,106 @@ def export_point_to_vector_file(
 
 def export_point_as_polygon_file(
     aPoint_in: List[Any],
-    sFilename_out: str,
-    pSpatial_reference_in: Optional[osr.SpatialReference] = None,
+    sFilename_out: PathLike,
+    pSpatial_reference_in: Optional[Union[osr.SpatialReference, int, str]] = None,
     overwrite: bool = True,
 ) -> None:
-    """Export points as a closed polygon to a vector file.
+    """Export points as a closed polygon to a vector GIS file.
 
     Parameters
     ----------
     aPoint_in : list
-        List of point objects with dLongitude_degree and dLatitude_degree attributes.
-    sFilename_out : str
-        Output filename with extension. Format is determined from extension.
-        Supports GeoJSON, Shapefile, GeoPackage, KML, etc.
-    pSpatial_reference_in : osr.SpatialReference, optional
-        Spatial reference system. If None, defaults to WGS84 (EPSG:4326).
+        List of point objects, dicts, or tuples with longitude/latitude coordinates.
+    sFilename_out : PathLike
+        Output filename. Format determined from extension.
+    pSpatial_reference_in : osr.SpatialReference, int, or str, optional
+        Spatial reference system. Defaults to EPSG:4326.
     overwrite : bool, optional
         If True, overwrite existing file. Default is True.
 
     Raises
     ------
     ValueError
-        If aPoint_in has fewer than 3 points or if file extension is not supported.
+        If point list contains fewer than 3 points.
     FileExistsError
-        If the output file exists and overwrite is False.
+        If output file exists and overwrite is False.
     RuntimeError
         If dataset, layer, or feature creation fails.
-
-    Notes
-    -----
-    - Automatically closes the polygon by connecting the last point to the first
-    - Adds an 'area' field containing the calculated polygon area
-    - Automatically determines output format from file extension
     """
-
     if not aPoint_in or len(aPoint_in) < 3:
         raise ValueError("Polygon requires at least 3 points.")
 
-    # Handle overwrite
-    if os.path.exists(sFilename_out):
+    filename_str = os.fspath(sFilename_out)
+    parent_dir = os.path.dirname(os.path.abspath(filename_str))
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
+    driver = get_vector_driver_from_filename(filename_str)
+
+    if os.path.exists(filename_str):
         if not overwrite:
-            raise FileExistsError(f"Output file already exists: {sFilename_out}")
-        os.remove(sFilename_out)
+            raise FileExistsError(f"Output file already exists: {filename_str}")
+        try:
+            driver.DeleteDataSource(filename_str)
+        except Exception:
+            if os.path.isfile(filename_str):
+                os.remove(filename_str)
 
-    # Get driver from file extension
-    driver = get_vector_driver_from_filename(sFilename_out)
-
-    if pSpatial_reference_in is None:
-        spatial_ref = osr.SpatialReference()
-        spatial_ref.ImportFromEPSG(4326)
-    else:
-        spatial_ref = pSpatial_reference_in
+    spatial_ref = _resolve_spatial_reference(pSpatial_reference_in)
 
     dataset = None
     layer = None
     feature = None
 
     try:
-        # Create dataset and layer
-        dataset = driver.CreateDataSource(sFilename_out)
+        dataset = driver.CreateDataSource(filename_str)
         if dataset is None:
-            raise RuntimeError(f"Could not create output dataset: {sFilename_out}")
+            raise RuntimeError(f"Could not create output dataset: {filename_str}")
 
         layer = dataset.CreateLayer("polygon", spatial_ref, geom_type=ogr.wkbPolygon)
         if layer is None:
             raise RuntimeError(
-                f"Could not create layer in output dataset: {sFilename_out}"
+                f"Could not create layer in output dataset: {filename_str}"
             )
 
-        # Create area field
         area_field = ogr.FieldDefn("area", ogr.OFTReal)
         area_field.SetWidth(20)
         area_field.SetPrecision(2)
         layer.CreateField(area_field)
 
-        # Build polygon ring
         ring = ogr.Geometry(ogr.wkbLinearRing)
         lon_list = []
         lat_list = []
 
-        for point_id, pPoint in enumerate(aPoint_in):
-            if not hasattr(pPoint, "dLongitude_degree") or not hasattr(
-                pPoint, "dLatitude_degree"
-            ):
-                raise ValueError(f"Point {point_id} missing coordinate attributes.")
+        for pPoint in aPoint_in:
+            lon, lat = _extract_point_coords(pPoint, projected=False)
+            ring.AddPoint(lon, lat)
+            lon_list.append(lon)
+            lat_list.append(lat)
 
-            ring.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
-            lon_list.append(pPoint.dLongitude_degree)
-            lat_list.append(pPoint.dLatitude_degree)
+        # Close ring if first and last point are not identical
+        if lon_list[0] != lon_list[-1] or lat_list[0] != lat_list[-1]:
+            ring.AddPoint(lon_list[0], lat_list[0])
 
-        # Close the ring
-        ring.AddPoint(aPoint_in[0].dLongitude_degree, aPoint_in[0].dLatitude_degree)
-
-        # Calculate area
         area = calculate_polygon_area(lon_list, lat_list)
 
-        # Create polygon geometry
         polygon = ogr.Geometry(ogr.wkbPolygon)
         polygon.AddGeometry(ring)
 
-        # Create and populate feature
         layer_defn = layer.GetLayerDefn()
         feature = ogr.Feature(layer_defn)
         feature.SetGeometry(polygon)
-        feature.SetField("area", area)
+        feature.SetField("area", float(area))
 
         result = layer.CreateFeature(feature)
         if result != ogr.OGRERR_NONE:
-            raise RuntimeError(f"Could not create polygon feature in {sFilename_out}.")
+            raise RuntimeError(
+                f"Could not create polygon feature in {filename_str}."
+            )
 
         dataset.FlushCache()
-
     finally:
         feature = None
         layer = None
         dataset = None
+

@@ -237,7 +237,7 @@ def check_if_duplicates(aList_in: Sequence) -> int:
     - Input must contain only hashable elements
     - Lists, dicts, sets cannot be elements (unhashable)
     - Large sequences may consume significant memory for set conversion
-    - Return is int (1/0) not bool (True/False) for backward compatibility
+    - Return is int: 1 indicates all elements are unique, 0 indicates duplicates exist
     """
     # Validate input
     if aList_in is None:

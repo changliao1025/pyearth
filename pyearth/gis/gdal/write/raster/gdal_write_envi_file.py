@@ -1,137 +1,246 @@
+"""ENVI raster writing utilities using GDAL."""
+
 import os
+from pathlib import Path
+from typing import Any, Optional, Tuple, Union
+import numpy as np
 from osgeo import gdal
+
+from pyearth.gis.gdal.gdal_to_numpy_datatype import numpy_dtype_to_gdal
+
+PathLike = Union[str, os.PathLike]
+
+__all__ = [
+    "gdal_write_envi_file",
+    "gdal_write_envi_file_multiple_band",
+]
+
+
+def _resolve_projection_wkt(projection: Any) -> str:
+    """Normalize a spatial reference to a WKT string."""
+    if projection is None:
+        return ""
+    if isinstance(projection, str):
+        return projection
+    if hasattr(projection, "ExportToWkt"):
+        return projection.ExportToWkt()
+    return str(projection)
 
 
 def gdal_write_envi_file(
-    sFilename_in,
-    aData_in,
-    dPixelWidth_in,
-    dOriginX_in,
-    dOriginY_in,
-    dMissing_value_in,
-    pSpatial_reference_in,
-):
+    filename: Optional[PathLike] = None,
+    data: Optional[np.ndarray] = None,
+    pixel_width: Optional[float] = None,
+    origin_x: Optional[float] = None,
+    origin_y: Optional[float] = None,
+    missing_value: Optional[float] = None,
+    spatial_reference: Optional[Any] = None,
+    datatype: Optional[int] = None,
+    **kwargs,
+) -> Tuple[Tuple[float, ...], str]:
+    """Write a single-band ENVI format raster file.
+
+    Parameters
+    ----------
+    filename : str or os.PathLike
+        Output file path.
+    data : np.ndarray
+        2D array of raster data.
+    pixel_width : float
+        Pixel resolution.
+    origin_x : float
+        Upper-left X coordinate.
+    origin_y : float
+        Upper-left Y coordinate.
+    missing_value : float
+        NoData value.
+    spatial_reference : str or osr.SpatialReference
+        Spatial reference system.
+    datatype : int, optional
+        GDAL data type constant. If None, auto-detected from data.dtype.
+
+    Returns
+    -------
+    tuple
+        (geotransform, projection_wkt)
     """
-    Write a ENVI standard format raster file
+    if filename is None:
+        filename = kwargs.get("sFilename_in")
+    if data is None:
+        data = kwargs.get("aData_in")
+    if pixel_width is None:
+        pixel_width = kwargs.get("dPixelWidth_in")
+    if origin_x is None:
+        origin_x = kwargs.get("dOriginX_in")
+    if origin_y is None:
+        origin_y = kwargs.get("dOriginY_in")
+    if missing_value is None:
+        missing_value = kwargs.get("dMissing_value_in")
+    if spatial_reference is None:
+        spatial_reference = kwargs.get("pSpatial_reference_in")
 
-    Args:
-        sFilename_in (string): The filename
-        aData_in (numpy.array): The data
-        dPixelWidth_in (float): The resolution
-        dOriginX_in (float): The location of origin x
-        dOriginY_in (float): The location of origin y
-        dMissing_value_in (float): The missinge value
-        pSpatial_reference_in (osr): The spatial reference
+    if filename is None or data is None:
+        raise ValueError("Both filename and data must be provided.")
 
-    Returns:
-        Tuple: pGeotransform_out, pProjection_out
-    """
-    if os.path.exists(sFilename_in):
-        os.remove(sFilename_in)
-        pass
+    filepath = Path(filename).resolve()
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    sDriverName = "ENVI"
-    pDriver = gdal.GetDriverByName(sDriverName)
+    if filepath.exists():
+        filepath.unlink()
 
-    if pDriver is None:
-        print("%s pDriver not available.\n" % sDriverName)
-    else:
-        print("%s pDriver IS available.\n" % sDriverName)
+    driver = gdal.GetDriverByName("ENVI")
+    if driver is None:
+        raise RuntimeError("GDAL ENVI driver is not available.")
 
-    nrow, ncolumn = aData_in.shape
-    nband = 1
+    data_arr = np.asarray(data)
+    if data_arr.ndim != 2:
+        raise ValueError(f"Single-band raster expects 2D array, got {data_arr.ndim}D.")
 
-    # Creates a new raster data source
-    pDataset = pDriver.Create(sFilename_in, ncolumn, nrow, nband, gdal.GDT_Float32)
+    nrow, ncolumn = data_arr.shape
 
-    # Write metadata
+    if datatype is None:
+        try:
+            datatype = numpy_dtype_to_gdal(data_arr.dtype)
+        except Exception:
+            datatype = gdal.GDT_Float32
 
-    pDataset.SetGeoTransform(
-        [dOriginX_in, dPixelWidth_in, 0.0, dOriginY_in, 0.0, -dPixelWidth_in]
-    )
+    dataset = driver.Create(str(filepath), ncolumn, nrow, 1, datatype)
+    if dataset is None:
+        raise RuntimeError(f"Unable to create ENVI raster: {filepath}")
 
-    pProjection = pSpatial_reference_in.ExportToPrettyWkt()
-    pDataset.SetProjection(pProjection)
+    band = None
+    try:
+        pw = float(pixel_width if pixel_width is not None else 1.0)
+        ox = float(origin_x if origin_x is not None else 0.0)
+        oy = float(origin_y if origin_y is not None else 0.0)
 
-    # Write raster datasets
-    pBand = pDataset.GetRasterBand(1)
-    pBand.WriteArray(aData_in)
-    pBand.SetNoDataValue(dMissing_value_in)
+        geotransform = [ox, pw, 0.0, oy, 0.0, -pw]
+        dataset.SetGeoTransform(geotransform)
 
-    pGeotransform_out = pDataset.GetGeoTransform()
-    pProjection_out = pDataset.GetProjection()
+        proj_wkt = _resolve_projection_wkt(spatial_reference)
+        if proj_wkt:
+            dataset.SetProjection(proj_wkt)
 
-    pDataset.FlushCache()  # Write to disk.
-    pDriver = None
-    pDataset = None
-    pBand = None
+        band = dataset.GetRasterBand(1)
+        band.WriteArray(data_arr)
+        if missing_value is not None:
+            band.SetNoDataValue(float(missing_value))
 
-    return pGeotransform_out, pProjection_out
+        dataset.FlushCache()
+        out_gt = dataset.GetGeoTransform()
+        out_proj = dataset.GetProjection()
+
+        return out_gt, out_proj
+    finally:
+        band = None
+        dataset = None
 
 
 def gdal_write_envi_file_multiple_band(
-    sFilename_in,
-    aData_in,
-    dPixelWidth_in,
-    dOriginX_in,
-    dOriginY_in,
-    dMissing_value_in,
-    pSpatial_reference_in,
-):
+    filename: Optional[PathLike] = None,
+    data: Optional[np.ndarray] = None,
+    pixel_width: Optional[float] = None,
+    origin_x: Optional[float] = None,
+    origin_y: Optional[float] = None,
+    missing_value: Optional[float] = None,
+    spatial_reference: Optional[Any] = None,
+    datatype: Optional[int] = None,
+    **kwargs,
+) -> Tuple[str, Tuple[float, ...], str]:
+    """Write a multi-band ENVI format raster file.
+
+    Parameters
+    ----------
+    filename : str or os.PathLike
+        Output file path.
+    data : np.ndarray
+        3D array of raster data (nband, nrow, ncolumn).
+    pixel_width : float
+        Pixel resolution.
+    origin_x : float
+        Upper-left X coordinate.
+    origin_y : float
+        Upper-left Y coordinate.
+    missing_value : float
+        NoData value.
+    spatial_reference : str or osr.SpatialReference
+        Spatial reference system.
+    datatype : int, optional
+        GDAL data type constant. If None, auto-detected from data.dtype.
+
+    Returns
+    -------
+    tuple
+        (filename, geotransform, projection_wkt)
     """
-    Write a multi-band ENVI raster file
+    if filename is None:
+        filename = kwargs.get("sFilename_in")
+    if data is None:
+        data = kwargs.get("aData_in")
+    if pixel_width is None:
+        pixel_width = kwargs.get("dPixelWidth_in")
+    if origin_x is None:
+        origin_x = kwargs.get("dOriginX_in")
+    if origin_y is None:
+        origin_y = kwargs.get("dOriginY_in")
+    if missing_value is None:
+        missing_value = kwargs.get("dMissing_value_in")
+    if spatial_reference is None:
+        spatial_reference = kwargs.get("pSpatial_reference_in")
 
-    Args:
-        sFilename_in (string): The filename
-        aData_in (numpy.array): The data
-        dPixelWidth_in (float): The resolution
-        dOriginX_in (float): The location of origin x
-        dOriginY_in (float): The location of origin y
-        dMissing_value_in (float): The missinge value
-        pSpatial_reference_in (osr): The spatial reference
+    if filename is None or data is None:
+        raise ValueError("Both filename and data must be provided.")
 
-    Returns:
-        Tuple: pGeotransform_out, pProjection_out
-    """
+    filepath = Path(filename).resolve()
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    if os.path.exists(sFilename_in):
-        os.remove(sFilename_in)
-        pass
+    if filepath.exists():
+        filepath.unlink()
 
-    sDriverName = "ENVI"
-    pDriver = gdal.GetDriverByName(sDriverName)
+    driver = gdal.GetDriverByName("ENVI")
+    if driver is None:
+        raise RuntimeError("GDAL ENVI driver is not available.")
 
-    if pDriver is None:
-        print("%s pDriver not available.\n" % sDriverName)
-    else:
-        print("%s pDriver IS available.\n" % sDriverName)
+    data_arr = np.asarray(data)
+    if data_arr.ndim != 3:
+        raise ValueError(f"Multi-band raster expects 3D array, got {data_arr.ndim}D.")
 
-    nband, nrow, ncolumn = aData_in.shape
+    nband, nrow, ncolumn = data_arr.shape
 
-    # Creates a new raster data source
-    pDataset = pDriver.Create(sFilename_in, ncolumn, nrow, nband, gdal.GDT_Float32)
+    if datatype is None:
+        try:
+            datatype = numpy_dtype_to_gdal(data_arr.dtype)
+        except Exception:
+            datatype = gdal.GDT_Float32
 
-    # Write metadata
+    dataset = driver.Create(str(filepath), ncolumn, nrow, nband, datatype)
+    if dataset is None:
+        raise RuntimeError(f"Unable to create multi-band ENVI raster: {filepath}")
 
-    pDataset.SetGeoTransform(
-        [dOriginX_in, dPixelWidth_in, 0.0, dOriginY_in, 0.0, -dPixelWidth_in]
-    )
+    band = None
+    try:
+        pw = float(pixel_width if pixel_width is not None else 1.0)
+        ox = float(origin_x if origin_x is not None else 0.0)
+        oy = float(origin_y if origin_y is not None else 0.0)
 
-    pProjection = pSpatial_reference_in.ExportToPrettyWkt()
-    pDataset.SetProjection(pProjection)
+        geotransform = [ox, pw, 0.0, oy, 0.0, -pw]
+        dataset.SetGeoTransform(geotransform)
 
-    # Write raster datasets
-    for iBand in range(nband):
-        pBand = pDataset.GetRasterBand(iBand + 1)
-        pBand.WriteArray(aData_in[iBand, :, :])
-        pBand.SetNoDataValue(dMissing_value_in)
+        proj_wkt = _resolve_projection_wkt(spatial_reference)
+        if proj_wkt:
+            dataset.SetProjection(proj_wkt)
 
-    pGeotransform_out = pDataset.GetGeoTransform()
-    pProjection_out = pDataset.GetProjection()
+        for i_band in range(nband):
+            band = dataset.GetRasterBand(i_band + 1)
+            band.WriteArray(data_arr[i_band, :, :])
+            if missing_value is not None:
+                band.SetNoDataValue(float(missing_value))
 
-    pDataset.FlushCache()  # Write to disk.
-    pDriver = None
-    pDataset = None
-    pBand = None
+        dataset.FlushCache()
+        out_gt = dataset.GetGeoTransform()
+        out_proj = dataset.GetProjection()
 
-    return sFilename_in, pGeotransform_out, pProjection_out
+        return str(filepath), out_gt, out_proj
+    finally:
+        band = None
+        dataset = None

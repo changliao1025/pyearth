@@ -36,6 +36,15 @@ from pyearth.gis.geometry.remove_duplicate_closure import (
     remove_duplicate_closure as remove_duplicate_closure,
 )
 
+__all__ = [
+    "PolarHandler",
+    "PoleType",
+    "PolarResult",
+    "polygon_includes_pole",
+    "POLAR_TOLERANCE",
+    "LATITUDE_BOUNDARY",
+]
+
 
 # ---------------------------------------------------------------------------
 # Module-level constants (single source of truth)
@@ -80,6 +89,7 @@ class PolarResult:
     includes_pole: bool
     pole: PoleType
     projected_coords: Optional[np.ndarray] = None
+
 
 
 # ---------------------------------------------------------------------------

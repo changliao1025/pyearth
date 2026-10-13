@@ -8,12 +8,11 @@ from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
     export_point_as_polygon_file,
 )
 
-iFlag_cython = importlib.util.find_spec("cython")
-if iFlag_cython is not None:
+try:
     from pyearth.gis.geometry.kernel import (
         calculate_distance_based_on_longitude_latitude,
     )
-else:
+except ImportError:
     from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import (
         calculate_distance_based_on_longitude_latitude,
     )

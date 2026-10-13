@@ -255,11 +255,8 @@ def dt2cal(dt: np.ndarray) -> np.ndarray:
     day_of_year : Calculate ordinal day from year, month, day
     day_in_month : Calculate number of days in a month
     """
-    # Validate input
-    if not isinstance(dt, np.ndarray):
-        logger.error(f"Input must be numpy.ndarray, got {type(dt).__name__}")
-        raise TypeError(f"Input must be numpy.ndarray, got {type(dt).__name__}")
-
+    # Validate and convert input
+    dt = np.asarray(dt)
     if not np.issubdtype(dt.dtype, np.datetime64):
         logger.error(f"Input must be datetime64 dtype, got {dt.dtype}")
         raise TypeError(f"Input must be datetime64 dtype, got {dt.dtype}")
@@ -283,13 +280,13 @@ def dt2cal(dt: np.ndarray) -> np.ndarray:
     Y, M, D, h, m, s = [dt.astype(f"M8[{x}]") for x in "YMDhms"]
 
     # Extract components by computing differences between time units
-    out[..., 0] = Y + 1970  # Gregorian Year (add 1970 to convert from epoch)
-    out[..., 1] = (M - Y) + 1  # Month (1-12, add 1 for 1-based indexing)
-    out[..., 2] = (D - M) + 1  # Day (1-31, add 1 for 1-based indexing)
-    out[..., 3] = (dt - D).astype("m8[h]")  # Hour (0-23)
-    out[..., 4] = (dt - h).astype("m8[m]")  # Minute (0-59)
-    out[..., 5] = (dt - m).astype("m8[s]")  # Second (0-59)
-    out[..., 6] = (dt - s).astype("m8[us]")  # Microsecond (0-999999)
+    out[..., 0] = Y.astype("int64") + 1970  # Gregorian Year
+    out[..., 1] = (M - Y).astype("int64") + 1  # Month (1-12)
+    out[..., 2] = (D - M).astype("int64") + 1  # Day (1-31)
+    out[..., 3] = (dt - D).astype("m8[h]").astype("int64")  # Hour (0-23)
+    out[..., 4] = (dt - h).astype("m8[m]").astype("int64")  # Minute (0-59)
+    out[..., 5] = (dt - m).astype("m8[s]").astype("int64")  # Second (0-59)
+    out[..., 6] = (dt - s).astype("m8[us]").astype("int64")  # Microsecond (0-999999)
 
     logger.debug(f"Converted to calendar array with shape {out.shape}")
 

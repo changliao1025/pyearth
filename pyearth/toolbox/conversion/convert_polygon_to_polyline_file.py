@@ -65,8 +65,8 @@ import osgeo
 from osgeo import ogr, osr
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_driver_from_extension,
-    get_vector_format_from_extension,
+    get_vector_driver_from_filename,
+    get_vector_format_from_filename,
 )
 
 # Configure logging
@@ -231,11 +231,11 @@ def convert_polygon_to_polyline_file(
 
     # Get input and output drivers based on file extensions
     try:
-        driver_in = get_vector_driver_from_extension(sFilename_polygon_in)
-        driver_out = get_vector_driver_from_extension(sFilename_polyline_out)
+        driver_in = get_vector_driver_from_filename(sFilename_polygon_in)
+        driver_out = get_vector_driver_from_filename(sFilename_polyline_out)
 
-        format_in = get_vector_format_from_extension(sFilename_polygon_in)
-        format_out = get_vector_format_from_extension(sFilename_polyline_out)
+        format_in = get_vector_format_from_filename(sFilename_polygon_in)
+        format_out = get_vector_format_from_filename(sFilename_polyline_out)
 
         logger.info(f"Converting from {format_in} to {format_out}")
     except ValueError as e:
