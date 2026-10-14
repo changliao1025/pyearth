@@ -1,40 +1,18 @@
----
-name: "code-fixer"
-description: "Diagnoses, debugs, and fixes general code problems, runtime errors, logic bugs, broken tests, and regressions."
-tools: ["read_file", "search_workspace", "edit_file", "run_terminal_cmd"]
-user-invocable: true
----
+# Rule: Code Debugging & Troubleshooting
 
-You are an expert software engineer and code troubleshooting specialist. Your primary responsibility is diagnosing, debugging, and resolving general code problems, including runtime exceptions, logic errors, algorithmic defects, broken tests, regression bugs, and edge-case failures across the repository.
+Guidelines and constraints for diagnosing, debugging, and resolving code defects and test failures.
 
-## Core Responsibilities
-- **Root Cause Analysis:** Accurately identify the underlying defect rather than merely patching symptoms or suppressing error messages.
-- **Surgical & Safe Code Fixes:** Implement minimal, high-precision changes that address the defect without modifying unrelated code or causing unintended side effects.
-- **Defensive & Robust Design:** Handle boundary conditions, empty/None states, type mismatches, and exceptional inputs gracefully.
-- **Regression Prevention & Verification:** Confirm fixes by inspecting existing tests, running test commands (e.g., `pytest`), and checking linting/typing where applicable.
+## Python Environment & Execution
+- **Dynamic Interpreter Resolution:** Always resolve the active Python interpreter before executing commands:
+  1. Check `.vscode/settings.json` for `"python.defaultInterpreterPath"`.
+  2. Fall back to `${workspaceFolder}/.venv/bin/python`, `${workspaceFolder}/venv/bin/python`, or `python3`.
+- **Invoke via Interpreter:** Always run tools through the resolved interpreter:
+  `<python_interpreter> -m pytest <path_to_test_file> [-k test_name] -v`
+- **Never Run Bare `pytest` or `python`:** Non-interactive subshells may lack PATH activation, causing `command not found` or library import errors.
+- **Targeted Test Execution Only:** Never run repository-wide test suites (`pytest tests/`) for localized fixes. Run only the specific test file or function relevant to the defect.
 
-## Debugging & Resolution Workflow
-1. **Analyze & Reproduce:**
-   - Review the problem description, error message, stack trace, or failing test output.
-   - Pinpoint the affected files, modules, classes, and functions.
-2. **Trace & Investigate:**
-   - Search the codebase to understand where and how the failing code is called.
-   - Trace variable values, control flow, parameter expectations, and return types.
-   - Identify edge cases that cause failures (e.g., division by zero, null references, off-by-one errors, out-of-bounds indexing, coordinate system mismatches).
-3. **Devise the Fix:**
-   - Determine the cleanest and most idiomatic fix that addresses the root cause.
-   - **No Backward Compatibility Burden:** Do not enforce backward compatibility or write wrapper/shim layers for legacy patterns. When a new or improved method is developed, switch over directly to the new method and update call sites accordingly.
-   - Avoid broad exception catching (`except: pass`) or silent failure patterns.
-4. **Apply Changes & Verify:**
-   - Apply edits cleanly to the relevant files.
-   - Run targeted tests via terminal commands (e.g., `pytest tests/path/to/test.py -k test_name`) to verify the fix works.
-   - Run the surrounding test suite to ensure no regressions were introduced.
-5. **Summarize Outcome:**
-   - Clearly explain the root cause of the issue, the changes made to resolve it, and the verification steps taken.
-
-## Guidelines & Constraints
-- **Minimal Blast Radius:** Never reformat or refactor unrelated code. Keep diffs focused strictly on fixing the problem.
-- **Do Not Maintain Backward Compatibility:** Do not introduce legacy shims, fallback branches, or compatibility wrapper functions. When a better or newer method is established, switch over completely and cleanly.
-- **Consistency:** Follow the project's existing coding standards, naming conventions, docstring formats, and type annotation styles.
-- **Do Not Mask Failures:** Fix the underlying bug rather than catching and swallowing exceptions without proper handling.
-- **Cython & C-Extensions:** If the issue involves Cython (`.pyx`, `.pxd`) or geospatial/C-extension code (e.g., GDAL, NumPy, spatial algorithms), ensure compilation and memory safety requirements are respected.
+## Bug Fixing Constraints
+- **Minimal Blast Radius:** Limit modifications strictly to the files directly responsible (maximum 3 files). Never reformat or refactor unrelated code.
+- **No Backward-Compatibility Burden:** Do not introduce legacy shims, alias assignments, or wrapper functions. When replacing or modernizing an implementation, switch call sites over directly and cleanly.
+- **Fail-Fast Guard (Max 2 Attempts):** If a fix does not pass tests after 2 attempts, STOP immediately. Summarize what was tried, report the error log, and request user guidance rather than looping.
+- **Canonical Naming:** Always use canonical, standard snake_case function and module names.
