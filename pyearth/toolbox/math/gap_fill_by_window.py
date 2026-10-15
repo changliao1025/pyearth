@@ -1,5 +1,4 @@
-import statistics
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 import numpy as np
 
 
@@ -75,29 +74,30 @@ def search_neighbors(
     if len(aArray_in) == 0:
         raise IndexError("Input array cannot be empty")
 
-    if not isinstance(iIndex_in, int):
+    if not isinstance(iIndex_in, (int, np.integer)):
         raise TypeError(f"Index must be an integer, got {type(iIndex_in)}")
 
-    if not (0 <= iIndex_in < len(aArray_in)):
+    iIndex = int(iIndex_in)
+    if not (0 <= iIndex < len(aArray_in)):
         raise ValueError(
-            f"Index {iIndex_in} is out of bounds for array of length {len(aArray_in)}"
+            f"Index {iIndex} is out of bounds for array of length {len(aArray_in)}"
         )
 
     # Handle window size
     if iWindow_size_in is None:
         iWindow_size = 1
-    elif not isinstance(iWindow_size_in, int):
+    elif not isinstance(iWindow_size_in, (int, np.integer)):
         raise TypeError(
             f"Window size must be an integer or None, got {type(iWindow_size_in)}"
         )
-    elif iWindow_size_in < 0:
+    elif int(iWindow_size_in) < 0:
         raise ValueError(f"Window size must be non-negative, got {iWindow_size_in}")
     else:
-        iWindow_size = iWindow_size_in
+        iWindow_size = int(iWindow_size_in)
 
     # Calculate the actual window bounds, respecting array boundaries
     array_length = len(aArray_in)
-    start_idx = max(0, iIndex_in - iWindow_size)
+    start_idx = max(0, iIndex - iWindow_size)
     end_idx = min(array_length, iIndex_in + iWindow_size + 1)
 
     # Extract the neighboring values
@@ -179,26 +179,28 @@ def gap_fill_by_window(
     # Handle window size
     if iWindow_size_in is None:
         iWindow_size = 1
-    elif not isinstance(iWindow_size_in, int):
+    elif not isinstance(iWindow_size_in, (int, np.integer)):
         raise TypeError(
             f"Window size must be an integer or None, got {type(iWindow_size_in)}"
         )
-    elif iWindow_size_in < 0:
+    elif int(iWindow_size_in) < 0:
         raise ValueError(f"Window size must be non-negative, got {iWindow_size_in}")
     else:
-        iWindow_size = iWindow_size_in
+        iWindow_size = int(iWindow_size_in)
 
     # Handle minimum good neighbors
     if min_good_neighbors is None:
         min_good_neighbors = iWindow_size + 1
-    elif not isinstance(min_good_neighbors, int):
+    elif not isinstance(min_good_neighbors, (int, np.integer)):
         raise TypeError(
             f"min_good_neighbors must be an integer or None, got {type(min_good_neighbors)}"
         )
-    elif min_good_neighbors <= 0:
+    elif int(min_good_neighbors) <= 0:
         raise ValueError(
             f"min_good_neighbors must be positive, got {min_good_neighbors}"
         )
+    else:
+        min_good_neighbors = int(min_good_neighbors)
 
     # Create a copy to avoid modifying the original
     aArray_out = aArray_in.copy()

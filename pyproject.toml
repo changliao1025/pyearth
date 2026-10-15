@@ -55,6 +55,7 @@ dev = [
     "sphinx-rtd-theme",
 ]
 docs = [
+    "breathe",
     "sphinx",
     "sphinx-rtd-theme",
     "myst-parser",
@@ -62,6 +63,18 @@ docs = [
 test = [
     "pytest>=7.0",
     "pytest-cov",
+]
+mesh = [
+    "alphashape",
+    "geopandas",
+]
+ocean = [
+    "cartopy",
+]
+all = [
+    "alphashape",
+    "cartopy",
+    "geopandas",
 ]
 
 [tool.setuptools]

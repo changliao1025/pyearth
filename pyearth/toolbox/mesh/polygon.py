@@ -557,7 +557,7 @@ class pypolygon:
             aPoint_2d = np.array(aPoint_2d)
             dLatitude_mean = np.mean(aPoint_2d[:,1])
             #convert distance to degree
-            dDegree = meter_to_degree(dLatitude_mean, dRadius)
+            dDegree = meter_to_degree(dRadius, dLatitude_mean)
             pPolygon_out = alphashape.alphashape(aPoint_2d, dDegree)
             #return as a list of vectex is more friendly
             aPoint_out = list()
@@ -656,7 +656,7 @@ class pypolygon:
             #dLongitude_mean = np.mean(aPoint_2d[:,0])
             dLatitude_mean = np.mean(aPoint_2d[:,1])
             #convert distance to degree
-            dDegree = meter_to_degree(dLatitude_mean, dRadius)
+            dDegree = meter_to_degree(dRadius, dLatitude_mean)
             gdf_in = geopandas.GeoDataFrame({'geometry': geopandas.points_from_xy(aPoint_2d[:,0], aPoint_2d[:,1])}, crs="EPSG:4326")
             #Generate the alpha shape
             gdf_out = alphashape.alphashape(gdf_in, dDegree)

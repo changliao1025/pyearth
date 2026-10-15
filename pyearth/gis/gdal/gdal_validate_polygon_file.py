@@ -1,42 +1,93 @@
+"""Vector polygon file validation utilities using OGR."""
+
 import os
+from typing import Optional, Union
 from osgeo import ogr
 
+PathLike = Union[str, os.PathLike]
 
-def gdal_validate_polygon_file(filename: str) -> bool:
+__all__ = ["gdal_validate_polygon_file"]
+
+
+def gdal_validate_polygon_file(
+    filename: Optional[PathLike] = None,
+    print_err: bool = False,
+    **kwargs,
+) -> bool:
+    """Validate that a vector file exists, contains layers, and all geometries are valid polygons.
+
+    Accepts both standard Polygon and MultiPolygon geometries.
+
+    Parameters
+    ----------
+    filename : str or os.PathLike
+        Path to the vector polygon file (e.g. .geojson, .shp, .gpkg).
+    print_err : bool, default=False
+        If True, print error descriptions if validation fails.
+
+    Returns
+    -------
+    bool
+        True if the file can be opened and all features contain valid Polygon
+        or MultiPolygon geometries, False otherwise.
     """
-    Check if a given polygon file is valid.
+    if filename is None:
+        filename = kwargs.get("sFilename_in")
 
-    Parameters:
-    filename (str): The filename of the polygon file.
-
-    Returns:
-    bool: True if the file is a valid polygon file, False otherwise.
-    """
-    if not os.path.exists(filename):
+    if filename is None:
         return False
 
+    filepath = os.fspath(filename)
+    if not os.path.exists(filepath):
+        if print_err:
+            print(f"File does not exist: {filepath}")
+        return False
+
+    dataset = None
+    layer = None
     try:
-        dataset = ogr.Open(filename)
+        dataset = ogr.Open(filepath, 0)
         if dataset is None:
+            if print_err:
+                print(f"Unable to open vector dataset: {filepath}")
             return False
 
-        layer = dataset.GetLayer()
+        layer = dataset.GetLayer(0)
         if layer is None:
+            if print_err:
+                print(f"No layers found in dataset: {filepath}")
             return False
 
+        feature_count = 0
         for feature in layer:
-            geometry = feature.GetGeometryRef()
-            if geometry is None:
+            feature_count += 1
+            geom = feature.GetGeometryRef()
+            if geom is None:
+                if print_err:
+                    print(f"Feature {feature.GetFID()} has null geometry")
                 return False
 
-            if geometry.GetGeometryName() != "POLYGON":
+            geom_name = geom.GetGeometryName().upper()
+            if geom_name not in ("POLYGON", "MULTIPOLYGON"):
+                if print_err:
+                    print(
+                        f"Feature {feature.GetFID()} has non-polygon geometry: {geom_name}"
+                    )
                 return False
 
-            if not geometry.IsValid():
+            if not geom.IsValid():
+                if print_err:
+                    print(f"Feature {feature.GetFID()} has invalid geometry topology")
                 return False
 
-        return True
+        return feature_count > 0
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        if print_err:
+            print(f"Error validating polygon file: {e}")
         return False
+
+    finally:
+        layer = None
+        dataset = None
+

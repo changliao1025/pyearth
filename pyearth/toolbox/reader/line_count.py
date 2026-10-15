@@ -1,20 +1,27 @@
-def line_count(sFilename_in):
+"""Line count utility."""
+
+import os
+
+
+def line_count(sFilename_in: str) -> int:
     """
-    Count the line count in a text file
+    Count the total number of lines in a text file.
 
-    Args:
-        sFilename_in (string): The filename
+    Parameters
+    ----------
+    sFilename_in : str
+        Path to the text file.
 
-    Returns:
-        int: The total line count
+    Returns
+    -------
+    int
+        The total line count.
     """
-    ifs = open(sFilename_in, "rb")
-    i = 0
-    sLine0 = ifs.readline()  # .rstrip()
-    sLine = sLine0.decode("utf-8", "ignore")
-    while len(sLine) > 0:
-        i = i + 1
-        sLine0 = ifs.readline()
-        sLine = sLine0.decode("utf-8", "ignore")
+    if not os.path.exists(sFilename_in):
+        raise FileNotFoundError(f"File not found: {sFilename_in}")
 
-    return i
+    count = 0
+    with open(sFilename_in, "r", encoding="utf-8", errors="ignore") as ifs:
+        for _ in ifs:
+            count += 1
+    return count

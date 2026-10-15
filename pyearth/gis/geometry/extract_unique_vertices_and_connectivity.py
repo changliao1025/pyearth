@@ -5,28 +5,7 @@ Mesh Vertex Extraction and Connectivity Mapping
 This module provides functionality to extract unique vertices from mesh cell coordinates
 and build connectivity arrays for unstructured mesh representation.
 
-In computational geometry and mesh processing    cell_sizes = []  # Track number of vertices per cell
-    for x_coords, y_coords in zip(aCell_vertex_x, aCell_vertex_y):
-        # Convert to numpy arrays with explicit dtype
-        x_arr = np.asarray(x_coords, dtype=np.float64)
-        y_arr = np.asarray(y_coords, dtype=np.float64)
-
-        # Validate that x and y arrays have matching lengths for this cell
-        if len(x_arr) != len(y_arr):
-            raise ValueError(
-                f"Mismatched coordinate array lengths in cell: "
-                f"{len(x_arr)} x-coords vs {len(y_arr)} y-coords"
-            )
-
-        cell_size = len(x_arr)
-        cell_sizes.append(cell_size)
-
-        # Copy cell vertices into pre-allocated arrays
-        all_x[idx:idx + cell_size] = x_arr
-        all_y[idx:idx + cell_size] = y_arr
-        idx += cell_size
-
-    # Trim arrays to actual size (in case estimate was too high)s) are often defined by their
+In computational geometry and mesh processing, cells (elements) are often defined by their
 vertex coordinates. When working with multiple cells, the same vertex may be shared between
 adjacent cells. This module identifies unique vertices across all cells and creates a
 connectivity array that maps each cell to its vertex indices.
@@ -110,6 +89,8 @@ import os, sys
 import numpy as np
 from typing import List, Tuple, Dict
 from collections import defaultdict
+
+__all__ = ["extract_unique_vertices_and_connectivity"]
 
 
 def extract_unique_vertices_and_connectivity(

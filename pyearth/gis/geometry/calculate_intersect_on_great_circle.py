@@ -46,6 +46,12 @@ from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d impor
     convert_sphere_3d_to_longitude_latitude,
 )
 
+__all__ = [
+    "calculate_intersect_on_great_circle",
+    "find_great_circle_intersection_with_meridian",
+    "project_point_onto_plane",
+]
+
 
 def project_point_onto_plane(p: np.ndarray, normal: np.ndarray) -> np.ndarray:
     """Project a 3D point onto a plane defined by its normal vector.
@@ -272,12 +278,12 @@ def find_great_circle_intersection_with_meridian(
     Examples
     --------
     >>> # Great circle from (0°E, 0°N) to (180°E, 0°N) crosses 90°E at equator
-    >>> lon, lat = calculate_great_circle_latitude_at_longitude(0, 0, 180, 0, 90)
+    >>> lon, lat = find_great_circle_intersection_with_meridian(0, 0, 180, 0, 90)
     >>> np.allclose([lon, lat], [90, 0])
     True
 
     >>> # Great circle crossing International Date Line
-    >>> lon, lat = calculate_great_circle_latitude_at_longitude(170, 45, -170, 50, 180)
+    >>> lon, lat = find_great_circle_intersection_with_meridian(170, 45, -170, 50, 180)
     >>> # Returns latitude where circle crosses ±180°
 
     Algorithm
@@ -363,3 +369,4 @@ def find_great_circle_intersection_with_meridian(
     lat_deg = np.degrees(lat_rad)
 
     return (target_lon, float(lat_deg))
+

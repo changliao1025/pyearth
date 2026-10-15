@@ -1,6 +1,6 @@
 import os
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Union
 from osgeo import ogr
 
 from pyearth.system.filename import get_extension_from_path
@@ -30,6 +30,7 @@ __all__ = [
     "get_available_vector_formats",
     "print_supported_vector_formats",
     "get_vector_format_from_extension",
+    "get_vector_driver_from_extension",
     "get_vector_driver_from_filename",
     "get_vector_driver_from_format",
     "get_vector_format_from_filename",
@@ -97,87 +98,88 @@ def print_supported_vector_formats() -> None:
             print(f"  {ext}: {driver} (driver not found)")
 
 
-def get_vector_format_from_extension(sExtension: str) -> str:
+PathLike = Union[str, os.PathLike]
+
+
+def get_vector_format_from_extension(extension: str) -> str:
+    """Determine the OGR format string from file extension.
+
+    Parameters
+    ----------
+    extension : str
+        Input file extension (e.g., '.shp').
+
+    Returns
+    -------
+    str
+        Format string for OGR driver.
+
+    Raises
+    ------
+    ValueError
+        If the file extension is not supported.
     """
-    Determine the OGR format string from file extension.
+    ext = extension.strip().lower()
+    if not ext.startswith("."):
+        ext = "." + ext
 
-    Only accepts extensions that are both in the supported list and have available drivers.
+    if ext in SUPPORTED_VECTOR_FORMATS:
+        return SUPPORTED_VECTOR_FORMATS[ext]
 
-    Parameters:
-    sExtension (str): Input file extension (e.g., '.shp').
+    raise ValueError(f"Unsupported vector file extension: {ext}")
 
-    Returns:
-    str: Format string for OGR driver.
 
-    Raises:
-    ValueError: If the file extension is not supported or driver is not available.
+def get_vector_format_from_filename(filename: PathLike) -> str:
+    """Determine the OGR format string from a filename or path.
+
+    Parameters
+    ----------
+    filename : str or os.PathLike
+        Input filename or path with extension.
+
+    Returns
+    -------
+    str
+        Format string for OGR driver.
+
+    Raises
+    ------
+    ValueError
+        If the file extension is not supported or not present.
     """
-    ext = sExtension.lower()
-
-    available_formats = get_available_vector_formats()
-    if ext not in available_formats:
-        if ext in SUPPORTED_VECTOR_FORMATS:
-            raise ValueError(
-                f"File extension '{ext}' is supported but driver '{SUPPORTED_VECTOR_FORMATS[ext]}' is not available in current GDAL/OGR installation"
-            )
-        else:
-            raise ValueError(f"Unsupported vector file extension: {ext}")
-
-    return available_formats[ext]
-
-
-def get_vector_format_from_filename(filename: str) -> str:
-    """
-    Determine the OGR format string from a filename.
-
-    Only accepts extensions that are both in the supported list and have available drivers.
-
-    Parameters:
-    filename (str): Input filename with extension.
-
-    Returns:
-    str: Format string for OGR driver.
-
-    Raises:
-    ValueError: If the file extension is not supported or driver is not available.
-    """
-    sExtension = get_extension_from_path(filename).lower()
-    if sExtension == "":
+    if filename is None:
+        raise ValueError("Filename cannot be None.")
+    ext = get_extension_from_path(os.fspath(filename)).lower()
+    if not ext:
         raise ValueError(
             f"Filename '{filename}' does not have an extension to determine vector format."
         )
-    return get_vector_format_from_extension(sExtension)
+    return get_vector_format_from_extension(ext)
 
 
 def get_extension_from_vector_format(format_name: str) -> str:
+    """Convert a GDAL/OGR vector format name to its corresponding file extension.
+
+    Parameters
+    ----------
+    format_name : str
+        The GDAL/OGR driver name (e.g., 'GeoJSON', 'ESRI Shapefile', 'GPKG').
+
+    Returns
+    -------
+    str
+        The file extension (e.g., '.geojson', '.shp', '.gpkg').
+
+    Raises
+    ------
+    ValueError
+        If format_name is not found in supported vector formats.
     """
-    Convert a GDAL vector format name to its corresponding file extension.
-
-    Parameters:
-    format_name (str): The GDAL/OGR driver name (e.g., 'GeoJSON', 'ESRI Shapefile', 'GPKG').
-
-    Returns:
-    str: The file extension (e.g., '.geojson', '.shp', '.gpkg').
-
-    Raises:
-    ValueError: If the format name is not found in the supported formats or if multiple
-                extensions map to the same format (in which case the first found is returned).
-
-    Examples:
-    >>> get_extension_from_vector_format('GeoJSON')
-    '.geojson'
-    >>> get_extension_from_vector_format('ESRI Shapefile')
-    '.shp'
-    >>> get_extension_from_vector_format('GPKG')
-    '.gpkg'
-    """
-    # Create a reverse mapping from format names to extensions
     format_to_extension = {}
     for ext, fmt in SUPPORTED_VECTOR_FORMATS.items():
         if fmt not in format_to_extension:
             format_to_extension[fmt] = ext
 
-    # Look up the extension
     if format_name not in format_to_extension:
         raise ValueError(
             f"Format '{format_name}' not found in supported vector formats. "
@@ -187,45 +189,71 @@ def get_extension_from_vector_format(format_name: str) -> str:
     return format_to_extension[format_name]
 
 
-def get_vector_driver_from_format(file_format: str) :
+def get_vector_driver_from_format(file_format: str) -> ogr.Driver:
+    """Get the OGR driver based on the provided vector file format.
+
+    Parameters
+    ----------
+    file_format : str
+        The vector file format (e.g., 'GeoJSON', 'ESRI Shapefile', 'GPKG').
+
+    Returns
+    -------
+    ogr.Driver
+        The OGR driver object corresponding to the file format.
+
+    Raises
+    ------
+    ValueError
+        If the driver is not found.
     """
-    Get the OGR driver based on the provided vector file format.
-
-    Parameters:
-    file_format (str): The vector file format (e.g., 'GeoJSON', 'ESRI Shapefile', 'GPKG').
-
-    Returns:
-    ogr.Driver: The OGR driver object corresponding to the file format.
-
-    Raises:
-    ValueError: If the driver is not found.
-    """
-    driver = ogr.GetDriverByName(file_format)
+    driver = ogr.GetDriverByName(file_format.strip())
     if driver is None:
         raise ValueError(f"Driver for format '{file_format}' not found.")
     return driver
 
 
-def get_vector_driver_from_filename(filename: str) :
+def get_vector_driver_from_filename(filename: PathLike) -> ogr.Driver:
+    """Get the OGR driver based on file extension.
+
+    Parameters
+    ----------
+    filename : str or os.PathLike
+        Path to the input file.
+
+    Returns
+    -------
+    ogr.Driver
+        The OGR driver object corresponding to the file format.
+
+    Raises
+    ------
+    ValueError
+        If the file extension is not supported or driver is not found.
     """
-    Get the OGR driver based on file extension.
-
-    Parameters:
-    filename (str): Path to the input file.
-
-    Returns:
-    ogr.Driver: The OGR driver object corresponding to the file format.
-
-    Raises:
-    ValueError: If the file extension is not supported or driver is not found.
-    """
-    sExtension = get_extension_from_path(filename).lower()
-    if sExtension == "":
-        raise ValueError(
-            f"Filename '{filename}' does not have an extension to determine vector format."
-        )
-    format_name = get_vector_format_from_extension(sExtension)
+    format_name = get_vector_format_from_filename(filename)
     return get_vector_driver_from_format(format_name)
+
+
+def get_vector_driver_from_extension(extension: str) -> ogr.Driver:
+    """Get the OGR driver based on file extension or filename.
+
+    Parameters
+    ----------
+    extension : str
+        File extension (e.g. '.geojson', 'shp') or path.
+
+    Returns
+    -------
+    ogr.Driver
+        The OGR driver object corresponding to the file format.
+    """
+    try:
+        format_name = get_vector_format_from_extension(extension)
+    except ValueError:
+        format_name = get_vector_format_from_filename(extension)
+    return get_vector_driver_from_format(format_name)
+
 
 
 @lru_cache(maxsize=1)

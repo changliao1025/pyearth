@@ -1,12 +1,16 @@
-from typing import List, Dict, Any, Tuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from pyearth.toolbox.mesh.point import pypoint
-from pyearth.toolbox.mesh.line import pyline
-from pyearth.toolbox.mesh.polyline import pypolyline
-from pyearth.toolbox.mesh.polygon import pypolygon
 from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates
 from pyearth.gis.geometry.calculate_angle_between_point import (
     calculate_angle_between_point,
 )
+
+if TYPE_CHECKING:
+    from pyearth.toolbox.mesh.line import pyline
+    from pyearth.toolbox.mesh.polygon import pypolygon
+    from pyearth.toolbox.mesh.polyline import pypolyline
 
 
 def _create_point(coords: Dict[str, Any]) -> pypoint:
@@ -34,6 +38,9 @@ def convert_gcs_coordinates_to_meshcell(
     Returns:
         pypolygon: A pypolygon object.
     """
+    from pyearth.toolbox.mesh.line import pyline
+    from pyearth.toolbox.mesh.polygon import pypolygon
+
     points = [
         _create_point({"dLongitude_degree": lon, "dLatitude_degree": lat})
         for lon, lat in aCoordinates_gcs_in[:-1]
@@ -72,16 +79,19 @@ def convert_gcs_coordinates_to_meshcell(
 
 def convert_gcs_coordinates_to_polyline(
     aCoordinates_in: List[Tuple[float, float]],
-) -> pypolyline:
+) -> Optional[pypolyline]:
     """
-    Convert GCS coordinates to a pyflowline object.
+    Convert GCS coordinates to a pypolyline object.
 
     Args:
         aCoordinates_in (List[Tuple[float, float]]): A list of GCS coordinates.
 
     Returns:
-        pyflowline: A pyflowline object or None if no edge is created.
+        pypolyline: A pypolyline object or None if no edge is created.
     """
+    from pyearth.toolbox.mesh.line import pyline
+    from pyearth.toolbox.mesh.polyline import pypolyline
+
     points = [
         _create_point({"dLongitude_degree": lon, "dLatitude_degree": lat})
         for lon, lat in aCoordinates_in
@@ -93,7 +103,6 @@ def convert_gcs_coordinates_to_polyline(
     ]
 
     if not edges:
-        print("No edge is created")
         return None
 
     return pypolyline(edges)
@@ -103,15 +112,18 @@ def convert_pcs_coordinates_to_polyline(
     aCoordinates_in: List[Tuple[float, float]], pProjection_in: Any
 ) -> pypolyline:
     """
-    Convert PCS coordinates to a pyflowline object.
+    Convert PCS coordinates to a pypolyline object.
 
     Args:
         aCoordinates_in (List[Tuple[float, float]]): A list of PCS coordinates.
         pProjection_in (Any): The projection information.
 
     Returns:
-        pyflowline: A pyflowline object.
+        pypolyline: A pypolyline object.
     """
+    from pyearth.toolbox.mesh.line import pyline
+    from pyearth.toolbox.mesh.polyline import pypolyline
+
     points = []
     for x, y in aCoordinates_in:
         lon, lat = reproject_coordinates(x, y, pProjection_in)

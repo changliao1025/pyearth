@@ -1,6 +1,12 @@
+"""ENVI raster header generation utilities."""
+
 import os
 from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
+PathLike = Union[str, os.PathLike]
+
+__all__ = ["envi_write_header"]
 
 _REQUIRED_KEYS = {
     "sFilename",
@@ -17,44 +23,61 @@ _REQUIRED_KEYS = {
 }
 
 
-def envi_write_header(sFilename_in, aHeader_in):
-    """
-    Write an ENVI header file from a metadata dictionary.
+def envi_write_header(
+    filename: Optional[PathLike] = None,
+    header_metadata: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> None:
+    """Write an ENVI header (.hdr) file from a metadata dictionary.
 
-    The routine currently supports WGS-84 map info and expects the caller to supply
-    a dictionary containing ENVI-required fields.
+    The routine supports WGS-84 map info and writes standard ENVI-format
+    header text files for binary raster datasets.
 
     Parameters
     ----------
-    sFilename_in : str
-        Path to the header file that will be written (for example ``"foo.hdr"``).
-    aHeader_in : dict
-        Dictionary containing header metadata. The following keys are required:
-        ``sFilename``, ``ncolumn``, ``nrow``, ``nband``, ``offset``, ``data_type``,
-        ``byte_order``, ``missing_value``, ``ULlon``, ``ULlat``, ``pixelSize``.
-        Provide either ``interleave`` or ``bsq`` to define the interleave layout.
-    """
+    filename : str or os.PathLike
+        Path to the header file to create (e.g. 'raster.hdr').
+    header_metadata : dict
+        Dictionary containing header metadata. Required keys include:
+        'sFilename', 'ncolumn', 'nrow', 'nband', 'offset', 'data_type',
+        'byte_order', 'missing_value', 'ULlon', 'ULlat', 'pixelSize',
+        and either 'interleave' or 'bsq'.
 
-    header_path = Path(sFilename_in)
+    Raises
+    ------
+    ValueError
+        If filename is empty, header_metadata is missing required keys,
+        or interleave layout is not specified.
+    """
+    if filename is None:
+        filename = kwargs.get("sFilename_in")
+    if header_metadata is None:
+        header_metadata = kwargs.get("aHeader_in")
+
+    if filename is None:
+        raise ValueError("Filename must be provided.")
+    if header_metadata is None or not isinstance(header_metadata, dict):
+        raise ValueError("header_metadata must be a dictionary.")
+
+    header_path = Path(filename).resolve()
     header_path.parent.mkdir(parents=True, exist_ok=True)
 
-    missing_keys = sorted(_REQUIRED_KEYS.difference(aHeader_in.keys()))
+    missing_keys = sorted(_REQUIRED_KEYS.difference(header_metadata.keys()))
     if missing_keys:
         missing = ", ".join(missing_keys)
         raise ValueError(f"ENVI header dictionary is missing required keys: {missing}")
 
-    interleave = aHeader_in.get("interleave", aHeader_in.get("bsq"))
+    interleave = header_metadata.get("interleave", header_metadata.get("bsq"))
     if interleave is None:
         raise ValueError(
             "ENVI header dictionary must include an 'interleave' or 'bsq' entry"
         )
 
-    def _as_str(key):
+    def _as_str(key: str) -> str:
         try:
-            value = aHeader_in[key]
+            return str(header_metadata[key])
         except KeyError as exc:
             raise ValueError(f"Missing required header value for '{key}'") from exc
-        return str(value)
 
     map_info = (
         "{Geographic Lat/Lon, 1.000, 1.000, "
@@ -78,5 +101,6 @@ def envi_write_header(sFilename_in, aHeader_in):
         "wavelength units = Unknown",
     ]
 
-    with header_path.open("w", encoding="utf-8") as header_file:
+    with open(header_path, "w", encoding="utf-8") as header_file:
         header_file.write("\n".join(header_lines) + "\n")
+

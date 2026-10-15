@@ -97,11 +97,15 @@ True
 True
 """
 
-from numpy import array, argmin
 import numpy as np
+from numpy import argmin, array
 from typing import List, Tuple
-
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
+
+__all__ = [
+    "visvalingam_whyatt_geodetic",
+    "VWSimplifier",
+]
 
 
 def visvalingam_whyatt_geodetic(aCoords_gcs, tolerance):

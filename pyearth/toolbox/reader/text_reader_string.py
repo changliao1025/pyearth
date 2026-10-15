@@ -1,168 +1,84 @@
+"""Text reader to 2D numpy string array utility."""
+
 import os
+from typing import Optional, Union
 import numpy as np
 
 
 def text_reader_string(
-    sFilename_in,
-    ncolumn_in=None,
-    nrow_in=None,
-    cDelimiter_in=None,
-    iFlag_remove_quota=None,
-    iSkipline_in=None,
-):
+    sFilename_in: str,
+    ncolumn_in: Optional[int] = None,
+    nrow_in: Optional[int] = None,
+    cDelimiter_in: Optional[str] = None,
+    iFlag_remove_quota: Optional[Union[int, bool]] = None,
+    iSkipline_in: Optional[int] = None,
+) -> np.ndarray:
     """
-    Read a text based file
+    Read a text-based file into a 2D NumPy array of strings.
 
-    Args:
-        sFilename_in (string): The text filename
-        ncolumn_in (int, optional): The number of column. Defaults to None.
-        nrow_in (int, optional): The number of row. Defaults to None.
-        cDelimiter_in (char, optional): The char to seperate a line. Defaults to None.
-        iFlag_remove_quota (int, optional): The flag to remove the quota in line string. Defaults to None.
-        iSkipline_in (int, optional): The line count to skip. Defaults to None.
+    Parameters
+    ----------
+    sFilename_in : str
+        Path to the text file.
+    ncolumn_in : int, optional
+        Expected number of columns. If None, inferred from the first parsed line.
+    nrow_in : int, optional
+        Maximum number of data rows to read. If None, reads all available lines.
+    cDelimiter_in : str, optional
+        Delimiter used to split tokens. If None, splits by arbitrary whitespace.
+    iFlag_remove_quota : int or bool, optional
+        If True (or 1), double-quotes are stripped from lines.
+    iSkipline_in : int, optional
+        Number of initial header lines to skip.
 
-    Returns:
-        numpy.arry: The data inside the text file.
+    Returns
+    -------
+    np.ndarray
+        2D NumPy array containing the parsed string tokens.
     """
-    if os.path.exists(sFilename_in):
-        pass
-    else:
-        print("The file does not exist!")
-        return
+    if not os.path.exists(sFilename_in):
+        raise FileNotFoundError(f"File not found: {sFilename_in}")
 
-    aData_out = -1
+    if ncolumn_in is not None and (not isinstance(ncolumn_in, (int, np.integer)) or int(ncolumn_in) <= 0):
+        raise ValueError(f"Number of columns must be a positive integer, got {ncolumn_in}")
 
-    # check the parameter
-    if ncolumn_in is not None:
-        if not isinstance(ncolumn_in, int) or ncolumn_in <= 0:
-            raise ValueError(
-                f"Number of columns must be a positive integer, got {ncolumn_in}"
-            )
+    target_cols = int(ncolumn_in) if ncolumn_in is not None else None
+    target_rows = int(nrow_in) if nrow_in is not None else None
+    strip_quotes = bool(iFlag_remove_quota)
+    skip = int(iSkipline_in) if iSkipline_in is not None else 0
 
-    if nrow_in is not None:
-        # there is nothing
-        nrow_out = nrow_in
-        # print(' ')
-    else:
-        # get the total line number
-        ifs = open(sFilename_in, "r", errors="ignore")
-        nrow_out = len(ifs.readlines())
-        ifs.close()
-    sLine = " "
-    ifs = open(sFilename_in, "r", errors="ignore")
-    if iSkipline_in is not None:
-        nrow_out = nrow_out - iSkipline_in
-        for i in range(iSkipline_in):
-            sLine = ifs.readline()
-    else:
-        pass
-    if iFlag_remove_quota is not None:
-        iFlag_iFlag_remove_quota = 1
-    else:
-        iFlag_iFlag_remove_quota = 0
-    # get delimiter
-    if cDelimiter_in is not None:
-        iFlag_delimiter = 1
-    else:
-        iFlag_delimiter = 0
-        # cDelimiter_in = ' '
-        pass
+    rows = []
+    with open(sFilename_in, "r", encoding="utf-8", errors="ignore") as f:
+        for _ in range(skip):
+            f.readline()
 
-    if iFlag_delimiter == 1:
-        if iFlag_column == 1:
-            if ncolumn_out < 1:
-                print("The file has no data!")
-                pass
-            aData_out = np.full((nrow_out, ncolumn_out), "  ", dtype=object)
-            for iRow in range(nrow_out):
-                sLine = (ifs.readline()).rstrip()
-                if iFlag_iFlag_remove_quota == 1:
-                    sLine = sLine.replace('"', "")
-                else:
-                    pass
-                aDummy = sLine.split(cDelimiter_in)
-                iDummy = len(aDummy)
-                if iDummy == ncolumn_out:
-                    aData_out[iRow] = aDummy
-                else:
-                    # something is missing
-                    aDummy2 = np.full(ncolumn_out, "  ", dtype=object)
-                    aDummy2[0:iDummy] = aDummy
-                    aData_out[iRow] = aDummy2
-                    pass
-        else:
-            sLine = (ifs.readline()).rstrip()
-            if iFlag_iFlag_remove_quota == 1:
-                sLine = sLine.replace('"', "")
+        for line in f:
+            if target_rows is not None and len(rows) >= target_rows:
+                break
+            line_str = line.rstrip("\r\n")
+            if strip_quotes:
+                line_str = line_str.replace('"', "")
+
+            if cDelimiter_in is not None:
+                tokens = line_str.split(cDelimiter_in)
             else:
-                pass
-            dummy = sLine.split(cDelimiter_in)
-            ncolumn_out = len(dummy)
-            # check ncolumn_in count
-            if ncolumn_out < 1:
-                print("The file has no data!")
-                pass
-            aData_out = np.full((nrow_out, ncolumn_out), "  ", dtype=object)
-            aData_out[0] = dummy
-            for iRow in range(1, nrow_out):
-                sLine = (ifs.readline()).rstrip()
-                if iFlag_iFlag_remove_quota == 1:
-                    sLine = sLine.replace('"', "")
-                else:
-                    pass
-                aDummy = sLine.split(cDelimiter_in)
-                iDummy = len(aDummy)
-                if iDummy == ncolumn_out:
-                    aData_out[iRow] = aDummy
-                else:
-                    # something is missing
-                    aDummy2 = np.full(ncolumn_out, "  ", dtype=object)
-                    aDummy2[0:iDummy] = aDummy
-                    aData_out[iRow] = aDummy2
-                    pass
+                tokens = line_str.split()
 
-    else:
-        if iFlag_column == 1:
-            # check ncolumn_in count
-            if ncolumn_out < 1:
-                return aData_out
-            aData_out = np.full((nrow_out, ncolumn_out), "  ", dtype=object)
-            for iRow in range(nrow_out):
-                dummy1 = ifs.readline()
-                # print('New line is: ' + dummy1)
-                dummy2 = dummy1.rstrip()
-                if iFlag_iFlag_remove_quota == 1:
-                    dummy2 = dummy2.replace('"', "")
-                else:
-                    pass
-                dummy3 = dummy2.split()
-                # print(dummy3)
-                aData_out[iRow] = dummy3
-        else:
-            sLine = (ifs.readline()).rstrip()
-            dummy = sLine.split()
-            ncolumn_out = len(dummy)
-            if ncolumn_out < 1:
-                return aData_out
-            aData_out = np.full((nrow_out, ncolumn_out), "  ", dtype=object)
-            if iFlag_iFlag_remove_quota == 1:
-                sLine = sLine.replace('"', "")
-            else:
-                pass
+            if not tokens:
+                continue
 
-            aData_out[0] = dummy
-            for iRow in range(1, nrow_out):
-                dummy1 = ifs.readline()
-                # print('New line is: ' + dummy1)
-                dummy2 = dummy1.rstrip()
-                if iFlag_iFlag_remove_quota == 1:
-                    dummy2 = dummy2.replace('"', "")
-                else:
-                    pass
-                dummy3 = dummy2.split()
-                # print(dummy3)
-                aData_out[iRow] = dummy3
-    # print(aData_out)
-    ifs.close()
+            if target_cols is not None:
+                if len(tokens) < target_cols:
+                    tokens = tokens + [""] * (target_cols - len(tokens))
+                elif len(tokens) > target_cols:
+                    tokens = tokens[:target_cols]
 
-    return aData_out
+            rows.append(tokens)
+
+    if not rows:
+        col_count = target_cols if target_cols is not None else 0
+        return np.empty((0, col_count), dtype=object)
+
+    num_cols = target_cols if target_cols is not None else max(len(r) for r in rows)
+    padded = [r + [""] * (num_cols - len(r)) for r in rows]
+    return np.array(padded, dtype=object)

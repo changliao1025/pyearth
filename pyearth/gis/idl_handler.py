@@ -28,6 +28,15 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Tuple, Union
 
+__all__ = [
+    "IdlHandler",
+    "IdlStrategy",
+    "IdlResult",
+    "IDL_TOLERANCE",
+    "IDL_OFFSET",
+    "DEFAULT_CUTOFF",
+]
+
 
 # ---------------------------------------------------------------------------
 # Module-level constants (single source of truth)
@@ -92,6 +101,7 @@ class IdlResult:
     ogr_geometry: Optional[Union[ogr.Geometry, List[ogr.Geometry]]] = None
     sub_polygons: Optional[List[np.ndarray]] = None
     adjusted_coords: Optional[np.ndarray] = None
+
 
 
 # ---------------------------------------------------------------------------
@@ -643,11 +653,9 @@ class IdlHandler:
 
         Handles IDL crossings by unwrapping longitudes first if needed.
         """
-        crosses, _ = _detect_id_crossing(coords)
-        if crosses:
-            unwrapped = _unwrap_longitudes(coords)
-            return _check_ccw(unwrapped)
-        return _check_ccw(coords)
+        from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
+
+        return check_counter_clockwise(coords)
 
     @staticmethod
     def calculate_signed_area(coords: np.ndarray) -> float:

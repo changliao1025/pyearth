@@ -21,10 +21,9 @@ from pyearth.gis.geometry.calculate_angle_between_point import (
     calculate_angle_between_point,
 )
 
-iFlag_cython = importlib.util.find_spec("cython")
-if iFlag_cython is not None:
+try:
     from pyearth.gis.geometry.kernel import calculate_distance_to_plane
-else:
+except ImportError:
     from pyearth.gis.geometry.calculate_distance_to_plane import (
         calculate_distance_to_plane,
     )
@@ -51,6 +50,8 @@ class LineClassEncoder(JSONEncoder):
             return obj.tolist()
         if isinstance(obj, pypoint):
             return json.loads(obj.tojson())
+        if isinstance(obj, pyline):
+            return obj.__dict__
         return super().default(obj)
 
 
@@ -559,4 +560,5 @@ class pyline:
         Returns:
             str: JSON representation of the line.
         """
-        return json.dumps(self, cls=LineClassEncoder, sort_keys=True, indent=4)
+        obj = self.__dict__.copy()
+        return json.dumps(obj, cls=LineClassEncoder, sort_keys=True, indent=4)

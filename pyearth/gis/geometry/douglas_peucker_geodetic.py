@@ -71,6 +71,8 @@ True
 from typing import List, Tuple
 from pyearth.gis.geometry.calculate_distance_to_line import calculate_distance_to_line
 
+__all__ = ["douglas_peucker_geodetic"]
+
 
 def douglas_peucker_geodetic(aCoords_gcs, tolerance):
     """

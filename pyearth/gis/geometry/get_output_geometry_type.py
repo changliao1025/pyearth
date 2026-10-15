@@ -7,6 +7,11 @@ output geometry types, handling multi-geometry types and 2.5D/3D variants.
 
 from osgeo import ogr
 
+__all__ = [
+    "get_output_geometry_type",
+    "GEOMETRY_TYPE_MAPPING",
+]
+
 # Geometry type mapping for common conversions
 GEOMETRY_TYPE_MAPPING = {
     ogr.wkbPoint: ogr.wkbPoint,

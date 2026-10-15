@@ -72,6 +72,13 @@ from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import 
     calculate_distance_based_on_longitude_latitude,
 )
 
+__all__ = [
+    "calculate_polygon_area",
+    "calculate_polygon_file_area",
+    "spherical_polygon_area",
+    "haversine",
+]
+
 
 def haversine(x: float) -> float:
     """Calculate the haversine function: hav(x) = (1 - cos(x)) / 2.
@@ -242,12 +249,6 @@ def calculate_polygon_area(
             f"Got {npoint} longitudes and {len(aLatitude_in)} latitudes."
         )
 
-    if len(aLatitude_in) != npoint:
-        raise ValueError(
-            f"Longitude and latitude arrays must have same length. "
-            f"Got {npoint} longitudes and {len(aLatitude_in)} latitudes."
-        )
-
     # Close polygon if not already closed
     if aLatitude_in[0] != aLatitude_in[-1] or aLongitude_in[0] != aLongitude_in[-1]:
         aLatitude_in = np.append(aLatitude_in, aLatitude_in[0])
@@ -322,7 +323,13 @@ def calculate_polygon_area(
         dLongitude_b = aLongitude_radian_in[1]
         dLatitude_b = aLatitude_radian_in[1]
 
-        nTriangle = npoint - 2
+        # Polygon is closed, so number of unique vertices is npoint - 1
+        # Triangulating N unique vertices yields N - 2 triangles = (npoint - 1) - 2 = npoint - 3
+        is_closed = (
+            aLongitude_radian_in[0] == aLongitude_radian_in[-1]
+            and aLatitude_radian_in[0] == aLatitude_radian_in[-1]
+        )
+        nTriangle = (npoint - 3) if is_closed else (npoint - 2)
         aArea = np.zeros(nTriangle)
 
         for i in np.arange(1, nTriangle + 1, 1):

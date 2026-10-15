@@ -59,7 +59,6 @@ import logging
 from pathlib import Path
 from typing import Optional, Literal
 from osgeo import ogr, osr
-import cartopy.feature as cfeature
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_filename,
@@ -496,6 +495,16 @@ def create_land_ocean_vector_mask_naturalearth(
         f"Downloading Natural Earth land data (resolution: {sResolution_coastal}). "
         f"This may take time on first run..."
     )
+
+    try:
+        import cartopy.feature as cfeature
+    except ImportError as exc:
+        raise ImportError(
+            "The 'cartopy' package is required to use "
+            "'create_land_ocean_vector_mask_naturalearth'. "
+            "Please install it (e.g., via 'conda install cartopy' or 'pip install pyearth[ocean]') "
+            "and try again."
+        ) from exc
 
     try:
         # Create a land feature from Natural Earth

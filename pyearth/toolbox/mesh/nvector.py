@@ -1,16 +1,19 @@
 import numpy as np
 
 
+_HIGH_PRECISION_DTYPE = getattr(np, "float128", np.longdouble)
+
+
 class pynvector(object):
     """
     N-vector representation for geographic points on a sphere.
 
-    Supports high-precision mode using numpy.float128 for improved
-    accuracy in spherical interpolation operations.
+    Supports high-precision mode using extended floating-point precision
+    for improved accuracy in spherical interpolation operations.
 
     Args:
         aParameter (dict): Dictionary with 'x', 'y', 'z' coordinates
-        use_high_precision (bool): Use float128 for calculations (default: False)
+        use_high_precision (bool): Use extended precision for calculations (default: False)
 
     Returns:
         pynvector: Normalized n-vector
@@ -18,7 +21,7 @@ class pynvector(object):
 
     def __init__(self, aParameter, use_high_precision=False, normalize=True):
         self.use_high_precision = use_high_precision
-        dtype = np.float128 if use_high_precision else np.float64
+        dtype = _HIGH_PRECISION_DTYPE if use_high_precision else np.float64
 
         # Extract and convert to appropriate precision
         self.dX = dtype(aParameter.get("x", 0.0))
@@ -66,7 +69,7 @@ class pynvector(object):
                 normalize=False,
             )
         else:
-            dtype = np.float128 if self.use_high_precision else np.float64
+            dtype = _HIGH_PRECISION_DTYPE if self.use_high_precision else np.float64
             return pynvector({"x": dtype(0.0), "y": dtype(0.0), "z": dtype(0.0)},
                            use_high_precision=self.use_high_precision,
                            normalize=False)
@@ -86,38 +89,4 @@ class pynvector(object):
     def __str__(self):
         return f"[{self.dX:.4f}, {self.dY:.4f}, {self.dZ:.4f}]"
 
-    def toLatLon(self):
-        """
-        Convert n-vector back to latitude/longitude coordinates.
 
-        Uses high precision (float128) for intermediate calculations if enabled,
-        but always returns float64 coordinates for pypoint storage.
-
-        Returns:
-            pypoint: Point with latitude and longitude in degrees
-        """
-        from pyearth.toolbox.mesh.point import pypoint
-
-        dtype = np.float128 if self.use_high_precision else np.float64
-
-        # Re-normalize in the target precision to reduce drift before conversion.
-        x = dtype(self.dX)
-        y = dtype(self.dY)
-        z = dtype(self.dZ)
-        norm = np.sqrt(x * x + y * y + z * z)
-
-        if norm > dtype(0.0):
-            x = x / norm
-            y = y / norm
-            z = z / norm
-
-        lat_rad = np.arctan2(z, np.sqrt(x * x + y * y))
-        lon_rad = np.arctan2(y, x)
-
-        # Always return as float64 for storage
-        return pypoint(
-            {
-                "dLongitude_degree": float(np.degrees(lon_rad)),
-                "dLatitude_degree": float(np.degrees(lat_rad)),
-            }
-        )

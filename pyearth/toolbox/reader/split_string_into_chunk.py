@@ -1,20 +1,32 @@
-def split_string_into_chunk(sString_in, iChunk_size_in=None):
+"""Split string into chunks utility."""
+
+from typing import Generator, Optional
+
+
+def split_string_into_chunk(
+    sString_in: str, iChunk_size_in: Optional[int] = None
+) -> Generator[str, None, None]:
     """
-    Split a string into pieces
+    Split a string into pieces of given chunk length.
 
-    Args:
-        sString_in (string): The input strin
-        iChunk_size_in (int, optional): the number of chuck. Defaults to None.
+    Parameters
+    ----------
+    sString_in : str
+        The input string.
+    iChunk_size_in : int, optional
+        Length of each chunk (default is 10). Must be positive.
 
-    Yields:
-        list: Subset of the string
+    Yields
+    ------
+    str
+        Chunks of the string.
     """
-    iTotel_size = len(sString_in)
-    if iChunk_size_in is not None:
-        iChunk_size = iChunk_size_in
-    else:
-        iChunk_size = 10
+    if not isinstance(sString_in, str):
+        raise TypeError(f"Input must be str, got {type(sString_in).__name__}")
 
-    iChunk_count = iTotel_size // iChunk_size
-    for pos in range(0, iTotel_size, iChunk_count):
-        yield sString_in[pos : pos + iChunk_count]
+    chunk_size = 10 if iChunk_size_in is None else int(iChunk_size_in)
+    if chunk_size <= 0:
+        raise ValueError(f"Chunk size must be positive, got {chunk_size}")
+
+    for pos in range(0, len(sString_in), chunk_size):
+        yield sString_in[pos : pos + chunk_size]

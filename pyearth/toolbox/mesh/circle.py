@@ -15,6 +15,8 @@ class CircleClassEncoder(JSONEncoder):
             return obj.tolist()
         if isinstance(obj, pypoint):
             return json.loads(obj.tojson())
+        if isinstance(obj, pycircle):
+            return obj.__dict__
         return JSONEncoder.default(self, obj)
 
 
@@ -39,4 +41,5 @@ class pycircle(object):
         Returns:
             str: A JSON string representing the pycircle object.
         """
-        return json.dumps(self, cls=CircleClassEncoder, sort_keys=True, indent=4)
+        obj = self.__dict__.copy()
+        return json.dumps(obj, cls=CircleClassEncoder, sort_keys=True, indent=4)

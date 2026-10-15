@@ -69,9 +69,7 @@ import logging
 from typing import Optional
 from datetime import datetime
 from osgeo import ogr, osr, gdal
-
-# Import spatial indexing utility
-from pyearth.toolbox.spatialindex.retired.setup_spatial_index import setup_spatial_index
+from rtree.index import Index as RTreeindex
 
 # Import vector format support utilities
 from pyearth.gis.gdal.gdal_vector_format_support import (
@@ -241,10 +239,9 @@ def intersect_polygon_with_polygon_file(
     # Record start time for performance tracking
     start_time = datetime.now()
 
-    # Set up spatial indexing library (rtree with automatic fallback)
+    # Set up spatial indexing library (rtree)
     logger.info(f"GDAL version: {gdal.__version__}")
-    RTreeClass = setup_spatial_index()
-    logger.info(f"Using rtree for spatial indexing")
+    logger.info("Using rtree for spatial indexing")
 
     # Validate input files exist
     if not os.path.exists(sFilename_base):
@@ -348,7 +345,7 @@ def intersect_polygon_with_polygon_file(
         # Build spatial index for base polygon features
         logger.info("Building spatial index for base features...")
 
-        index_base = RTreeClass()
+        index_base = RTreeindex()
 
         base_features = {}  # Cache base features
         indexed_count = 0
