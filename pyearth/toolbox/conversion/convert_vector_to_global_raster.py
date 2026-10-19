@@ -70,11 +70,13 @@ See Also
 - convert_vector_to_raster: Vector to raster with extent from input data
 """
 
-import os
 import logging
+import os
 from typing import Optional
+
 import numpy as np
-from osgeo import ogr, osr, gdal
+from osgeo import gdal, ogr, osr
+
 from pyearth.system.define_global_variables import sPath_proj_lib
 from pyearth.toolbox.conversion.rasterize_vector import rasterize_vector
 

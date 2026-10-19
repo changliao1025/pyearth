@@ -1,6 +1,6 @@
 # PyEarth Architecture Reference
 
-`pyearth` (v0.2.3) is a lightweight Python package for Earth science and geospatial computation developed by Dr. Chang Liao (Pacific Northwest National Laboratory / E3SM project).
+`pyearth` (v0.2.4) is a lightweight Python package for Earth science and geospatial computation developed by Dr. Chang Liao (Pacific Northwest National Laboratory / E3SM project).
 
 It serves as the foundational spatial computing and geoprocessing engine within the **PyEarthSuite** ecosystem, deliberately decoupled from visualization packages (`pyearthviz`, `pyearthviz3d`) and graph topology packages (`pyearthriver`).
 
@@ -34,7 +34,7 @@ PyEarth synthesizes two primary software paradigms:
 ```mermaid
 flowchart TD
     subgraph Core ["pyearth (Root)"]
-        Init["__version__ = '0.2.3'"]
+        Init["__version__ = '0.2.4'"]
     end
 
     subgraph System ["pyearth.system"]

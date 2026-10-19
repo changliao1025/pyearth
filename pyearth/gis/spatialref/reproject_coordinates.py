@@ -5,6 +5,7 @@ using Well-Known Text (WKT), EPSG codes, or SpatialReference objects.
 """
 
 from typing import List, Optional, Sequence, Tuple, Union
+
 from osgeo import osr
 
 osr.UseExceptions()

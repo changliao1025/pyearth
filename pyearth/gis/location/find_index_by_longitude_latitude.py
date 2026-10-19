@@ -88,4 +88,3 @@ def find_index_by_longitude_latitude(
         )
 
     return int(row_index), int(column_index)
-

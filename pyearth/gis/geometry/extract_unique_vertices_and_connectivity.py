@@ -85,10 +85,12 @@ array([0, 1, 2], dtype=int32)
 array([3, 4, 5, 6], dtype=int32)
 """
 
-import os, sys
-import numpy as np
-from typing import List, Tuple, Dict
+import os
+import sys
 from collections import defaultdict
+from typing import Dict, List, Tuple
+
+import numpy as np
 
 __all__ = ["extract_unique_vertices_and_connectivity"]
 

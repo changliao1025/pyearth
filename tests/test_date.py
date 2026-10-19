@@ -1,4 +1,5 @@
 import datetime
+
 import numpy as np
 import pytest
 
@@ -78,7 +79,9 @@ class TestDayOfYear:
 
 class TestDt2Cal:
     def test_1d_array(self):
-        dates = np.array(["2024-01-15T10:30:45.123456", "2024-02-29T00:00:00"], dtype="datetime64")
+        dates = np.array(
+            ["2024-01-15T10:30:45.123456", "2024-02-29T00:00:00"], dtype="datetime64"
+        )
         cal = dt2cal(dates)
         assert cal.shape == (2, 7)
         assert np.array_equal(cal[0], [2024, 1, 15, 10, 30, 45, 123456])

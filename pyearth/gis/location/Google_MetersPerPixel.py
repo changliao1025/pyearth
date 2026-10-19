@@ -1,6 +1,7 @@
 """Calculate ground resolution for Google Maps/Web Mercator tile pyramids."""
 
 from typing import Optional, Union
+
 import numpy as np
 
 from pyearth.system.define_global_variables import earth_radius
@@ -70,4 +71,3 @@ def google_meters_per_pixel(
         meters_per_pixel *= np.cos(np.radians(lat))
 
     return float(meters_per_pixel)
-

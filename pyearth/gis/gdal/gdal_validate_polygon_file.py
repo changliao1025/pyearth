@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Union
+
 from osgeo import ogr
 
 PathLike = Union[str, os.PathLike]
@@ -90,4 +91,3 @@ def gdal_validate_polygon_file(
     finally:
         layer = None
         dataset = None
-

@@ -21,7 +21,7 @@ def line_count(sFilename_in: str) -> int:
         raise FileNotFoundError(f"File not found: {sFilename_in}")
 
     count = 0
-    with open(sFilename_in, "r", encoding="utf-8", errors="ignore") as ifs:
+    with open(sFilename_in, encoding="utf-8", errors="ignore") as ifs:
         for _ in ifs:
             count += 1
     return count

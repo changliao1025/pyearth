@@ -2,18 +2,21 @@
 Clip vector files by a bounding box with support for multiple vector formats.
 """
 
-import os
 import logging
-from typing import Optional, List, Dict
+import os
+from typing import Dict, List, Optional
+
 from osgeo import ogr, osr
 
-from pyearth.system.define_global_variables import *
-from pyearth.toolbox.management.vector.reproject import reproject_vector
-from pyearth.toolbox.management.vector.merge_features import merge_features
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
-from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
-from pyearth.gis.gdal.read.vector.gdal_get_vector_boundary import gdal_get_vector_boundary
+from pyearth.gis.gdal.read.vector.gdal_get_vector_boundary import (
+    gdal_get_vector_boundary,
+)
 from pyearth.gis.gdal.read.vector.gdal_get_vector_extent import gdal_get_vector_extent
+from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
+from pyearth.system.define_global_variables import *
+from pyearth.toolbox.management.vector.merge_features import merge_features
+from pyearth.toolbox.management.vector.reproject import reproject_vector
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,9 +27,8 @@ def clip_vector_by_bounding_box(
     sFilename_vector_in: str,
     sFilename_polygon_in: str,
     sFilename_vector_out: str,
-    dBuffer_in = None,
+    dBuffer_in=None,
 ) -> None:
-
     """
     Select features from a vector file using the bounding box of a polygon file.
 
@@ -156,7 +158,7 @@ def clip_vector_by_bounding_box(
         pEnvelope = pLayer_clip.GetExtent()
         minx, maxx, miny, maxy = pEnvelope
 
-        #add buffer if user provided buffer
+        # add buffer if user provided buffer
         if dBuffer_in is not None:
             minx = minx - dBuffer_in
             maxx = maxx + dBuffer_in
@@ -261,5 +263,3 @@ def clip_vector_by_bounding_box(
             pSpatial_reference_target = None
 
     return
-
-

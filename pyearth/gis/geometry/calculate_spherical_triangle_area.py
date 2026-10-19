@@ -42,12 +42,14 @@ References
 .. [3] https://mathworld.wolfram.com/LHuiliersTheorem.html
 """
 
+from typing import List, Optional, Union
+
 import numpy as np
-from typing import Union, List, Optional
-from pyearth.system.define_global_variables import earth_radius
+
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import (
     calculate_distance_based_on_longitude_latitude,
 )
+from pyearth.system.define_global_variables import earth_radius
 
 __all__ = ["calculate_spherical_triangle_area"]
 

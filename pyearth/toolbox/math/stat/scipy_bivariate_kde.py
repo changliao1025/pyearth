@@ -1,10 +1,11 @@
+from typing import Tuple, Union
+
 import numpy as np
-from typing import Union, Tuple
 
 
 def kde_support(
     data: np.ndarray,
-    bandwidth: Union[float, str],
+    bandwidth: float,
     grid_size: int,
     cut: float,
     bounds: np.ndarray,

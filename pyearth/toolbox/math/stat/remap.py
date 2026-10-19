@@ -43,5 +43,7 @@ def remap(
         return float(nMin)
 
     # Standard affine linear interpolation naturally handles inverted ranges
-    result = nMin + (float(x) - float(oMin)) * (float(nMax) - float(nMin)) / (float(oMax) - float(oMin))
+    result = nMin + (float(x) - float(oMin)) * (float(nMax) - float(nMin)) / (
+        float(oMax) - float(oMin)
+    )
     return float(result)

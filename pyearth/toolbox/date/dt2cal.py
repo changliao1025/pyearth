@@ -74,9 +74,10 @@ See Also
 - pandas.to_datetime: Pandas datetime conversion
 """
 
-import numpy as np
 import logging
 from typing import Union
+
+import numpy as np
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -277,7 +278,7 @@ def dt2cal(dt: np.ndarray) -> np.ndarray:
     # Decompose calendar floors
     # Convert datetime64 to different time units for component extraction
     # This creates intermediate arrays at different time resolutions
-    Y, M, D, h, m, s = [dt.astype(f"M8[{x}]") for x in "YMDhms"]
+    Y, M, D, h, m, s = (dt.astype(f"M8[{x}]") for x in "YMDhms")
 
     # Extract components by computing differences between time units
     out[..., 0] = Y.astype("int64") + 1970  # Gregorian Year

@@ -47,15 +47,11 @@ class TestAngles:
 
     def test_angle_between_points_on_sphere(self):
         # Angle at North Pole between chord vectors to (0,0) and (90,0) in 3D Euclidean space
-        ang = calculate_angle_between_point(
-            0.0, 0.0, 0.0, 90.0, 90.0, 0.0
-        )
+        ang = calculate_angle_between_point(0.0, 0.0, 0.0, 90.0, 90.0, 0.0)
         assert pytest.approx(ang) == 60.0
 
     def test_angle_between_point_normal(self):
-        ang = calculate_angle_between_point_normal(
-            0.0, 0.0, 0.0, 90.0, 90.0, 0.0
-        )
+        ang = calculate_angle_between_point_normal(0.0, 0.0, 0.0, 90.0, 90.0, 0.0)
         assert 0.0 <= ang < 360.0
 
 
@@ -96,7 +92,9 @@ class TestGreatCircleOperations:
 
     def test_meridian_intersection(self):
         # Great circle along equator crosses 45E at 0N
-        lon, lat = find_great_circle_intersection_with_meridian(0.0, 0.0, 90.0, 0.0, 45.0)
+        lon, lat = find_great_circle_intersection_with_meridian(
+            0.0, 0.0, 90.0, 0.0, 45.0
+        )
         assert pytest.approx(lon) == 45.0
         assert pytest.approx(lat, abs=1e-5) == 0.0
 
@@ -142,7 +140,9 @@ class TestPolygonChecksAndClean:
         assert not is_convex_polygon(concave)
 
     def test_ccw_and_orientation(self):
-        ccw_ring = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]])
+        ccw_ring = np.array(
+            [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]
+        )
         assert check_counter_clockwise(ccw_ring)
         assert get_polygon_orientation(ccw_ring) == "counter-clockwise"
 

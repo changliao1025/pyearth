@@ -60,10 +60,11 @@ References
 
 """
 
-import os
 import logging
-from typing import Optional
+import os
 from pathlib import Path
+from typing import Optional
+
 from osgeo import ogr, osr
 
 # Configure module logger

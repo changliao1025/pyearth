@@ -1,16 +1,17 @@
 """Unit tests for pyearth.gis.spatialref package."""
 
 import unittest
+
 import numpy as np
 from osgeo import osr
 
 from pyearth.gis.spatialref import (
-    get_utm_zone,
+    degree_to_meter,
     get_utm_epsg_code,
     get_utm_spatial_reference_wkt,
-    degree_to_meter,
-    meter_to_degree,
+    get_utm_zone,
     is_wgs84_projection,
+    meter_to_degree,
     reproject_coordinates,
     reproject_coordinates_batch,
 )

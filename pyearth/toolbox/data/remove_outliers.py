@@ -75,9 +75,10 @@ References
 
 """
 
-import numpy as np
-from typing import Union, Tuple, Optional
 import logging
+from typing import Optional, Tuple, Union
+
+import numpy as np
 
 # Configure module logger
 logger = logging.getLogger(__name__)

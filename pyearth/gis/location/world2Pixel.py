@@ -48,16 +48,14 @@ def world_to_pixel(
     try:
         x_val = float(x)
         y_val = float(y)
-        c0, c1, c2, c3, c4, c5 = [float(v) for v in geotransform]
+        c0, c1, c2, c3, c4, c5 = (float(v) for v in geotransform)
     except (TypeError, ValueError) as e:
         raise TypeError(f"Coordinates and geotransform values must be numeric: {e}")
 
     # Standard north-up fast path
     if c2 == 0.0 and c4 == 0.0:
         if c1 == 0.0 or c5 == 0.0:
-            raise ValueError(
-                "Pixel dimensions cannot be zero. Invalid geotransform."
-            )
+            raise ValueError("Pixel dimensions cannot be zero. Invalid geotransform.")
         col = int((x_val - c0) / c1)
         row = int((y_val - c3) / c5)
         return col, row
@@ -108,7 +106,7 @@ def pixel_to_world(
         )
 
     try:
-        c0, c1, c2, c3, c4, c5 = [float(v) for v in geotransform]
+        c0, c1, c2, c3, c4, c5 = (float(v) for v in geotransform)
         c = float(col) + (0.5 if center else 0.0)
         r = float(row) + (0.5 if center else 0.0)
     except (TypeError, ValueError) as e:
@@ -117,5 +115,3 @@ def pixel_to_world(
     x = c0 + c * c1 + r * c2
     y = c3 + c * c4 + r * c5
     return x, y
-
-

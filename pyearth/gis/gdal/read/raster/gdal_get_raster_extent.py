@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Tuple, Union
+
 from osgeo import gdal
 
 from pyearth.gis.spatialref.is_wgs84_projection import is_wgs84_projection

@@ -81,8 +81,14 @@ References
        http://www.idlcoyote.com/map_tips/lonconvert.html
 """
 
-from typing import Union, Sequence, overload
+from typing import Sequence, Union, overload
+
 import numpy as np
+
+__all__ = [
+    "convert_360_to_180",
+    "convert_180_to_360",
+]
 
 
 @overload
@@ -248,21 +254,15 @@ def convert_360_to_180(
     .. [1] IDL Coyote longitude conversion:
            http://www.idlcoyote.com/map_tips/lonconvert.html
     """
-__all__ = [
-    "convert_360_to_180",
-    "convert_180_to_360",
-]
-
-
-def convert_360_to_180(longitude_degree_in: Union[float, Sequence[float], np.ndarray]) -> Union[float, np.ndarray]:
-    """Convert longitude value(s) from [0°, 360°] range to [-180°, 180°] range."""
     if isinstance(longitude_degree_in, (int, float)):
         return float(((longitude_degree_in + 180.0) % 360.0) - 180.0)
     longitude_array = np.asarray(longitude_degree_in)
     return ((longitude_array + 180.0) % 360.0) - 180.0
 
 
-def convert_180_to_360(longitude_degree_in: Union[float, Sequence[float], np.ndarray]) -> Union[float, np.ndarray]:
+def convert_180_to_360(
+    longitude_degree_in: Union[float, Sequence[float], np.ndarray],
+) -> Union[float, np.ndarray]:
     """Convert longitude from [-180°, 180°] range to [0°, 360°] range."""
     if isinstance(longitude_degree_in, (int, float)):
         return float((longitude_degree_in + 360.0) % 360.0)

@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Union
+
 import numpy as np
 
 
@@ -39,16 +40,20 @@ def text_reader_string(
     if not os.path.exists(sFilename_in):
         raise FileNotFoundError(f"File not found: {sFilename_in}")
 
-    if ncolumn_in is not None and (not isinstance(ncolumn_in, (int, np.integer)) or int(ncolumn_in) <= 0):
-        raise ValueError(f"Number of columns must be a positive integer, got {ncolumn_in}")
+    if ncolumn_in is not None and (
+        not isinstance(ncolumn_in, (int, np.integer)) or int(ncolumn_in) <= 0
+    ):
+        raise ValueError(
+            f"Number of columns must be a positive integer, got {ncolumn_in}"
+        )
 
     target_cols = int(ncolumn_in) if ncolumn_in is not None else None
     target_rows = int(nrow_in) if nrow_in is not None else None
     strip_quotes = bool(iFlag_remove_quota)
     skip = int(iSkipline_in) if iSkipline_in is not None else 0
 
-    rows = []
-    with open(sFilename_in, "r", encoding="utf-8", errors="ignore") as f:
+    rows: list[list[str]] = []
+    with open(sFilename_in, encoding="utf-8", errors="ignore") as f:
         for _ in range(skip):
             f.readline()
 

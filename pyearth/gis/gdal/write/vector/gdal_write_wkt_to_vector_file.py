@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from osgeo import ogr, osr
+
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 
 ogr.UseExceptions()
@@ -16,7 +17,7 @@ __all__ = ["gdal_write_wkt_to_vector_file"]
 
 
 def _resolve_spatial_reference(
-    srs: Optional[Union[osr.SpatialReference, int, str]]
+    srs: Optional[Union[osr.SpatialReference, int, str]],
 ) -> Optional[osr.SpatialReference]:
     """Resolve an EPSG code, WKT string, or SpatialReference instance."""
     if srs is None:

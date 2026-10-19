@@ -64,11 +64,12 @@ See Also
 - filter_vector_by_polygon: Extract features within a bounding polygon
 """
 
-import os
 import logging
-from typing import Optional
+import os
 from datetime import datetime
-from osgeo import ogr, osr, gdal
+from typing import Optional
+
+from osgeo import gdal, ogr, osr
 from rtree.index import Index as RTreeindex
 
 # Import vector format support utilities

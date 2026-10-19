@@ -66,13 +66,14 @@ See Also
 - get_vector_format_from_filename: Format name extraction
 """
 
-import os
 import logging
-import subprocess
+import os
 import shutil
+import subprocess
 from typing import Optional
+
 import osgeo
-from osgeo import ogr, osr, gdal
+from osgeo import gdal, ogr, osr
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_filename,
@@ -110,12 +111,12 @@ def _convert_with_ogr2ogr(
         True if successful, False otherwise
     """
     # Check if ogr2ogr is available
-    if shutil.which('ogr2ogr') is None:
+    if shutil.which("ogr2ogr") is None:
         logger.warning("ogr2ogr command not found, falling back to Python API")
         return False
 
     # Build ogr2ogr command
-    cmd = ['ogr2ogr', '-f']
+    cmd = ["ogr2ogr", "-f"]
 
     # Determine output format from extension
     try:
@@ -140,16 +141,16 @@ def _convert_with_ogr2ogr(
     cmd.append(ogr_format)
 
     # Add overwrite flag
-    cmd.append('-overwrite')
+    cmd.append("-overwrite")
 
     # Determine target CRS
     if target_epsg is not None:
         # Explicit EPSG provided
-        cmd.extend(['-t_srs', f'EPSG:{target_epsg}'])
+        cmd.extend(["-t_srs", f"EPSG:{target_epsg}"])
         logger.info(f"Target CRS: EPSG:{target_epsg} (explicit)")
     elif format_out.lower() in ["geojson", "json"]:
         # GeoJSON format - always use WGS84
-        cmd.extend(['-t_srs', 'EPSG:4326'])
+        cmd.extend(["-t_srs", "EPSG:4326"])
         logger.info(f"Target CRS: EPSG:4326 (GeoJSON format requirement)")
 
     # Add output and input files
@@ -159,12 +160,7 @@ def _convert_with_ogr2ogr(
     # Execute ogr2ogr
     try:
         logger.info(f"Executing: {' '.join(cmd)}")
-        result = subprocess.run(
-            cmd,
-            check=True,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
 
         if result.returncode == 0:
             logger.info("Conversion completed successfully using ogr2ogr")
@@ -396,13 +392,13 @@ def convert_vector_format(
 
     # Use ogr2ogr if requested and available
     if use_ogr2ogr:
-        success = _convert_with_ogr2ogr(sFilename_vector_in, sFilename_vector_out, target_epsg)
+        success = _convert_with_ogr2ogr(
+            sFilename_vector_in, sFilename_vector_out, target_epsg
+        )
         if success:
             return True
         else:
             logger.info("Falling back to Python API method")
-
-
 
     # Open input vector dataset
     pDataset_in = ogr.Open(sFilename_vector_in, 0)

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
-from pyearth.toolbox.mesh.point import pypoint
-from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates
+
 from pyearth.gis.geometry.calculate_angle_between_point import (
     calculate_angle_between_point,
 )
+from pyearth.gis.spatialref.reproject_coordinates import reproject_coordinates
+from pyearth.toolbox.mesh.point import pypoint
 
 if TYPE_CHECKING:
     from pyearth.toolbox.mesh.line import pyline
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from pyearth.toolbox.mesh.polyline import pypolyline
 
 
-def _create_point(coords: Dict[str, Any]) -> pypoint:
+def _create_point(coords: dict[str, Any]) -> pypoint:
     """Helper function to create a pypoint object."""
     return pypoint(coords)
 
@@ -22,7 +23,7 @@ def convert_gcs_coordinates_to_meshcell(
     iMesh_type_in: int,
     dLongitude_center_in: float,
     dLatitude_center_in: float,
-    aCoordinates_gcs_in: List[Tuple[float, float]],
+    aCoordinates_gcs_in: list[tuple[float, float]],
     iFlag_simplify_in: bool = False,
 ) -> pypolygon:
     """
@@ -78,8 +79,8 @@ def convert_gcs_coordinates_to_meshcell(
 
 
 def convert_gcs_coordinates_to_polyline(
-    aCoordinates_in: List[Tuple[float, float]],
-) -> Optional[pypolyline]:
+    aCoordinates_in: list[tuple[float, float]],
+) -> pypolyline | None:
     """
     Convert GCS coordinates to a pypolyline object.
 
@@ -109,7 +110,7 @@ def convert_gcs_coordinates_to_polyline(
 
 
 def convert_pcs_coordinates_to_polyline(
-    aCoordinates_in: List[Tuple[float, float]], pProjection_in: Any
+    aCoordinates_in: list[tuple[float, float]], pProjection_in: Any
 ) -> pypolyline:
     """
     Convert PCS coordinates to a pypolyline object.

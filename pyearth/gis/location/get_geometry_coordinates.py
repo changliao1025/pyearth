@@ -7,8 +7,10 @@ enforced to be in counter-clockwise (CCW) order following the right-hand rule.
 """
 
 from typing import List, Union
+
 import numpy as np
 from osgeo import ogr
+
 from pyearth.gis.geometry.check_counter_clockwise import check_counter_clockwise
 
 __all__ = [

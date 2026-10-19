@@ -1,7 +1,9 @@
 import json
 from json import JSONEncoder
-import numpy as np
 from typing import List
+
+import numpy as np
+
 from pyearth.toolbox.mesh.point import pypoint
 
 
@@ -20,7 +22,7 @@ class CircleClassEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 
 
-class pycircle(object):
+class pycircle:
     """The pycircle class represents a circle on a sphere."""
 
     def __init__(self, pPoint_center_in: pypoint, aPoint_circle_in: List[pypoint]):

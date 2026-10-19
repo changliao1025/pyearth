@@ -1,6 +1,7 @@
 """Bidirectional conversion between geographic and 3D Cartesian coordinates."""
 
 from typing import Tuple, Union
+
 import numpy as np
 
 __all__ = [

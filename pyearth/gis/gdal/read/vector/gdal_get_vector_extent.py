@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Tuple, Union
+
 from osgeo import ogr
 
 PathLike = Union[str, os.PathLike]

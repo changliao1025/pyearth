@@ -1,6 +1,7 @@
 """Coordinate resolution conversions between angular degrees and linear meters."""
 
-from typing import Union
+from typing import Optional, Union
+
 import numpy as np
 
 from pyearth.system.define_global_variables import earth_radius
@@ -9,7 +10,7 @@ __all__ = ["degree_to_meter", "meter_to_degree"]
 
 
 def degree_to_meter(
-    resolution_degree: Union[float, np.ndarray] = None,
+    resolution_degree: Optional[Union[float, np.ndarray]] = None,
     latitude: Union[float, np.ndarray] = 0.0,
     **kwargs,
 ) -> Union[float, np.ndarray]:
@@ -53,7 +54,7 @@ def degree_to_meter(
 
 
 def meter_to_degree(
-    resolution_meter: Union[float, np.ndarray] = None,
+    resolution_meter: Optional[Union[float, np.ndarray]] = None,
     latitude: Union[float, np.ndarray] = 0.0,
     **kwargs,
 ) -> Union[float, np.ndarray]:
@@ -109,4 +110,3 @@ def meter_to_degree(
     if np.ndim(resolution_degree) == 0:
         return float(resolution_degree)
     return resolution_degree
-

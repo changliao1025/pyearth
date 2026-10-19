@@ -1,11 +1,10 @@
 
 
 cimport cython
-from libc.math cimport M_PI, sin, cos
-
 cimport numpy as cnp
-import numpy as np
+from libc.math cimport M_PI, cos, sin
 
+import numpy as np
 
 """
 Geospatial 3D conversion utilities for PyEarth.
@@ -72,4 +71,3 @@ cpdef object convert_longitude_latitude_to_sphere_3d(double dLongitude_in, doubl
     z = sin(latitude_rad)
 
     return np.array([x, y, z], dtype=np.float64)
-

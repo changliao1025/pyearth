@@ -115,4 +115,3 @@ def create_symlink(source: PathLike, target_link: PathLike) -> None:
             raise OSError(
                 f"Failed to create symlink from {target_path} to {source_path}: {e}"
             ) from e
-

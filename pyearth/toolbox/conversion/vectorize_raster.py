@@ -73,9 +73,10 @@ See Also
 - numpy_to_gdal_type: Data type conversion utility
 """
 
-import os
 import logging
+import os
 from typing import Optional
+
 import numpy as np
 from osgeo import gdal, ogr, osr
 
@@ -497,7 +498,7 @@ def vectorize_raster(
                     if valid_data.size > 0:
                         if np.issubdtype(valid_data.dtype, np.integer):
                             # For integer arrays, use bincount (faster)
-                            dominant_value = np.bincount(valid_data).argmax()
+                            dominant_value = np.argmax(np.bincount(valid_data))
                         else:
                             # For float arrays, use unique value counting
                             unique_values, counts = np.unique(

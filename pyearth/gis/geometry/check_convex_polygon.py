@@ -1,6 +1,7 @@
 """Check if a 2D polygon is convex."""
 
 from typing import List, Sequence, Tuple, Union
+
 import numpy as np
 
 __all__ = [
@@ -9,7 +10,9 @@ __all__ = [
 ]
 
 
-def cross_product_2d(p_prev: Sequence[float], p_curr: Sequence[float], p_next: Sequence[float]) -> float:
+def cross_product_2d(
+    p_prev: Sequence[float], p_curr: Sequence[float], p_next: Sequence[float]
+) -> float:
     """Calculate the 2D cross product (turn direction) of vectors defined by three consecutive points.
 
     Returns:
@@ -63,4 +66,3 @@ def is_convex_polygon(polygon_vertices: Sequence[Sequence[float]]) -> bool:
                 return False
 
     return True
-

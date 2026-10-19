@@ -1,6 +1,7 @@
 """List min and max algorithms ignoring NaNs."""
 
 from typing import Any, Sequence
+
 import numpy as np
 
 

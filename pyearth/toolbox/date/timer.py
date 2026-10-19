@@ -61,9 +61,9 @@ See Also
 - timeit: Standard library module for microbenchmarking
 """
 
-import time
 import logging
-from typing import Optional, List
+import time
+from typing import List, Optional
 
 # Configure logging
 logger = logging.getLogger(__name__)

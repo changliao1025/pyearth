@@ -1,25 +1,27 @@
-import os
 import logging
+import os
 import time
 from typing import Optional, Union
+
 import numpy as np
-from osgeo import ogr, osr, gdal
+from osgeo import gdal, ogr, osr
 
 gdal.UseExceptions()
 
-from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_format_from_filename,
-    print_supported_vector_formats,
+    get_available_vector_formats,
     get_vector_driver_from_format,
+    get_vector_format_from_filename,
 )
+from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
 IDL_threshold = 1e-3  # Degrees from antimeridian
+
 
 def remove_small_polygon(
     sFilename_vector_in: str,
     sFilename_vector_out: str,
-    dThreshold_in: Union[float, int], # in square meters
+    dThreshold_in: Union[float, int],  # in square meters
     iFlag_algorithm: int = 2,
     verbose: bool = True,
     progress_interval: int = 1000,
@@ -139,7 +141,7 @@ def remove_small_polygon(
         raise RuntimeError(f"Failed to determine vector format: {e}")
 
     if pDriver_out is None:
-        available_formats = print_supported_vector_formats()
+        available_formats = get_available_vector_formats()
         raise ValueError(
             f"Output format '{sFormat_out}' is not supported. "
             f"Available formats: {available_formats}"
@@ -348,7 +350,9 @@ def _process_single_polygon(
         # If it is, keep it regardless of area since it might be split and actual area is larger
         lon_coords = aCoords_outer[:, 0]
 
-        is_near_antimeridian = np.any( np.abs(np.abs(lon_coords[:-1]) - 180.0) < IDL_threshold )
+        is_near_antimeridian = np.any(
+            np.abs(np.abs(lon_coords[:-1]) - 180.0) < IDL_threshold
+        )
 
         if is_near_antimeridian:
             # Keep polygon near antimeridian without area check

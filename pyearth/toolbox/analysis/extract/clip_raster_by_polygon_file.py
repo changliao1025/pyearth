@@ -2,17 +2,18 @@
 Clip raster by polygon file with support for multiple vector formats.
 """
 
+import logging
 import os
 import sys
-import logging
 from typing import Optional, Tuple
+
 import numpy as np
 from osgeo import gdal, ogr, osr
 
-from pyearth.toolbox.management.vector.merge_features import merge_features
-from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
-from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
+from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
+from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
+from pyearth.toolbox.management.vector.merge_features import merge_features
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

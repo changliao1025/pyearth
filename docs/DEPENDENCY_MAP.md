@@ -1,6 +1,6 @@
 # PyEarth Dependency Map & Architecture Balancing Report
 
-This document maps all external, inter-module, and function-level dependencies across `pyearth` (v0.2.3) to support methodical, file-by-file code review and architectural refactoring.
+This document maps all external, inter-module, and function-level dependencies across `pyearth` (v0.2.4) to support methodical, file-by-file code review and architectural refactoring.
 
 ---
 

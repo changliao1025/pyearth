@@ -73,9 +73,10 @@ See Also
 - calculate_polygon_area: General polygon area calculation
 """
 
-import numpy as np
 import logging
 from typing import Union
+
+import numpy as np
 
 # Configure logging
 logger = logging.getLogger(__name__)

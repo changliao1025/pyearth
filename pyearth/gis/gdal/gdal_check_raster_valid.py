@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Union
+
 from osgeo import gdal
 
 PathLike = Union[str, os.PathLike]
@@ -76,4 +77,3 @@ def gdal_check_raster_valid(
 
     finally:
         dataset = None
-

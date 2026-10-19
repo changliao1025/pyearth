@@ -69,9 +69,10 @@ See Also
 - convert_vector_to_raster: Simplified interface using auto-detected extent
 """
 
-import os
 import logging
+import os
 from typing import Optional
+
 import numpy as np
 from osgeo import gdal, ogr, osr
 
@@ -541,13 +542,16 @@ def rasterize_vector(
                         burn_values=[dField_value],
                     )
                 else:
+                    options = ["ALL_TOUCHED=TRUE"]
+                    if sAttribute_name:
+                        options.append(f"ATTRIBUTE={sAttribute_name}")
                     gdal.RasterizeLayer(
                         pDatasource_raster,
                         [1],
                         pLayer_vector,
                         None,
                         None,
-                        options=["ALL_TOUCHED=TRUE", "ATTRIBUTE=" + sAttribute_name],
+                        options=options,
                     )
         else:
             # Use constant burn values

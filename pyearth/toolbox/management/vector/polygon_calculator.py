@@ -1,11 +1,13 @@
 # import gdal
 import os
-from osgeo import ogr, osr
 from datetime import datetime
+
 import numpy as np
+from osgeo import ogr, osr
 from rtree.index import Index as RTreeindex
-from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
+from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
 
 osr.UseExceptions()
 
@@ -44,7 +46,7 @@ def polygon_difference(
     # read the new file
     pDataset_new = pDriver_geojson.Open(sFilename_new, 0)
 
-    # find the numebr of geometries in the base file
+    # find the number of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
     nFeature_base = pLayer_base.GetFeatureCount()
 
@@ -61,7 +63,7 @@ def polygon_difference(
             pFeature_new = pLayer_new.GetFeature(j)
             pGeometry_new = pFeature_new.GetGeometryRef()
             iFlag_intersect = pGeometry_new.Intersects(pGeometry_base)
-            if iFlag_intersect == True:
+            if iFlag_intersect:
                 iFlag_intersected = 1
                 pGeometry_intersect = pGeometry_new.Intersection(pGeometry_base)
                 pGeometrytype_intersect = pGeometry_intersect.GetGeometryName()
@@ -119,7 +121,7 @@ def polygon_difference_rtree(
     pFeatureOut = ogr.Feature(pLayerDefn)
     # read the base file
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
-    # find the numebr of geometries in the base file
+    # find the number of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
     interleaved = True
     index_base = RTreeindex()
@@ -150,7 +152,7 @@ def polygon_difference_rtree(
             dData_base = aData_base[k]
             dData_diff = dData_new - dData_base
             iFlag_intersect = pGeometry_new.Intersects(pGeometry_base)
-            if iFlag_intersect == True:
+            if iFlag_intersect:
                 pGeometry_intersect = pGeometry_new.Intersection(pGeometry_base)
                 pGeometrytype_intersect = pGeometry_intersect.GetGeometryName()
                 if pGeometrytype_intersect == "POLYGON":
@@ -225,7 +227,7 @@ def polygon_difference_cython(
     pFeatureOut = ogr.Feature(pLayerDefn)
     # read the base file
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
-    # find the numebr of geometries in the base file
+    # find the number of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
     index_base = RTreeindex()
     aData_base = list()
@@ -269,7 +271,7 @@ def polygon_difference_cython(
                 dData_percent = -100
 
             iFlag_intersect = pGeometry_new.Intersects(pGeometry_base)
-            if iFlag_intersect == True:
+            if iFlag_intersect:
                 pGeometry_intersect = pGeometry_new.Intersection(pGeometry_base)
                 pGeometrytype_intersect = pGeometry_intersect.GetGeometryName()
                 iCount = pGeometry_intersect.GetGeometryCount()
@@ -328,8 +330,8 @@ def polygon_difference_cython(
             dData_percent = 100
             aCoords_gcs = get_geometry_coordinates(pGeometry_new)
             dArea = calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
-            if iFlag_intersect == True:
-                if iFlag_within == True:
+            if iFlag_intersect:
+                if iFlag_within:
                     continue
                 # not within as well
 
@@ -415,8 +417,8 @@ def polygon_difference_cython(
             dData_percent = -100
             aCoords_gcs = get_geometry_coordinates(pGeometry_base)
             dArea = calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
-            if iFlag_intersect == True:
-                if iFlag_within == True:
+            if iFlag_intersect:
+                if iFlag_within:
                     continue
                 pGeometry_difference = pGeometry_base.Difference(pGeometry_union)
                 pGeometrytype_difference = pGeometry_difference.GetGeometryName()
@@ -536,7 +538,7 @@ def polygon_difference_cython_channel(
     pFeatureOut = ogr.Feature(pLayerDefn)
     # read the base file
     pDataset_base = pDriver_geojson.Open(sFilename_base, 0)
-    # find the numebr of geometries in the base file
+    # find the number of geometries in the base file
     pLayer_base = pDataset_base.GetLayer()
     index_base = RTreeindex()
     aData_base = list()
@@ -594,7 +596,7 @@ def polygon_difference_cython_channel(
                         dData_percent = -100
 
                     iFlag_intersect = pGeometry_new.Intersects(pGeometry_base)
-                    if iFlag_intersect == True:
+                    if iFlag_intersect:
                         pGeometry_intersect = pGeometry_new.Intersection(pGeometry_base)
                         pGeometrytype_intersect = pGeometry_intersect.GetGeometryName()
                         iCount = pGeometry_intersect.GetGeometryCount()

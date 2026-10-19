@@ -53,6 +53,7 @@ osgeo.ogr.Geometry.Simplify : Simplification to remove unnecessary vertices
 """
 
 from typing import Optional
+
 from osgeo import ogr
 
 

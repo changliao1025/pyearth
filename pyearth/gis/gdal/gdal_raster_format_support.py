@@ -1,8 +1,9 @@
 """GDAL raster format and driver support inspection utilities."""
 
-from functools import lru_cache
 import os
+from functools import lru_cache
 from typing import Dict, Union
+
 from osgeo import gdal
 
 from pyearth.system.filename import get_extension_from_path
@@ -109,7 +110,6 @@ def get_raster_format_from_extension(extension: str) -> str:
     raise ValueError(f"Unsupported raster file extension: {ext}")
 
 
-
 def get_raster_format_from_filename(filename: PathLike) -> str:
     """Determine the GDAL raster format string from a filename or path.
 
@@ -154,9 +154,7 @@ def get_extension_from_raster_format(format_name: str) -> str:
     for ext, fmt in SUPPORTED_RASTER_FORMATS.items():
         if fmt.lower() == format_name.strip().lower():
             return ext
-    raise ValueError(
-        f"Format '{format_name}' not found in supported raster formats."
-    )
+    raise ValueError(f"Format '{format_name}' not found in supported raster formats.")
 
 
 def get_raster_driver_from_format(file_format: str) -> gdal.Driver:
@@ -198,4 +196,3 @@ def get_raster_driver_from_filename(filename: PathLike) -> gdal.Driver:
     """
     format_name = get_raster_format_from_filename(filename)
     return get_raster_driver_from_format(format_name)
-

@@ -39,7 +39,9 @@ class TestFilenameUtils(unittest.TestCase):
         self.assertEqual(get_extension_from_filename("data.txt"), ".txt")
         self.assertEqual(get_extension_from_filename("archive.tar.gz"), ".gz")
         self.assertEqual(get_extension_from_filename("no_ext"), "")
-        self.assertEqual(get_extension_from_filename(Path("nested/dir/image.png")), ".png")
+        self.assertEqual(
+            get_extension_from_filename(Path("nested/dir/image.png")), ".png"
+        )
 
         with self.assertRaises(ValueError):
             get_extension_from_filename(None)
@@ -53,15 +55,23 @@ class TestFilenameUtils(unittest.TestCase):
             get_extension_from_path(None)
 
     def test_get_filename_from_path_without_extension(self):
-        self.assertEqual(get_filename_from_path_without_extension("/path/to/file.tif"), "file")
-        self.assertEqual(get_filename_from_path_without_extension("alone.json"), "alone")
-        self.assertEqual(get_filename_from_path_without_extension(Path("/dir/sub/test.nc")), "test")
+        self.assertEqual(
+            get_filename_from_path_without_extension("/path/to/file.tif"), "file"
+        )
+        self.assertEqual(
+            get_filename_from_path_without_extension("alone.json"), "alone"
+        )
+        self.assertEqual(
+            get_filename_from_path_without_extension(Path("/dir/sub/test.nc")), "test"
+        )
 
         with self.assertRaises(ValueError):
             get_filename_from_path_without_extension(None)
 
     def test_get_filename_without_extension(self):
-        self.assertEqual(get_filename_without_extension("/path/to/file.tif"), "/path/to/file")
+        self.assertEqual(
+            get_filename_without_extension("/path/to/file.tif"), "/path/to/file"
+        )
         self.assertEqual(get_filename_without_extension("alone.json"), "alone")
         self.assertEqual(get_filename_without_extension("noext"), "noext")
 
@@ -123,7 +133,9 @@ class TestSetLinkerDirectory(unittest.TestCase):
             lib_dir.mkdir()
 
             var_name = "TEST_LINKER_VAR"
-            result = configure_linker_path(env_path=tmpdir, prepend=True, var_name=var_name)
+            result = configure_linker_path(
+                env_path=tmpdir, prepend=True, var_name=var_name
+            )
             self.assertIn(str(lib_dir.resolve()), result)
             self.assertEqual(os.environ.get(var_name), result)
 

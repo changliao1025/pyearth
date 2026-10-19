@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
 from osgeo import ogr, osr
+
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
@@ -143,7 +144,7 @@ def export_point_to_vector_file(
     spatial_ref = _resolve_spatial_reference(pSpatial_reference_in)
 
     has_attributes = aAttribute_data is not None
-    attribute_data = aAttribute_data if has_attributes else []
+    attribute_data: List[Any] = aAttribute_data if aAttribute_data is not None else []
 
     dataset = None
     layer = None
@@ -287,13 +288,10 @@ def export_point_as_polygon_file(
 
         result = layer.CreateFeature(feature)
         if result != ogr.OGRERR_NONE:
-            raise RuntimeError(
-                f"Could not create polygon feature in {filename_str}."
-            )
+            raise RuntimeError(f"Could not create polygon feature in {filename_str}.")
 
         dataset.FlushCache()
     finally:
         feature = None
         layer = None
         dataset = None
-

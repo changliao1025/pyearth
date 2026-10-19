@@ -2,6 +2,7 @@
 
 import os
 from typing import Any, Dict, Optional, Union
+
 import numpy as np
 from osgeo import gdal
 

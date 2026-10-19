@@ -1,10 +1,9 @@
 import numpy as np
 
-
 _HIGH_PRECISION_DTYPE = getattr(np, "float128", np.longdouble)
 
 
-class pynvector(object):
+class pynvector:
     """
     N-vector representation for geographic points on a sphere.
 
@@ -36,7 +35,9 @@ class pynvector(object):
                 self.dY /= length
                 self.dZ /= length
             else:
-                self.dX = self.dY = self.dZ = dtype(0.0)  # Normalize zero vector to zero
+                self.dX = self.dY = self.dZ = dtype(
+                    0.0
+                )  # Normalize zero vector to zero
 
     def length(self):
         return np.sqrt(self.dX * self.dX + self.dY * self.dY + self.dZ * self.dZ)
@@ -70,9 +71,11 @@ class pynvector(object):
             )
         else:
             dtype = _HIGH_PRECISION_DTYPE if self.use_high_precision else np.float64
-            return pynvector({"x": dtype(0.0), "y": dtype(0.0), "z": dtype(0.0)},
-                           use_high_precision=self.use_high_precision,
-                           normalize=False)
+            return pynvector(
+                {"x": dtype(0.0), "y": dtype(0.0), "z": dtype(0.0)},
+                use_high_precision=self.use_high_precision,
+                normalize=False,
+            )
 
     def __add__(self, other):
         if not isinstance(other, pynvector):
@@ -88,5 +91,3 @@ class pynvector(object):
 
     def __str__(self):
         return f"[{self.dX:.4f}, {self.dY:.4f}, {self.dZ:.4f}]"
-
-

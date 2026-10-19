@@ -1,18 +1,20 @@
-import os
 import json
+import os
 from json import JSONEncoder
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
+
 import numpy as np
 from osgeo import ogr, osr
 
-from pyearth.toolbox.mesh.point import pypoint
+from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
+from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
+from pyearth.gis.spatialref.convert_between_degree_and_meter import meter_to_degree
+from pyearth.toolbox.mesh.algorithm.save_points_as_polygon import save_points_as_polygon
 from pyearth.toolbox.mesh.circle import pycircle
 from pyearth.toolbox.mesh.line import pyline
+from pyearth.toolbox.mesh.point import pypoint
 from pyearth.toolbox.mesh.polyline import pypolyline
-from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
-from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
-from pyearth.toolbox.mesh.algorithm.save_points_as_polygon import save_points_as_polygon
-from pyearth.gis.spatialref.convert_between_degree_and_meter import meter_to_degree
+
 
 class PolygonClassEncoder(JSONEncoder):
     """Custom JSON encoder for pypolygon objects and their dependencies."""
@@ -381,10 +383,9 @@ class pypolygon:
         """
         return self.towkt()
 
-    def calculate_buffer_zone_polygon(self, dRadius,
-                                      sFilename_out = None,
-                                      sFolder_out=None,
-                                      iFlag_algorithm=1)-> Tuple[str, List[pypoint], List[pycircle]]:
+    def calculate_buffer_zone_polygon(
+        self, dRadius, sFilename_out=None, sFolder_out=None, iFlag_algorithm=1
+    ) -> Tuple[str, List[pypoint], List[pycircle]]:
         """
         Calculate the buffer zone polygon
 
@@ -401,8 +402,8 @@ class pypolygon:
             if os.path.exists(sFilename_out):
                 os.remove(sFilename_out)
                 pass
-        aPoint_out = list()
-        aCircle_out = list()
+        aPoint_out: List[pypoint] = list()
+        aCircle_out: List[pycircle] = list()
         aLongitude_degree = list()
         aLatitude_degree = list()
         aPoint_2d = list()
@@ -410,8 +411,10 @@ class pypolygon:
         spatial_ref.ImportFromEPSG(4326)  # Example: WGS84
         for i in range(self.nLine):
             pLine = self.aLine[i]
-            sWkt, aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
-            aCircle_out.append(aCircle)
+            sWkt, aPoint, aPoint_center, aPoint_circle, aCircle = (
+                pLine.calculate_buffer_zone_polygon(dRadius)
+            )
+            aCircle_out.extend(aCircle)
             for pPoint in aPoint:
                 aLongitude_degree.append(pPoint.dLongitude_degree)
                 aLatitude_degree.append(pPoint.dLatitude_degree)
@@ -427,37 +430,38 @@ class pypolygon:
                 aLatitude_degree.append(pPoint.dLatitude_degree)
                 aPoint_2d.append([pPoint.dLongitude_degree, pPoint.dLatitude_degree])
 
-            #save out for debug
+            # save out for debug
             if sFolder_out is not None:
-                sFilename_dummy= os.path.join(sFolder_out, 'buffer_zone_edge_%d.geojson' % i)
+                sFilename_dummy = os.path.join(
+                    sFolder_out, "buffer_zone_edge_%d.geojson" % i
+                )
                 save_points_as_polygon(aPoint, sFilename_dummy)
 
         if iFlag_algorithm == 1:
-            #create a polygon geometry
+            # create a polygon geometry
             pGeometry_merge = None
-            for pCircle in aCircle_out:
-                for ppCircle in pCircle:
-                    pGeometry = ogr.Geometry(ogr.wkbPolygon)
-                    pGeometry.AssignSpatialReference(spatial_ref)
-                    pRing = ogr.Geometry(ogr.wkbLinearRing)
-                    for pPoint in ppCircle.aPoint_circle:
-                        pRing.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
-                        pass
-                    pRing.CloseRings()
-                    pGeometry.AddGeometry(pRing)
-                    if pGeometry_merge is None:
-                        pGeometry_merge = pGeometry.Clone()
-                    else:
-                        pGeometry_merge = pGeometry_merge.Union(pGeometry)
-            #now export the polygon
+            for ppCircle in aCircle_out:
+                pGeometry = ogr.Geometry(ogr.wkbPolygon)
+                pGeometry.AssignSpatialReference(spatial_ref)
+                pRing = ogr.Geometry(ogr.wkbLinearRing)
+                for pPoint in ppCircle.aPoint_circle:
+                    pRing.AddPoint(pPoint.dLongitude_degree, pPoint.dLatitude_degree)
+                    pass
+                pRing.CloseRings()
+                pGeometry.AddGeometry(pRing)
+                if pGeometry_merge is None:
+                    pGeometry_merge = pGeometry.Clone()
+                else:
+                    pGeometry_merge = pGeometry_merge.Union(pGeometry)
+            # now export the polygon
             aPoint_dummy = list()
             npoints = 0
             pGeometry_out = None
             if pGeometry_merge is not None and not pGeometry_merge.IsEmpty():
                 sGeometry_name = pGeometry_merge.GetGeometryName().upper()
-                if sGeometry_name == 'POLYGON':
+                if sGeometry_name == "POLYGON":
                     pGeometry_out = pGeometry_merge
-                elif sGeometry_name == 'MULTIPOLYGON':
+                elif sGeometry_name == "MULTIPOLYGON":
                     # Use the largest polygon when union returns disjoint pieces.
                     dArea_max = -1.0
                     for iPart in range(pGeometry_merge.GetGeometryCount()):
@@ -465,7 +469,16 @@ class pypolygon:
                         if pPart is None:
                             continue
                         aCoords_gcs = get_geometry_coordinates(pPart)
-                        dArea_part = calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
+                        if aCoords_gcs is None:
+                            continue
+                        coords = (
+                            aCoords_gcs[0]
+                            if isinstance(aCoords_gcs, list)
+                            else aCoords_gcs
+                        )
+                        if len(coords) == 0:
+                            continue
+                        dArea_part = calculate_polygon_area(coords[:, 0], coords[:, 1])
                         if dArea_part > dArea_max:
                             dArea_max = dArea_part
                             pGeometry_out = pPart
@@ -476,29 +489,32 @@ class pypolygon:
                     npoints = ring.GetPointCount()
                     for i in range(npoints):
                         point = ring.GetPoint(i)
-                        point0= dict()
-                        point0['dLongitude_degree'] = point[0]
-                        point0['dLatitude_degree'] = point[1]
+                        point0 = dict()
+                        point0["dLongitude_degree"] = point[0]
+                        point0["dLatitude_degree"] = point[1]
                         pVertex_out = pypoint(point0)
                         aPoint_dummy.append(pVertex_out)
 
             if sFilename_out is not None and len(aPoint_dummy) > 0:
                 save_points_as_polygon(aPoint_dummy, sFilename_out)
+            aPoint_out = aPoint_dummy
 
             # Generate WKT from merged polygon
-            pGeometry_out.FlattenTo2D()  # Ensure geometry is 2D for WKT export
-            sWkt_buffer_polygon = pGeometry_out.ExportToWkt()
+            if pGeometry_out is not None:
+                pGeometry_out.FlattenTo2D()  # Ensure geometry is 2D for WKT export
+                sWkt_buffer_polygon = str(pGeometry_out.ExportToWkt())
+            else:
+                sWkt_buffer_polygon = ""
         else:
-            #use my own algorithm, which is the circle
+            # use my own algorithm, which is the circle
             sWkt_buffer_polygon = ""
             pass
 
         return sWkt_buffer_polygon, aPoint_out, aCircle_out
 
-    def calculate_buffer_zone_polygon_alpha(self, dRadius,
-                                            sFilename_out = None,
-                                              sFolder_out=None,
-                                      iFlag_algorithm=1):
+    def calculate_buffer_zone_polygon_alpha(
+        self, dRadius, sFilename_out=None, sFolder_out=None, iFlag_algorithm=1
+    ):
         """
         Calculate the buffer zone polygon
 
@@ -531,7 +547,9 @@ class pypolygon:
         aPoint_2d = list()
         for i in range(self.nLine):
             pLine = self.aLine[i]
-            _, aPoint, aPoint_center, aPoint_circle, aCircle = pLine.calculate_buffer_zone_polygon(dRadius)
+            _, aPoint, aPoint_center, aPoint_circle, aCircle = (
+                pLine.calculate_buffer_zone_polygon(dRadius)
+            )
             aCircle_out.append(aCircle)
             for pPoint in aPoint:
                 aLongitude_degree.append(pPoint.dLongitude_degree)
@@ -548,23 +566,25 @@ class pypolygon:
                 aLatitude_degree.append(pPoint.dLatitude_degree)
                 aPoint_2d.append([pPoint.dLongitude_degree, pPoint.dLatitude_degree])
 
-            #save out for debug
+            # save out for debug
             if sFolder_out is not None:
-                sFilename_dummy= os.path.join(sFolder_out, 'buffer_zone_edge_%d.geojson' % i)
+                sFilename_dummy = os.path.join(
+                    sFolder_out, "buffer_zone_edge_%d.geojson" % i
+                )
                 save_points_as_polygon(aPoint, sFilename_dummy)
 
         if iFlag_algorithm == 1:
             aPoint_2d = np.array(aPoint_2d)
-            dLatitude_mean = np.mean(aPoint_2d[:,1])
-            #convert distance to degree
+            dLatitude_mean = np.mean(aPoint_2d[:, 1])
+            # convert distance to degree
             dDegree = meter_to_degree(dRadius, dLatitude_mean)
             pPolygon_out = alphashape.alphashape(aPoint_2d, dDegree)
-            #return as a list of vectex is more friendly
+            # return as a list of vectex is more friendly
             aPoint_out = list()
             for dLongtitude, dLatitude in pPolygon_out.exterior.coords:
-                point0= dict()
-                point0['dLongitude_degree'] = dLongtitude
-                point0['dLatitude_degree'] = dLatitude
+                point0 = dict()
+                point0["dLongitude_degree"] = dLongtitude
+                point0["dLatitude_degree"] = dLatitude
                 pPoint_out = pypoint(point0)
                 aPoint_out.append(pPoint_out)
             if sFilename_out is not None:
@@ -573,23 +593,26 @@ class pypolygon:
             pPolygon_out = alphashape.alphashape(aPoint_2d, 0.0)
             aPoint_dummy = list()
             for dLongtitude, dLatitude in pPolygon_out.exterior.coords:
-                point0= dict()
-                point0['dLongitude_degree'] = dLongtitude
-                point0['dLatitude_degree'] = dLatitude
+                point0 = dict()
+                point0["dLongitude_degree"] = dLongtitude
+                point0["dLatitude_degree"] = dLatitude
                 pPoint_out = pypoint(point0)
                 aPoint_dummy.append(pPoint_out)
             if sFilename_out is not None:
-                sFilename_dummy = sFilename_out.replace('.geojson', '_convex_hull.geojson')
+                sFilename_dummy = sFilename_out.replace(
+                    ".geojson", "_convex_hull.geojson"
+                )
                 save_points_as_polygon(aPoint_dummy, sFilename_dummy)
         else:
-            #use my own algorithm, which is the circle
+            # use my own algorithm, which is the circle
 
             pass
 
         return aPoint_out, aCircle_out
 
-    def calculate_buffer_zone_polygon_alpha_gdf(self, dRadius, sFilename_out = None, sFolder_out=None,
-                                      iFlag_algorithm=1):
+    def calculate_buffer_zone_polygon_alpha_gdf(
+        self, dRadius, sFilename_out=None, sFolder_out=None, iFlag_algorithm=1
+    ):
         """
         Calculate the buffer zone polygon
 
@@ -628,7 +651,9 @@ class pypolygon:
         aPoint_2d = list()
         for i in range(self.nLine):
             edge = self.aEdge[i]
-            _, aPoint, aPoint_center, aPoint_circle, aCircle = edge.calculate_buffer_zone_polygon(dRadius)
+            _, aPoint, aPoint_center, aPoint_circle, aCircle = (
+                edge.calculate_buffer_zone_polygon(dRadius)
+            )
             aCircle_out.append(aCircle)
             for pPoint in aPoint:
                 aLongitude_degree.append(pPoint.dLongitude_degree)
@@ -645,42 +670,53 @@ class pypolygon:
                 aLatitude_degree.append(pPoint.dLatitude_degree)
                 aPoint_2d.append([pPoint.dLongitude_degree, pPoint.dLatitude_degree])
 
-            #save out for debug
+            # save out for debug
             if sFolder_out is not None:
-                sFilename_dummy= os.path.join(sFolder_out, 'buffer_zone_edge_%d.geojson' % i)
+                sFilename_dummy = os.path.join(
+                    sFolder_out, "buffer_zone_edge_%d.geojson" % i
+                )
                 save_points_as_polygon(aPoint, sFilename_dummy)
 
         if iFlag_algorithm == 1:
             aPoint_2d = np.array(aPoint_2d)
-            #mean longitude and latitude
-            #dLongitude_mean = np.mean(aPoint_2d[:,0])
-            dLatitude_mean = np.mean(aPoint_2d[:,1])
-            #convert distance to degree
+            # mean longitude and latitude
+            # dLongitude_mean = np.mean(aPoint_2d[:,0])
+            dLatitude_mean = np.mean(aPoint_2d[:, 1])
+            # convert distance to degree
             dDegree = meter_to_degree(dRadius, dLatitude_mean)
-            gdf_in = geopandas.GeoDataFrame({'geometry': geopandas.points_from_xy(aPoint_2d[:,0], aPoint_2d[:,1])}, crs="EPSG:4326")
-            #Generate the alpha shape
+            gdf_in = geopandas.GeoDataFrame(
+                {
+                    "geometry": geopandas.points_from_xy(
+                        aPoint_2d[:, 0], aPoint_2d[:, 1]
+                    )
+                },
+                crs="EPSG:4326",
+            )
+            # Generate the alpha shape
             gdf_out = alphashape.alphashape(gdf_in, dDegree)
-            #save a geojson file
+            # save a geojson file
             if sFilename_out is not None:
-                gdf_out.to_file(sFilename_out, driver='GeoJSON')
+                gdf_out.to_file(sFilename_out, driver="GeoJSON")
 
-            #get the vertices
-            #for i in range(gdf_out.shape[0]):
+            # get the vertices
+            # for i in range(gdf_out.shape[0]):
             pPolygon_out = gdf_out.geometry.iloc[0]
             for dLongtitude, dLatitude in pPolygon_out.exterior.coords:
-                point0= dict()
-                point0['dLongitude_degree'] = dLongtitude
-                point0['dLatitude_degree'] = dLatitude
+                point0 = dict()
+                point0["dLongitude_degree"] = dLongtitude
+                point0["dLatitude_degree"] = dLatitude
                 pPoint_out = pypoint(point0)
                 aPoint_out.append(pPoint_out)
                 pass
 
             gdf_out = alphashape.alphashape(gdf_in, 0.0)
             if sFilename_out is not None:
-                sFilename_dummy = sFilename_out.replace('.geojson', '_convex_hull.geojson')
-                gdf_out.to_file(sFilename_dummy, driver='GeoJSON')
+                sFilename_dummy = sFilename_out.replace(
+                    ".geojson", "_convex_hull.geojson"
+                )
+                gdf_out.to_file(sFilename_dummy, driver="GeoJSON")
         else:
-            #use my own algorithm, which is the circle
+            # use my own algorithm, which is the circle
 
             pass
 
