@@ -50,14 +50,16 @@ References
 
 """
 
+import importlib.util
+import logging
+
 # we will use gdal api for most operations
 import os
 import sys
-import numpy as np
-import importlib.util
-import logging
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Literal, Optional
+
+import numpy as np
 from osgeo import ogr, osr
 
 from pyearth.gis.gdal.gdal_vector_format_support import (

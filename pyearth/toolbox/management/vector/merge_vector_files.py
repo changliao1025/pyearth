@@ -1,7 +1,10 @@
-import os, sys
-import numpy as np
+import os
+import sys
 from typing import List
-from osgeo import gdal, osr, ogr, gdalconst
+
+import numpy as np
+from osgeo import gdal, gdalconst, ogr, osr
+
 from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_format_from_filename,
     print_supported_vector_formats,
@@ -204,13 +207,15 @@ def merge_vector_files(
                     pFieldDefn = pLayerDefn_in.GetFieldDefn(i)
                     sFieldName = pFieldDefn.GetName()
                     # Skip GeoParquet bbox columns exposed as regular fields by GDAL
-                    if sFieldName.startswith('geometry_bbox') or sFieldName.startswith('__bbox'):
+                    if sFieldName.startswith("geometry_bbox") or sFieldName.startswith(
+                        "__bbox"
+                    ):
                         continue
                     else:
                         print(f"Adding field to output layer: {sFieldName}")
                         if pLayer_out.CreateField(pFieldDefn) != 0:
                             print(
-                            f"Failed to create field {sFieldName} in output layer"
+                                f"Failed to create field {sFieldName} in output layer"
                             )
                             return
 
@@ -262,7 +267,9 @@ def merge_vector_files(
                     pFieldDefn_in = pLayerDefn_in.GetFieldDefn(i)
                     sFieldName = pFieldDefn_in.GetName()
                     # Skip GeoParquet bbox columns — present in layer defn but not fetchable from features
-                    if sFieldName.startswith('geometry_bbox') or sFieldName.startswith('__bbox'):
+                    if sFieldName.startswith("geometry_bbox") or sFieldName.startswith(
+                        "__bbox"
+                    ):
                         continue
 
                     # Check if the field exists in the output layer

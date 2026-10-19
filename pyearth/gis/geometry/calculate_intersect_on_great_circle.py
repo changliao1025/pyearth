@@ -41,6 +41,7 @@ References
 """
 
 import numpy as np
+
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
     convert_longitude_latitude_to_sphere_3d,
     convert_sphere_3d_to_longitude_latitude,
@@ -369,4 +370,3 @@ def find_great_circle_intersection_with_meridian(
     lat_deg = np.degrees(lat_rad)
 
     return (target_lon, float(lat_deg))
-

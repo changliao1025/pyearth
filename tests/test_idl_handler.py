@@ -4,20 +4,22 @@ from osgeo import ogr
 
 from pyearth.gis.idl_handler import (
     IdlHandler,
-    IdlStrategy,
     IdlResult,
+    IdlStrategy,
 )
 
 
 def test_idl_handler_detect_crossing():
     # Crossing polygon
-    coords = np.array([
-        [170.0, -10.0],
-        [170.0,  10.0],
-        [-170.0, 10.0],
-        [-170.0, -10.0],
-        [170.0, -10.0],
-    ])
+    coords = np.array(
+        [
+            [170.0, -10.0],
+            [170.0, 10.0],
+            [-170.0, 10.0],
+            [-170.0, -10.0],
+            [170.0, -10.0],
+        ]
+    )
     handler = IdlHandler(strategy=IdlStrategy.CHECK_ONLY)
     result = handler.detect(coords)
     assert result.crosses_idl is True
@@ -25,26 +27,30 @@ def test_idl_handler_detect_crossing():
 
 
 def test_idl_handler_detect_non_crossing():
-    coords = np.array([
-        [0.0, 0.0],
-        [10.0, 0.0],
-        [10.0, 10.0],
-        [0.0, 10.0],
-        [0.0, 0.0],
-    ])
+    coords = np.array(
+        [
+            [0.0, 0.0],
+            [10.0, 0.0],
+            [10.0, 10.0],
+            [0.0, 10.0],
+            [0.0, 0.0],
+        ]
+    )
     handler = IdlHandler(strategy=IdlStrategy.CHECK_ONLY)
     result = handler.detect(coords)
     assert result.crosses_idl is False
 
 
 def test_idl_handler_split_strategy():
-    coords = np.array([
-        [170.0, -10.0],
-        [170.0,  10.0],
-        [-170.0, 10.0],
-        [-170.0, -10.0],
-        [170.0, -10.0],
-    ])
+    coords = np.array(
+        [
+            [170.0, -10.0],
+            [170.0, 10.0],
+            [-170.0, 10.0],
+            [-170.0, -10.0],
+            [170.0, -10.0],
+        ]
+    )
     handler = IdlHandler(strategy=IdlStrategy.SPLIT)
     result = handler.detect(coords)
     assert result.crosses_idl is True
@@ -60,13 +66,15 @@ def test_idl_handler_split_strategy():
 
 def test_idl_handler_split_starting_western():
     # Polygon starting with negative longitude
-    coords = np.array([
-        [-170.0, -10.0],
-        [170.0, -10.0],
-        [170.0,  10.0],
-        [-170.0, 10.0],
-        [-170.0, -10.0],
-    ])
+    coords = np.array(
+        [
+            [-170.0, -10.0],
+            [170.0, -10.0],
+            [170.0, 10.0],
+            [-170.0, 10.0],
+            [-170.0, -10.0],
+        ]
+    )
     handler = IdlHandler(strategy=IdlStrategy.SPLIT)
     result = handler.detect(coords)
     assert result.crosses_idl is True
@@ -80,13 +88,15 @@ def test_idl_handler_split_starting_western():
 
 
 def test_idl_handler_unwrap():
-    coords = np.array([
-        [170.0, 10.0],
-        [-170.0, 10.0],
-        [-170.0, -10.0],
-        [170.0, -10.0],
-        [170.0, 10.0],
-    ])
+    coords = np.array(
+        [
+            [170.0, 10.0],
+            [-170.0, 10.0],
+            [-170.0, -10.0],
+            [170.0, -10.0],
+            [170.0, 10.0],
+        ]
+    )
     handler = IdlHandler()
     unwrapped = handler.unwrap(coords)
     diffs = np.abs(np.diff(unwrapped[:, 0]))
@@ -95,13 +105,15 @@ def test_idl_handler_unwrap():
 
 def test_idl_handler_check_ccw():
     # Counter-clockwise polygon across IDL
-    coords_ccw = np.array([
-        [170.0, -10.0],
-        [-170.0, -10.0],
-        [-170.0, 10.0],
-        [170.0, 10.0],
-        [170.0, -10.0],
-    ])
+    coords_ccw = np.array(
+        [
+            [170.0, -10.0],
+            [-170.0, -10.0],
+            [-170.0, 10.0],
+            [170.0, 10.0],
+            [170.0, -10.0],
+        ]
+    )
     # Shoelace on unwrapped should determine orientation
     assert IdlHandler.check_counter_clockwise(coords_ccw) is True
     assert IdlHandler.check_counter_clockwise(coords_ccw[::-1]) is False

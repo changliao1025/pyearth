@@ -24,7 +24,7 @@ def read_configuration_file(sFilename_configuration_in: str) -> Dict[str, str]:
         )
 
     config_out: Dict[str, str] = {}
-    with open(sFilename_configuration_in, "r", encoding="utf-8", errors="ignore") as ifs:
+    with open(sFilename_configuration_in, encoding="utf-8", errors="ignore") as ifs:
         for line in ifs:
             line_str = line.strip()
             if not line_str or line_str.startswith("#"):

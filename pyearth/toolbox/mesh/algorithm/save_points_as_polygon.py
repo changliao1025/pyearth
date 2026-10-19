@@ -1,8 +1,10 @@
-
 import os
+
 from osgeo import ogr, osr
-from pyearth.gis.geometry.calculate_polygon_area  import calculate_polygon_area
+
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
+from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
+
 
 def save_points_as_polygon(aPoint_in, sFilename_out):
     pDriver = get_vector_driver_from_filename(sFilename_out)
@@ -12,7 +14,9 @@ def save_points_as_polygon(aPoint_in, sFilename_out):
     pDataset = pDriver.CreateDataSource(sFilename_out)
     pSrcSpatialRef = osr.SpatialReference()
     pSrcSpatialRef.ImportFromEPSG(4326)
-    pLayer = pDataset.CreateLayer('buffer_polygon', pSrcSpatialRef, geom_type=ogr.wkbPolygon)
+    pLayer = pDataset.CreateLayer(
+        "buffer_polygon", pSrcSpatialRef, geom_type=ogr.wkbPolygon
+    )
     aLon = list()
     aLat = list()
     ring = ogr.Geometry(ogr.wkbLinearRing)
@@ -22,7 +26,7 @@ def save_points_as_polygon(aPoint_in, sFilename_out):
         aLat.append(pVertex.dLatitude_degree)
 
     ring.CloseRings()
-    pArea_field = ogr.FieldDefn('area', ogr.OFTReal)
+    pArea_field = ogr.FieldDefn("area", ogr.OFTReal)
     pArea_field.SetWidth(20)
     pArea_field.SetPrecision(2)
     pLayer.CreateField(pArea_field)
@@ -33,9 +37,9 @@ def save_points_as_polygon(aPoint_in, sFilename_out):
     pPolygon = ogr.Geometry(ogr.wkbPolygon)
     pPolygon.AddGeometry(ring)
     pFeature.SetGeometry(pPolygon)
-    pFeature.SetField("area", dArea )
+    pFeature.SetField("area", dArea)
     pLayer.CreateFeature(pFeature)
-    #flush the cache and close the file
+    # flush the cache and close the file
     pDataset.FlushCache()
     pDataset.Destroy()
     pSrcSpatialRef = None

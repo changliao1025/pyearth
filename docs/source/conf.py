@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Read the Docs Template documentation build configuration file, created by
 # sphinx-quickstart on Tue Aug 26 14:19:49 2014.
@@ -12,8 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
+import sys
 
 # Try to import tomli for Python < 3.11, tomllib for Python >= 3.11
 try:
@@ -29,6 +28,7 @@ except ImportError:
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
+
 # Read version from pyproject.toml
 def get_version():
     """Read version from pyproject.toml"""
@@ -37,24 +37,28 @@ def get_version():
         return "0.2.3"
 
     try:
-        pyproject_path = os.path.join(os.path.dirname(__file__), '..', '..', 'pyproject.toml')
-        with open(pyproject_path, 'rb') as f:
+        pyproject_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "pyproject.toml"
+        )
+        with open(pyproject_path, "rb") as f:
             pyproject_data = toml_lib.load(f)
-        return pyproject_data['project']['version']
+        return pyproject_data["project"]["version"]
     except (FileNotFoundError, KeyError, Exception):
         # Fallback if pyproject.toml is missing or malformed
         return "0.2.3"
+
 
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
-import subprocess, os
+import os
+import subprocess
 
 
 def configureDoxyfile(input_dir, output_dir):
-    with open("Doxyfile.in", "r") as file:
+    with open("Doxyfile.in") as file:
         filedata = file.read()
 
     filedata = filedata.replace("@DOXYGEN_INPUT_DIR@", input_dir)
@@ -84,14 +88,14 @@ extensions = [
     "sphinx.ext.napoleon",  # Support for Google and NumPy style docstrings
     "sphinx.ext.viewcode",  # Add links to source code
     "sphinx.ext.intersphinx",  # Link to other project documentation
-    "breathe"
+    "breathe",
 ]
 
 # Intersphinx mapping to link to other projects
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'gdal': ('https://gdal.org/', None),
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "gdal": ("https://gdal.org/", None),
 }
 
 # Napoleon settings for better docstring support
@@ -267,7 +271,7 @@ htmlhelp_basename = "ReadtheDocsTemplatedoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+latex_elements: dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').

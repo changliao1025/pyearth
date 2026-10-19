@@ -1,25 +1,33 @@
-import os
-import json
-from json import JSONEncoder
-import numpy as np
 import importlib.util
-from typing import List, Tuple, Optional
+import json
+import os
+from json import JSONEncoder
+from typing import List, Optional, Tuple
+
+import numpy as np
 from osgeo import ogr
-from pyearth.toolbox.mesh.point import pypoint
-from pyearth.toolbox.mesh.circle import pycircle
-from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
-    calculate_intersect_on_great_circle,
-)
+
 from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
     export_point_as_polygon_file,
-)
-from pyearth.toolbox.mesh.algorithm.split_by_length import split_line_by_length
-from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import (
-    find_minimal_enclosing_polygon,
 )
 from pyearth.gis.geometry.calculate_angle_between_point import (
     calculate_angle_between_point,
 )
+from pyearth.gis.geometry.calculate_angle_between_vectors_degrees import (
+    calculate_angle_between_vectors_degrees,
+)
+from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
+    calculate_intersect_on_great_circle,
+)
+from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
+    convert_longitude_latitude_to_sphere_3d,
+)
+from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import (
+    find_minimal_enclosing_polygon,
+)
+from pyearth.toolbox.mesh.algorithm.split_by_length import split_line_by_length
+from pyearth.toolbox.mesh.circle import pycircle
+from pyearth.toolbox.mesh.point import pypoint
 
 try:
     from pyearth.gis.geometry.kernel import calculate_distance_to_plane
@@ -105,6 +113,8 @@ class pyline:
         self.pBound: Tuple[float, float, float, float] = self.calculate_line_bound()
         self.lLineID: int = -1
         self.lLineIndex: int = -1
+        self.pCircle_start: Optional[pycircle] = None
+        self.pCircle_end: Optional[pycircle] = None
 
     @classmethod
     def create(cls, pPoint_start_in: pypoint, pPoint_end_in: pypoint) -> "pyline":
@@ -373,16 +383,62 @@ class pyline:
         if not isinstance(other, pyline):
             raise TypeError(f"Expected pyline, got {type(other)}")
 
-        return calculate_angle_between_point(
-            self.pPoint_start.dLongitude_degree,
-            self.pPoint_start.dLatitude_degree,
-            self.pPoint_end.dLongitude_degree,
-            self.pPoint_end.dLatitude_degree,
-            other.pPoint_start.dLongitude_degree,
-            other.pPoint_start.dLatitude_degree,
-            other.pPoint_end.dLongitude_degree,
-            other.pPoint_end.dLatitude_degree,
-        )
+        if self.pPoint_end == other.pPoint_start:
+            return calculate_angle_between_point(
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+                other.pPoint_end.dLongitude_degree,
+                other.pPoint_end.dLatitude_degree,
+            )
+        elif self.pPoint_start == other.pPoint_start:
+            return calculate_angle_between_point(
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                other.pPoint_end.dLongitude_degree,
+                other.pPoint_end.dLatitude_degree,
+            )
+        elif self.pPoint_end == other.pPoint_end:
+            return calculate_angle_between_point(
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+                other.pPoint_start.dLongitude_degree,
+                other.pPoint_start.dLatitude_degree,
+            )
+        elif self.pPoint_start == other.pPoint_end:
+            return calculate_angle_between_point(
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+                other.pPoint_start.dLongitude_degree,
+                other.pPoint_start.dLatitude_degree,
+            )
+        else:
+            v1_s = convert_longitude_latitude_to_sphere_3d(
+                self.pPoint_start.dLongitude_degree,
+                self.pPoint_start.dLatitude_degree,
+            )
+            v1_e = convert_longitude_latitude_to_sphere_3d(
+                self.pPoint_end.dLongitude_degree,
+                self.pPoint_end.dLatitude_degree,
+            )
+            v2_s = convert_longitude_latitude_to_sphere_3d(
+                other.pPoint_start.dLongitude_degree,
+                other.pPoint_start.dLatitude_degree,
+            )
+            v2_e = convert_longitude_latitude_to_sphere_3d(
+                other.pPoint_end.dLongitude_degree,
+                other.pPoint_end.dLatitude_degree,
+            )
+            vec1 = np.array(v1_e) - np.array(v1_s)
+            vec2 = np.array(v2_e) - np.array(v2_s)
+            return calculate_angle_between_vectors_degrees(vec1, vec2)
 
     def calculate_buffer_zone_polygon(
         self,

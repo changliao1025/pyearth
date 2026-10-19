@@ -50,16 +50,18 @@ License
 Part of the PyEarth package.
 """
 
+import logging
 import os
+
 import numpy as np
 import osgeo
-import logging
 from osgeo import gdal, osr
-from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
-from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
+
 from pyearth.gis.gdal.gdal_raster_format_support import (
     get_raster_driver_from_filename,
 )
+from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
+from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
 
 
 def reproject_raster(

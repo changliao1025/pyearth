@@ -64,11 +64,12 @@ Extract streams within watershed:
     ... )
 """
 
-import os
 import logging
-from typing import Optional
-from osgeo import ogr, osr, gdal
+import os
 from datetime import datetime
+from typing import Optional
+
+from osgeo import gdal, ogr, osr
 from rtree.index import Index as RTreeindex
 
 from pyearth.gis.gdal.gdal_vector_format_support import (

@@ -2,16 +2,17 @@
 Clip vector files by polygon with support for multiple vector formats.
 """
 
-import os
 import logging
-from typing import Optional, List, Dict
+import os
+from typing import Dict, List, Optional
+
 from osgeo import ogr, osr
 
-from pyearth.system.define_global_variables import *
-from pyearth.toolbox.management.vector.reproject import reproject_vector
-from pyearth.toolbox.management.vector.merge_features import merge_features
 from pyearth.gis.gdal.gdal_vector_format_support import get_vector_driver_from_filename
 from pyearth.gis.geometry.get_output_geometry_type import get_output_geometry_type
+from pyearth.system.define_global_variables import *
+from pyearth.toolbox.management.vector.merge_features import merge_features
+from pyearth.toolbox.management.vector.reproject import reproject_vector
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

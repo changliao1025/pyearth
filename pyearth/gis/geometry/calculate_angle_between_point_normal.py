@@ -1,6 +1,7 @@
 """Calculate angle between point normal for geographic coordinates."""
 
 import numpy as np
+
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
     convert_longitude_latitude_to_sphere_3d,
 )

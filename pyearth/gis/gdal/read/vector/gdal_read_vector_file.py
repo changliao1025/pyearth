@@ -2,6 +2,7 @@
 
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
+
 from osgeo import ogr, osr
 
 ogr.UseExceptions()
@@ -187,4 +188,3 @@ def gdal_read_vector_file(
     finally:
         layer = None
         dataset = None
-

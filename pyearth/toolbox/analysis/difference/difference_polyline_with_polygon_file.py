@@ -2,12 +2,13 @@
 Geometric difference analysis between polylines and polygons using spatial indexing.
 """
 
+import logging
 import os
 import sys
-import logging
-from typing import Optional, Union, Tuple, Dict
-from osgeo import ogr, osr
 from datetime import datetime
+from typing import Dict, Optional, Tuple, Union
+
+from osgeo import ogr, osr
 from rtree.index import Index as RTreeindex
 
 from pyearth.gis.gdal.gdal_vector_format_support import (

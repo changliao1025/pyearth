@@ -96,10 +96,11 @@ References
 
 """
 
-import numpy as np
 import datetime
 import logging
-from typing import Union, Optional, Literal
+from typing import Literal, Optional, Union
+
+import numpy as np
 
 import pyearth.toolbox.date.julian as julian
 from pyearth.toolbox.date.day_in_month import day_in_month
@@ -606,11 +607,11 @@ def convert_time_series_daily_to_monthly(
     # Convert to numpy array and return
     # ========================================================================
 
-    aData_monthly_out = np.array(aData_monthly_out)
+    result_array = np.array(aData_monthly_out)
 
     logger.info(
-        f"Converted {len(aData_daily)} daily values to {len(aData_monthly_out)} "
+        f"Converted {len(aData_daily)} daily values to {len(result_array)} "
         f"monthly values using '{sType}' aggregation"
     )
 
-    return aData_monthly_out
+    return result_array

@@ -3,6 +3,7 @@
 import os
 import xml.etree.ElementTree as ET
 from typing import Any, Dict
+
 import numpy as np
 
 
@@ -26,18 +27,23 @@ def parse_xml_file(sFilename_xml_in: str) -> Dict[str, Any]:
     tree = ET.parse(sFilename_xml_in)
     root = tree.getroot()
     namelist: Dict[str, Any] = {}
-    keys_str = []
+    keys_str: list[str] = []
 
     for entry in root.findall("./group/entry"):
         key = entry.get("id")
+        if key is None:
+            continue
         type_elem = entry.find("type")
-        dtype = type_elem.text.strip() if type_elem is not None and type_elem.text else ""
+        dtype = (
+            type_elem.text.strip() if type_elem is not None and type_elem.text else ""
+        )
 
         if dtype == "char":
             keys_str.append(key)
 
         if "value" in entry.attrib:
-            val_raw = entry.get("value")
+            val_raw = entry.attrib["value"]
+            value: Any
             if dtype == "integer":
                 value = int(val_raw)
             elif dtype == "real":
@@ -48,7 +54,7 @@ def parse_xml_file(sFilename_xml_in: str) -> Dict[str, Any]:
                 value = val_raw
             namelist[key] = value
         else:
-            values = []
+            values: list[Any] = []
             for val_elem in entry.findall("./values"):
                 text = val_elem.text.strip() if val_elem.text else ""
                 if dtype == "integer":

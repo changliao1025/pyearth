@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Tuple, Union
+
 from osgeo import ogr
 
 PathLike = Union[str, os.PathLike]
@@ -77,9 +78,7 @@ def gdal_get_vector_boundary(
                 break
 
         if boundary_geom is None:
-            raise ValueError(
-                f"No valid polygon geometry found in {filepath}."
-            )
+            raise ValueError(f"No valid polygon geometry found in {filepath}.")
 
         boundary_wkt = boundary_geom.ExportToWkt()
         extent = boundary_geom.GetEnvelope()

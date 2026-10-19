@@ -103,4 +103,3 @@ def envi_write_header(
 
     with open(header_path, "w", encoding="utf-8") as header_file:
         header_file.write("\n".join(header_lines) + "\n")
-

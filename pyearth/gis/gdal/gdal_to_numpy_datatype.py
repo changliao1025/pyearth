@@ -1,6 +1,7 @@
 """Type conversion utilities between GDAL raster data types and NumPy data types."""
 
 from typing import Any, Optional, Type, Union
+
 import numpy as np
 from osgeo import gdalconst, ogr
 
@@ -29,7 +30,7 @@ if hasattr(gdalconst, "GDT_UInt64"):
     _GDAL_TO_NUMPY[gdalconst.GDT_UInt64] = np.uint64
 
 
-def gdal_to_numpy_datatype(gdal_dtype: int) -> Type[np.number]:
+def gdal_to_numpy_datatype(gdal_dtype: int) -> Type[Any]:
     """Convert a GDAL data type constant to the corresponding NumPy scalar data type.
 
     Parameters
@@ -155,7 +156,6 @@ def numpy_to_gdal_type(
         elif target_type == ogr.OFTString:
             return str(numpy_value)
 
-
     if isinstance(numpy_value, (int, np.integer)):
         return int(numpy_value)
     elif isinstance(numpy_value, (float, np.floating)):
@@ -166,4 +166,3 @@ def numpy_to_gdal_type(
         return str(numpy_value)
 
     return numpy_value
-

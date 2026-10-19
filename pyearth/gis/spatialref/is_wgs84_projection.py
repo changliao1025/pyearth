@@ -1,6 +1,7 @@
 """Check whether a spatial reference matches the WGS84 geographic system."""
 
-from typing import Union, Optional
+from typing import Optional, Union
+
 from osgeo import osr
 
 osr.UseExceptions()
@@ -64,8 +65,7 @@ def is_wgs84_projection(projection: Union[str, osr.SpatialReference]) -> bool:
     try:
         if target_sr.ImportFromWkt(proj_str) == 0:
             if target_sr.IsSame(_WGS84_SR) or (
-                target_sr.IsGeographic()
-                and target_sr.GetAuthorityCode(None) == "4326"
+                target_sr.IsGeographic() and target_sr.GetAuthorityCode(None) == "4326"
             ):
                 return True
     except Exception:
@@ -83,12 +83,10 @@ def is_wgs84_projection(projection: Union[str, osr.SpatialReference]) -> bool:
     try:
         if target_sr.SetFromUserInput(proj_str) == 0:
             if target_sr.IsSame(_WGS84_SR) or (
-                target_sr.IsGeographic()
-                and target_sr.GetAuthorityCode(None) == "4326"
+                target_sr.IsGeographic() and target_sr.GetAuthorityCode(None) == "4326"
             ):
                 return True
     except Exception:
         pass
 
     return False
-

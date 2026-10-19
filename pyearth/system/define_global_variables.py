@@ -229,21 +229,25 @@ def _configure_proj_lib() -> Optional[str]:
 
     candidate_paths = []
     for root in search_roots:
-        candidate_paths.extend([
-            os.path.join(root, "share", "proj"),
-            os.path.join(root, "Library", "share", "proj"),
-            os.path.join(root, "Lib", "site-packages", "pyproj", "proj_dir", "share", "proj"),
-            os.path.join(
-                root,
-                "lib",
-                f"python{sys.version_info.major}.{sys.version_info.minor}",
-                "site-packages",
-                "pyproj",
-                "proj_dir",
-                "share",
-                "proj",
-            ),
-        ])
+        candidate_paths.extend(
+            [
+                os.path.join(root, "share", "proj"),
+                os.path.join(root, "Library", "share", "proj"),
+                os.path.join(
+                    root, "Lib", "site-packages", "pyproj", "proj_dir", "share", "proj"
+                ),
+                os.path.join(
+                    root,
+                    "lib",
+                    f"python{sys.version_info.major}.{sys.version_info.minor}",
+                    "site-packages",
+                    "pyproj",
+                    "proj_dir",
+                    "share",
+                    "proj",
+                ),
+            ]
+        )
 
     for proj_path in candidate_paths:
         if os.path.isdir(proj_path):
@@ -287,7 +291,9 @@ def print_environment_info(verbose: bool = True) -> None:
     if sPath_proj_lib:
         print(f"\n✓ PROJ_LIB / PROJ_DATA: {sPath_proj_lib}")
     else:
-        print("\n⚠ PROJ data directory: Not found (coordinate transformations may be limited)")
+        print(
+            "\n⚠ PROJ data directory: Not found (coordinate transformations may be limited)"
+        )
 
     if verbose:
         print("\nConstants:")
@@ -297,4 +303,3 @@ def print_environment_info(verbose: bool = True) -> None:
         print(f"  Raster: {sExtension_tiff}, {sExtension_envi}, {sExtension_netcdf}")
         print(f"  Vector: {sExtension_shapefile}, {sExtension_json}")
         print(f"  Image: {sExtension_png}, {sExtension_jpg}")
-

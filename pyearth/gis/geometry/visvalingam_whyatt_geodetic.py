@@ -97,9 +97,11 @@ True
 True
 """
 
+from typing import List, Tuple
+
 import numpy as np
 from numpy import argmin, array
-from typing import List, Tuple
+
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 
 __all__ = [
@@ -362,7 +364,7 @@ def remove(s, i):
     s[i:-1] = s[i + 1 :]
 
 
-class VWSimplifier(object):
+class VWSimplifier:
     """
     Visvalingam-Whyatt polyline simplifier with geodesic area calculation.
 

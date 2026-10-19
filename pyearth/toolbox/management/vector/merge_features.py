@@ -1,26 +1,24 @@
-import os, sys
-import numpy as np
+import os
+import sys
 import time
-from typing import List, Tuple, Optional, Union, Dict, Any
-from osgeo import gdal, osr, ogr
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import numpy as np
+from osgeo import gdal, ogr, osr
 from rtree.index import Index as RTreeindex
-from pyearth.system.filename import get_extension_from_path
 
 from pyearth.gis.gdal.gdal_vector_format_support import (
+    get_vector_driver_from_filename,
+    get_vector_driver_from_format,
     get_vector_format_from_filename,
     print_supported_vector_formats,
-    get_vector_driver_from_format,
-    get_vector_driver_from_filename,
 )
+from pyearth.system.filename import get_extension_from_path
 
 
 def create_spatial_index(
     geometries: List[Optional[Any]], verbose: bool = False
-) -> Tuple[
-    Union[Any, Dict[int, Tuple[float, float, float, float]]],
-    Optional[Dict[int, Tuple[float, float, float, float]]],
-    bool,
-]:
+) -> Tuple[RTreeindex, Dict[int, Tuple[float, float, float, float]]]:
     """
     Create a spatial index for geometries to speed up intersection queries.
 

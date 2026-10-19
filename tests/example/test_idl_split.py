@@ -1,4 +1,5 @@
 import numpy as np
+
 from pyearth.gis.idl_handler import IdlHandler, IdlStrategy
 
 
@@ -6,13 +7,15 @@ def test_idl_split():
     handler = IdlHandler(strategy=IdlStrategy.SPLIT)
 
     # Example 1: Simple rectangular polygon crossing IDL
-    coords = np.array([
-        [170.0, -10.0],
-        [170.0,  10.0],
-        [-170.0, 10.0],
-        [-170.0, -10.0],
-        [170.0, -10.0],
-    ])
+    coords = np.array(
+        [
+            [170.0, -10.0],
+            [170.0, 10.0],
+            [-170.0, 10.0],
+            [-170.0, -10.0],
+            [170.0, -10.0],
+        ]
+    )
     result = handler.detect(coords)
     assert result.crosses_idl is True
     assert result.sub_polygons is not None
@@ -23,19 +26,21 @@ def test_idl_split():
     assert np.allclose(western[0], western[-1])
 
     # Example 4: Complex polygon
-    coords_complex = np.array([
-        [175.0, 0.0],
-        [178.0, 2.0],
-        [179.0, 5.0],
-        [-179.0, 5.0],
-        [-178.0, 2.0],
-        [-175.0, 0.0],
-        [-178.0, -2.0],
-        [-179.0, -5.0],
-        [179.0, -5.0],
-        [178.0, -2.0],
-        [175.0, 0.0],
-    ])
+    coords_complex = np.array(
+        [
+            [175.0, 0.0],
+            [178.0, 2.0],
+            [179.0, 5.0],
+            [-179.0, 5.0],
+            [-178.0, 2.0],
+            [-175.0, 0.0],
+            [-178.0, -2.0],
+            [-179.0, -5.0],
+            [179.0, -5.0],
+            [178.0, -2.0],
+            [175.0, 0.0],
+        ]
+    )
     result2 = handler.detect(coords_complex)
     assert result2.crosses_idl is True
     assert result2.sub_polygons is not None
@@ -46,13 +51,15 @@ def test_idl_split():
     assert np.allclose(western2[0], western2[-1])
 
     # IDL-vertex-only path: polygon touching ±180 but not crossing
-    coords_touch = np.array([
-        [170.0, 0.0],
-        [180.0, 0.0],
-        [180.0, 10.0],
-        [170.0, 10.0],
-        [170.0, 0.0],
-    ])
+    coords_touch = np.array(
+        [
+            [170.0, 0.0],
+            [180.0, 0.0],
+            [180.0, 10.0],
+            [170.0, 10.0],
+            [170.0, 0.0],
+        ]
+    )
     result_touch = handler.detect(coords_touch)
     assert result_touch.crosses_idl is False
     assert result_touch.adjusted_coords is not None

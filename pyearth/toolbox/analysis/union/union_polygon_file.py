@@ -5,12 +5,14 @@ This module provides functionality to union overlapping polygons while keeping
 non-overlapping polygons as individual features.
 """
 
-import os
 import logging
+import os
+
 from osgeo import ogr
+
 from pyearth.gis.gdal.gdal_vector_format_support import (
-    get_vector_format_from_filename,
     get_vector_driver_from_filename,
+    get_vector_format_from_filename,
 )
 
 # Configure logging
@@ -186,7 +188,9 @@ def union_polygon_file(sFilename_in, sFilename_out):
     logger.info("Union operation summary:")
     logger.info(f"  - Non-overlapping polygons: {single_polygon_count}")
     logger.info(f"  - Unioned polygon groups: {union_polygon_count}")
-    logger.info(f"  - Total output features: {single_polygon_count + union_polygon_count}")
+    logger.info(
+        f"  - Total output features: {single_polygon_count + union_polygon_count}"
+    )
     logger.info(f"Union completed successfully: {sFilename_out}")
 
     return

@@ -159,4 +159,3 @@ def get_utm_spatial_reference_wkt(longitude: float, latitude: float) -> str:
         return wkt_projection
     except Exception as e:
         raise RuntimeError(f"Failed to export WKT for EPSG:{epsg_code}: {e}") from e
-

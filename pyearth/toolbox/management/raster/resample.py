@@ -60,18 +60,19 @@ License
 Part of the PyEarth package.
 """
 
-import os
-import numpy as np
-from osgeo import gdal, osr, gdalconst
 import logging
+import os
 
+import numpy as np
+from osgeo import gdal, gdalconst, osr
+
+from pyearth.gis.gdal.gdal_raster_format_support import (
+    get_raster_driver_from_filename,
+)
+from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
 from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
 from pyearth.gis.gdal.read.raster.gdal_get_raster_spatial_reference import (
     gdal_get_raster_spatial_reference_wkt,
-)
-from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
-from pyearth.gis.gdal.gdal_raster_format_support import (
-    get_raster_driver_from_filename,
 )
 
 gdal.UseExceptions()

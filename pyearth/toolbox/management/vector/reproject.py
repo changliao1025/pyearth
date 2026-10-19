@@ -1,12 +1,14 @@
 import os
-import osgeo
-from osgeo import osr, ogr
 from typing import Optional
+
+import osgeo
+from osgeo import ogr, osr
+
 from pyearth.gis.gdal.gdal_vector_format_support import (
+    get_vector_driver_from_filename,
+    get_vector_driver_from_format,
     get_vector_format_from_filename,
     print_supported_vector_formats,
-    get_vector_driver_from_format,
-    get_vector_driver_from_filename,
 )
 
 

@@ -130,16 +130,16 @@ def from_jd(jd: float, fmt: str = "jd") -> datetime:
     day = int(k)
 
     # in microseconds
-    frac_component = int(jdf * (1e6 * 24 * 3600))
+    frac_component = int(jdf * (1000000 * 24 * 3600))
 
-    hours = int(frac_component // (1e6 * 3600))
-    frac_component -= hours * 1e6 * 3600
+    hours = int(frac_component // (1000000 * 3600))
+    frac_component -= hours * 1000000 * 3600
 
-    minutes = int(frac_component // (1e6 * 60))
-    frac_component -= minutes * 1e6 * 60
+    minutes = int(frac_component // (1000000 * 60))
+    frac_component -= minutes * 1000000 * 60
 
-    seconds = int(frac_component // 1e6)
-    frac_component -= seconds * 1e6
+    seconds = int(frac_component // 1000000)
+    frac_component -= seconds * 1000000
 
     frac_component = int(frac_component)
 

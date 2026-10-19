@@ -1,9 +1,11 @@
+import importlib.util
 import json
 from json import JSONEncoder
-import importlib.util
-import numpy as np
 from typing import List, Tuple
+
+import numpy as np
 from osgeo import ogr
+
 from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
     export_point_as_polygon_file,
 )
@@ -29,7 +31,7 @@ class PointClassEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 
 
-class pypoint(object):
+class pypoint:
     """
     The point class
 
@@ -86,8 +88,6 @@ class pypoint(object):
 
     def __str__(self):
         return f"({self.dLongitude_degree}, {self.dLatitude_degree}, {self.dElevation})"
-
-
 
     def __hash__(self):
         return hash(
@@ -147,6 +147,7 @@ class pypoint(object):
     def calculate_buffer_zone_point(self, dRadius, dBearing=90):
         # Create a geodesic object
         from geographiclib.geodesic import Geodesic
+
         geod = Geodesic.WGS84  # the default is WGS84
         # Calculate the geodesic buffer
         pPoint_buffer = geod.Direct(
@@ -159,15 +160,13 @@ class pypoint(object):
         point0["dLatitude_degree"] = pPoint_buffer["lat2"]
         pPoint_out = pypoint(point0)
 
-        #convert the point to a wkt string
+        # convert the point to a wkt string
         sWkt_buffer_point = pPoint_out.towkt()
 
         return sWkt_buffer_point
 
     def calculate_buffer_zone_circle(
-        self, dRadius, nPoint=360,
-        iFlag_support_antimeridian_in=0,
-        sFilename_out=None
+        self, dRadius, nPoint=360, iFlag_support_antimeridian_in=0, sFilename_out=None
     ) -> Tuple[str, List["pypoint"]]:
         """
         Calculate a buffer zone circle around a point using geodesic distances.
@@ -202,16 +201,20 @@ class pypoint(object):
             pPoint_out = pypoint(point0)
             aPoint.append(pPoint_out)
 
-        if np.max([p.dLongitude_degree for p in aPoint]) - np.min([p.dLongitude_degree for p in aPoint]) > 180:
+        if (
+            np.max([p.dLongitude_degree for p in aPoint])
+            - np.min([p.dLongitude_degree for p in aPoint])
+            > 180
+        ):
             iFlag_cross_idl = 1
         else:
             iFlag_cross_idl = 0
 
-        if iFlag_support_antimeridian_in ==1:
-            #split int two parts if cross the antimeridian
+        if iFlag_support_antimeridian_in == 1:
+            # split int two parts if cross the antimeridian
             aPoint_part1 = [p for p in aPoint if p.dLongitude_degree >= 0]
             aPoint_part2 = [p for p in aPoint if p.dLongitude_degree < 0]
-            #create a multi polygon wkt string
+            # create a multi polygon wkt string
             pGeometry = ogr.Geometry(ogr.wkbMultiPolygon)
             if len(aPoint_part1) >= 3:
                 pPolygon1 = ogr.Geometry(ogr.wkbPolygon)
@@ -234,10 +237,10 @@ class pypoint(object):
         else:
             if iFlag_cross_idl == 1:
                 if self.dLongitude_degree >= 0:
-                    #drop points with longitude < 0
+                    # drop points with longitude < 0
                     aPoint = [p for p in aPoint if p.dLongitude_degree >= 0]
                 else:
-                    #drop points with longitude > 0
+                    # drop points with longitude > 0
                     aPoint = [p for p in aPoint if p.dLongitude_degree <= 0]
                 pass
             else:

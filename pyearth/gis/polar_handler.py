@@ -23,14 +23,14 @@ Usage:
     polygon_includes_pole(coords_array, pole="south")
 """
 
-
 from __future__ import annotations
 
-import numpy as np
-from numpy.typing import NDArray
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
+
+import numpy as np
+from numpy.typing import NDArray
 
 from pyearth.gis.geometry.remove_duplicate_closure import (
     remove_duplicate_closure as remove_duplicate_closure,
@@ -50,7 +50,7 @@ __all__ = [
 # Module-level constants (single source of truth)
 # ---------------------------------------------------------------------------
 POLAR_TOLERANCE = 1.0e-12  # Tolerance for point-on-segment / point-in-polygon tests
-LATITUDE_BOUNDARY = 90.0   # Absolute latitude of the poles
+LATITUDE_BOUNDARY = 90.0  # Absolute latitude of the poles
 
 
 # ---------------------------------------------------------------------------
@@ -88,8 +88,7 @@ class PolarResult:
 
     includes_pole: bool
     pole: PoleType
-    projected_coords: Optional[np.ndarray] = None
-
+    projected_coords: np.ndarray | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -368,13 +367,17 @@ class PolarHandler:
         origin = np.array([0.0, 0.0])
 
         lats = arr[:, 1]
-        if self._pole == PoleType.NORTH and (np.all(lats <= 0.0) or np.mean(lats) <= 0.0):
+        if self._pole == PoleType.NORTH and (
+            np.all(lats <= 0.0) or np.mean(lats) <= 0.0
+        ):
             return PolarResult(
                 includes_pole=False,
                 pole=self._pole,
                 projected_coords=projected,
             )
-        if self._pole == PoleType.SOUTH and (np.all(lats >= 0.0) or np.mean(lats) >= 0.0):
+        if self._pole == PoleType.SOUTH and (
+            np.all(lats >= 0.0) or np.mean(lats) >= 0.0
+        ):
             return PolarResult(
                 includes_pole=False,
                 pole=self._pole,
@@ -409,7 +412,7 @@ class PolarHandler:
 
     # -- private helpers ----------------------------------------------------
 
-    def _validate_coords(self, coords: NDArray[np.floating]) -> Optional[np.ndarray]:
+    def _validate_coords(self, coords: NDArray[np.floating]) -> np.ndarray | None:
         """Validate and prepare a coordinate array for processing.
 
         Returns ``None`` when the input is invalid (too few vertices,

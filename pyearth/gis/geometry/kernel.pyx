@@ -1,8 +1,10 @@
 
 cimport cython
-from libc.math cimport M_PI, sin, cos, asin, acos, sqrt, abs
 cimport numpy as cnp
+from libc.math cimport M_PI, abs, acos, asin, cos, sin, sqrt
+
 import numpy as np
+
 from pyearth.gis.location.kernel cimport convert_longitude_latitude_to_sphere_3d
 
 """ Low-level function for pyflowline

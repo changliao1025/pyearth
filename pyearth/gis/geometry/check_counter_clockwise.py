@@ -1,5 +1,7 @@
-import numpy as np
 from typing import Union
+
+import numpy as np
+
 from pyearth.gis.geometry.remove_duplicate_closure import remove_duplicate_closure
 
 __all__ = [

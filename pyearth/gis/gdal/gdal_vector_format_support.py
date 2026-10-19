@@ -1,6 +1,7 @@
 import os
 from functools import lru_cache
 from typing import Optional, Union
+
 from osgeo import ogr
 
 from pyearth.system.filename import get_extension_from_path
@@ -253,7 +254,6 @@ def get_vector_driver_from_extension(extension: str) -> ogr.Driver:
     except ValueError:
         format_name = get_vector_format_from_filename(extension)
     return get_vector_driver_from_format(format_name)
-
 
 
 @lru_cache(maxsize=1)

@@ -19,14 +19,14 @@ Usage:
     unwrapped = handler.unwrap(coords_array)
 """
 
-
 from __future__ import annotations
 
-import numpy as np
-from osgeo import ogr, osr
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Tuple, Union
+
+import numpy as np
+from osgeo import ogr, osr
 
 __all__ = [
     "IdlHandler",
@@ -41,8 +41,8 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # Module-level constants (single source of truth)
 # ---------------------------------------------------------------------------
-IDL_TOLERANCE = 1e-6   # Tolerance for detecting points on the IDL (+/-180 deg)
-IDL_OFFSET = 1e-7      # Offset to move points off IDL (< IDL_TOLERANCE)
+IDL_TOLERANCE = 1e-6  # Tolerance for detecting points on the IDL (+/-180 deg)
+IDL_OFFSET = 1e-7  # Offset to move points off IDL (< IDL_TOLERANCE)
 DEFAULT_CUTOFF = -150  # Western-hemisphere threshold for longitude shifting
 
 
@@ -97,11 +97,10 @@ class IdlResult:
     """
 
     crosses_idl: bool
-    coords: Optional[np.ndarray] = None
-    ogr_geometry: Optional[Union[ogr.Geometry, List[ogr.Geometry]]] = None
-    sub_polygons: Optional[List[np.ndarray]] = None
-    adjusted_coords: Optional[np.ndarray] = None
-
+    coords: np.ndarray | None = None
+    ogr_geometry: ogr.Geometry | list[ogr.Geometry] | None = None
+    sub_polygons: list[np.ndarray] | None = None
+    adjusted_coords: np.ndarray | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -114,10 +113,10 @@ def calculate_signed_area_shoelace(coords: np.ndarray) -> float:
     x, y = coords[:, 0], coords[:, 1]
     x_rolled = np.roll(x, -1)
     y_rolled = np.roll(y, -1)
-    return 0.5 * np.sum(x * y_rolled - x_rolled * y)
+    return float(0.5 * np.sum(x * y_rolled - x_rolled * y))
 
 
-def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]:
+def _detect_id_crossing(coords: np.ndarray) -> tuple[bool, np.ndarray | None]:
     """Detect whether polygon coordinates cross the International Date Line.
 
     Distinguishes between actual IDL edge crossings and vertices that merely
@@ -190,7 +189,7 @@ def _detect_id_crossing(coords: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]
             (lons < 0) & (lons_next > 0) & ~idl_vertices & ~np.roll(idl_vertices, -1)
         )
 
-        def _nudge_idl_vertices_and_return_false() -> Tuple[bool, np.ndarray]:
+        def _nudge_idl_vertices_and_return_false() -> tuple[bool, np.ndarray]:
             for idx in np.where(idl_vertices)[0]:
                 if idx == 0:
                     prev_idx = len(coords_updated) - 2
@@ -299,7 +298,9 @@ def _unwrap_longitudes(coords: np.ndarray) -> np.ndarray:
     return result
 
 
-def _shift_western_by_360(coords: np.ndarray, cutoff: float = DEFAULT_CUTOFF) -> np.ndarray:
+def _shift_western_by_360(
+    coords: np.ndarray, cutoff: float = DEFAULT_CUTOFF
+) -> np.ndarray:
     """Shift western-hemisphere longitudes by +360° for a continuous [0, 360] range.
 
     Converts polygons that cross the International Date Line from the standard
@@ -389,11 +390,12 @@ def _close_ring_if_needed(coords: np.ndarray) -> np.ndarray:
     return coords
 
 
-def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.ndarray]:
+def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> list[np.ndarray]:
     """Split a polygon crossing the IDL into eastern and western sub-polygons."""
     from pyearth.gis.geometry.calculate_intersect_on_great_circle import (
         find_great_circle_intersection_with_meridian,
     )
+
     coords = np.array(aCoord_gcs, dtype=np.float64)
     if coords.ndim != 2 or coords.shape[1] != 2:
         raise ValueError("coords must be a 2D array with shape (n, 2)")
@@ -423,13 +425,17 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
             for i in range(len(coords_norm) - 1):
                 if abs(abs(coords_norm[i, 0]) - 180.0) < IDL_TOLERANCE:
                     coords_norm[i, 0] = 180.0 - IDL_OFFSET
-            eastern = _close_ring_if_needed(_ensure_valid_range(coords_norm[:-1].copy()))
+            eastern = _close_ring_if_needed(
+                _ensure_valid_range(coords_norm[:-1].copy())
+            )
             western = np.empty((0, 2), dtype=np.float64)
         else:
             for i in range(len(coords_norm) - 1):
                 if abs(abs(coords_norm[i, 0]) - 180.0) < IDL_TOLERANCE:
                     coords_norm[i, 0] = -180.0 + IDL_OFFSET
-            western = _close_ring_if_needed(_ensure_valid_range(coords_norm[:-1].copy()))
+            western = _close_ring_if_needed(
+                _ensure_valid_range(coords_norm[:-1].copy())
+            )
             eastern = np.empty((0, 2), dtype=np.float64)
         return [eastern, western]
     else:
@@ -498,7 +504,7 @@ def _split_international_date_line_polygon(aCoord_gcs: np.ndarray) -> List[np.nd
         return [eastern_arr, western_arr]
 
 
-def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geometry]:
+def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> ogr.Geometry | None:
     """Convert an IDL-crossing OGR polygon by shifting western longitudes +360."""
     if geometry_in is None:
         raise ValueError("Input geometry cannot be None")
@@ -526,8 +532,8 @@ def _convert_to_unwrapped_polygon(geometry_in: ogr.Geometry) -> Optional[ogr.Geo
 
 
 def _convert_single_idl_polygon(
-    geometry_in: ogr.Geometry, srs: Optional[osr.SpatialReference] = None
-) -> Optional[ogr.Geometry]:
+    geometry_in: ogr.Geometry, srs: osr.SpatialReference | None = None
+) -> ogr.Geometry | None:
     """Convert a single IDL-crossing polygon by shifting western longitudes +360."""
     if geometry_in.GetGeometryType() != ogr.wkbPolygon:
         return None
@@ -603,7 +609,7 @@ class IdlHandler:
         self.idl_tolerance = idl_tolerance
         self.idl_offset = idl_offset
 
-    def detect(self, coords: Union[np.ndarray, ogr.Geometry]) -> IdlResult:
+    def detect(self, coords: np.ndarray | ogr.Geometry) -> IdlResult:
         """Detect whether a polygon or OGR geometry crosses the IDL."""
         if isinstance(coords, ogr.Geometry):
             coords = self._extract_coords(coords)
@@ -613,7 +619,7 @@ class IdlHandler:
             result.sub_polygons = _split_international_date_line_polygon(coords)
         return result
 
-    def fix(self, ogr_geom: ogr.Geometry) -> List[ogr.Geometry]:
+    def fix(self, ogr_geom: ogr.Geometry) -> list[ogr.Geometry]:
         """Fix an OGR geometry that may cross the IDL based on configured strategy."""
         if ogr_geom is None:
             return []
@@ -665,11 +671,21 @@ class IdlHandler:
     @staticmethod
     def _extract_coords(geom: ogr.Geometry) -> np.ndarray:
         """Extract (lon, lat) numpy array from an OGR geometry."""
-        from pyearth.gis.location.get_geometry_coordinates import get_geometry_coordinates
-        coords = get_geometry_coordinates(geom)
-        if coords is None or len(coords) < 3:
+        from pyearth.gis.location.get_geometry_coordinates import (
+            get_geometry_coordinates,
+        )
+
+        raw_coords = get_geometry_coordinates(geom)
+        if raw_coords is None:
             raise ValueError("Insufficient coordinates extracted from geometry")
-        return coords
+        result_coords: np.ndarray | None = (
+            (raw_coords[0] if len(raw_coords) > 0 else None)
+            if isinstance(raw_coords, list)
+            else raw_coords
+        )
+        if result_coords is None or len(result_coords) < 3:
+            raise ValueError("Insufficient coordinates extracted from geometry")
+        return result_coords
 
     @staticmethod
     def _coords_to_ogr(coords: np.ndarray, srs=None) -> ogr.Geometry:

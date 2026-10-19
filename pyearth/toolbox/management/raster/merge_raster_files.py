@@ -73,17 +73,19 @@ License
 This module is part of the PyEarth package.
 """
 
-import os
 import logging
-from typing import List, Union, Optional, Literal
+import os
+from typing import List, Literal, Optional, Union
+
 import numpy as np
-from osgeo import gdal, osr, gdalconst
-from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
-from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
-from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
+from osgeo import gdal, gdalconst, osr
+
 from pyearth.gis.gdal.gdal_raster_format_support import (
     get_raster_driver_from_filename,
 )
+from pyearth.gis.gdal.gdal_to_numpy_datatype import gdal_to_numpy_datatype
+from pyearth.gis.gdal.read.raster.gdal_get_raster_extent import gdal_get_raster_extent
+from pyearth.gis.gdal.read.raster.gdal_read_geotiff_file import gdal_read_geotiff_file
 
 
 def merge_raster_files(
@@ -92,20 +94,7 @@ def merge_raster_files(
     dResolution_x: float,
     dResolution_y: float,
     sFilename_mask: str,
-    sResampleAlg: Literal[
-        "NEAREST",
-        "BILINEAR",
-        "CUBIC",
-        "CUBICSPLINE",
-        "LANCZOS",
-        "AVERAGE",
-        "MODE",
-        "MAX",
-        "MIN",
-        "MED",
-        "Q1",
-        "Q3",
-    ] = "NEAREST",
+    sResampleAlg: str = "NEAREST",
     dMissing_value_source: Union[int, float] = -9999,
     dMissing_value_target: Union[int, float] = -9999,
     iData_type: int = gdal.GDT_Int16,

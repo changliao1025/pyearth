@@ -1,8 +1,12 @@
-import numpy as np
 import logging
-from typing import List, Tuple, Union, Optional, Any, Dict
-from osgeo import ogr, gdal
-from pyearth.gis.gdal.gdal_vector_format_support import get_vector_format_from_filename
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import numpy as np
+from osgeo import gdal, ogr
+
+from pyearth.gis.gdal.gdal_vector_format_support import (
+    get_vector_driver_from_filename,
+)
 
 
 def get_field_value(
@@ -46,7 +50,7 @@ def get_field_value(
     if bVerbose:
         logging.info(f"Opening vector file: {sFilename_vector_in}")
     try:
-        drv = get_vector_format_from_filename(sFilename_vector_in)
+        drv = get_vector_driver_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 0)
     except Exception:
@@ -153,7 +157,7 @@ def get_field_and_value(
     """
     pDataset = None
     try:
-        drv = get_vector_format_from_filename(sFilename_vector_in)
+        drv = get_vector_driver_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 0)
     except Exception:
@@ -232,7 +236,7 @@ def add_field_to_vector_file(
     if bVerbose:
         logging.info(f"Opening vector file for updating: {sFilename_vector_in}")
     try:
-        drv = get_vector_format_from_filename(sFilename_vector_in)
+        drv = get_vector_driver_from_filename(sFilename_vector_in)
         if drv is not None:
             pDataset = drv.Open(sFilename_vector_in, 1)  # 1 for update
     except Exception:
@@ -274,8 +278,11 @@ def add_field_to_vector_file(
     if not isinstance(aField, (list, np.ndarray)):
         aField = [aField]
 
-    if not isinstance(aValue, (list, np.ndarray, dict)):
-        aValue = [aValue]
+    aValue_list: list[Any]
+    if isinstance(aValue, (list, np.ndarray)):
+        aValue_list = list(aValue)
+    else:
+        aValue_list = [aValue]
 
     # Get field names that already exist in the layer
     aField_existing = [field.GetName() for field in pLayer.schema]
@@ -285,7 +292,7 @@ def add_field_to_vector_file(
         logging.info(f"Adding fields: {aField}")
 
     # Process each field
-    aValue_row = aValue[0] if len(aValue) > 0 else None
+    aValue_row = aValue_list[0] if len(aValue_list) > 0 else None
     for i, sFieldname in enumerate(aField):
         # Check if the field already exists
         if sFieldname not in aField_existing:
@@ -320,12 +327,12 @@ def add_field_to_vector_file(
 
     # Update each feature with the values
     pFeature = pLayer.GetNextFeature()
-    nrow = len(aValue)
+    nrow = len(aValue_list)
     if bVerbose:
         logging.info(f"Updating {nrow} features")
 
     if nrow == 1:
-        aValue_row = aValue[0]
+        aValue_row = aValue_list[0]
         while pFeature:
             for j, sFieldname in enumerate(aField):
                 if isinstance(aValue_row, dict):
@@ -341,7 +348,7 @@ def add_field_to_vector_file(
     else:
         i = 0
         while pFeature and i < nrow:
-            aValue_row = aValue[i]
+            aValue_row = aValue_list[i]
             for j, sFieldname in enumerate(aField):
                 if isinstance(aValue_row, dict):
                     value = aValue_row.get(sFieldname)

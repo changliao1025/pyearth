@@ -6,7 +6,7 @@ overlap with a given geographic bounding box. HydroSHEDS uses 2-letter continent
 codes (af, as, au, etc.) for organizing global hydrological datasets.
 """
 
-from typing import Tuple, List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 __all__ = ["get_hydrosheds_continent_from_extent"]
 

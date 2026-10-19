@@ -1,6 +1,7 @@
 """Great-circle distance calculations on spherical Earth."""
 
 from typing import Optional, Union
+
 import numpy as np
 
 from pyearth.system.define_global_variables import earth_radius
@@ -75,4 +76,3 @@ def calculate_distance_based_on_longitude_latitude(
     eff_radius = float(rad_val) if rad_val is not None else float(earth_radius)
     d = c * eff_radius
     return float(d) if d.ndim == 0 else d
-

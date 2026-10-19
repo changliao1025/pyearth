@@ -1,8 +1,5 @@
 """GIS location, coordinate conversion, and grid indexing utilities."""
 
-from pyearth.gis.location.Google_MetersPerPixel import (
-    google_meters_per_pixel,
-)
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (
     convert_longitude_latitude_to_sphere_3d,
     convert_sphere_3d_to_longitude_latitude,
@@ -20,6 +17,9 @@ from pyearth.gis.location.get_geometry_coordinates import (
 )
 from pyearth.gis.location.get_hydrosheds_continent_from_extent import (
     get_hydrosheds_continent_from_extent,
+)
+from pyearth.gis.location.Google_MetersPerPixel import (
+    google_meters_per_pixel,
 )
 from pyearth.gis.location.world2Pixel import (
     pixel_to_world,

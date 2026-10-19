@@ -3,9 +3,9 @@ Adapter functions to convert between pypoint and pynvector representations.
 """
 
 import numpy as np
-from pyearth.toolbox.mesh.point import pypoint
-from pyearth.toolbox.mesh.nvector import pynvector
 
+from pyearth.toolbox.mesh.nvector import pynvector
+from pyearth.toolbox.mesh.point import pypoint
 
 _HIGH_PRECISION_DTYPE = getattr(np, "float128", np.longdouble)
 

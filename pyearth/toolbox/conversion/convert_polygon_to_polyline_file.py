@@ -58,9 +58,10 @@ See Also
 - convert_vector_format: General format conversion with transformation
 """
 
-import os
 import logging
+import os
 from typing import Optional
+
 import osgeo
 from osgeo import ogr, osr
 

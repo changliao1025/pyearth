@@ -65,5 +65,3 @@ def gdal_check_file_type(
         gdal.PopErrorHandler()
 
     return "unknown"
-
-

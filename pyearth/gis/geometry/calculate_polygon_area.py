@@ -60,17 +60,18 @@ References
 """
 
 import math
-import numpy as np
-from typing import Union, Optional, Tuple
-from osgeo import ogr
-from pyearth.system.define_global_variables import earth_radius
+from typing import Optional, Tuple, Union
 
-from pyearth.gis.geometry.calculate_spherical_triangle_area import (
-    calculate_spherical_triangle_area,
-)
+import numpy as np
+from osgeo import ogr
+
 from pyearth.gis.geometry.calculate_distance_based_on_longitude_latitude import (
     calculate_distance_based_on_longitude_latitude,
 )
+from pyearth.gis.geometry.calculate_spherical_triangle_area import (
+    calculate_spherical_triangle_area,
+)
+from pyearth.system.define_global_variables import earth_radius
 
 __all__ = [
     "calculate_polygon_area",
@@ -332,7 +333,7 @@ def calculate_polygon_area(
         nTriangle = (npoint - 3) if is_closed else (npoint - 2)
         aArea = np.zeros(nTriangle)
 
-        for i in np.arange(1, nTriangle + 1, 1):
+        for i in range(1, nTriangle + 1):
             # Define triangle vertices
             dLongitude_a = dLongitude_b
             dLatitude_a = dLatitude_b
@@ -451,12 +452,22 @@ def calculate_polygon_file_area(sFilename_polygon_in: str) -> float:
 
         if sGeometryType == "POLYGON":
             aCoords_gcs = get_geometry_coordinates(pGeometry)
-            dArea += calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
+            if aCoords_gcs is not None:
+                coords = (
+                    aCoords_gcs[0] if isinstance(aCoords_gcs, list) else aCoords_gcs
+                )
+                if len(coords) > 0:
+                    dArea += calculate_polygon_area(coords[:, 0], coords[:, 1])
         elif sGeometryType == "MULTIPOLYGON":
             for i in range(pGeometry.GetGeometryCount()):
                 pGeometry_temp = pGeometry.GetGeometryRef(i)
                 aCoords_gcs = get_geometry_coordinates(pGeometry_temp)
-                dArea += calculate_polygon_area(aCoords_gcs[:, 0], aCoords_gcs[:, 1])
+                if aCoords_gcs is not None:
+                    coords = (
+                        aCoords_gcs[0] if isinstance(aCoords_gcs, list) else aCoords_gcs
+                    )
+                    if len(coords) > 0:
+                        dArea += calculate_polygon_area(coords[:, 0], coords[:, 1])
         # Skip unsupported geometry types
 
         pFeature = pLayer.GetNextFeature()

@@ -141,4 +141,3 @@ try:
     _configured_path = configure_linker_path()
 except (ValueError, RuntimeError):
     pass
-

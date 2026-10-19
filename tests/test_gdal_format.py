@@ -116,7 +116,9 @@ class TestGdalVectorFormatSupport(unittest.TestCase):
 
     def test_format_from_filename(self):
         self.assertEqual(get_vector_format_from_filename("vector.geojson"), "GeoJSON")
-        self.assertEqual(get_vector_format_from_filename(Path("data.shp")), "ESRI Shapefile")
+        self.assertEqual(
+            get_vector_format_from_filename(Path("data.shp")), "ESRI Shapefile"
+        )
 
         with self.assertRaises(ValueError):
             get_vector_format_from_filename("no_extension")

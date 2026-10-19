@@ -1,6 +1,7 @@
 """Calculate angle between points on a sphere."""
 
 import numpy as np
+
 from pyearth.gis.geometry.calculate_angle_between_vectors_degrees import (
     calculate_angle_between_vectors_degrees,
 )
@@ -63,4 +64,3 @@ def calculate_angle_between_point(
     c3vec = c3 - b3
 
     return calculate_angle_between_vectors_degrees(a3vec, c3vec)
-

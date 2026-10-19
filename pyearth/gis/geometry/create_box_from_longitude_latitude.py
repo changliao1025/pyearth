@@ -75,8 +75,10 @@ pyearth.gis.spatialref.convert_between_degree_and_meter : Degree/meter conversio
 
 import os
 from typing import Optional, Tuple
+
 import numpy as np
 from osgeo import ogr, osr
+
 from pyearth.gis.geometry.calculate_polygon_area import calculate_polygon_area
 from pyearth.gis.spatialref.convert_between_degree_and_meter import (
     degree_to_meter,

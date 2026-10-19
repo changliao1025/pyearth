@@ -1,6 +1,7 @@
 """Calculate distance from a point to a line segment on Earth's surface."""
 
 from typing import Optional
+
 import numpy as np
 
 from pyearth.gis.location.convert_between_longitude_latitude_and_sphere_3d import (

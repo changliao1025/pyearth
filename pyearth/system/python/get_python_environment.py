@@ -80,7 +80,11 @@ def get_python_environment() -> Tuple[str, str, str]:
 
     # 2. Virtual environment (venv / PEP 405)
     # Check 2a: pyvenv.cfg in sys.prefix or executable parent tree
-    for check_dir in [prefix_obj, python_path_obj.parent, python_path_obj.parent.parent]:
+    for check_dir in [
+        prefix_obj,
+        python_path_obj.parent,
+        python_path_obj.parent.parent,
+    ]:
         if (check_dir / "pyvenv.cfg").exists():
             return str(check_dir), check_dir.name, "venv"
 
@@ -156,4 +160,3 @@ def get_conda_environment() -> Tuple[str, str]:
         )
 
     return env_path, env_name
-

@@ -1,16 +1,18 @@
-import os
 import copy
-import json
 import importlib.util
+import json
+import os
 from json import JSONEncoder
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
+
 import numpy as np
 from osgeo import ogr
-from pyearth.toolbox.mesh.point import pypoint
-from pyearth.toolbox.mesh.line import pyline
+
 from pyearth.gis.gdal.write.vector.gdal_export_point_to_vector_file import (
     export_point_as_polygon_file,
 )
+from pyearth.toolbox.mesh.line import pyline
+from pyearth.toolbox.mesh.point import pypoint
 
 try:
     from pyearth.gis.geometry.kernel import (
@@ -179,7 +181,7 @@ class pypolyline:
         pGeometry = ogr.CreateGeometryFromWkt(self.wkt)
         if pGeometry is None:
             raise ValueError("Invalid geometry in polyline")
-        (minX, maxX, minY, maxY) = pGeometry.GetEnvelope()
+        minX, maxX, minY, maxY = pGeometry.GetEnvelope()
         self.pBound = (float(minX), float(minY), float(maxX), float(maxY))
         return self.pBound
 
@@ -318,19 +320,22 @@ class pypolyline:
                 - Minimum distance in meters
                 - Closest point on the polyline
         """
-        # Check distances to all vertices
-        dDistance_min_point = float("inf")
-        pPoint_min_point = None
+        if not self.aPoint:
+            raise ValueError("Polyline has no vertices.")
 
-        for point in self.aPoint:
+        # Check distances to all vertices
+        pPoint_min_point = self.aPoint[0]
+        dDistance_min_point = pPoint.calculate_distance(pPoint_min_point)
+
+        for point in self.aPoint[1:]:
             dDistance = pPoint.calculate_distance(point)
             if dDistance < dDistance_min_point:
                 dDistance_min_point = dDistance
                 pPoint_min_point = point
 
-        # Check distances to all line segments (FIXED: was using non-existent nEdge/aEdge)
+        # Check distances to all line segments
         dDistance_min_edge = float("inf")
-        pPoint_min_edge = None
+        pPoint_min_edge: Optional[pypoint] = None
 
         for line in self.aLine:
             dDistance, pPoint_out_edge = line.calculate_distance_to_point(pPoint)
@@ -339,7 +344,7 @@ class pypolyline:
                 pPoint_min_edge = pPoint_out_edge
 
         # Return the minimum of vertex and edge distances
-        if dDistance_min_point < dDistance_min_edge:
+        if pPoint_min_edge is None or dDistance_min_point < dDistance_min_edge:
             return dDistance_min_point, pPoint_min_point
         else:
             return dDistance_min_edge, pPoint_min_edge

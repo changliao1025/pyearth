@@ -2,6 +2,7 @@
 
 import os
 from typing import Optional, Union
+
 from osgeo import gdal, osr
 
 PathLike = Union[str, os.PathLike]

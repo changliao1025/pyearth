@@ -1,10 +1,12 @@
-import numpy as np
 import logging
-from pyearth.toolbox.mesh.nvector import pynvector
+
+import numpy as np
+
 from pyearth.toolbox.mesh.algorithm.convert_nvector_point import (
-    point_to_nvector,
     nvector_to_point,
+    point_to_nvector,
 )
+from pyearth.toolbox.mesh.nvector import pynvector
 
 # Configure logger for this module
 logger = logging.getLogger(__name__)
@@ -90,7 +92,9 @@ def split_polyline_by_length(aFlowline_in, dDistance):
     return aPolyline_out
 
 
-def split_line_by_length(pLine_in, dLength_in, tolerance=1e-6, use_high_precision=False):
+def split_line_by_length(
+    pLine_in, dLength_in, tolerance=1e-6, use_high_precision=False
+):
     """
     Split a line into smaller segments with maximum length constraint.
 

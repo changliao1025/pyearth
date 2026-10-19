@@ -1,14 +1,16 @@
-
 import os
+
 import numpy as np
 from osgeo import gdal
 from scipy.ndimage import binary_dilation
-from pyearth.gis.gdal.gdal_raster_format_support import get_raster_driver_from_filename
-from pyearth.gis.gdal.write.raster.gdal_write_geotiff_file import gdal_write_geotiff_file
 
-def create_raster_buffer_zone(sFilename_in,
-                                  sFilename_out, target_value,
-                                  buffer_pixel):
+from pyearth.gis.gdal.gdal_raster_format_support import get_raster_driver_from_filename
+from pyearth.gis.gdal.write.raster.gdal_write_geotiff_file import (
+    gdal_write_geotiff_file,
+)
+
+
+def create_raster_buffer_zone(sFilename_in, sFilename_out, target_value, buffer_pixel):
     """
     Create a buffer zone for a raster image based on a target value and buffer pixel size.
 
@@ -49,8 +51,7 @@ def create_raster_buffer_zone(sFilename_in,
     # Overwrite only buffered cells with the target value
     raster_data[buffer_array] = target_value
 
-    #there is an issue at the international dateline, we done want to make the IDL as coastline,
-
+    # there is an issue at the international dateline, we done want to make the IDL as coastline,
 
     # Create a new raster file to save the buffer zone
     if os.path.exists(sFilename_out):
@@ -69,7 +70,10 @@ def create_raster_buffer_zone(sFilename_in,
 
     print("Buffer zone created and saved to: ", sFilename_out)
 
-def reset_antimeridian_column(column_data, source_value, target_value, iRaster_buffer_pixel):
+
+def reset_antimeridian_column(
+    column_data, source_value, target_value, iRaster_buffer_pixel
+):
     """
     Reset values in a column corresponding to the antimeridian to prevent buffer dilation artifacts.
 
@@ -148,7 +152,9 @@ def reset_antimeridian_column(column_data, source_value, target_value, iRaster_b
     """
     # Check if input is 2D
     if column_data.ndim != 2:
-        raise ValueError(f"Expected 2D array, got {column_data.ndim}D array with shape {column_data.shape}")
+        raise ValueError(
+            f"Expected 2D array, got {column_data.ndim}D array with shape {column_data.shape}"
+        )
 
     nrow, ncol = column_data.shape
 
@@ -164,24 +170,27 @@ def reset_antimeridian_column(column_data, source_value, target_value, iRaster_b
 
         if source_indices.size > 0:
             # Find contiguous segments of source_value
-            segments = np.split(source_indices, np.where(np.diff(source_indices) != 1)[0] + 1)
+            segments = np.split(
+                source_indices, np.where(np.diff(source_indices) != 1)[0] + 1
+            )
 
             for segment in segments:
                 if segment.size > 0:
                     # Preserve iRaster_buffer_pixel pixels at top and bottom, set middle to target_value
                     if len(segment) > 2 * iRaster_buffer_pixel:
                         # Only modify middle pixels if segment is large enough
-                        middle_pixels = segment[iRaster_buffer_pixel+1:-iRaster_buffer_pixel-1] #when iRaster_buffer_pixel is 1, we want to keep the first 2 pixels and the last 2 pixels, and set the middle pixels as target_value
+                        middle_pixels = segment[
+                            iRaster_buffer_pixel + 1 : -iRaster_buffer_pixel - 1
+                        ]  # when iRaster_buffer_pixel is 1, we want to keep the first 2 pixels and the last 2 pixels, and set the middle pixels as target_value
                         updated_columns[middle_pixels, col_idx] = target_value
                     # If segment is too small, keep all as source_value (no modification)
 
     return updated_columns
 
-def fix_raster_antimeridian_issue(sFilename_in,
-                                  sFilename_out,
-                                  source_value,
-                                  target_value,
-                                  iRaster_buffer_pixel=1):
+
+def fix_raster_antimeridian_issue(
+    sFilename_in, sFilename_out, source_value, target_value, iRaster_buffer_pixel=1
+):
     """
     Replace raster values at the international dateline and surrounding buffer columns
     to avoid artifacts when creating buffer zones.
@@ -252,24 +261,27 @@ def fix_raster_antimeridian_issue(sFilename_in,
 
         # Select buffer columns from the left edge (wrapping to left/west at -180°)
         left_start = 0
-        left_buffer_cols = np.arange(left_start, iRaster_buffer_pixel+ 1)
+        left_buffer_cols = np.arange(left_start, iRaster_buffer_pixel + 1)
         left_columns = raster_data[:, left_buffer_cols]
         right_end = ncols
-        right_buffer_cols = np.arange(ncols - iRaster_buffer_pixel-1, right_end)
+        right_buffer_cols = np.arange(ncols - iRaster_buffer_pixel - 1, right_end)
         right_columns = raster_data[:, right_buffer_cols]
 
-        #now process the left, for example, when iRaster_buffer_pixel = 1, the data can be
+        # now process the left, for example, when iRaster_buffer_pixel = 1, the data can be
 
-        updated_columns_left = reset_antimeridian_column(left_columns, source_value, target_value, iRaster_buffer_pixel)
+        updated_columns_left = reset_antimeridian_column(
+            left_columns, source_value, target_value, iRaster_buffer_pixel
+        )
         # Select buffer columns from the right edge
 
-        updated_columns_right = reset_antimeridian_column(right_columns, source_value, target_value, iRaster_buffer_pixel)
-        #now replace the original columns with the updated columns
+        updated_columns_right = reset_antimeridian_column(
+            right_columns, source_value, target_value, iRaster_buffer_pixel
+        )
+        # now replace the original columns with the updated columns
         raster_data[:, left_buffer_cols] = updated_columns_left
         raster_data[:, right_buffer_cols] = updated_columns_right
     else:
         print("No antimeridian detected in this raster extent")
-
 
     # Create a new raster file to save the modified data
     if os.path.exists(sFilename_out):

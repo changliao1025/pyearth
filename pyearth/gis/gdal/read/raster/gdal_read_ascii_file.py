@@ -2,7 +2,9 @@
 
 import os
 from typing import Optional, Union
+
 from osgeo import gdal
+
 from pyearth.gis.gdal.read.raster.gdal_read_envi_file import RasterDataset
 
 gdal.UseExceptions()

@@ -78,7 +78,9 @@ class TestBivariateKDE:
         x = np.random.normal(0, 1, 60)
         y = np.random.normal(0, 1, 60)
         bounds = np.array([[x.min() - 1, x.max() + 1], [y.min() - 1, y.max() + 1]])
-        xx, yy, z = scipy_bivariate_kde(x, y, bandwidth="scott", grid_size=20, cut=1.0, bounds=bounds)
+        xx, yy, z = scipy_bivariate_kde(
+            x, y, bandwidth="scott", grid_size=20, cut=1.0, bounds=bounds
+        )
         assert xx.shape == (20, 20)
         assert yy.shape == (20, 20)
         assert z.shape == (20, 20)
