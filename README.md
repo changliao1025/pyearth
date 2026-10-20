@@ -1,6 +1,7 @@
 ### PyEarth
 
-[![DOI](https://zenodo.org/badge/67889575.svg)](https://zenodo.org/badge/latestdoi/67889575)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6109987.svg)](https://doi.org/10.5281/zenodo.6109987)
+[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![PyPI Downloads](https://static.pepy.tech/badge/pyearth)](https://pepy.tech/project/pyearth)
 [![Conda Downloads](https://anaconda.org/conda-forge/pyearth/badges/downloads.svg)](https://anaconda.org/conda-forge/pyearth)
 
