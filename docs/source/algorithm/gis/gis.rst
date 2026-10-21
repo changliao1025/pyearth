@@ -182,6 +182,7 @@ Polygon Operations
 * **check_counter_clockwise** - Check polygon vertex ordering
 * **get_polygon_orientation** - Get orientation as string (CW or CCW)
 * **clean_geometry** - Clean and validate geometry objects
+* **remove_duplicate_closure** - Remove duplicate closing vertex from polygon coordinate rings
 
 Simplification
 --------------
@@ -208,10 +209,41 @@ International Date Line Handling
 * **IdlStrategy** - Strategy enumeration (CHECK_ONLY, SPLIT, WRAP_TO_360, UNWRAP, DROP, REORDER)
 * **IdlResult** - Dataclass encapsulating detection and transformation outputs
 
+Polar Region Handling
+=====================
+
+* **PolarHandler** - Centralized detector for polygons enclosing North or South poles via stereographic projection
+* **PoleType** - Pole enumeration (NORTH, SOUTH)
+* **PolarResult** - Dataclass encapsulating polar enclosure check results and transformed vertices
+* **polygon_includes_pole** - Module convenience function to check if coordinates enclose a pole
+* **POLAR_TOLERANCE** - Floating point tolerance for point-in-polygon tests (1e-12)
+* **LATITUDE_BOUNDARY** - Absolute latitude boundary for poles (90.0 degrees)
+
+.. code-block:: python
+
+   from pyearth.gis.polar_handler import PolarHandler, PoleType, polygon_includes_pole
+   import numpy as np
+
+   # Check if polygon encloses South Pole
+   coords = np.array([
+       [-180.0, -80.0],
+       [-90.0, -80.0],
+       [0.0, -80.0],
+       [90.0, -80.0],
+       [180.0, -80.0]
+   ])
+
+   handler = PolarHandler(pole=PoleType.SOUTH)
+   result = handler.detect(coords)
+   print(f"Encloses South Pole: {result.includes_pole}")
+
+   # Or using convenience function
+   encloses_south = polygon_includes_pole(coords, pole='south')
+
 Geometry Type Utilities
 ========================
 
-* **get_output_geometry_type** - Determine appropriate output geometry type
+* **get_output_geometry_type** - Determine appropriate output geometry type for transformed features
 
 Coordinate Range Conversion
 ============================
@@ -367,3 +399,26 @@ Example 4: Work with Vector Files
    if geometries:
        wkt = geometries[0].ExportToWkt()
        gdal_write_wkt_to_vector_file(wkt, 'output.geojson', layer_name='features')
+
+Example 5: Check Polar Region Enclosure
+=======================================
+
+.. code-block:: python
+
+   from pyearth.gis.polar_handler import PolarHandler, PoleType
+   import numpy as np
+
+   # Define polygon vertices circling Antarctica
+   antarctica_ring = np.array([
+       [-180.0, -70.0],
+       [-90.0, -70.0],
+       [0.0, -70.0],
+       [90.0, -70.0],
+       [180.0, -70.0]
+   ])
+
+   handler = PolarHandler(pole=PoleType.SOUTH)
+   result = handler.detect(antarctica_ring)
+
+   if result.includes_pole:
+       print("The polygon encloses the South Pole.")

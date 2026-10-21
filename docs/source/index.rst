@@ -3,11 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pyearth documentation!
-==============================================
+Welcome to PyEarth Documentation!
+=================================
 
 .. note::
-   PyEarth has been restructured as part of the **EarthSuite** ecosystem.
+   PyEarth has been restructured as part of the **PyEarthSuite** ecosystem.
    Some functionality has been moved to separate focused packages:
 
    - **pyearthviz** - 2D visualization (matplotlib/cartopy)
@@ -18,17 +18,37 @@ Welcome to pyearth documentation!
 
    PyEarth now focuses on core GIS operations, spatial toolbox, and system utilities.
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
+   :caption: Getting Started
 
    story
    getting-started
-   algorithm/gis/gis.rst
-   algorithm/system/system.rst
-   algorithm/toolbox/toolbox.rst
+   faq
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Core Modules & Reference
+
+   algorithm/gis/gis
+   algorithm/system/system
+   algorithm/toolbox/toolbox
    algorithm/api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Architecture & Design
+
+   architecture
+   dependency_map
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Community & Credits
+
+   authors
+   contribution
+   support
 
 Indices and tables
 ==================

@@ -88,6 +88,7 @@ extensions = [
     "sphinx.ext.napoleon",  # Support for Google and NumPy style docstrings
     "sphinx.ext.viewcode",  # Add links to source code
     "sphinx.ext.intersphinx",  # Link to other project documentation
+    "myst_parser",  # Support for Markdown documentation files
     "breathe",
 ]
 
@@ -95,7 +96,7 @@ extensions = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "gdal": ("https://gdal.org/", None),
+    "gdal": ("https://gdal.org/en/stable/", None),
 }
 
 # Napoleon settings for better docstring support
@@ -119,7 +120,18 @@ breathe_default_project = "pyearth"
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+# MyST Markdown parser configuration
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "fieldlist",
+]
+myst_heading_anchors = 3
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -129,7 +141,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "pyearth"
-copyright = "2020, Pacific Northwest National Laboratory"
+copyright = "2020-2026, Pacific Northwest National Laboratory"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -182,6 +194,9 @@ pygments_style = "sphinx"
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
+
+# Suppress harmless warnings (e.g. mermaid code blocks highlighting)
+suppress_warnings = ["misc.highlighting_failure"]
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -266,7 +281,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "ReadtheDocsTemplatedoc"
+htmlhelp_basename = "pyearthdoc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -286,9 +301,9 @@ latex_elements: dict[str, str] = {
 latex_documents = [
     (
         "index",
-        "ReadtheDocsTemplate.tex",
-        "Read the Docs Template Documentation",
-        "Read the Docs",
+        "pyearth.tex",
+        "PyEarth Documentation",
+        "Chang Liao",
         "manual",
     ),
 ]
@@ -321,9 +336,9 @@ latex_documents = [
 man_pages = [
     (
         "index",
-        "readthedocstemplate",
-        "Read the Docs Template Documentation",
-        ["Read the Docs"],
+        "pyearth",
+        "PyEarth Documentation",
+        ["Chang Liao"],
         1,
     )
 ]
@@ -340,11 +355,11 @@ man_pages = [
 texinfo_documents = [
     (
         "index",
-        "ReadtheDocsTemplate",
-        "Read the Docs Template Documentation",
-        "Read the Docs",
-        "ReadtheDocsTemplate",
-        "One line description of project.",
+        "pyearth",
+        "PyEarth Documentation",
+        "Chang Liao",
+        "pyearth",
+        "A lightweight Python package for Earth science",
         "Miscellaneous",
     ),
 ]
