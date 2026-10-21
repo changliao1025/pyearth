@@ -141,51 +141,55 @@ GIS Module
 
 The **gis** module provides comprehensive spatial data operations:
 
-* **GDAL wrappers**: Read/write raster and vector formats
-* **Geometry operations**: Distance calculations, polygon area, convex hull checks
-* **Location utilities**: Coordinate conversions, spatial indexing
-* **Spatial reference**: Projection handling, coordinate reprojection
+* **GDAL wrappers**: Read/write raster and vector formats with format detection and validation
+* **Geometry operations**: Geodetic distance calculations, polygon area, angles, convex checks, simplification
+* **IDL & Polar handlers**: Unified Antimeridian (IDL) crossing resolution and polar stereographic enclosure detection
+* **Location utilities**: 2D/3D coordinate conversions, array-pixel spatial indexing, HydroSHEDS extent
+* **Spatial reference**: UTM zone utilities, EPSG transformations, coordinate reprojection
 
 Toolbox Module
 --------------
 
 The **toolbox** module contains utilities for common Earth science tasks:
 
-* **Analysis**: Polygon operations, vector clipping, attribute filtering
-* **Conversion**: Format conversion, rasterization, vectorization
-* **Data processing**: Time series conversion, outlier removal
-* **Date utilities**: Julian dates, day-of-year, leap year checks
-* **Geometry**: Hexagon calculations, buffer zones
-* **Management**: Raster/vector merging, reprojection, resampling
-* **Math**: Statistical operations, gap filling
-* **Mesh**: Generate and manipulate meshes
-* **Reader**: Configuration and XML parsing
+* **Analysis**: Raster/vector clipping, bounding box extract, attribute filtering, intersection, difference, union
+* **Conversion**: Format transcoding, rasterization, vectorization, polygon-to-polyline
+* **Data processing**: Time series aggregation, outlier removal, percentile computation, list utilities
+* **Date utilities**: Julian date conversion, calendar translation, day-of-year, leap year checks, timer
+* **Geometry**: Regular polygon area calculations (e.g. regular hexagons)
+* **Management**: Raster mosaicking (merge), vector merge, attribute manipulation, small polygon filtering
+* **Math**: Statistical remapping, 2D bivariate KDE, moving window gap-filling
+* **Mesh**: Point, line, polyline, polygon, circle classes and geodetic mesh algorithms (slerp, convex hull)
+* **Reader**: Configuration readers, high-speed line counting, XML and E3SM model configuration parsers
 
 System Module
 -------------
 
-The **system** module provides system-wide operations:
+The **system** module provides system-wide operational utilities:
 
-* Symbolic link creation
-* Global variable definitions
-* Filename utilities
-* Python environment detection
+* Cross-platform symbolic link creation
+* Global variables, physical constants, file extension definitions, and environment summary
+* Filename and file path parsing utilities
+* Dynamic linker path configuration (LD_LIBRARY_PATH / DYLD_LIBRARY_PATH)
+* Python and Conda environment detection
 
 Next Steps
 ==========
 
 * Explore the :doc:`algorithm/gis/gis` for GIS operations
+* Check out :doc:`algorithm/system/system` for system utilities
 * Check out :doc:`algorithm/toolbox/toolbox` for toolbox functions
 * See :doc:`algorithm/api` for complete API reference
 * Read the :doc:`faq` for common issues and solutions
+* Learn how to participate on the :doc:`contribution` page
 
 Related Packages
 ================
 
-PyEarth is part of the EarthSuite ecosystem. For specialized tasks, consider:
+PyEarth is part of the **PyEarthSuite** ecosystem. For specialized tasks, consider:
 
 * **pyearthviz** - 2D visualization with matplotlib/cartopy
 * **pyearthviz3d** - 3D globe visualization with GeoVista
 * **pyearthriver** - River network topology and graph algorithms
-* **pyearthmesh** - Advanced mesh generation tools
-* **pyearthhelp** - Data retrieval and HPC job management
+* **pyearthmesh** - Advanced mesh generation tools (regular and unstructured grids, MPAS)
+* **pyearthhelp** - Hydrological data retrieval (NWIS, NLDI, GSIM) and HPC job management

@@ -74,7 +74,24 @@ Usage Questions
       if result.crosses_idl:
           eastern, western = result.sub_polygons
 
-6. Which coordinate system should I use?
+6. How do I check if a polygon encloses the North or South Pole?
+-----------------------------------------------------------------
+
+   PyEarth provides ``PolarHandler`` and ``polygon_includes_pole`` which project geographic vertices onto a local polar plane and perform point-in-polygon tests:
+
+   .. code-block:: python
+
+      from pyearth.gis.polar_handler import PolarHandler, PoleType, polygon_includes_pole
+
+      handler = PolarHandler(pole=PoleType.SOUTH)
+      result = handler.detect(coords)
+      print(result.includes_pole)
+
+      # Or convenience function
+      if polygon_includes_pole(coords, pole='north'):
+          print("Polygon encloses the North Pole")
+
+7. Which coordinate system should I use?
 -----------------------------------------
 
    * For global analyses, use **WGS84 (EPSG:4326)** with longitude/latitude
@@ -89,7 +106,7 @@ Usage Questions
 Package Organization
 ====================
 
-7. I need visualization functions - where did they go?
+8. I need visualization functions - where did they go?
 -------------------------------------------------------
 
    Visualization functions have been moved to separate focused packages:
@@ -103,7 +120,7 @@ Package Organization
 
       conda install -c conda-forge pyearthviz pyearthviz3d
 
-8. Where can I find river network analysis functions?
+9. Where can I find river network analysis functions?
 ------------------------------------------------------
 
    River network analysis has been moved to **pyearthriver**:
@@ -114,18 +131,18 @@ Package Organization
 
    Or visit: https://github.com/changliao1025/pyearthriver
 
-9. How do I choose between pyearth and pyearthmesh for mesh generation?
-------------------------------------------------------------------------
+10. How do I choose between pyearth and pyearthmesh for mesh generation?
+-------------------------------------------------------------------------
 
-   * **pyearth** - Basic mesh generation (lat/lon, square, hexagon grids)
-   * **pyearthmesh** - Advanced mesh generation with more complex geometries and topological operations
+   * **pyearth** - Basic mesh classes (point, line, polyline, polygon, circle) and mesh algorithms (slerp, convex hull, coordinate conversion)
+   * **pyearthmesh** - Advanced mesh generation with regular and unstructured grids (lat/lon, square, hexagon, MPAS meshes) and topological operations
 
-   For simple regular grids, use pyearth. For complex mesh workflows, use pyearthmesh.
+   For simple regular grids and mesh primitives, use pyearth. For full grid generation workflows, use pyearthmesh.
 
 Performance and Optimization
 =============================
 
-10. How can I speed up geometry operations?
+11. How can I speed up geometry operations?
 --------------------------------------------
 
     PyEarth includes Cython-optimized functions for performance-critical operations:
@@ -135,7 +152,7 @@ Performance and Optimization
 
     These are automatically compiled during installation when Cython is available.
 
-11. How do I handle large raster files?
+12. How do I handle large raster files?
 ----------------------------------------
 
     For large rasters:
@@ -155,7 +172,7 @@ Performance and Optimization
 Common Errors
 =============
 
-12. "ModuleNotFoundError" when importing pyearth submodules
+13. "ModuleNotFoundError" when importing pyearth submodules
 ------------------------------------------------------------
 
     Make sure you're using the full import path:
@@ -168,7 +185,7 @@ Common Errors
        # Incorrect
        from pyearth import gdal_read_geotiff_file
 
-13. Geometry operations return None or unexpected results
+14. Geometry operations return None or unexpected results
 ----------------------------------------------------------
 
     Check that:
@@ -181,7 +198,7 @@ Common Errors
 Contributing and Support
 ========================
 
-14. How can I contribute to PyEarth?
+15. How can I contribute to PyEarth?
 -------------------------------------
 
     Contributions are welcome! Please:
@@ -193,7 +210,7 @@ Contributing and Support
 
     See the :doc:`contribution` page for more details.
 
-15. Where can I get help?
+16. Where can I get help?
 --------------------------
 
     * Open an issue on GitHub: https://github.com/changliao1025/pyearth/issues

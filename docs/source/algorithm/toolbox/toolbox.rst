@@ -2,7 +2,7 @@
 Toolbox Module
 ################
 
-The Toolbox module provides a comprehensive collection of utilities for common Earth science tasks, including data analysis, format conversion, date/time operations, geometry calculations, and file management.
+The Toolbox module provides a comprehensive collection of utilities for common Earth science tasks, including spatial analysis, format conversion, date/time operations, mesh algorithms, data management, and file reading.
 
 *************************
 Analysis Operations
@@ -15,8 +15,8 @@ Clipping and Filtering
 -----------------------
 
 * **clip_raster_by_polygon_file** - Clip raster to polygon boundary
-* **clip_vector_by_polygon_file** - Clip vector features by polygon
-* **clip_vector_by_polygon_files** - Clip vector by multiple polygon files
+* **clip_vector_by_polygon_file** - Clip vector features by polygon boundary
+* **clip_vector_by_bounding_box** - Clip vector features by rectangular bounding box
 * **exclude_vector_by_polygon_file** - Exclude vector features within polygon
 * **exclude_vector_by_polygon_files** - Exclude features by multiple polygons
 * **filter_vector_by_attribute** - Filter vector features by attribute values
@@ -24,8 +24,9 @@ Clipping and Filtering
 
 .. code-block:: python
 
-   from pyearth.toolbox.analysis.extract.clip_raster_by_polygon_file import \
-       clip_raster_by_polygon_file
+   from pyearth.toolbox.analysis.extract.clip_raster_by_polygon_file import (
+       clip_raster_by_polygon_file,
+   )
 
    # Clip raster to watershed boundary
    clip_raster_by_polygon_file(
@@ -38,14 +39,23 @@ Intersection Operations
 ========================
 
 * **intersect_polygon_with_polygon_file** - Intersect two polygon layers
-* **intersect_polyline_with_polygon_file** - Intersect polylines with polygons
-* **intersect_polyline_with_polygon_files** - Intersect with multiple polygon files
+* **intersect_polyline_with_polygon_files** - Intersect polylines with polygon files
 
 Difference Operations
 ======================
 
 * **difference_polygon_with_polygon_file** - Calculate polygon difference
 * **difference_polyline_with_polygon_file** - Calculate polyline difference with polygon
+
+Union Operations
+================
+
+* **union_polygon_file** - Calculate geometric union of features in a polygon file
+
+Image Processing
+================
+
+* **raster_process** - Image operations and filtering on raster data
 
 *************************
 Conversion Operations
@@ -54,13 +64,13 @@ Conversion Operations
 Format Conversion
 =================
 
-* **convert_vector_format** - Convert between vector formats (shapefile, GeoJSON, etc.)
+* **convert_vector_format** - Convert between vector formats (Shapefile, GeoJSON, etc.)
 * **convert_polygon_to_polyline_file** - Convert polygon to polyline features
 
 Raster/Vector Conversion
 =========================
 
-* **rasterize_vector** - Convert vector features to raster
+* **rasterize_vector** - Convert vector features to raster format
 * **vectorize_raster** - Convert raster to vector polygons
 * **convert_vector_to_global_raster** - Convert vector to global raster grid
 
@@ -90,12 +100,14 @@ Statistical Operations
 Time Series Operations
 ======================
 
-* **convert_time_series_daily_to_monthly** - Aggregate daily data to monthly
+* **convert_time_series_daily_to_monthly** - Aggregate daily data to monthly values
 
-Data Cleaning
-=============
+Data Cleaning & List Utilities
+==============================
 
 * **gap_fill_by_window** - Fill missing data using window-based interpolation
+* **check_if_duplicates** - Check for duplicate values in sequences
+* **list_max**, **list_min** - Extract extremal values from sequences
 
 Ocean/Land Utilities
 ====================
@@ -107,6 +119,12 @@ Vector Data Operations
 ======================
 
 * **copy_geometry_without_attributes** - Copy geometries without attribute table
+
+NetCDF Utilities (Beta)
+=======================
+
+* **add_variable_to_netcdf** - Add a new data variable into an existing NetCDF file
+* **replace_variable_in_netcdf** - Update/replace a variable within a NetCDF file
 
 .. code-block:: python
 
@@ -151,14 +169,13 @@ Timer Utilities
    from pyearth.toolbox.date.timer import timer
 
    # Calculate day of year
-   doy = day_of_year(2024, 3, 15)  # Returns 75
+   doy = day_of_year(2026, 3, 15)  # Returns 74
 
    # Check leap year
-   is_leap = leap_year(2024)  # Returns True
+   is_leap = leap_year(2026)  # Returns False
 
    # Time code execution
    with timer("Processing"):
-       # Your code here
        pass
 
 *************************
@@ -168,22 +185,14 @@ Geometry Operations
 Geometric Calculations
 ======================
 
-* **calculate_hexagon_area** - Calculate area of regular hexagon
-* **create_gcs_buffer_zone** - Create buffer zone in geographic coordinates
-
-Buffer Operations
-=================
-
-* **create_point_buffer_zone** - Create buffer around point
-* **create_polyline_buffer_zone** - Create buffer around polyline
-* **create_buffer_zone_polygon_file** - Create buffer for polygon file
+* **calculate_hexagon_area** - Calculate area of regular hexagon based on edge length
 
 .. code-block:: python
 
    from pyearth.toolbox.geometry.calculate_hexagon_area import calculate_hexagon_area
 
-   # Calculate hexagon area
-   area = calculate_hexagon_area(dLength_edge_in=1000.0)  # meters
+   # Calculate hexagon area (in square meters)
+   area = calculate_hexagon_area(dLength_edge_in=1000.0)
 
 *************************
 Management Operations
@@ -197,14 +206,14 @@ Transformation Operations
 
 * **reproject_raster** - Reproject raster to different coordinate system
 * **resample_raster** - Resample raster to different resolution
-* **merge_rasters** - Mosaic multiple raster files
+* **merge_raster_files** - Mosaic multiple raster files into a single composite
 
 .. code-block:: python
 
-   from pyearth.toolbox.management.raster.merge_rasters import merge_rasters
+   from pyearth.toolbox.management.raster.merge_raster_files import merge_raster_files
 
    # Merge multiple raster files
-   merge_rasters(
+   merge_raster_files(
        ['tile1.tif', 'tile2.tif', 'tile3.tif'],
        'merged_output.tif'
    )
@@ -251,14 +260,13 @@ Math Operations
 Statistical Functions
 =====================
 
-* **remap** - Remap value from one range to another
+* **remap** - Remap value from one numeric range to another
 * **scipy_bivariate_kde** - Bivariate kernel density estimation
-* **kde_support** - Support functions for KDE calculations
 
 Array Operations
 ================
 
-* **gap_fill_by_window** - Fill gaps using moving window
+* **gap_fill_by_window** - Fill gaps using moving window interpolation
 
 .. code-block:: python
 
@@ -277,16 +285,16 @@ Mesh Classes
 Point and Line Objects
 ----------------------
 
-* **pypoint** - Point class with longitude/latitude
+* **pypoint** - Point class with longitude/latitude coordinates
 * **pynvector** - Normal vector class for sphere calculations
-* **pyline** - Line segment class
-* **pypolyline** - Polyline class with multiple segments
+* **pyline** - Great circle line segment class
+* **pypolyline** - Polyline class containing multiple segments
 
 Polygon Objects
 ---------------
 
-* **pypolygon** - Polygon class with vertices
-* **pycircle** - Circle class on sphere
+* **pypolygon** - Spherical polygon class with ordered vertices
+* **pycircle** - Circle class on a sphere
 
 .. code-block:: python
 
@@ -301,39 +309,20 @@ Polygon Objects
    # Create polygon
    polygon = pypolygon(aPoint=[p1, p2, p3])
 
-Mesh Generation
+Mesh Algorithms
 ===============
 
-Grid Generation
----------------
-
-* **create_latlon_mesh** - Create latitude/longitude grid mesh
-* **create_square_mesh** - Create square grid mesh
-* **create_hexagon_mesh** - Create hexagonal grid mesh
-
-Mesh Algorithms
----------------
-
-* **convert_gcs_coordinates_to_meshcell** - Convert coordinates to mesh cell
-* **convert_gcs_coordinates_to_polyline** - Convert coordinates to polyline
+* **convert_gcs_coordinates_to_meshcell** - Convert geographic coordinates to mesh cell
+* **convert_gcs_coordinates_to_polyline** - Convert geographic coordinates to polyline
 * **convert_pcs_coordinates_to_polyline** - Convert projected coordinates to polyline
-* **find_minimal_enclosing_polygon** - Find convex hull of points
-* **save_points_as_polygon** - Save point array as polygon file
-* **split_line_by_length** - Split line into segments of specified length
-* **split_polyline_by_length** - Split polyline by length
+* **point_to_nvector**, **nvector_to_point** - Adapter between point and n-vector representations
+* **find_minimal_enclosing_polygon** - Compute minimal enclosing polygon (convex hull) of points
+* **save_points_as_polygon** - Save point array as polygon geometry file
+* **slerp** - Spherical linear interpolation between points
+* **split_line_by_length** - Split line segments by length threshold
 
-.. code-block:: python
-
-   from pyearth.toolbox.mesh.latlon.create_latlon_mesh import create_latlon_mesh
-
-   # Create global lat/lon mesh
-   cells = create_latlon_mesh(
-       dLongitude_left_in=-180.0,
-       dLongitude_right_in=180.0,
-       dLatitude_bot_in=-90.0,
-       dLatitude_top_in=90.0,
-       dResolution_in=1.0
-   )
+.. note::
+   Advanced grid generation (lat-lon, square, and hexagonal meshes, MPAS mesh generation) is provided by the companion package **pyearthmesh**.
 
 *************************
 Reader Utilities
@@ -345,17 +334,13 @@ File Reading
 * **line_count** - Count lines in text file efficiently
 * **parse_xml_file** - Parse XML configuration files
 * **text_reader_string** - Read text file and return as string
-
-String Operations
-=================
-
+* **read_configuration_file** - Read and parse key-value configuration files
 * **split_string_into_chunk** - Split string into fixed-size chunks
 
-Configuration Parsing
-=====================
+Model XML Utilities (Beta)
+==========================
 
-* **read_configuration_file** - Read and parse configuration files
-* **parse_xml_file_e3sm** - Parse E3SM model XML files (atmosphere and land)
+* **parse_xml_file_e3sm** - Parse E3SM model XML files (atmosphere and land configuration)
 
 .. code-block:: python
 
@@ -377,8 +362,9 @@ Example 1: Clip and Rasterize Workflow
 
 .. code-block:: python
 
-   from pyearth.toolbox.analysis.extract.clip_vector_by_polygon_file import \
-       clip_vector_by_polygon_file
+   from pyearth.toolbox.analysis.extract.clip_vector_by_polygon_file import (
+       clip_vector_by_polygon_file,
+   )
    from pyearth.toolbox.conversion.rasterize_vector import rasterize_vector
 
    # Clip stream network to watershed
@@ -402,8 +388,9 @@ Example 2: Time Series Processing
 
 .. code-block:: python
 
-   from pyearth.toolbox.data.convert_time_series_daily_to_monthly import \
-       convert_time_series_daily_to_monthly
+   from pyearth.toolbox.data.convert_time_series_daily_to_monthly import (
+       convert_time_series_daily_to_monthly,
+   )
    from pyearth.toolbox.data.remove_outliers import remove_outliers
    import numpy as np
 
@@ -416,33 +403,32 @@ Example 2: Time Series Processing
    # Convert to monthly
    monthly_precip = convert_time_series_daily_to_monthly(
        clean_precip,
-       iYear_start=2024,
+       iYear_start=2026,
        iMonth_start=1,
        iDay_start=1
    )
 
-Example 3: Mesh Generation and Export
-======================================
+Example 3: Mesh Algorithms and Export
+=====================================
 
 .. code-block:: python
 
-   from pyearth.toolbox.mesh.hexaon.create_hexagon_mesh import create_hexagon_mesh
-   from pyearth.toolbox.mesh.algorithm.save_points_as_polygon import \
-       save_points_as_polygon
-
-   # Create hexagonal mesh
-   cells = create_hexagon_mesh(
-       iFlag_rotation_in=0,
-       dX_left_in=0.0,
-       dX_right_in=100.0,
-       dY_bot_in=0.0,
-       dY_top_in=100.0,
-       dResolution_in=10.0
+   from pyearth.toolbox.mesh.point import pypoint
+   from pyearth.toolbox.mesh.algorithm.find_minimal_enclosing_polygon import (
+       find_minimal_enclosing_polygon,
+   )
+   from pyearth.toolbox.mesh.algorithm.save_points_as_polygon import (
+       save_points_as_polygon,
    )
 
-   # Extract center points and save as polygon
-   center_points = [cell.pVertex_center for cell in cells]
-   save_points_as_polygon(center_points, 'hexagon_centers.geojson')
+   points = [
+       pypoint({'dLongitude_degree': -122.0, 'dLatitude_degree': 47.0}),
+       pypoint({'dLongitude_degree': -121.0, 'dLatitude_degree': 47.0}),
+       pypoint({'dLongitude_degree': -121.5, 'dLatitude_degree': 48.0}),
+   ]
+
+   hull = find_minimal_enclosing_polygon(points)
+   save_points_as_polygon(points, 'points_polygon.geojson')
 
 Example 4: Merge and Reproject Vectors
 =======================================
@@ -464,21 +450,3 @@ Example 4: Merge and Reproject Vectors
        'all_regions_utm.shp',
        'EPSG:32610'  # UTM Zone 10N
    )
-
-Example 5: Data Quality Control
-================================
-
-.. code-block:: python
-
-   from pyearth.toolbox.data.remove_outliers import remove_outliers
-   from pyearth.toolbox.math.gap_fill_by_window import gap_fill_by_window
-   import numpy as np
-
-   # Sensor data with outliers and gaps
-   data = np.array([1.0, 2.0, 100.0, 4.0, np.nan, 6.0, 7.0, -50.0, 9.0])
-
-   # Remove outliers
-   data_clean = remove_outliers(data, method='zscore', threshold=2.0)
-
-   # Fill gaps
-   data_filled = gap_fill_by_window(data_clean, iWindow_size_in=3)
