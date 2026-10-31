@@ -15,6 +15,9 @@ from pyearth.toolbox.management.vector.polygon_calculator import (
     polygon_difference,
     polygon_difference_rtree,
 )
+from pyearth.toolbox.management.vector.remove_internal_polygon import (
+    remove_internal_polygon,
+)
 from pyearth.toolbox.management.vector.remove_small_polygon import (
     remove_small_polygon,
 )
@@ -26,6 +29,7 @@ __all__ = [
     "merge_vector_files",
     "merge_features",
     "reproject_vector",
+    "remove_internal_polygon",
     "remove_small_polygon",
     "get_field_value",
     "get_field_and_value",
