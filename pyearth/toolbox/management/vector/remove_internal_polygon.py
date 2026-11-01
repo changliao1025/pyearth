@@ -12,6 +12,7 @@ from pyearth.gis.gdal.gdal_vector_format_support import (
     get_vector_driver_from_format,
     get_vector_format_from_filename,
 )
+from pyearth.gis.geometry.clean_ring_spikes import clean_ring_spikes
 
 
 def remove_internal_polygon(
@@ -20,11 +21,12 @@ def remove_internal_polygon(
     verbose: bool = True,
 ) -> None:
     """
-    Remove internal rings (holes) from polygons in a vector file.
+    Remove internal rings (holes) from polygons in a vector file and clean retracing boundary spikes.
 
     This function processes polygon and multipolygon features from an input vector
     file and removes all interior rings (holes/islands/lakes), keeping only the
-    exterior boundary ring for each polygon part. All attribute fields and spatial
+    exterior boundary ring for each polygon part. It also prunes any zero-width
+    retracing spikes/crevices along the outer ring. All attribute fields and spatial
     reference information are preserved.
 
     Parameters
@@ -172,11 +174,11 @@ def remove_internal_polygon(
                     n_rings = pGeometry_in.GetGeometryCount()
                     if n_rings > 1:
                         nHolesRemoved += n_rings - 1
-                        pOuterRing = pGeometry_in.GetGeometryRef(0)
-                        pGeometry_out = ogr.Geometry(ogr.wkbPolygon)
-                        pGeometry_out.AddGeometry(pOuterRing.Clone())
-                    else:
-                        pGeometry_out = pGeometry_in.Clone()
+                    pOuterRing = pGeometry_in.GetGeometryRef(0)
+                    pCleanRing = clean_ring_spikes(pOuterRing)
+                    pGeometry_out = ogr.Geometry(ogr.wkbPolygon)
+                    if pCleanRing is not None:
+                        pGeometry_out.AddGeometry(pCleanRing)
 
                 elif sGeomName == "MULTIPOLYGON":
                     pGeometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
@@ -189,12 +191,12 @@ def remove_internal_polygon(
                             n_rings = pPart.GetGeometryCount()
                             if n_rings > 1:
                                 nHolesRemoved += n_rings - 1
-                                pOuterRing = pPart.GetGeometryRef(0)
-                                pNewPoly = ogr.Geometry(ogr.wkbPolygon)
-                                pNewPoly.AddGeometry(pOuterRing.Clone())
-                                pGeometry_out.AddGeometry(pNewPoly)
-                            else:
-                                pGeometry_out.AddGeometry(pPart.Clone())
+                            pOuterRing = pPart.GetGeometryRef(0)
+                            pCleanRing = clean_ring_spikes(pOuterRing)
+                            pNewPoly = ogr.Geometry(ogr.wkbPolygon)
+                            if pCleanRing is not None:
+                                pNewPoly.AddGeometry(pCleanRing)
+                            pGeometry_out.AddGeometry(pNewPoly)
                         elif pPart is not None:
                             pGeometry_out.AddGeometry(pPart.Clone())
 
