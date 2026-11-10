@@ -64,6 +64,8 @@ def remove_internal_polygon(
 
     # Remove existing output file if it exists
     if os.path.exists(sFilename_vector_out):
+        if os.path.samefile(sFilename_vector_in, sFilename_vector_out):
+            raise ValueError("Input and output files must be different")
         if verbose:
             logging.info(f"Removing existing output file: {sFilename_vector_out}")
         try:
