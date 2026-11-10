@@ -80,6 +80,8 @@ def create_land_ocean_vector_mask_naturalearth(
     sFormat: Optional[str] = None,
     iFlag_exclude_antarctica: bool = True,
     dLatitude_threshold_antarctica: float = -60.0,
+    dThreshold_area_island: Optional[float] = None,
+    iFlag_remove_internal_rings: bool = False,
 ) -> int:
     """
     Create a land-ocean vector mask from Natural Earth data.
@@ -766,6 +768,43 @@ def create_land_ocean_vector_mask_naturalearth(
     # Close output dataset
     pDataset_out.Destroy()
 
+    # Apply optional island area filtering and internal ring removal
+    if dThreshold_area_island is not None and dThreshold_area_island > 0:
+        from pyearth.toolbox.management.vector.remove_small_polygon import (
+            remove_small_polygon,
+        )
+
+        sFilename_base, sExt = os.path.splitext(sFilename_out)
+        sFilename_tmp_island = f"{sFilename_base}_tmp_island{sExt}"
+        remove_small_polygon(
+            sFilename_out, sFilename_tmp_island, dThreshold_area_island, verbose=False
+        )
+        if os.path.exists(sFilename_out):
+            os.remove(sFilename_out)
+        os.replace(sFilename_tmp_island, sFilename_out)
+
+    if iFlag_remove_internal_rings:
+        from pyearth.toolbox.management.vector.remove_internal_polygon import (
+            remove_internal_polygon,
+        )
+
+        sFilename_base, sExt = os.path.splitext(sFilename_out)
+        sFilename_tmp_rings = f"{sFilename_base}_tmp_rings{sExt}"
+        remove_internal_polygon(sFilename_out, sFilename_tmp_rings, verbose=False)
+        if os.path.exists(sFilename_out):
+            os.remove(sFilename_out)
+        os.replace(sFilename_tmp_rings, sFilename_out)
+
+    if (
+        dThreshold_area_island is not None and dThreshold_area_island > 0
+    ) or iFlag_remove_internal_rings:
+        pDs_check = ogr.Open(sFilename_out, 0)
+        if pDs_check is not None:
+            pLayer_check = pDs_check.GetLayer()
+            if pLayer_check is not None:
+                iCount = pLayer_check.GetFeatureCount()
+            pDs_check = None
+
     # ========================================================================
     # Log summary statistics
     # ========================================================================
@@ -789,3 +828,6 @@ def create_land_ocean_vector_mask_naturalearth(
         logger.warning("No features were created! Check Antarctica filter settings.")
 
     return iCount
+
+
+__all__ = ["create_land_ocean_vector_mask_naturalearth"]

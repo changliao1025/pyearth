@@ -16,6 +16,7 @@ from pyearth.gis.geometry import (
     calculate_spherical_triangle_area,
     check_counter_clockwise,
     clean_geometry,
+    clean_ring_spikes,
     convert_180_to_360,
     convert_360_to_180,
     create_box_from_longitude_latitude,
@@ -202,3 +203,17 @@ class TestSimplificationAndMesh:
     def test_output_geometry_type(self):
         assert get_output_geometry_type(ogr.wkbMultiPolygon) == ogr.wkbPolygon
         assert get_output_geometry_type(ogr.wkbLineString25D) == ogr.wkbLineString
+
+    def test_clean_ring_spikes(self):
+        # Create a polygon with a retracing spike:
+        # (0,0) -> (10,0) -> (10,5) -> (5,5) -> (3,7) -> (5,5) -> (10,5) -> (10,10) -> (0,10) -> (0,0)
+        wkt = "POLYGON ((0 0, 10 0, 10 5, 5 5, 3 7, 5 5, 10 5, 10 10, 0 10, 0 0))"
+        geom = ogr.CreateGeometryFromWkt(wkt)
+        cleaned = clean_ring_spikes(geom)
+        assert cleaned is not None
+        assert cleaned.IsValid()
+        ring = cleaned.GetGeometryRef(0)
+        # Spike (5,5)->(3,7)->(5,5) collapsed
+        coords = [ring.GetPoint(i)[:2] for i in range(ring.GetPointCount())]
+        assert (3.0, 7.0) not in coords
+        assert pytest.approx(cleaned.GetArea()) == 100.0

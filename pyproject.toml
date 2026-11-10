@@ -126,3 +126,8 @@ exclude = ["^docs/"]
 
 [tool.cython]
 language_level = 3
+
+[tool.codespell]
+ignore-words-list = "aline,hav"
+ignore-regex = "\\b[a-z]+[A-Z][a-zA-Z0-9_]*\\b"
+skip = "*.geojson,*.tif,*.tiff"

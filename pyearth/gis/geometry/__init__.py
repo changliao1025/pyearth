@@ -40,6 +40,7 @@ from pyearth.gis.geometry.check_counter_clockwise import (
     unwrap_longitudes,
 )
 from pyearth.gis.geometry.clean_geometry import clean_geometry
+from pyearth.gis.geometry.clean_ring_spikes import clean_ring_spikes
 from pyearth.gis.geometry.convert_longitude_range import (
     convert_180_to_360,
     convert_360_to_180,
@@ -91,6 +92,7 @@ __all__ = [
     "unwrap_longitudes",
     "remove_duplicate_closure",
     "clean_geometry",
+    "clean_ring_spikes",
     # Coordinate range & boxes
     "convert_360_to_180",
     "convert_180_to_360",
