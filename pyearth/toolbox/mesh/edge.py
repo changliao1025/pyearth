@@ -210,15 +210,25 @@ class pyedge(pyline):
 
     def get_midpoint(self) -> pyvertex:
         """Calculate and return the midpoint of the edge as a pyvertex."""
-        mid_lon = (
-            self.pVertex_start.dLongitude_degree + self.pVertex_end.dLongitude_degree
-        ) / 2.0
-        mid_lat = (
-            self.pVertex_start.dLatitude_degree + self.pVertex_end.dLatitude_degree
-        ) / 2.0
+        from pyearth.toolbox.mesh.algorithm.convert_nvector_point import (
+            nvector_to_point,
+            point_to_nvector,
+        )
+        from pyearth.toolbox.mesh.algorithm.split_by_length import slerp
 
-        param = {"dLongitude_degree": mid_lon, "dLatitude_degree": mid_lat}
-        return pyvertex(param)
+        midpoint = nvector_to_point(
+            slerp(
+                point_to_nvector(self.pVertex_start),
+                point_to_nvector(self.pVertex_end),
+                0.5,
+            )
+        )
+        return pyvertex(
+            {
+                "dLongitude_degree": midpoint.dLongitude_degree,
+                "dLatitude_degree": midpoint.dLatitude_degree,
+            }
+        )
 
     def is_connected_to(self, other: "pyedge") -> bool:
         """Check if this edge shares a vertex with another edge."""
