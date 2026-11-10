@@ -43,7 +43,9 @@ repos:
     rev: v2.4.3
     hooks:
       - id: codespell
-        args: ["--ignore-words-list=aline"]
+        args:
+          - --ignore-words-list=aline,hav
+          - --ignore-regex=\b[a-z]+[A-Z][a-zA-Z0-9_]*\b
         exclude: ^(.*\.geojson|.*\.tif|.*\.tiff)$
 
   - repo: https://github.com/asottile/pyupgrade
