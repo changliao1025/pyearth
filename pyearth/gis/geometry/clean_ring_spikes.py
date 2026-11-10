@@ -58,7 +58,6 @@ def _clean_single_ring(
         and abs(cleaned[1][1] - cleaned[-2][1]) <= atol
     ):
         cleaned = cleaned[1:-1]
-        cleaned.append(cleaned[0])
 
     if len(cleaned) < 3:
         return ring_geom.Clone()
