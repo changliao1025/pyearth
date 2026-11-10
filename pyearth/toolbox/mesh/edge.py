@@ -35,6 +35,8 @@ class EdgeClassEncoder(JSONEncoder):
             return obj
         if isinstance(obj, pyvertex):
             return json.loads(obj.tojson())
+        if isinstance(obj, pyedge):
+            return json.loads(obj.tojson())
         return JSONEncoder.default(self, obj)
 
 
