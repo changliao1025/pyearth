@@ -100,8 +100,30 @@ class pyedge(pyline):
         self.lIndex_upstream: int = -1
         self.lIndex_downstream: int = -1
 
-        self.pVertex_start = pVertex_start_in
-        self.pVertex_end = pVertex_end_in
+        self.pVertex_start = (
+            pVertex_start_in
+            if isinstance(pVertex_start_in, pyvertex)
+            else pyvertex(
+                {
+                    **pVertex_start_in.__dict__,
+                    "x": pVertex_start_in.dX_meter,
+                    "y": pVertex_start_in.dY_meter,
+                    "z": pVertex_start_in.dZ_meter,
+                }
+            )
+        )
+        self.pVertex_end = (
+            pVertex_end_in
+            if isinstance(pVertex_end_in, pyvertex)
+            else pyvertex(
+                {
+                    **pVertex_end_in.__dict__,
+                    "x": pVertex_end_in.dX_meter,
+                    "y": pVertex_end_in.dY_meter,
+                    "z": pVertex_end_in.dZ_meter,
+                }
+            )
+        )
 
     def __repr__(self) -> str:
         return (
