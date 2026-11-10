@@ -91,7 +91,7 @@ class pyvertex(pypoint):
         return super().__hash__()
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, pyvertex):
+        if not isinstance(other, pypoint):
             return NotImplemented
         return super().__eq__(other)
 
