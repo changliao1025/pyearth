@@ -3,58 +3,64 @@ name: Upload Pyearth Package to PyPI
 on:
   release:
     types: [published]
-  workflow_dispatch:  # Allow manual triggers
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-publish:
+    name: Build & Publish Release
     runs-on: ubuntu-latest
-    environment: release  # Use GitHub environments for better security
+    environment:
+      name: release
+      url: https://pypi.org/p/pyearth
+    permissions:
+      id-token: write  # Enables PyPI Trusted Publishing (OIDC)
+      contents: read
 
     steps:
-    - uses: actions/checkout@v4  # Use latest version
-      with:
-        fetch-depth: 0  # Fetch full history for proper versioning
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4  # Use latest version
-      with:
-        python-version: '3.11'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install cython numpy build twine
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-    - name: Build package (sdist only)
-      run: python -m build --sdist
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install cython numpy build twine
 
-    - name: Verify package metadata
-      run: |
-        twine check dist/*
+      - name: Verify version matches git tag
+        run: |
+          PACKAGE_VERSION=$(grep '^version = ' pyproject.toml | cut -d '"' -f 2)
+          echo "Package version in pyproject.toml: $PACKAGE_VERSION"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Release tag: $TAG_VERSION"
+            if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+              echo "::error::Version mismatch! pyproject.toml is $PACKAGE_VERSION but git tag is $TAG_VERSION"
+              exit 1
+            fi
+          fi
 
-    - name: Verify version matches tag
-      run: |
-        PACKAGE_VERSION=$(grep '^version = ' pyproject.toml | cut -d '"' -f 2)
-        TAG_VERSION=${GITHUB_REF#refs/tags/v}
-        echo "Package version: $PACKAGE_VERSION"
-        echo "Tag version: $TAG_VERSION"
-        if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
-          echo "Version mismatch! Package: $PACKAGE_VERSION, Tag: $TAG_VERSION"
-          exit 1
-        fi
+      - name: Build package distribution (sdist)
+        run: python -m build --sdist
 
-    - name: Publish to PyPI
-      if: "!github.event.release.prerelease"
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYEARTH_PYPI }}
-      run: |
-        twine upload dist/*
+      - name: Verify distribution metadata
+        run: twine check dist/*
 
-    - name: Create deployment status
-      if: always()
-      run: |
-        if [ ${{ job.status }} == 'success' ]; then
-          echo "✅ Package successfully published to PyPI"
-        else
-          echo "❌ Package publication failed"
-        fi
+      - name: Upload dist artifacts to GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyearth-dist
+          path: dist/
+          retention-days: 7
+
+      - name: Publish to PyPI
+        if: "!github.event.release.prerelease"
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYEARTH_PYPI }}
