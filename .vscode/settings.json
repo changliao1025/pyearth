@@ -6,7 +6,7 @@
         "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}"
     },
     "editor.renderWhitespace": "all",
-    "workbench.colorTheme": "Tomorrow Night Blue",
+    "workbench.colorTheme": "Quiet Light",
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
