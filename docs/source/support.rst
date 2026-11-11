@@ -25,7 +25,7 @@ BibTeX entry:
      author       = {Liao, Chang},
      title        = {PyEarth: A lightweight Python package for Earth science},
      publisher    = {Zenodo},
-     version      = {0.2.4},
+     version      = {0.2.5},
      doi          = {10.5281/zenodo.6109987},
      url          = {https://github.com/changliao1025/pyearth}
    }
