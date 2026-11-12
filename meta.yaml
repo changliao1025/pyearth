@@ -1,7 +1,6 @@
 {% set name = "pyearth" %}
 {% set version = "0.2.5" %}
 {% set git_rev = "main" %}
-{% set python_min = "3.9" %}
 
 package:
   name: {{ name|lower }}
@@ -25,7 +24,7 @@ requirements:
     - python
     - setuptools
     - numpy
-    - cython >=0.29.0
+    - cython >=3.0
   run:
     - python
     - {{ pin_compatible('numpy') }}
